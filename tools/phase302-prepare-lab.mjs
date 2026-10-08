@@ -59,7 +59,6 @@ async function verifyJobmarkAssets(optics) {
     if (!record.source) continue;
     const source = record.source;
     if (source.src && source.sha256) resources.set(source.src, source.sha256);
-    if (source.maskSrc && source.maskSha256) resources.set(source.maskSrc, source.maskSha256);
   }
   for (const [url, expectedHash] of resources) {
     if (!url.startsWith('/')) throw new Error('Expected a local Job-icon URL: ' + url);

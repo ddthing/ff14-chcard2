@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useI18n } from "@/lib/i18n";
 import { getEditorCopy } from "@/components/editor/copy";
 import { AppearanceControl } from "@/components/appearance-control";
 import { useEditorStore } from "@/store/editor-store";
 import { ROUTES } from "@/lib/routes";
+import { EditorIcon } from "@/components/editor/editor-icon";
 import styles from "@/components/app-shell.module.css";
 
 function HeaderSaveStatus() {
@@ -15,9 +16,9 @@ function HeaderSaveStatus() {
   const copy = getEditorCopy(locale);
   const longLabel = saveStatus === "error" ? copy.saveError : saveStatus === "saving" ? copy.saving : copy.saved;
   const shortLabel = {
-    ko: { saved: "저장됨", saving: "저장 중", error: "저장 안 됨" },
-    en: { saved: "Saved", saving: "Saving", error: "Not saved" },
-    ja: { saved: "保存済み", saving: "保存中", error: "未保存" },
+    ko: { saved: "초안 저장됨", saving: "저장 중", error: "저장 안 됨" },
+    en: { saved: "Draft saved", saving: "Saving", error: "Not saved" },
+    ja: { saved: "下書き保存済み", saving: "保存中", error: "未保存" },
   }[locale][saveStatus];
 
   return (
@@ -37,15 +38,23 @@ function HeaderSaveStatus() {
 }
 
 const languageLabels = [
-  { value: "ko", label: "KO" },
-  { value: "en", label: "EN" },
-  { value: "ja", label: "JP" },
+  { value: "ko", label: "한국어" },
+  { value: "en", label: "English" },
+  { value: "ja", label: "日本語" },
 ] as const;
 
 export function AppHeader() {
+  const router = useRouter();
   const pathname = usePathname() ?? ROUTES.editor;
   const { locale, setLocale, t } = useI18n();
   const isEditor = pathname === ROUTES.editor || pathname.startsWith(`${ROUTES.editor}/`);
+  const name = useEditorStore((state) => state.character.name);
+  const persistNow = useEditorStore((state) => state.persistNow);
+  const labels = {
+    ko: { home: '홈으로', export: '이미지 저장', settings: '화면 설정', editing: '카드 편집' },
+    en: { home: 'Home', export: 'Save image', settings: 'Display settings', editing: 'Card editor' },
+    ja: { home: 'ホーム', export: '画像を保存', settings: '表示設定', editing: 'カード編集' },
+  }[locale];
   const section = pathname.startsWith(ROUTES.templates)
     ? t("nav.templates")
     : pathname.startsWith(ROUTES.export)
@@ -55,47 +64,47 @@ export function AppHeader() {
   return (
     <header className={styles.appHeader} data-app-header>
       <div className={styles.headerLeft}>
-        <Link className={styles.brand} href={ROUTES.home} aria-label={t("header.brand")}>
-          <span className={styles.brandMark} aria-hidden="true">
-            <svg viewBox="0 0 32 32" width="20" height="20" fill="none">
-              <path d="M16 2.8v26.4M2.8 16h26.4M6.7 6.7l18.6 18.6M25.3 6.7 6.7 25.3" stroke="currentColor" strokeWidth=".85" />
-              <circle cx="16" cy="16" r="3.1" stroke="currentColor" strokeWidth=".85" />
-            </svg>
-          </span>
-          <span className={styles.brandFull}>XIV ADVENTURER CARD</span>
-          <span className={styles.brandCompact}>XIV</span>
+        <Link className={styles.brand} href={ROUTES.home} aria-label={isEditor ? labels.home : t("header.brand")}>
+          <span className={styles.brandMark} aria-hidden="true"><span className={styles.backArrow}>←</span></span>
+          <span className={styles.brandWordmark} aria-hidden="true"><strong>XIV</strong><small>ATELIER</small></span>
         </Link>
-        <span className={styles.headerDivider} aria-hidden="true">/</span>
-        <span className={styles.sectionLabel}>{section}</span>
+        <span className={styles.headerDivider} aria-hidden="true" />
+        <div className={styles.documentIdentity}>
+          <span className={styles.documentLabel}>{isEditor ? labels.editing : 'XIV / ATELIER'}</span>
+          <span className={isEditor ? styles.editorName : styles.sectionLabel}>{isEditor ? name || section : section}</span>
+        </div>
       </div>
 
       <div className={styles.headerRight}>
         {isEditor && <HeaderSaveStatus />}
         <span className={styles.actionDivider} aria-hidden="true" />
-        <AppearanceControl />
+        <span className={styles.desktopAppearance}><AppearanceControl /></span>
         <span className={styles.actionDivider} aria-hidden="true" />
-        <div className={styles.languageButtons} role="group" aria-label={t("nav.language")}>
-          {languageLabels.map(({ value, label }) => (
-            <button
-              className={styles.languageButton}
-              key={value}
-              type="button"
-              aria-pressed={locale === value}
-              lang={value}
-              onClick={() => setLocale(value)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <select
-          className={styles.languageSelect}
-          aria-label={t("nav.language")}
-          value={locale}
-          onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}
-        >
+        <select className={styles.desktopLanguage} aria-label={t("nav.language")} value={locale}
+          onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}>
           {languageLabels.map(({ value, label }) => <option value={value} key={value}>{label}</option>)}
         </select>
+        <details className={styles.mobileSettings} onKeyDown={(event) => {
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            event.stopPropagation();
+            event.currentTarget.open = false;
+            event.currentTarget.querySelector('summary')?.focus();
+          }
+        }}>
+          <summary aria-label={labels.settings}>•••</summary>
+          <div className={styles.settingsContent}>
+            <AppearanceControl />
+            <select className={styles.languageSelect} aria-label={t('nav.language')} value={locale}
+              onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}>
+              {languageLabels.map(({ value, label }) => <option value={value} key={value}>{label}</option>)}
+            </select>
+          </div>
+        </details>
+        {isEditor && <button type="button" className={styles.headerExport} onClick={() => {
+          persistNow();
+          router.push(ROUTES.export);
+        }}><span>{labels.export}</span><EditorIcon name="export" size={16} /></button>}
       </div>
     </header>
   );

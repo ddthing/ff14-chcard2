@@ -50,16 +50,3 @@ export function isCurrentJobIconRequest<TImage extends object>(
   return requestImage === currentImage && imageIsConnected && sourceIsCurrent;
 }
 
-/** A failed mask stays out of the DOM until a different source is selected. */
-export function shouldRenderJobIconMask(maskSrc: string | null, failedMaskSrc: string | null): boolean {
-  return Boolean(maskSrc && maskSrc !== failedMaskSrc);
-}
-
-/** Failed derived assets fall back once to the original mask, then to text. */
-export function resolveAvailableJobIconSource(
-  derived: string | null,
-  original: string | null,
-  failedSources: readonly string[],
-): string | null {
-  return [derived, original].find((source): source is string => Boolean(source && !failedSources.includes(source))) ?? null;
-}

@@ -1,33 +1,126 @@
+import type { AdventurerCardTemplate } from '@/components/cards/types';
 import type { Locale } from '@/lib/types';
+
+type HomeCopy = {
+  steps: readonly [string, string, string];
+  eyebrow: string;
+  title: string;
+  description: string;
+  create: string;
+  explore: string;
+  productNote: string;
+  privacyNote: string;
+  sampleLabel: string;
+  styleSelector: string;
+  styleHeading: string;
+  stylePrompt: string;
+  stylePrefix: string;
+  selectStyle: string;
+  selected: string;
+  previewStyle: string;
+  draftHeading: string;
+  resumeDraft: string;
+  draftDetails: (name: string, job: string, world: string) => string;
+  draftStyle: (style: string, ratio: string) => string;
+  saved: string;
+  saving: string;
+  saveError: string;
+  footer: string;
+  featurePoints: Record<AdventurerCardTemplate, readonly [string, string]>;
+};
+
 export const homeCopy = {
   ko: {
-    title: '모험을 간직하는\n또 하나의 방식.', description: 'FFXIV 스크린샷을 나만의 모험자 카드로.', create: '카드 만들기', explore: '템플릿 둘러보기',
-    stack: '카드 디자인 미리보기', previous: '이전 디자인', next: '다음 디자인', current: '선택한 디자인',
-    compareTitle: '한 장의 스크린샷,\n새로운 이야기.', compareDescription: '경계선을 움직여 스크린샷이 카드가 되는 순간을 만나보세요.', screenshot: '스크린샷', card: '완성된 카드', compare: '완성된 카드 표시 비율',
-    worldsTitle: '같은 모험.\n서로 다른 세 가지 시선.', cinematic: '시네마틱', editorial: '에디토리얼', identity: '아이덴티티', cinematicText: '빛과 풍경이 이야기를 이끄는 한 장면.', editorialText: '대담한 글자와 인물의 만남.', identityText: '이름, 월드, 그리고 나만의 기록.',
-    workflowTitle: '당신의 순간에서,\n당신의 카드까지.', workflowText: '사진을 고르고, 이야기를 담고, 원하는 모습으로 저장하세요.', steps: ['스크린샷 선택', '이야기 담기', '디자인 고르기', '카드 저장'],
-    discoveryTitle: '어떤 모습으로\n기억하고 싶나요?', discoveryText: '세 가지 마스터 디자인에서 시작해 보세요.',
-    detailTitle: '가까이 볼수록,\n더 선명한 개성.', detailText: '필름의 결, 종이와 잉크, 정돈된 기록. 작은 차이가 카드의 인상을 만듭니다.', detailLabel: '카드 디테일', materials: ['사진과 필름', '종이와 잉크', '매트한 카드지'],
-    finalTitle: '다음 모험도,\n당신답게.', finalText: '스크린샷 한 장이면 충분합니다.', alt: '에오르제아의 풍경 속 모험자 Coner', portraitAlt: '붉은 후드를 쓴 모험자 Coner',
+    steps: ['사진 선택', '카드 편집', '이미지 저장'],
+    eyebrow: 'FFXIV 모험가 카드 스튜디오',
+    title: '당신의 모험,\n한 장으로.',
+    description: '사진을 고르고, 이름을 더하고. 간직하고 싶은 모험가 카드를 만들어 보세요.',
+    create: '내 사진으로 시작하기',
+    explore: '스타일 크게 비교하기',
+    productNote: '사진 · 캐릭터 정보 · 세 가지 카드 스타일',
+    privacyNote: '사진은 이 기기에서 불러와 시작합니다.',
+    sampleLabel: '디자인 예시 · 샘플 캐릭터',
+    styleSelector: '카드 스타일 선택',
+    styleHeading: '세 가지 방식으로 모험을 기록하세요',
+    stylePrompt: '편집 중에도 바꿀 수 있어요.',
+    stylePrefix: '스타일',
+    selectStyle: '이 스타일 선택',
+    selected: '선택됨',
+    previewStyle: '미리보기',
+    draftHeading: '이어서 만들기',
+    resumeDraft: '편집 계속하기',
+    draftDetails: (name, job, world) => [name, job, world].filter(Boolean).join(' · '),
+    draftStyle: (style, ratio) => `${style} · ${ratio}`,
+    saved: '이 기기에 저장됨',
+    saving: '저장 중',
+    saveError: '저장하지 못함',
+    footer: '캐릭터의 순간을, 당신의 기록으로.',
+    featurePoints: {
+      cinematic: ['황혼빛 장면과 얇은 금박 프레임', '넓은 사진 · 절제된 정보'],
+      editorial: ['붓결을 따라 이어지는 비대칭 사진', '직업 문양 · 종이 위 타이포'],
+      'id-card': ['모험을 기록하는 길드 인물 카드', '정돈된 프로필 · XIV 깃발'],
+    },
   },
   en: {
-    title: 'Your adventure.\nWorth keeping.', description: 'Turn your FFXIV screenshot into a designed adventurer card.', create: 'Create your card', explore: 'Explore templates',
-    stack: 'Card design preview', previous: 'Previous design', next: 'Next design', current: 'Selected design',
-    compareTitle: 'A screenshot.\nA new story.', compareDescription: 'Move the divider to see your screenshot become a card.', screenshot: 'Screenshot', card: 'Finished card', compare: 'Finished card visibility',
-    worldsTitle: 'One adventure.\nThree points of view.', cinematic: 'Cinematic', editorial: 'Editorial', identity: 'Identity', cinematicText: 'A scene led by light and landscape.', editorialText: 'Bold type meets a character of your own.', identityText: 'Your name, your world, your record.',
-    workflowTitle: 'From your moment\nto your card.', workflowText: 'Choose a screenshot, add your story, then save it your way.', steps: ['Choose a screenshot', 'Add your story', 'Find your design', 'Save your card'],
-    discoveryTitle: 'How will you\nremember it?', discoveryText: 'Find your starting point in three master designs.',
-    detailTitle: 'Look closer.\nFeel the difference.', detailText: 'Photographic grain, paper and ink, a collected record. Small details give each card its character.', detailLabel: 'Card detail', materials: ['Photographic film', 'Paper and ink', 'Matte card stock'],
-    finalTitle: 'Your next adventure.\nMade yours.', finalText: 'All it takes is a screenshot.', alt: 'Coner in an Eorzean landscape', portraitAlt: 'Coner wearing a red hood',
+    steps: ['Choose a photo', 'Edit your card', 'Save an image'],
+    eyebrow: 'FFXIV ADVENTURER CARD STUDIO',
+    title: 'Your adventure.\nYours to keep.',
+    description: 'Start with a screenshot and make an adventurer card worth keeping.',
+    create: 'Start with my photo',
+    explore: 'Compare full-size styles',
+    productNote: 'Photo · character details · three card styles',
+    privacyNote: 'Your photo stays on this device while you create.',
+    sampleLabel: 'Design example · Sample character',
+    styleSelector: 'Choose a card style',
+    styleHeading: 'Three ways to keep your adventure',
+    stylePrompt: 'You can change it while editing.',
+    stylePrefix: 'STYLE',
+    selectStyle: 'Choose this style',
+    selected: 'Selected',
+    previewStyle: 'Preview style',
+    draftHeading: 'Continue your draft',
+    resumeDraft: 'Continue editing',
+    draftDetails: (name, job, world) => [name, job, world].filter(Boolean).join(' · '),
+    draftStyle: (style, ratio) => `${style} · ${ratio}`,
+    saved: 'Saved on this device',
+    saving: 'Saving',
+    saveError: 'Could not save',
+    footer: 'A moment from your character, kept as your own.',
+    featurePoints: {
+      cinematic: ['A twilight scene in a fine gold frame', 'Wide photo · quiet details'],
+      editorial: ['A brushworked, asymmetric portrait', 'Job emblem · ink on warm paper'],
+      'id-card': ['A guild record for the moments you keep', 'Ordered profile · XIV pennant'],
+    },
   },
   ja: {
-    title: '冒険を残す、\nもうひとつのかたち。', description: 'FFXIVのスクリーンショットを、あなただけの冒険者カードに。', create: 'カードをつくる', explore: 'テンプレートを見る',
-    stack: 'カードデザインのプレビュー', previous: '前のデザイン', next: '次のデザイン', current: '選択中のデザイン',
-    compareTitle: '一枚の写真から、\n新しい物語へ。', compareDescription: '境界線を動かして、写真がカードになる瞬間を。', screenshot: 'スクリーンショット', card: '完成したカード', compare: '完成したカードの表示割合',
-    worldsTitle: 'ひとつの冒険。\n三つのまなざし。', cinematic: 'シネマティック', editorial: 'エディトリアル', identity: 'アイデンティティ', cinematicText: '光と風景が物語を描く一場面。', editorialText: '大胆な文字と、あなたらしい姿。', identityText: '名前、ワールド、あなたの記録。',
-    workflowTitle: 'あなたの瞬間を、\nあなたの一枚に。', workflowText: '写真を選び、物語を添えて、好きなかたちで保存。', steps: ['写真を選ぶ', '物語を添える', 'デザインを選ぶ', 'カードを保存'],
-    discoveryTitle: 'どんなかたちで\n覚えていたい？', discoveryText: '三つのマスターデザインから始めましょう。',
-    detailTitle: '近づくほど、\n感じる個性。', detailText: 'フィルムの粒子、紙とインク、整った記録。小さな違いがカードの表情をつくります。', detailLabel: 'カードのディテール', materials: ['写真とフィルム', '紙とインク', 'マットなカード紙'],
-    finalTitle: '次の冒険も、\nあなたらしく。', finalText: 'スクリーンショット一枚から。', alt: 'エオルゼアの風景の中の冒険者Coner', portraitAlt: '赤いフードをかぶったConer',
+    steps: ['写真を選ぶ', 'カードを編集', '画像を保存'],
+    eyebrow: 'FFXIV 冒険者カードスタジオ',
+    title: 'あなたの冒険を、\n一枚に。',
+    description: 'スクリーンショットから、ずっと残しておきたい冒険者カードをつくりましょう。',
+    create: '自分の写真から始める',
+    explore: 'スタイルを大きく比較',
+    productNote: '写真 · キャラクター情報 · 三つのカードスタイル',
+    privacyNote: '写真はこの端末で読み込んで作成します。',
+    sampleLabel: 'デザイン例 · サンプルキャラクター',
+    styleSelector: 'カードスタイルを選択',
+    styleHeading: '三つのかたちで冒険を残す',
+    stylePrompt: '編集中でも変更できます。',
+    stylePrefix: 'スタイル',
+    selectStyle: 'このスタイルを選ぶ',
+    selected: '選択中',
+    previewStyle: 'プレビュー',
+    draftHeading: '下書きから続ける',
+    resumeDraft: '編集を続ける',
+    draftDetails: (name, job, world) => [name, job, world].filter(Boolean).join(' · '),
+    draftStyle: (style, ratio) => `${style} · ${ratio}`,
+    saved: 'この端末に保存済み',
+    saving: '保存中',
+    saveError: '保存できませんでした',
+    footer: 'キャラクターの瞬間を、あなたの記録に。',
+    featurePoints: {
+      cinematic: ['夕景を細い金のフレームに収める一枚', '広い写真 · 控えめな情報'],
+      editorial: ['筆の輪郭に沿う非対称のポートレート', 'ジョブの紋章 · 温かな紙の文字'],
+      'id-card': ['冒険の瞬間を残すギルドの記録', '整ったプロフィール · XIVの旗'],
+    },
   },
-} satisfies Record<Locale, object>;
+} satisfies Record<Locale, HomeCopy>;

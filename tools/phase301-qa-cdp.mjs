@@ -218,7 +218,7 @@ export function buildJobMarkSourceCases() {
   const tiers = [
     { jobId: "red-mage", sourceTier: "xivapi-svg" },
     { jobId: "reaper", sourceTier: "xivapi-raster" },
-    { jobId: "astrologian", sourceTier: "fan-kit" },
+    { jobId: "astrologian", sourceTier: "xivapi-raster" },
     { jobId: "beastmaster", sourceTier: "generic" },
   ];
   const probes = [

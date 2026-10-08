@@ -94,6 +94,22 @@ test('Latin font registry files and OFL notices match the stylesheet', () => {
   assert.doesNotMatch(css, /@fontsource-variable\/noto-(?:sans|serif)-(?:kr|jp)/);
 });
 
+test('V3 handwritten faces are local WOFF2 assets with source licenses and export readiness', () => {
+  const css = readFileSync(resolve(projectRoot, 'src/app/fonts.css'), 'utf8');
+  const preview = readFileSync(resolve(projectRoot, 'src/components/editor/card-preview.tsx'), 'utf8');
+  for (const key of ['pinyonScript', 'whisper']) {
+    const entry = FONT_REGISTRY[key];
+    assert.match(readFileSync(resolve(projectRoot, entry.licenseFile), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i);
+    for (const asset of entry.localAssets) {
+      assert.equal(statSync(resolve(projectRoot, asset.filePath)).size, asset.bytes);
+      assert.ok(css.includes(asset.publicPath));
+      assert.ok(asset.publicPath.endsWith('.woff2'));
+    }
+    assert.ok(preview.includes('loadProfiledFontFace('));
+    assert.ok(preview.includes(`'400 24px "${entry.family}"'`));
+  }
+});
+
 test('CJK font registry metadata matches dynamic subset CSS, assets, and licenses', () => {
   const packageJson = JSON.parse(readFileSync(resolve(projectRoot, 'package.json'), 'utf8'));
   const loader = readFileSync(resolve(projectRoot, 'src/data/fonts/load-fonts.ts'), 'utf8');
@@ -239,4 +255,59 @@ test('stylesheet plan is limited to active scripts and CJK serif presets', () =>
   assert.deepEqual(getTypographyStylesheetIds('condensed', ['korean', 'japanese'], { masterFamily: 'identity' }), [
     'notoSansKr', 'notoSerifKr', 'notoSansJp', 'notoSerifJp',
   ]);
+});
+
+test('identical font face requests share pending and completed loads', async () => {
+  const originalDocument = globalThis.document;
+  let calls = 0;
+  let resolveLoad;
+  const face = { family: 'Noto Sans KR' };
+  globalThis.document = {
+    fonts: {
+      load: () => {
+        calls += 1;
+        return new Promise((resolve) => { resolveLoad = resolve; });
+      },
+    },
+  };
+  const detail = { source: 'preview', face: 'noto-sans-kr', script: 'korean', glyphCount: 3 };
+
+  try {
+    const first = fontLoader.loadProfiledFontFace('400 16px "Noto Sans KR"', '모험가', detail);
+    const second = fontLoader.loadProfiledFontFace('400 16px "Noto Sans KR"', '모험가', { ...detail, source: 'optical' });
+    assert.equal(calls, 1);
+    resolveLoad([face]);
+    assert.deepEqual(await first, [face]);
+    assert.deepEqual(await second, [face]);
+
+    assert.deepEqual(await fontLoader.loadProfiledFontFace('400 16px "Noto Sans KR"', '모험가', detail), [face]);
+    assert.equal(calls, 1);
+  } finally {
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
+});
+
+test('failed font face requests are evicted so the next request can retry', async () => {
+  const originalDocument = globalThis.document;
+  let calls = 0;
+  const face = { family: 'Noto Serif JP' };
+  globalThis.document = {
+    fonts: {
+      load: () => {
+        calls += 1;
+        return calls === 1 ? Promise.reject(new Error('temporary font failure')) : Promise.resolve([face]);
+      },
+    },
+  };
+  const detail = { source: 'preview', face: 'noto-serif-jp', script: 'japanese', glyphCount: 2 };
+
+  try {
+    await assert.rejects(fontLoader.loadProfiledFontFace('400 16px "Noto Serif JP"', '冒険', detail), /temporary font failure/);
+    assert.deepEqual(await fontLoader.loadProfiledFontFace('400 16px "Noto Serif JP"', '冒険', detail), [face]);
+    assert.equal(calls, 2);
+  } finally {
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
 });

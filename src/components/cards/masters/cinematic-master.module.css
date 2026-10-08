@@ -1,15 +1,16 @@
-/* The 4:5 composition is the authored campaign poster: an open photograph,
-   a centered name in its natural negative space, then one compact factual strip. */
 .canvas {
   --cinema-identity-left: 7%;
-  --cinema-identity-bottom: 8.5%;
+  --cinema-identity-bottom: 7.8%;
   --cinema-identity-width: 86%;
-  --cinema-bio-top: 14%;
-  --cinema-bio-left: 8%;
+  --cinema-bio-top: 23%;
+  --cinema-bio-left: 7.5%;
   --cinema-bio-width: 25%;
-  --cinema-bio-size: 2.5cqi;
-  --cinema-meta-label-size: 1.04cqi;
-  --cinema-meta-value-size: 2cqi;
+  --cinema-bio-size: 2.2cqi;
+  --cinema-meta-label-size: 1.18cqi;
+  --cinema-meta-value-size: 2.25cqi;
+  --cinema-promise-top: 3.2%;
+  --cinema-signature-top: 5.7%;
+  --cinema-frame-inset: 1.65%;
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -38,31 +39,108 @@
   pointer-events: none;
 }
 
-/* Local contrast gathers at the signature and lower print details. The image
-   remains full-bleed and untouched beneath these translucent gradients. */
 .veil {
   position: absolute;
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(
-      ellipse 54% 24% at 0% 0%,
-      color-mix(in srgb, var(--craft-ink, #101519) 42%, transparent) 0%,
-      transparent 100%
-    ),
-    linear-gradient(
-      180deg,
-      transparent 34%,
-      color-mix(in srgb, var(--craft-ink, #101519) 12%, transparent) 47%,
-      color-mix(in srgb, var(--craft-ink, #101519) 50%, transparent) 72%,
-      color-mix(in srgb, var(--craft-ink, #101519) 74%, transparent) 100%
-    );
+    radial-gradient(ellipse 42% 24% at 0% 0%, color-mix(in srgb, var(--craft-ink, #101519) 46%, transparent), transparent 100%),
+    radial-gradient(ellipse 40% 25% at 100% 0%, color-mix(in srgb, var(--craft-ink, #101519) 34%, transparent), transparent 100%),
+    linear-gradient(180deg, transparent 32%, color-mix(in srgb, var(--craft-ink, #101519) 8%, transparent) 48%, color-mix(in srgb, var(--craft-ink, #101519) 40%, transparent) 70%, color-mix(in srgb, var(--craft-ink, #101519) 78%, transparent) 100%);
   pointer-events: none;
+}
+
+.topPromise {
+  position: absolute;
+  z-index: 2;
+  top: var(--cinema-promise-top);
+  left: 5.6%;
+  width: 29%;
+  color: var(--craft-gold-light, var(--craft-ivory, var(--master-ink, var(--card-light))));
+}
+
+.topPromise p {
+  margin: 0;
+  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), 1.65cqi);
+  font-weight: 500;
+  letter-spacing: .31em;
+  line-height: 1.28;
+}
+
+.topPromise p > span,
+.topSignature p > span { display: block; }
+
+.promiseRule {
+  display: block;
+  width: 7.4cqi;
+  height: var(--master-rule-weight, .13cqi);
+  margin: 3.2cqi 0 2.4cqi;
+  background: var(--craft-gold-light, var(--craft-brass, var(--master-accent, #b99b72)));
+  opacity: .84;
+}
+
+.topQuote {
+  color: color-mix(in srgb, var(--craft-ivory, #f3ead7) 94%, transparent);
+  font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif))) !important;
+  font-size: max(var(--master-micro-min, .84cqi), 2.35cqi) !important;
+  font-style: italic;
+  font-weight: 450 !important;
+  letter-spacing: .04em !important;
+  line-height: 1.25 !important;
+}
+
+.topSignature {
+  position: absolute;
+  z-index: 2;
+  top: var(--cinema-signature-top);
+  right: 5.5%;
+  width: 32%;
+  color: var(--craft-gold-light, var(--craft-ivory, var(--master-ink, var(--card-light))));
+  text-align: center;
+}
+
+.topSignature p {
+  margin: 0;
+  font-family: 'Pinyon Script', var(--font-display, var(--card-font-display, Georgia, serif));
+  font-size: 4.15cqi;
+  font-weight: 400;
+  letter-spacing: .01em;
+  line-height: 1.08;
+}
+
+.signaturePlace {
+  display: block;
+  margin-top: 2cqi;
+  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), 1.45cqi);
+  font-weight: 600;
+  letter-spacing: .31em;
+  line-height: 1;
+}
+
+.bio {
+  position: absolute;
+  z-index: 2;
+  top: var(--cinema-bio-top);
+  left: var(--cinema-bio-left);
+  width: var(--cinema-bio-width);
+  max-width: var(--cinema-bio-width);
+  margin: 0;
+  color: color-mix(in srgb, var(--craft-ivory, #f3ead7) 86%, transparent);
+  font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
+  font-size: max(var(--master-micro-min, .84cqi), var(--cinema-bio-size));
+  font-style: italic;
+  font-weight: var(--master-secondary-display-weight, 450);
+  letter-spacing: var(--master-secondary-display-tracking, .025em);
+  line-height: var(--master-secondary-display-leading, 1.25);
+  text-wrap: pretty;
+  overflow-wrap: anywhere;
 }
 
 .identity {
   position: absolute;
-  z-index: 2;
+  z-index: 3;
   right: auto;
   bottom: var(--cinema-identity-bottom);
   left: var(--cinema-identity-left);
@@ -78,33 +156,29 @@
   --cinematic-foil-layer: var(--material-cinematic-film-grain-image, none);
   max-width: 100%;
   margin: 0;
-  padding-block-end: 0.16em;
-  color: var(--craft-ivory, var(--master-ink, var(--card-light)));
-  font-family: var(--card-font-display, Georgia, serif);
+  padding-block-end: .16em;
+  color: var(--craft-gold-light, var(--craft-ivory, var(--master-ink, var(--card-light))));
+  font-family: var(--master-font-display, var(--card-font-display, Georgia, serif));
   font-weight: var(--card-display-weight, 500);
-  letter-spacing: calc(var(--card-display-tracking, -0.035em) * 0.84);
-  line-height: 0.86;
+  letter-spacing: calc(var(--card-display-tracking, -.035em) * .84);
+  line-height: .86;
   text-align: center;
   text-wrap: balance;
   overflow-wrap: anywhere;
 }
 
-/* The map remains clipped by the original display-name element; the foil
-   gradient continues to carry the title's contrast. */
 @supports ((background-clip: text) or (-webkit-background-clip: text)) {
   .name {
     background-image:
       var(--cinematic-foil-layer, none),
-      linear-gradient(
-        112deg,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 0%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 58%, var(--craft-brass, var(--master-accent, #b99b72)) 42%) 28%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 74%, var(--craft-brass, var(--master-accent, #b99b72)) 26%) 45%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 96%, var(--craft-brass, var(--master-accent, #b99b72)) 4%) 53%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 61%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 55%, var(--craft-brass, var(--master-accent, #b99b72)) 45%) 82%,
-        color-mix(in srgb, var(--craft-ivory, var(--master-ink, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 100%
-      );
+      linear-gradient(112deg,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 0%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 58%, var(--craft-brass, var(--master-accent, #b99b72)) 42%) 28%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 74%, var(--craft-brass, var(--master-accent, #b99b72)) 26%) 45%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 96%, var(--craft-brass, var(--master-accent, #b99b72)) 4%) 53%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 61%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 55%, var(--craft-brass, var(--master-accent, #b99b72)) 45%) 82%,
+        color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory, #f2eee7)) 72%, var(--craft-brass, var(--master-accent, #b99b72)) 28%) 100%);
     background-size: cover, 100% 100%;
     background-position: center;
     background-repeat: no-repeat;
@@ -114,191 +188,81 @@
     -webkit-text-fill-color: transparent;
     color: transparent;
   }
-
 }
 
-:global(article[data-layout='a'][data-material-texture='off']) .name {
-  --cinematic-foil-layer: none;
-}
+:global(article[data-layout='a'][data-material-texture='off']) .name { --cinematic-foil-layer: none; }
 
 .name[data-name-script='latin'] {
   font-family: var(--master-font-display, var(--card-font-display, Georgia, serif));
-  letter-spacing: calc(var(--card-display-tracking, -0.035em) * 1.42);
-  line-height: 0.78;
-  -webkit-text-stroke: 0.004em color-mix(in srgb, var(--craft-brass, #b99b72) 52%, var(--craft-ivory, #f2eee7) 48%);
+  letter-spacing: calc(var(--card-display-tracking, -.035em) * 1.15);
+  line-height: .78;
+  -webkit-text-stroke: .004em color-mix(in srgb, var(--craft-brass, #b99b72) 52%, var(--craft-ivory, #f2eee7) 48%);
 }
 
 .name[data-name-script='korean'] {
   font-family: var(--master-font-display, var(--card-font-display, Georgia, serif));
   font-weight: var(--master-display-weight, var(--card-display-weight, 500));
-  letter-spacing: var(--master-display-tracking, -0.01em);
+  letter-spacing: var(--master-display-tracking, -.01em);
   line-height: var(--master-display-leading, 1.02);
 }
 
 .name[data-name-script='japanese'] {
   font-family: var(--master-font-display, var(--card-font-display, Georgia, serif));
   font-weight: var(--master-display-weight, var(--card-display-weight, 500));
-  letter-spacing: var(--master-display-tracking, -0.005em);
+  letter-spacing: var(--master-display-tracking, -.005em);
   line-height: var(--master-display-leading, 1.05);
 }
 
-.nameLine {
-  display: block;
-  max-width: 100%;
-  text-align: center;
-  text-wrap: balance;
-}
-
-.bio {
-  position: absolute;
-  z-index: 2;
-  top: var(--cinema-bio-top);
-  left: var(--cinema-bio-left);
-  width: var(--cinema-bio-width);
-  max-width: var(--cinema-bio-width);
-  margin: 0;
-  color: color-mix(in srgb, var(--craft-ivory, #f3ead7) 88%, transparent);
-  font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
-  font-size: max(var(--master-micro-min, 0.84cqi), var(--cinema-bio-size));
-  font-style: italic;
-  font-weight: var(--master-secondary-display-weight, 450);
-  letter-spacing: var(--master-secondary-display-tracking, 0.025em);
-  line-height: var(--master-secondary-display-leading, 1.25);
-  text-align: left;
-  text-wrap: pretty;
-  overflow-wrap: anywhere;
-}
-
-.bio::before {
-  display: block;
-  width: 3.2cqi;
-  height: var(--master-rule-weight, 0.1cqi);
-  margin-block-end: 0.9cqi;
-  background: linear-gradient(90deg, var(--craft-brass, #b99b72), color-mix(in srgb, var(--craft-brass, #b99b72) 16%, transparent));
-  content: '';
-}
+.nameLine { display: block; max-width: 100%; text-align: center; text-wrap: balance; }
 
 .nameDivider {
-  display: block;
-  flex: 0 0 auto;
-  width: 28cqi;
-  height: auto;
-  aspect-ratio: 160 / 18;
-  margin: 0.8cqi auto 0.4cqi;
-  color: color-mix(in srgb, var(--craft-brass, #b99b72) 82%, var(--craft-ivory, #f2eee7) 18%);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 5.3cqi minmax(0, 1fr);
+  align-items: center;
+  gap: 1.1cqi;
+  margin: .8cqi 0 .35cqi;
+  color: var(--craft-gold-light, var(--craft-brass, var(--master-accent, #b99b72)));
 }
+
+.nameDivider > span { height: var(--master-rule-weight, .13cqi); background: currentColor; opacity: .68; }
+.nameDiamond { display: block; width: 100%; height: auto; aspect-ratio: 1; }
 
 .metadata {
   display: flex;
+  min-width: 0;
   align-items: stretch;
   gap: 0;
   margin: 0;
-  padding: 0.4cqi 0 0;
+  padding: .4cqi 0 0;
   font-family: var(--card-font-metadata, sans-serif);
 }
 
 .metaCell {
   flex: 1 1 0;
   min-width: 0;
-  padding-inline-start: 0.85cqi;
+  padding-inline-start: 1.15cqi;
   border-inline-start: 1px solid transparent;
-  background-image: linear-gradient(
-    color-mix(in srgb, var(--craft-brass, #b79a72) 58%, transparent),
-    color-mix(in srgb, var(--craft-brass, #b79a72) 58%, transparent)
-  );
-  background-size: var(--master-rule-weight, 0.1cqi) 100%;
+  background-image: linear-gradient(color-mix(in srgb, var(--craft-brass, #b79a72) 58%, transparent), color-mix(in srgb, var(--craft-brass, #b79a72) 58%, transparent));
+  background-size: var(--master-rule-weight, .13cqi) 100%;
   background-position: left;
   background-repeat: no-repeat;
-  background-origin: border-box;
-  background-clip: border-box;
 }
 
-.metaCell[data-cinema-fact='job'] { flex-grow: 1.4; }
-.metaCell[data-cinema-fact='level'] { flex-grow: 0.68; }
-.metaCell[data-cinema-fact='world'] { flex-grow: 1.06; }
-.metaCell[data-cinema-fact='data-center'] { flex-grow: 1.2; }
-.metaCell[data-cinema-fact='free-company'] { flex-grow: 1.42; }
-.metaCell[data-cinema-fact='service'] { flex-grow: 1.16; }
-
-.metaCell[data-cinema-fact='job'] .metaLabel {
-  margin-bottom: 0.65cqi;
-}
-
-.jobLockup {
-  display: flex;
-  min-width: 0;
-  align-items: center;
-  gap: 0.85cqi;
-  margin: 0;
-}
-
-.jobSeal {
-  position: relative;
-  display: grid;
-  width: 5.4cqi;
-  height: 5.4cqi;
-  flex: 0 0 auto;
-  place-items: center;
-  color: var(--job-motif-color, var(--craft-brass, var(--master-accent, var(--card-accent))));
-  --job-icon-color: var(--job-motif-color, var(--craft-brass, var(--master-accent, var(--card-accent))));
-}
-
-.jobSeal::before {
-  position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(currentColor, currentColor) left top / 28% var(--master-rule-weight, 0.1cqi) no-repeat,
-    linear-gradient(currentColor, currentColor) left top / var(--master-rule-weight, 0.1cqi) 28% no-repeat,
-    linear-gradient(currentColor, currentColor) right top / 28% var(--master-rule-weight, 0.1cqi) no-repeat,
-    linear-gradient(currentColor, currentColor) right top / var(--master-rule-weight, 0.1cqi) 28% no-repeat,
-    linear-gradient(currentColor, currentColor) left bottom / 28% var(--master-rule-weight, 0.1cqi) no-repeat,
-    linear-gradient(currentColor, currentColor) left bottom / var(--master-rule-weight, 0.1cqi) 28% no-repeat,
-    linear-gradient(currentColor, currentColor) right bottom / 28% var(--master-rule-weight, 0.1cqi) no-repeat,
-    linear-gradient(currentColor, currentColor) right bottom / var(--master-rule-weight, 0.1cqi) 28% no-repeat;
-  content: '';
-  opacity: 0.66;
-  pointer-events: none;
-}
-
-.jobGlyph {
-  width: 1em !important;
-  height: 1em !important;
-  flex: 0 0 1em !important;
-  font-size: inherit !important;
-}
-
-.jobLockupText {
-  display: grid;
-  min-width: 0;
-  align-content: center;
-  gap: 0.18cqi;
-}
-
-.jobAbbreviation {
-  color: color-mix(in srgb, var(--craft-brass, var(--master-accent, #b99b72)) 72%, var(--craft-ivory, var(--master-ink, var(--card-light))) 28%);
-  font-family: var(--card-font-display, Georgia, serif);
-  font-size: max(var(--master-micro-min, 0.84cqi), 1.5cqi);
-  font-weight: 600;
-  letter-spacing: 0.14em;
-  line-height: 1;
-  white-space: nowrap;
-}
-
-.metaCell:first-child {
-  padding-inline-start: 0;
-  border-inline-start: 0;
-  background-image: none;
-}
+.metaCell:first-child { padding-inline-start: 0; border-inline-start: 0; background-image: none; }
+.metaCell[data-cinema-fact='job'] { flex-grow: 1.1; }
+.metaCell[data-cinema-fact='level'] { flex-grow: .72; }
+.metaCell[data-cinema-fact='world-data-center'] { flex-grow: 1.2; }
+.metaCell[data-cinema-fact='free-company'] { flex-grow: 1.2; }
 
 .metaLabel {
   display: block;
-  margin: 0 0 0.45cqi;
-  color: color-mix(in srgb, var(--craft-brass, #b99b72) 68%, var(--craft-ivory, #f3ead7) 32%);
-  font-family: var(--master-font-label, inherit);
-  font-size: max(var(--master-micro-min, 0.84cqi), var(--cinema-meta-label-size));
-  font-weight: var(--master-label-weight, 600);
-  letter-spacing: var(--master-label-tracking, 0.1em);
-  line-height: var(--master-label-leading, 1.15);
+  margin: 0 0 .58cqi;
+  color: color-mix(in srgb, var(--craft-gold-light, var(--craft-brass, #b99b72)) 88%, var(--craft-ivory, #f3ead7) 12%);
+  font-family: var(--master-font-label, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--cinema-meta-label-size));
+  font-weight: var(--master-label-weight, 650);
+  letter-spacing: .16em;
+  line-height: 1.15;
   text-transform: uppercase;
   overflow-wrap: anywhere;
 }
@@ -309,7 +273,7 @@
   margin: 0;
   color: var(--craft-ivory, var(--master-ink, var(--card-light)));
   font-family: var(--master-font-information, var(--card-font-world, var(--card-font-display, var(--card-font-body, Georgia, serif))));
-  font-size: max(var(--master-micro-min, 0.84cqi), var(--cinema-meta-value-size));
+  font-size: max(var(--master-micro-min, .84cqi), var(--cinema-meta-value-size));
   font-weight: var(--master-information-weight, 500);
   letter-spacing: var(--master-information-tracking, 0);
   line-height: var(--master-information-leading, 1.08);
@@ -320,103 +284,155 @@
 .metaCell[data-cinema-fact='job'] .metaValue {
   font-family: var(--master-font-job, var(--card-font-world, var(--card-font-display, Georgia, serif)));
   font-weight: var(--master-job-weight, 500);
-  letter-spacing: var(--master-job-tracking, 0);
   line-height: var(--master-job-leading, 1.08);
 }
 
-.levelValue {
-  color: var(--craft-brass, var(--master-accent, var(--card-accent)));
-  font-family: var(--card-font-display, Georgia, serif);
-  font-size: max(var(--master-micro-min, 0.84cqi), calc(var(--cinema-meta-value-size) * 1.18));
-  font-variant-numeric: lining-nums tabular-nums;
-  letter-spacing: 0.015em;
-  line-height: 1;
+.jobLockup { display: flex; min-width: 0; align-items: center; gap: .8cqi; margin: 0; }
+
+.jobSeal {
+  position: relative;
+  display: grid;
+  width: 4.7cqi;
+  height: 4.7cqi;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--job-motif-color, var(--craft-brass, var(--master-accent, var(--card-accent))));
+  --job-icon-color: var(--job-motif-color, var(--craft-brass, var(--master-accent, var(--card-accent))));
 }
 
-.origin {
-  color: color-mix(in srgb, var(--craft-ivory, #f3ead7) 92%, transparent);
-  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
-  font-size: max(var(--master-micro-min, 0.84cqi), calc(var(--cinema-meta-value-size) * 0.78));
-  font-weight: var(--master-micro-weight, 600);
-  letter-spacing: var(--master-micro-tracking, 0.05em);
-  line-height: var(--master-micro-leading, normal);
+.jobSeal::before {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(currentColor, currentColor) left top / 28% var(--master-rule-weight, .13cqi) no-repeat,
+    linear-gradient(currentColor, currentColor) left top / var(--master-rule-weight, .13cqi) 28% no-repeat,
+    linear-gradient(currentColor, currentColor) right top / 28% var(--master-rule-weight, .13cqi) no-repeat,
+    linear-gradient(currentColor, currentColor) right top / var(--master-rule-weight, .13cqi) 28% no-repeat,
+    linear-gradient(currentColor, currentColor) left bottom / 28% var(--master-rule-weight, .13cqi) no-repeat,
+    linear-gradient(currentColor, currentColor) left bottom / var(--master-rule-weight, .13cqi) 28% no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / 28% var(--master-rule-weight, .13cqi) no-repeat,
+    linear-gradient(currentColor, currentColor) right bottom / var(--master-rule-weight, .13cqi) 28% no-repeat;
+  content: '';
+  opacity: .66;
+  pointer-events: none;
+}
+
+.jobLockupText { display: grid; min-width: 0; align-content: center; gap: .2cqi; }
+.jobGlyph { width: 1em !important; height: 1em !important; flex: 0 0 1em !important; font-size: inherit !important; }
+
+.jobAbbreviation {
+  color: color-mix(in srgb, var(--craft-gold-light, var(--craft-brass, #b99b72)) 72%, var(--craft-ivory, var(--master-ink, var(--card-light))) 28%);
+  font-family: var(--card-font-display, Georgia, serif);
+  font-size: max(var(--master-micro-min, .84cqi), 1.42cqi);
+  font-weight: 600;
+  letter-spacing: .14em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.levelValue {
+  color: var(--craft-gold-light, var(--craft-brass, var(--master-accent, var(--card-accent))));
+  font-family: var(--card-font-display, Georgia, serif);
+  font-size: max(var(--master-micro-min, .84cqi), calc(var(--cinema-meta-value-size) * 1.18));
+  font-variant-numeric: lining-nums tabular-nums;
+  letter-spacing: .015em;
+  line-height: 1;
 }
 
 .frame {
   position: absolute;
-  z-index: 3;
+  z-index: 6;
   inset: 0;
   pointer-events: none;
 }
 
-/* Square: retain the film-poster hierarchy while giving the title a quieter
-   footprint and preserving a full-width lower strip. */
+.frame::before,
+.frame::after {
+  position: absolute;
+  z-index: 0;
+  border: var(--master-rule-weight, .13cqi) solid color-mix(in srgb, var(--craft-brass) 88%, var(--craft-ivory));
+  content: '';
+}
+
+.frame::before { inset: 1.6%; }
+.frame::after { inset: 2.35%; opacity: .62; }
+
+.frame :global([data-print-frame='cinematic']) {
+  --frame-inset: 20em;
+  --corner-size: 80em;
+  --corner-reach: 45em;
+  z-index: 1;
+  opacity: .9;
+}
+
+.frame :global([data-print-frame='cinematic'] > span:nth-of-type(-n+4)),
+.frame :global([data-print-frame='cinematic'] > span:nth-of-type(9)) {
+  display: none !important;
+}
+
+.frame :global([data-print-frame='cinematic'] > span:nth-of-type(7)) { display: block !important; }
+
+/* Square preserves a compact campaign title and the four precise print facts. */
 .canvas[data-ratio='1:1'] {
   --cinema-identity-left: 6%;
-  --cinema-identity-bottom: 8.3%;
+  --cinema-identity-bottom: 7.5%;
   --cinema-identity-width: 88%;
-  --cinema-bio-top: 14%;
-  --cinema-bio-left: 8%;
-  --cinema-bio-width: 30%;
-  --cinema-bio-size: 2.3cqi;
-  --cinema-meta-label-size: 0.98cqi;
-  --cinema-meta-value-size: 1.48cqi;
-}
-
-/* 3:4 gives the hero title slightly more depth without enlarging the strip. */
-.canvas[data-ratio='3:4'] {
-  --cinema-identity-bottom: 8.4%;
-  --cinema-identity-width: 88%;
-  --cinema-bio-top: 13.5%;
+  --cinema-bio-top: 21%;
+  --cinema-bio-left: 7%;
   --cinema-bio-width: 28%;
-  --cinema-bio-size: 2.45cqi;
+  --cinema-bio-size: 1.9cqi;
+  --cinema-meta-label-size: 1.05cqi;
+  --cinema-meta-value-size: 1.75cqi;
+  --cinema-promise-top: 3.8%;
+  --cinema-signature-top: 6%;
 }
 
-/* Tall: keep the image field generous, then let the caption settle above the
-   shared credit-safe area. */
+.canvas[data-ratio='3:4'] {
+  --cinema-identity-bottom: 7.8%;
+  --cinema-identity-width: 88%;
+  --cinema-bio-top: 22%;
+  --cinema-bio-width: 27%;
+  --cinema-meta-value-size: 2.15cqi;
+}
+
 .canvas[data-ratio='9:16'] {
   --cinema-identity-left: 6%;
-  --cinema-identity-bottom: 8%;
+  --cinema-identity-bottom: 7%;
   --cinema-identity-width: 88%;
-  --cinema-bio-top: 11%;
+  --cinema-bio-top: 16%;
   --cinema-bio-left: 7%;
-  --cinema-bio-width: 34%;
-  --cinema-bio-size: 2.1cqi;
-  --cinema-meta-label-size: 1.08cqi;
-  --cinema-meta-value-size: 1.62cqi;
+  --cinema-bio-width: 33%;
+  --cinema-bio-size: 1.9cqi;
+  --cinema-meta-label-size: 1.03cqi;
+  --cinema-meta-value-size: 1.52cqi;
+  --cinema-promise-top: 3%;
+  --cinema-signature-top: 4.8%;
 }
 
-.canvas[data-ratio='9:16'] .bio {
-  display: none;
-}
+.canvas[data-ratio='9:16'] .bio { display: none; }
+.canvas[data-ratio='9:16'] .metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.2cqi; }
+.canvas[data-ratio='9:16'] .metaCell { min-height: 5cqi; }
 
-/* Wide: the full-bleed photo stays dominant; a centered title and low strip
-   share the width without becoming a left-side web-profile panel. */
 .canvas[data-ratio='16:9'] {
   --cinema-identity-left: 6%;
-  --cinema-identity-bottom: 8%;
+  --cinema-identity-bottom: 7%;
   --cinema-identity-width: 88%;
-  --cinema-bio-top: 14%;
-  --cinema-bio-left: 8%;
-  --cinema-bio-width: 22%;
-  --cinema-bio-size: 2.3cqi;
-  --cinema-meta-label-size: 0.7cqi;
-  --cinema-meta-value-size: 1.22cqi;
+  --cinema-bio-top: 20%;
+  --cinema-bio-left: 7%;
+  --cinema-bio-width: 20%;
+  --cinema-bio-size: 1.55cqi;
+  --cinema-meta-label-size: .72cqi;
+  --cinema-meta-value-size: 1.35cqi;
+  --cinema-promise-top: 7%;
+  --cinema-signature-top: 8%;
 }
 
-.canvas[data-ratio='16:9'] .bio {
-  display: none;
-}
+.canvas[data-ratio='16:9'] .bio { display: none; }
+.canvas[data-ratio='16:9'] .jobSeal { width: 3.4cqi; height: 3.4cqi; }
+.canvas[data-ratio='16:9'] .jobLockup { gap: .6cqi; }
+.canvas[data-ratio='16:9'] .jobAbbreviation { font-size: max(var(--master-micro-min, .7cqi), .72cqi); }
+.canvas[data-ratio='16:9'] .metadata { padding-top: .7cqi; }
 
-.canvas[data-ratio='16:9'] .jobSeal {
-  width: 4cqi;
-  height: 4cqi;
-}
-
-.canvas[data-ratio='16:9'] .jobLockup {
-  gap: 0.65cqi;
-}
-
-.canvas[data-ratio='16:9'] .jobAbbreviation {
-  font-size: max(var(--master-micro-min, 0.7cqi), 0.72cqi);
-}
+/* Localized stock signatures keep the serif tone without Latin script fallback. */
+.canvas:lang(ko) .topSignature p { font-family: var(--font-display-korean); font-style: normal; font-weight: 400; word-break: keep-all; }
+.canvas:lang(ja) .topSignature p { font-family: var(--font-display-japanese); font-style: normal; font-weight: 400; }

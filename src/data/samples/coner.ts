@@ -86,6 +86,10 @@ export function getConerScreenshotPresentation(
   // The ID portrait window is shorter than the full card. Keep the hood and
   // raised hand above its name seam; this only applies to the supplied sample.
   if (template === 'id-card' && role === 'portrait') framing.y = 8;
+  // Editorial's 9:16 brush is a short upper photo field. Bias the sample crop
+  // upward so the face remains inside that silhouette; uploaded photos keep
+  // the editor's stored image adjustments.
+  if (template === 'editorial' && role === 'portrait' && ratio === '9:16') framing.y = 20;
 
   return {
     role,

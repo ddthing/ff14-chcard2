@@ -34,6 +34,28 @@ export interface FontRegistryEntry {
  * requests limited to glyphs used by the selected card text.
  */
 export const FONT_REGISTRY = {
+  pinyonScript: {
+    id: 'pinyon-script', family: 'Pinyon Script', license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Pinyon-Script-OFL.txt',
+    sourceUrl: 'https://github.com/google/fonts/tree/main/ofl/pinyonscript',
+    axes: { weight: [400, 400] }, supportedScripts: ['latin'],
+    localAssets: [
+      { subset: 'latin', publicPath: '/fonts/pinyon-script-latin-normal.woff2', filePath: 'public/fonts/pinyon-script-latin-normal.woff2', bytes: 39044 },
+      { subset: 'latin-ext', publicPath: '/fonts/pinyon-script-latin-ext-normal.woff2', filePath: 'public/fonts/pinyon-script-latin-ext-normal.woff2', bytes: 36152 },
+      { subset: 'vietnamese', publicPath: '/fonts/pinyon-script-vietnamese-normal.woff2', filePath: 'public/fonts/pinyon-script-vietnamese-normal.woff2', bytes: 10700 },
+    ],
+  },
+  whisper: {
+    id: 'whisper', family: 'Whisper', license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Whisper-OFL.txt',
+    sourceUrl: 'https://github.com/google/fonts/tree/main/ofl/whisper',
+    axes: { weight: [400, 400] }, supportedScripts: ['latin'],
+    localAssets: [
+      { subset: 'latin', publicPath: '/fonts/whisper-latin-normal.woff2', filePath: 'public/fonts/whisper-latin-normal.woff2', bytes: 33296 },
+      { subset: 'latin-ext', publicPath: '/fonts/whisper-latin-ext-normal.woff2', filePath: 'public/fonts/whisper-latin-ext-normal.woff2', bytes: 26340 },
+      { subset: 'vietnamese', publicPath: '/fonts/whisper-vietnamese-normal.woff2', filePath: 'public/fonts/whisper-vietnamese-normal.woff2', bytes: 10344 },
+    ],
+  },
   cormorantGaramond: {
     id: 'cormorant-garamond',
     family: 'Cormorant Garamond Variable',

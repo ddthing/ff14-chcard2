@@ -11,7 +11,7 @@ register('./ts-alias-loader.mjs', import.meta.url);
 
 const { getCardMaterialAssets, getCardMaterialStyleProperties, resolveCardMaterial, SAFE_MATERIAL_FALLBACK } = await import('../src/lib/card-materials.ts');
 const { getMasterArtProperties } = await import('../src/lib/card-art-tokens.ts');
-const { getEditorialPaperShape } = await import('../src/lib/card-graphics/editorial-shape.ts');
+const { getEditorialBrushShape } = await import('../src/lib/card-graphics/editorial-shape.ts');
 
 const EXPECTED_MATERIALS = {
   cinematic: [['cinematic-film-grain', '/images/materials/cinematic-film-grain.webp', 0.45]],
@@ -154,16 +154,18 @@ test('CSS variables use the registry source and zero-opacity fallback for unused
   assert.equal('--master-material-opacity' in familyProperties, false);
 });
 
-test('editorial paper contour paths remain frozen for every supported ratio', () => {
-  const expectedPaths = {
-    '1:1': 'M 526 0 C 491 104 482 214 510 316 C 538 418 548 513 519 614 C 490 718 491 855 514 1000 L 1000 1000 L 1000 0 Z',
-    '4:5': 'M 586 0 C 548 108 542 217 574 322 C 606 426 610 525 575 638 C 544 742 535 866 558 1000 L 1000 1000 L 1000 0 Z',
-    '3:4': 'M 612 0 C 570 115 560 226 586 326 C 608 414 610 507 578 633 C 552 730 547 848 570 1000 L 1000 1000 L 1000 0 Z',
-    '9:16': 'M 0 615 C 180 603 285 624 420 621 C 570 618 665 596 790 609 C 890 620 956 621 1000 611 L 1000 1000 L 0 1000 Z',
-    '16:9': 'M 326 0 C 292 92 288 190 314 286 C 342 386 341 486 309 592 C 281 704 290 850 318 1000 L 1000 1000 L 1000 0 Z',
+test('editorial brush keeps the supplied SVG clip and chooses a composition for every ratio', () => {
+  const expectedCompositions = {
+    '1:1': 'side-panel',
+    '4:5': 'side-panel',
+    '3:4': 'side-panel',
+    '9:16': 'stacked',
+    '16:9': 'side-panel',
   };
-  for (const [ratio, path] of Object.entries(expectedPaths)) {
-    assert.equal(getEditorialPaperShape(ratio).path, path, `${ratio} paper path`);
+  for (const [ratio, composition] of Object.entries(expectedCompositions)) {
+    const shape = getEditorialBrushShape(ratio);
+    assert.equal(shape.composition, composition, `${ratio} composition`);
+    assert.equal(shape.inkOutline, '/assets/card-materials/v3/editorial-brush-outline.svg');
   }
 });
 

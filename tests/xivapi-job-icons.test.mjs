@@ -15,7 +15,6 @@ const manifest = JSON.parse(
 );
 const {
   FFXIV_OFFICIAL_ASSETS_ENABLED,
-  OFFICIAL_JOB_ICON_ASSETS,
   resolveJobIcon,
   resolveJobIconFromSources,
 } = await import('../src/lib/ffxiv-assets/index.ts');
@@ -54,9 +53,7 @@ function expectedSource(jobId, usage = 'picker') {
   const entry = manifest.entries[jobId];
   if (isReviewedFor(entry?.svg, usage)) return ['xivapi-svg', entry.svg.src];
   if (isReviewedFor(adoptedRaster(entry ?? {}), usage)) return ['xivapi-raster', entry.raster.src];
-  if (usage === 'cardDisplay') return null;
-  const fanKit = OFFICIAL_JOB_ICON_ASSETS[jobId];
-  return fanKit ? ['fan-kit', fanKit.maskSrc] : null;
+  return null;
 }
 
 test('manifest covers every canonical job and records source gaps explicitly', () => {
@@ -81,6 +78,7 @@ test('each checked-in XIVAPI candidate is local, present and matches its recorde
   const publishedCoverage = { svg: 0, icons: 0, companion: 0, risingstones: 0 };
   const sourceAvailable = manifest.coverage.sourceAvailable ?? manifest.coverage;
   assert.deepEqual(sourceAvailable, { svg: 33, icons: 33, companion: 33, risingstones: 31 });
+  assert.deepEqual(manifest.coverage.publishedSources, { svg: 16, icons: 18, companion: 0, risingstones: 0 });
 
   for (const entry of Object.values(manifest.entries)) {
     if (isSource(entry.svg)) publishedCoverage.svg += 1;
@@ -115,13 +113,13 @@ test('each checked-in XIVAPI candidate is local, present and matches its recorde
   }
 });
 
-test('reviewed SVG, raster, Fan Kit mask and generic fallback cascade in priority order', () => {
+test('reviewed XIVAPI SVG and raster sources cascade without generated-mask fallback', () => {
   assert.equal(FFXIV_OFFICIAL_ASSETS_ENABLED, true);
-  const fanKitAsset = OFFICIAL_JOB_ICON_ASSETS.paladin;
   const svg = {
     src: '/assets/ffxiv/jobs/xivapi/svg/paladin.svg',
     width: 1000,
     height: 1000,
+    provider: 'svg',
     sha256: 'a'.repeat(64),
     integrityVerified: true,
     verified: true,
@@ -130,9 +128,10 @@ test('reviewed SVG, raster, Fan Kit mask and generic fallback cascade in priorit
     opticalOffsetY: -0.015,
   };
   const raster = {
-    src: '/assets/ffxiv/jobs/xivapi/raster/paladin-512.png',
-    width: 512,
-    height: 512,
+    src: '/assets/ffxiv/jobs/xivapi/icons/paladin.png',
+    width: 256,
+    height: 256,
+    provider: 'icons',
     sha256: 'b'.repeat(64),
     integrityVerified: true,
     verified: true,
@@ -142,7 +141,6 @@ test('reviewed SVG, raster, Fan Kit mask and generic fallback cascade in priorit
     usage: 'picker',
     officialAssetsEnabled: true,
     entry: { svg, raster },
-    fanKitAsset,
   };
 
   const vector = resolveJobIconFromSources(common);
@@ -161,23 +159,20 @@ test('reviewed SVG, raster, Fan Kit mask and generic fallback cascade in priorit
     ['xivapi-raster', raster.src],
   );
 
-  const fanKitFallback = resolveJobIconFromSources({
+  const noGeneratedMaskFallback = resolveJobIconFromSources({
     ...common,
     failedSources: [svg.src, raster.src],
   });
-  assert.deepEqual(
-    fanKitFallback && [fanKitFallback.source, fanKitFallback.src],
-    ['fan-kit', fanKitAsset.maskSrc],
-  );
+  assert.equal(noGeneratedMaskFallback, null);
 
   assert.equal(resolveJobIconFromSources({
     ...common,
-    failedSources: [svg.src, raster.src, fanKitAsset.maskSrc],
+    failedSources: [svg.src, raster.src],
   }), null);
   assert.equal(resolveJobIconFromSources({ ...common, officialAssetsEnabled: false }), null);
 });
 
-test('unsafe local source paths never override the retained Fan Kit fallback', () => {
+test('unsafe local source paths never override the generic fallback', () => {
   const unsafePaths = [
     'https://example.invalid/paladin.svg',
     '//example.invalid/paladin.svg',
@@ -195,11 +190,18 @@ test('unsafe local source paths never override the retained Fan Kit fallback', (
       usage: 'picker',
       officialAssetsEnabled: true,
       entry: {
-        svg: { src, width: 1000, height: 1000, verified: true },
+        svg: {
+          src,
+          width: 1000,
+          height: 1000,
+          provider: 'svg',
+          sha256: 'c'.repeat(64),
+          integrityVerified: true,
+          verified: true,
+        },
       },
-      fanKitAsset: OFFICIAL_JOB_ICON_ASSETS.paladin,
     });
-    assert.equal(result?.source, 'fan-kit', `${src} must be rejected`);
+    assert.equal(result, null, `${src} must be rejected`);
   }
 });
 
@@ -208,20 +210,25 @@ test('display marks require a reviewed SVG and per-usage approvals stay scoped',
     src: '/assets/ffxiv/jobs/xivapi/svg/warrior.svg',
     width: 1000,
     height: 1000,
+    provider: 'svg',
+    sha256: 'd'.repeat(64),
+    integrityVerified: true,
     verified: true,
     verifiedUsages: ['picker', 'micro', 'cardSmall', 'cardMedium'],
   };
   const raster = {
-    src: '/assets/ffxiv/jobs/xivapi/raster/warrior-512.png',
-    width: 512,
-    height: 512,
+    src: '/assets/ffxiv/jobs/xivapi/icons/warrior.png',
+    width: 256,
+    height: 256,
+    provider: 'icons',
+    sha256: 'e'.repeat(64),
+    integrityVerified: true,
     verified: true,
   };
   const base = {
     jobId: 'warrior',
     officialAssetsEnabled: true,
     entry: { svg, raster },
-    fanKitAsset: OFFICIAL_JOB_ICON_ASSETS.warrior,
   };
 
   assert.equal(resolveJobIconFromSources({ ...base, usage: 'cardDisplay' }), null);
@@ -277,7 +284,22 @@ test('a reviewed representative job resolves a preferred XIVAPI source', () => {
   assert.equal(resolved?.verified, true);
 });
 
-test('Reaper source appearance preserves raster color while tinted appearance uses its alpha mask', () => {
+test('previously mask-backed jobs now use the inspected 256px XIVAPI originals', () => {
+  const migratedJobs = [
+    'dark-knight', 'astrologian', 'ninja', 'carpenter', 'blacksmith', 'armorer',
+    'goldsmith', 'leatherworker', 'weaver', 'alchemist', 'culinarian', 'miner',
+    'botanist', 'fisher',
+  ];
+  for (const jobId of migratedJobs) {
+    const small = resolveJobIcon({ jobId, usage: 'cardSmall' });
+    assert.deepEqual(small && [small.source, small.src, small.width, small.height], [
+      'xivapi-raster', `/assets/ffxiv/jobs/xivapi/icons/${jobId}.png`, 256, 256,
+    ]);
+    assert.equal(resolveJobIcon({ jobId, usage: 'cardDisplay' }), null, `${jobId} stays off the large raster path`);
+  }
+});
+
+test('Reaper source appearance preserves raster color while tinted appearance uses source alpha', () => {
   const reaperSource = manifest.entries.reaper.raster;
   assert.equal(reaperSource.colorMode, 'source-color-and-alpha-mask');
 

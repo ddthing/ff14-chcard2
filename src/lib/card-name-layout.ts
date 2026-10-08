@@ -19,6 +19,30 @@ export interface CardNameLayout {
 
 type NameSegment = { text: string; weight: number };
 
+const CARD_NAME_LAYOUT_CACHE_LIMIT = 64;
+const CARD_NAME_LAYOUT_CACHE_MAX_NAME_LENGTH = 256;
+const cardNameLayoutCache = new Map<string, CardNameLayout>();
+
+function localeScriptFor(locale: string): TypographyScript {
+  return locale.toLowerCase().startsWith('ko')
+    ? 'korean'
+    : locale.toLowerCase().startsWith('ja')
+      ? 'japanese'
+      : 'latin';
+}
+
+function copyLayout(layout: CardNameLayout): CardNameLayout {
+  return { ...layout, lines: [...layout.lines] };
+}
+
+function rememberLayout(key: string, layout: CardNameLayout): void {
+  if (cardNameLayoutCache.has(key)) cardNameLayoutCache.delete(key);
+  else if (cardNameLayoutCache.size >= CARD_NAME_LAYOUT_CACHE_LIMIT) {
+    cardNameLayoutCache.delete(cardNameLayoutCache.keys().next().value!);
+  }
+  cardNameLayoutCache.set(key, layout);
+}
+
 function graphemes(text: string): string[] {
   if (typeof Intl.Segmenter === 'function') {
     return Array.from(new Intl.Segmenter(undefined, { granularity: 'grapheme' }).segment(text), (part) => part.segment);
@@ -170,11 +194,19 @@ function cjkLines(text: string, script: TypographyScript, category: CardNameCate
  */
 export function getCardNameLayout(name: string, locale: string): CardNameLayout {
   const normalizedName = name.replace(/\s+/gu, ' ').trim();
-  const localeScript: TypographyScript = locale.toLowerCase().startsWith('ko')
-    ? 'korean'
-    : locale.toLowerCase().startsWith('ja')
-      ? 'japanese'
-      : 'latin';
+  const localeScript = localeScriptFor(locale);
+  const cacheKey = normalizedName.length <= CARD_NAME_LAYOUT_CACHE_MAX_NAME_LENGTH
+    ? `${localeScript}\u0000${normalizedName}`
+    : null;
+  if (cacheKey !== null) {
+    const cached = cardNameLayoutCache.get(cacheKey);
+    if (cached) {
+      cardNameLayoutCache.delete(cacheKey);
+      cardNameLayoutCache.set(cacheKey, cached);
+      return copyLayout(cached);
+    }
+  }
+
   const script = detectTypographyScript(normalizedName, localeScript);
   const length = weightedNameLength(normalizedName, script);
   const category = chooseCategory(length, script);
@@ -184,6 +216,8 @@ export function getCardNameLayout(name: string, locale: string): CardNameLayout 
   const scale = category === 'short' ? 1 : category === 'medium' ? 0.88 : 0.74;
 
   const maxLineUnits = Math.max(1, ...lines.map((line) => weightedNameLength(line, script) + (line.match(/\s/gu)?.length ?? 0) * 0.28));
-  return { normalizedName, script, category, lines, scale, maxLineUnits };
+  const layout = { normalizedName, script, category, lines, scale, maxLineUnits };
+  if (cacheKey !== null) rememberLayout(cacheKey, layout);
+  return copyLayout(layout);
 }
 

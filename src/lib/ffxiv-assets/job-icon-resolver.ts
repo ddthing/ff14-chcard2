@@ -1,8 +1,4 @@
 import { FFXIV_OFFICIAL_ASSETS_ENABLED } from './config';
-import {
-  OFFICIAL_JOB_ICON_ASSETS,
-  type OfficialJobIconAsset,
-} from './job-icons';
 import xivapiJobIconManifest from './xivapi-job-icon-manifest.json' with { type: 'json' };
 
 export type JobIconUsage =
@@ -18,7 +14,7 @@ export type JobIconUsage =
 
 export type CanonicalJobIconUsage = Exclude<JobIconUsage, 'small' | 'medium' | 'editorialLarge'>;
 export type JobIconAppearance = 'tinted' | 'source';
-export type JobIconSourceKind = 'xivapi-svg' | 'xivapi-raster' | 'fan-kit';
+export type JobIconSourceKind = 'xivapi-svg' | 'xivapi-raster';
 
 export type XivapiJobIconSource = Readonly<{
   src: string;
@@ -27,6 +23,7 @@ export type XivapiJobIconSource = Readonly<{
   verified: boolean;
   integrityVerified?: boolean;
   sha256?: string;
+  provider?: 'svg' | 'icons';
   sourcePath?: string;
   upstreamGitBlobSha?: string;
   visualReview?: string;
@@ -79,11 +76,9 @@ export type ResolveJobIconSourcesInput = Readonly<{
   officialAssetsEnabled?: boolean;
   failedSources?: readonly string[];
   entry?: XivapiJobIconEntry | null;
-  fanKitAsset?: OfficialJobIconAsset | null;
 }>;
 
 const XIVAPI_ASSET_PREFIX = '/assets/ffxiv/jobs/xivapi/';
-const FAN_KIT_ASSET_PREFIX = '/assets/ffxiv/jobs/official/';
 const xivapiEntries = (xivapiJobIconManifest as unknown as XivapiJobIconManifest).entries;
 
 function canonicalizeUsage(usage: JobIconUsage): CanonicalJobIconUsage {
@@ -118,23 +113,27 @@ function hasValidDimensions(source: XivapiJobIconSource): boolean {
     source.width <= 16_384 && source.height <= 16_384;
 }
 
+function isSupportedXivapiPath(source: XivapiJobIconSource): boolean {
+  if (source.provider === 'svg') {
+    return isSafeLocalAssetPath(source.src, `${XIVAPI_ASSET_PREFIX}svg/`) && source.src.endsWith('.svg');
+  }
+  if (source.provider === 'icons') {
+    return isSafeLocalAssetPath(source.src, `${XIVAPI_ASSET_PREFIX}icons/`) && source.src.endsWith('.png');
+  }
+  return false;
+}
+
 function isVerifiedXivapiSource(
   source: XivapiJobIconSource | null | undefined,
   usage: CanonicalJobIconUsage,
 ): source is XivapiJobIconSource {
   return Boolean(
     source && source.verified === true &&
+    source.integrityVerified === true &&
+    typeof source.sha256 === 'string' && /^[a-f\d]{64}$/i.test(source.sha256) &&
     (!source.verifiedUsages || source.verifiedUsages.includes(usage)) &&
-    isSafeLocalAssetPath(source.src, XIVAPI_ASSET_PREFIX) &&
+    isSupportedXivapiPath(source) &&
     hasValidDimensions(source),
-  );
-}
-
-function isSafeFanKitAsset(asset: OfficialJobIconAsset): boolean {
-  return (
-    isSafeLocalAssetPath(asset.src, FAN_KIT_ASSET_PREFIX) &&
-    isSafeLocalAssetPath(asset.maskSrc, `${FAN_KIT_ASSET_PREFIX}masks/`) &&
-    hasValidDimensions({ ...asset, verified: true })
   );
 }
 
@@ -180,9 +179,9 @@ function getRenderMode(appearance: JobIconAppearance, colorMode?: XivapiJobIconS
 }
 
 /**
- * Pick a reviewed local asset for this presentation size. The display gate
- * accepts SVG only; templates that need a large graphic can keep their own
- * typography when no reviewed SVG is available.
+ * Pick a reviewed local XIVAPI asset for this presentation size. The display
+ * gate accepts SVG only; templates can keep their own typography when no
+ * reviewed vector is available.
  */
 export function resolveJobIcon({
   jobId,
@@ -196,9 +195,6 @@ export function resolveJobIcon({
   const entry = Object.prototype.hasOwnProperty.call(xivapiEntries, jobId)
     ? xivapiEntries[jobId]
     : undefined;
-  const fanKitAsset = Object.prototype.hasOwnProperty.call(OFFICIAL_JOB_ICON_ASSETS, jobId)
-    ? OFFICIAL_JOB_ICON_ASSETS[jobId]
-    : undefined;
 
   return resolveJobIconFromSources({
     jobId,
@@ -207,7 +203,6 @@ export function resolveJobIcon({
     officialAssetsEnabled,
     failedSources,
     entry,
-    fanKitAsset,
   });
 }
 
@@ -219,7 +214,6 @@ export function resolveJobIconFromSources({
   officialAssetsEnabled = FFXIV_OFFICIAL_ASSETS_ENABLED,
   failedSources = [],
   entry,
-  fanKitAsset,
 }: ResolveJobIconSourcesInput): ResolvedJobIcon | null {
   if (!officialAssetsEnabled || !isSafeJobId(jobId)) return null;
 
@@ -261,20 +255,7 @@ export function resolveJobIconFromSources({
     );
   }
 
-  if (!fanKitAsset || !isSafeFanKitAsset(fanKitAsset)) return null;
-
-  const src = appearance === 'tinted' ? fanKitAsset.maskSrc : fanKitAsset.src;
-  if (failedSources.includes(src)) return null;
-
-  return createResolvedIcon(
-    src,
-    fanKitAsset.width,
-    fanKitAsset.height,
-    'fan-kit',
-    false,
-    appearance,
-    usage,
-  );
+  return null;
 }
 
 export function normalizeJobIconUsage(usage: JobIconUsage): CanonicalJobIconUsage {

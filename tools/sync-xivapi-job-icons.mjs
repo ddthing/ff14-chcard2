@@ -11,9 +11,8 @@ const UPSTREAM_COMMIT = "766cb47831435a83f04d904146bd3472501564c5";
 const LOCAL_BASE = "public/assets/ffxiv/jobs/xivapi";
 const AUDIT_PATH = "docs/qa/phase216-job-icons/source-audit.json";
 const CAPTURE_BASE = "docs/qa/phase216-job-icons/upstream";
-const REVIEW_PATH = "docs/qa/phase216-job-icons/review-decisions.json";
 const MANIFEST_PATH = "src/lib/ffxiv-assets/xivapi-job-icon-manifest.json";
-const OFFICIAL_MANIFEST_PATH = "src/lib/ffxiv-assets/job-icon-manifest.json";
+const OFFICIAL_MANIFEST_PATH = "src/lib/ffxiv-assets/fan-kit-source-manifest.json";
 
 const JOBS = [
   ["paladin", 19, "paladin"],
@@ -271,15 +270,7 @@ async function removePreviousGeneratedPublicFiles(root) {
 
 async function publishVerified(root) {
   const previousManifest = JSON.parse(await readFile(path.join(root, MANIFEST_PATH), "utf8"));
-  const decisions = JSON.parse(await readFile(path.join(root, REVIEW_PATH), "utf8"));
   const audit = JSON.parse(await readFile(path.join(root, AUDIT_PATH), "utf8"));
-  const metrics = JSON.parse(await readFile(path.join(root, "docs/qa/phase216-job-icons/svg-vs-fankit-mask-metrics.json"), "utf8"));
-  const sourcesByPath = new Map();
-  for (const entry of Object.values(audit.entries)) {
-    for (const source of Object.values(entry.sources)) {
-      if (source?.sourcePath) sourcesByPath.set(source.sourcePath, source);
-    }
-  }
 
   const localDate = audit.retrievedAtLocalDate;
   const entries = Object.fromEntries(JOBS.map(({ jobId }) => [jobId, { svg: null, raster: null }]));
@@ -287,16 +278,19 @@ async function publishVerified(root) {
   const selectedOutputs = new Set();
   let copied = 0;
 
-  for (const [jobId, decision] of Object.entries(decisions.entries ?? {})) {
-    if (!Object.hasOwn(entries, jobId)) throw new Error(`Review log contains noncanonical job id: ${jobId}`);
+  for (const [jobId, previousEntry] of Object.entries(previousManifest.entries ?? {})) {
+    if (!Object.hasOwn(entries, jobId)) throw new Error(`Manifest contains noncanonical job id: ${jobId}`);
     for (const key of ["svg", "raster"]) {
-      const selection = decision[key];
-      if (!selection?.approved) continue;
-      const provider = key === "svg" ? "svg" : selection.provider;
+      const selection = previousEntry[key];
+      if (!selection?.verified || !selection.integrityVerified || !Array.isArray(selection.verifiedUsages)) continue;
+      const provider = selection.provider;
       if (!PROVIDERS.includes(provider)) throw new Error(`Unsupported XIVAPI provider for ${jobId}: ${provider}`);
       const auditSource = audit.entries[jobId]?.sources?.[provider];
-      if (!auditSource?.localPath || auditSource.status === "absent-upstream") {
-        throw new Error(`Review log selects missing ${provider} source for ${jobId}`);
+      if (
+        !auditSource?.localPath || auditSource.status === "absent-upstream" ||
+        auditSource.sourcePath !== selection.sourcePath || auditSource.sha256 !== selection.sha256
+      ) {
+        throw new Error(`Manifest selects an unverified ${provider} source for ${jobId}`);
       }
       const sourceBytes = await readFile(path.join(root, auditSource.localPath));
       if (sha256(sourceBytes) !== auditSource.sha256) throw new Error(`Source changed before publication: ${auditSource.sourcePath}`);
@@ -305,34 +299,13 @@ async function publishVerified(root) {
       }
 
       const extension = key === "svg" ? "svg" : "png";
-      const providerDirectory = provider;
-      const publicPath = `${LOCAL_BASE}/${providerDirectory}/${jobId}.${extension}`;
+      const publicPath = `${LOCAL_BASE}/${provider}/${jobId}.${extension}`;
       const publicUrl = `/${publicPath.replace(/^public[\\/]/, "").replaceAll(path.sep, "/")}`;
       const output = path.join(root, publicPath);
       const expectedPrefix = `${path.resolve(root, LOCAL_BASE)}${path.sep}`;
       if (!path.resolve(output).startsWith(expectedPrefix)) throw new Error(`Refusing path outside XIVAPI folder: ${output}`);
       await atomicWrite(output, sourceBytes);
-      entries[jobId][key] = {
-        src: publicUrl,
-        width: auditSource.width,
-        height: auditSource.height,
-        provider,
-        colorMode: key === "svg" ? "monochrome-mask" : "source-color-and-alpha-mask",
-        verified: true,
-        integrityVerified: true,
-        sha256: auditSource.sha256,
-        sourcePath: auditSource.sourcePath,
-        visualScale: key === "svg"
-          ? metrics.jobs[jobId].at512.visualScaleSuggestion
-          : metrics.jobs[jobId].iconsRasterAt256.visualScaleSuggestion,
-        opticalOffsetX: (key === "svg"
-          ? metrics.jobs[jobId].at512.opticalOffsetXPercentSuggestion
-          : metrics.jobs[jobId].iconsRasterAt256.opticalOffsetXPercentSuggestion) / 100,
-        opticalOffsetY: (key === "svg"
-          ? metrics.jobs[jobId].at512.opticalOffsetYPercentSuggestion
-          : metrics.jobs[jobId].iconsRasterAt256.opticalOffsetYPercentSuggestion) / 100,
-        ...(Array.isArray(selection.verifiedUsages) ? { verifiedUsages: selection.verifiedUsages } : {}),
-      };
+      entries[jobId][key] = { ...selection, src: publicUrl, width: auditSource.width, height: auditSource.height };
       selectedOutputs.add(path.resolve(output));
       selectionCounts[provider] += 1;
       copied += 1;
@@ -350,9 +323,7 @@ async function publishVerified(root) {
     currentJobCount: JOBS.length,
     coverage: {
       sourceAvailable: audit.coverage,
-      reviewedJobs: Object.keys(decisions.entries ?? {}).filter((id) => (
-        decisions.entries[id]?.reviewed === true
-      )).length,
+      reviewedJobs: previousManifest.coverage?.reviewedJobs ?? JOBS.length,
       publishedSources: selectionCounts,
     },
     entries,
@@ -381,15 +352,7 @@ async function publishVerified(root) {
 
   await atomicJson(root, MANIFEST_PATH, manifest);
   await writeFile(path.join(root, MANIFEST_PATH), `${JSON.stringify(manifest, null, 2)}\n`);
-  const auditWithReview = {
-    ...audit,
-    visualReview: {
-      reviewedAtLocalDate: decisions.reviewedAtLocalDate ?? null,
-      decisions: decisions.entries ?? {},
-    },
-  };
-  await atomicJson(root, AUDIT_PATH, auditWithReview);
-  console.log(`Published ${copied} explicitly reviewed XIVAPI sources locally; unselected candidates remain outside public/.`);
+  console.log(`Republished ${copied} manifest-approved pinned XIVAPI originals locally; no derived assets were produced.`);
 }
 
 async function sync(root) {

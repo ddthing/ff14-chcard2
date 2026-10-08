@@ -1,11 +1,13 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { AdventurerIdCard, CinematicCard, EditorialCard } from '@/components/cards';
 import type { AdventurerCardCharacter, AdventurerCardData } from '@/components/cards/types';
-import { localizeFfxivLabel } from '@/data/ffxiv';
-import { loadTypographyFonts, getTypographyScriptsForCardText } from '@/data/fonts/load-fonts';
+import { getJob, JOB_CATEGORIES, localizeFfxivLabel } from '@/data/ffxiv';
+import { loadTypographyFonts, loadProfiledFontFace, getTypographyScriptsForCardText } from '@/data/fonts/load-fonts';
 import { CARD_EXPORT_FONT_TIMEOUT_MS, CardExportError, withCardExportTimeout } from '@/lib/card-export';
+import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
+import { CARD_STOCK_COPY, getCardDisplayBio, getCardStaticText } from '@/lib/card-copy';
 import { profileCount, profileRender, profileStart } from '@/lib/performance-profile';
 import { useI18n } from '@/lib/i18n';
 import type { Locale } from '@/lib/types';
@@ -16,14 +18,27 @@ import {
   type TypographyScript,
 } from '@/lib/typography-presets';
 
-function getCardFontRequest(character: AdventurerCardCharacter, locale: Locale) {
+export function getCardFontRequest(
+  character: AdventurerCardCharacter,
+  locale: Locale,
+  template?: 'cinematic' | 'editorial' | 'id-card',
+  imageUrl = '',
+) {
   const scriptFallback: TypographyScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
+  const job = getJob(character.jobId ?? character.job);
+  const jobCategory = JOB_CATEGORIES.find(({ id }) => id === job?.category);
+  const microcopy = getCardMicrocopy(character, locale);
+  const displayBio = getCardDisplayBio(character, imageUrl, locale);
   const strings = [
     character.name,
-    character.bio,
+    displayBio,
     character.freeCompany,
+    ...getCardStaticText(locale, template),
+    microcopy.jobAbbreviation,
+    microcopy.origin,
     localizeFfxivLabel('job', character.jobId ?? character.job, locale),
-    localizeFfxivLabel('world', character.worldId ?? character.world, locale),
+    jobCategory?.localizedName[locale] ?? '',
+    localizeCardWorld(character, locale),
     localizeFfxivLabel('dataCenter', character.dataCenterId ?? character.dataCenter, locale),
     localizeFfxivLabel('race', character.raceId ?? character.race, locale),
     localizeFfxivLabel('clan', character.clanId ?? character.clan, locale),
@@ -44,11 +59,23 @@ function getCardFontRequest(character: AdventurerCardCharacter, locale: Locale) 
 
 export interface CardPreviewFontData {
   character: AdventurerCardCharacter;
+  imageUrl?: string;
   design: {
     typographyPreset: string;
     template?: 'cinematic' | 'editorial' | 'id-card';
     layoutVariant?: 'a' | 'b' | 'c';
   };
+}
+
+/** Fingerprint only the text and face-selection inputs that can change preview font readiness. */
+export function getCardPreviewFontRequestKey(data: CardPreviewFontData, locale: Locale): string {
+  return JSON.stringify([
+    locale,
+    data.design.typographyPreset,
+    data.design.template ?? 'unknown',
+    data.design.layoutVariant ?? 'a',
+    getCardFontRequest(data.character, locale, data.design.template, data.imageUrl),
+  ]);
 }
 
 /** Resolve script faces and wait for their glyphs before a preview/export capture. */
@@ -58,7 +85,7 @@ export async function loadCardPreviewFonts(
   options: { signal?: AbortSignal; timeoutMs?: number; source?: 'preview' | 'export' } = {},
 ): Promise<void> {
   if (typeof document === 'undefined') return;
-  const fontRequest = getCardFontRequest(data.character, locale);
+  const fontRequest = getCardFontRequest(data.character, locale, data.design.template, data.imageUrl);
   const source = options.source ?? 'preview';
   profileCount(`preview.fontLoads.calls.${source}`);
   const finishProfile = profileStart('preview.fontLoads.total', {
@@ -92,6 +119,49 @@ export async function loadCardPreviewFonts(
     );
     const finishReady = profileStart('preview.fonts.ready', { source, locale });
     try {
+      // V3's handwritten captions are real local faces in both preview and export.
+      if (masterFamily) {
+        const handwrittenLoads = data.design.template === 'cinematic'
+          ? [() => {
+            const text = CARD_STOCK_COPY.cinematic[locale].signature.join(' ');
+            return loadProfiledFontFace('400 24px "Pinyon Script"', text, {
+              source,
+              face: 'pinyon-script',
+              script: 'latin',
+              glyphCount: Array.from(text).length,
+            });
+          }]
+          : data.design.template === 'editorial'
+            ? [
+              () => {
+                const text = CARD_STOCK_COPY.editorial[locale].warriorOfLight;
+                return loadProfiledFontFace('400 24px "Pinyon Script"', text, {
+                  source,
+                  face: 'pinyon-script',
+                  script: 'latin',
+                  glyphCount: Array.from(text).length,
+                });
+              },
+              () => {
+                const text = CARD_STOCK_COPY.editorial[locale].story;
+                return loadProfiledFontFace('400 24px "Whisper"', text, {
+                  source,
+                  face: 'whisper',
+                  script: 'latin',
+                  glyphCount: Array.from(text).length,
+                });
+              },
+            ]
+            : [];
+        if (handwrittenLoads.length > 0) {
+          await withCardExportTimeout(
+            () => Promise.all(handwrittenLoads.map((load) => load())),
+            timeoutMs,
+            'font-timeout',
+            options.signal,
+          );
+        }
+      }
       await withCardExportTimeout(
       () => document.fonts.ready,
       timeoutMs,
@@ -122,18 +192,31 @@ export function CardPreview({ data, className, highlightField, locale: localeOve
   const locale = localeOverride ?? contextLocale;
   const { character } = data;
   const typographyPreset = data.design.typographyPreset;
+  const template = data.design.template;
+  const layoutVariant = data.design.layoutVariant;
+  const imageUrl = data.imageUrl;
+  const fontData = useMemo<CardPreviewFontData>(() => ({
+    character,
+    imageUrl,
+    design: { typographyPreset, template, layoutVariant },
+  }), [character, imageUrl, layoutVariant, template, typographyPreset]);
+  const fontRequestKey = useMemo(
+    () => getCardPreviewFontRequestKey(fontData, locale),
+    [fontData, locale],
+  );
+  const fontInputsRef = useRef({ data: fontData, locale });
 
   useEffect(() => {
-    void loadCardPreviewFonts({
-      character,
-      design: {
-        typographyPreset,
-        template: data.design.template,
-        layoutVariant: data.design.layoutVariant,
-      },
-    }, locale, { source: 'preview' })
+    fontInputsRef.current = { data: fontData, locale };
+  }, [fontData, locale]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const fontInputs = fontInputsRef.current;
+    void loadCardPreviewFonts(fontInputs.data, fontInputs.locale, { source: 'preview', signal: controller.signal })
       .catch(() => undefined);
-  }, [character, data.design.layoutVariant, data.design.template, locale, typographyPreset]);
+    return () => controller.abort();
+  }, [fontRequestKey]);
 
   const props = { data, ratio: data.design.ratio, className, highlightField, locale };
 

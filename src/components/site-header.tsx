@@ -35,8 +35,7 @@ export default function SiteHeader({ activePath }: { activePath?: RoutePath }) {
     <header className={styles.header} data-scrolled={scrolled}>
       <div className={styles.headerInner}>
         <Link className={styles.brand} href={ROUTES.home} aria-label={t("header.brand")}>
-          <svg className={styles.brandMark} aria-hidden="true" viewBox="0 0 32 32" width="26" height="26" fill="none"><path d="M16 2.8v26.4M2.8 16h26.4M6.7 6.7l18.6 18.6M25.3 6.7 6.7 25.3" stroke="currentColor" strokeWidth=".75" /><circle cx="16" cy="16" r="3.1" stroke="currentColor" strokeWidth=".75" /></svg>
-          <strong>XIV</strong><span>Adventurer Card</span>
+          <strong>XIV</strong><span>ATELIER</span>
         </Link>
         <nav className={styles.nav} aria-label={t("nav.primary")}>
           <Link href={ROUTES.templates} aria-current={(activePath ?? pathname) === ROUTES.templates ? "page" : undefined}>{t("nav.templates")}</Link>

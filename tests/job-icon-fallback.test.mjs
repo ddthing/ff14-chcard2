@@ -5,7 +5,7 @@ import { register } from 'node:module';
 
 register('./ts-alias-loader.mjs', import.meta.url);
 
-const { isCurrentJobIconRequest, isCurrentJobIconSource, resolveJobIconFallbackMark, shouldRenderJobIconMask } = await import('../src/components/ffxiv/job-icon-fallback.ts');
+const { isCurrentJobIconRequest, isCurrentJobIconSource, resolveJobIconFallbackMark } = await import('../src/components/ffxiv/job-icon-fallback.ts');
 
 test('generic DPS roles fall through to the more specific job category', () => {
   assert.equal(resolveJobIconFallbackMark('dps', 'limited', 'BST'), 'L');
@@ -29,16 +29,12 @@ test('display-size icon fallback uses the canonical abbreviation while small mar
   assert.equal(resolveJobIconFallbackMark('tank', 'tank', null, 'cardDisplay'), 'T');
 });
 
-test('source guards reject stale image events and failed masks stay out until the source changes', () => {
+test('source guards reject stale XIVAPI image events', () => {
   assert.equal(isCurrentJobIconSource('/mask/pld.png', '/mask/pld.png', '/mask/pld.png'), true);
   assert.equal(isCurrentJobIconSource('/mask/pld.png', '/mask/pld.png', ''), true);
   assert.equal(isCurrentJobIconSource('/mask/pld.png', '/mask/drg.png', '/mask/drg.png'), false);
   assert.equal(isCurrentJobIconSource('/mask/pld.png', '/mask/pld.png', '/mask/drg.png'), false);
 
-  assert.equal(shouldRenderJobIconMask('/mask/pld.png', null), true);
-  assert.equal(shouldRenderJobIconMask('/mask/pld.png', '/mask/pld.png'), false);
-  assert.equal(shouldRenderJobIconMask('/mask/drg.png', '/mask/pld.png'), true);
-  assert.equal(shouldRenderJobIconMask(null, null), false);
 });
 
 test('a deferred A decode cannot fail the current A request after an A to B to A switch', async () => {
@@ -67,13 +63,3 @@ test('a deferred A decode cannot fail the current A request after an A to B to A
   assert.match(componentSource, /isCurrentJobIconRequest\(/);
 });
 
-const { resolveAvailableJobIconSource } = await import('../src/components/ffxiv/job-icon-fallback.ts');
-test('derived load failure falls back to the official mask once, then to the role mark', () => {
-  const derived = '/assets/derived/gnb.png';
-  const original = '/assets/official/masks/gnb.png';
-  assert.equal(resolveAvailableJobIconSource(derived, original, []), derived);
-  assert.equal(resolveAvailableJobIconSource(derived, original, [derived]), original);
-  assert.equal(resolveAvailableJobIconSource(derived, original, [derived, original]), null);
-  assert.equal(resolveAvailableJobIconSource(null, null, []), null);
-  assert.equal(resolveAvailableJobIconSource(null, original, [derived]), original);
-});

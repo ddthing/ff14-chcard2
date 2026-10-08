@@ -8,6 +8,7 @@ import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
+import { CARD_STOCK_COPY, CARD_UI_LABELS } from '@/lib/card-copy';
 import type { CardPictogramKind } from '@/lib/card-graphics/pictograms';
 import styles from './identity-master.module.css';
 
@@ -18,36 +19,6 @@ type RecordFact = {
   pictogram: CardPictogramKind;
   ariaLabel?: string;
 };
-
-const COPY = {
-  ko: {
-    masthead: '모험가',
-    mastheadCaption: '기록',
-    job: '직업',
-    origin: '출신과 여정',
-    lineage: '종족 계보',
-    affiliation: '소속',
-    community: '모험가의 기록',
-  },
-  en: {
-    masthead: 'ADVENTURER',
-    mastheadCaption: 'RECORD',
-    job: 'JOB',
-    origin: 'ORIGIN & ROUTE',
-    lineage: 'LINEAGE',
-    affiliation: 'AFFILIATION',
-    community: 'FIELD NOTES',
-  },
-  ja: {
-    masthead: '冒険者',
-    mastheadCaption: '記録',
-    job: 'ジョブ',
-    origin: '出身・旅路',
-    lineage: '種族・部族',
-    affiliation: '所属',
-    community: '冒険者の記録',
-  },
-} as const;
 
 const IDENTITY_MATTE_FIBER = resolveCardMaterial('id-card', 'identity-matte-fiber').src;
 
@@ -71,80 +42,66 @@ function RecordEntry({ label, value, field, pictogram, ariaLabel }: RecordFact) 
   );
 }
 
-function RecordGroup({
-  title,
-  facts,
-  className,
-}: {
-  title: string;
-  facts: RecordFact[];
-  className?: string;
-}) {
+function RecordColumn({ title, facts }: { title: string; facts: RecordFact[] }) {
   const visibleFacts = facts.filter((fact) => nonEmpty(fact.value));
   if (visibleFacts.length === 0) return null;
 
   return (
-    <section className={[styles.recordGroup, className].filter(Boolean).join(' ')} aria-label={title}>
-      <h3 className={styles.groupTitle} data-typography-role="micro" data-master-typography-role="micro">{title}</h3>
-      <div className={styles.recordList}>
-        {visibleFacts.map((fact) => <RecordEntry key={fact.field} {...fact} />)}
-      </div>
-    </section>
+    <div className={styles.recordColumn} role="group" aria-label={title}>
+      {visibleFacts.map((fact) => <RecordEntry key={fact.field} {...fact} />)}
+    </div>
   );
 }
 
 export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
-  const { character, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = COPY[locale];
+  const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
+  const copy = CARD_STOCK_COPY.identity[locale];
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
-  const fitNameTight = nameLayout.category === 'long'
-    || nameLines.length >= 3;
+  const fitNameTight = nameLayout.category === 'long' || nameLines.length >= 3;
   const isCjkName = nameLayout.script === 'korean' || nameLayout.script === 'japanese';
   const jobMotifVisible = data.design.jobMotifVisible !== false;
   const jobGlyphSize = getJobIdentityGlyphLogicalSize(ratio ?? data.design.ratio);
-  const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(ratio ?? data.design.ratio);
+  const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(ratio ?? data.design.ratio, 'identityBadge');
   const hasJob = nonEmpty(labels.job);
   const jobMarkState = getJobIdentityMarkState(jobMotifVisible, hasJob);
-  const bio = character.bio.trim();
-  const showBio = nonEmpty(bio)
-    && Array.from(bio).length <= 120
-    && !(isCjkName && fitNameTight);
+  const bio = localizedBio.trim();
+  const showBio = nonEmpty(bio) && Array.from(bio).length <= 120 && !(isCjkName && fitNameTight);
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
 
   const originFacts: RecordFact[] = [
     { label: ui.world, value: labels.world, field: 'world', pictogram: 'world' },
     { label: ui.dataCenter, value: labels.dataCenter, field: 'dataCenter', pictogram: 'dataCenter' },
-    { label: locale === 'ko' ? '서비스 · 지역' : locale === 'ja' ? 'サービス・地域' : 'SERVICE · REGION', value: microcopy.origin, field: 'origin', pictogram: 'service' },
+    { label: ui.serviceRegion, value: microcopy.origin, field: 'origin', pictogram: 'service' },
   ];
   const lineageFacts: RecordFact[] = [
     { label: ui.race, value: labels.race, field: 'race', pictogram: 'race' },
     { label: ui.clan, value: labels.clan, field: 'clan', pictogram: 'clan' },
+    { label: ui.freeCompany, value: character.freeCompany, field: 'freeCompany', pictogram: 'freeCompany' },
   ];
   const affiliationFacts: RecordFact[] = [
-    { label: ui.freeCompany, value: character.freeCompany, field: 'freeCompany', pictogram: 'freeCompany' },
     { label: ui.grandCompany, value: labels.grandCompany, field: 'grandCompany', pictogram: 'grandCompany' },
-  ];
-  const languageFacts: RecordFact[] = labels.languages.length > 0
-    ? [{
-      label: locale === 'ko' ? '언어' : locale === 'ja' ? '言語' : 'LANGUAGES',
+    {
+      label: CARD_UI_LABELS[locale].languages,
       value: labels.languages.join(' / '),
       field: 'languages',
       pictogram: 'languages',
       ariaLabel: labels.languageNames.join(', '),
-    }]
-    : [];
-  const playStyleFacts: RecordFact[] = labels.playStyles.length > 0
-    ? [{
-      label: locale === 'ko' ? '플레이 스타일' : locale === 'ja' ? 'プレイスタイル' : 'PLAY STYLE',
+    },
+    {
+      label: CARD_UI_LABELS[locale].playStyles,
       value: labels.playStyles.join(' · '),
       field: 'playStyles',
       pictogram: 'playStyles',
-    }]
-    : [];
+    },
+  ];
 
   return (
     <div className={styles.canvas} data-ratio={ratio ?? data.design.ratio} data-locale={locale} lang={locale}>
-      <ArtPhoto data={data} className={styles.photo} />
+      <ArtPhoto data={data} locale={locale} className={styles.photo} />
+      <div className={styles.photoCopy} lang={locale}>
+        <p className={styles.photoQuote}>{copy.photoQuote.map((line) => <span key={line}>{line}</span>)}</p>
+        <p className={styles.photoStamp}>{copy.photoStamp.map((line) => <span key={line}>{line}</span>)}</p>
+      </div>
       <div className={styles.stock} aria-hidden="true">
         <Image
           className={styles.stockMaterial}
@@ -157,7 +114,9 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
           data-material-layer="identity-matte-fiber"
         />
       </div>
-      <PrintFrame family="id-card" />
+      <div className={styles.frame} aria-hidden="true">
+        <PrintFrame family="id-card" />
+      </div>
 
       <header
         className={styles.masthead}
@@ -175,7 +134,6 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
           aria-hidden="true"
           data-material-layer="identity-matte-fiber"
         />
-        <EngravingMark kind="compass" className={styles.ribbonCompass} />
         <svg
           className={styles.ribbonRule}
           viewBox="0 0 100 100"
@@ -191,15 +149,17 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
           <path d="M3 2H97V82L50 94 3 82Z" strokeWidth=".42" />
           <path d="M6 5H94V80L50 90 6 80Z" strokeWidth=".28" opacity=".58" />
         </svg>
-        <span className={styles.mastheadTitle} data-master-typography-role="micro">{copy.masthead}</span>
-        <span className={styles.mastheadNote} data-master-typography-role="caption">{copy.mastheadCaption}</span>
+        <span className={styles.mastheadTitle} data-master-typography-role="micro">{CARD_STOCK_COPY.brand.recordMark}</span>
+        <span className={styles.mastheadNote} data-master-typography-role="caption">
+          {copy.banner.map((word) => <span key={word}>{word}</span>)}
+        </span>
+        <span className={styles.mastheadLocation} data-master-typography-role="micro">{copy.location}</span>
       </header>
-      <span className={styles.unofficialNote} data-master-typography-role="micro">{ui.unofficial}</span>
 
       <EngravingMark kind="divider" className={styles.seamDivider} />
 
-      <section className={styles.paper} aria-label={copy.masthead}>
-        <section className={styles.heroIdentity} aria-label={copy.job}>
+      <section className={styles.paper} aria-label={copy.record}>
+        <section className={styles.heroIdentity} aria-label={copy.masthead}>
           <div className={styles.nameBlock}>
             {nonEmpty(nameLayout.normalizedName) && (
               <OpticalName
@@ -257,20 +217,9 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
         </section>
 
         <div className={styles.records}>
-          <RecordGroup title={copy.origin} facts={originFacts} className={styles.originGroup} />
-
-          {(lineageFacts.some((fact) => nonEmpty(fact.value)) || affiliationFacts.some((fact) => nonEmpty(fact.value))) && (
-            <div className={styles.associations}>
-              <RecordGroup title={copy.lineage} facts={lineageFacts} className={styles.lineageGroup} />
-              <RecordGroup title={copy.affiliation} facts={affiliationFacts} className={styles.affiliationGroup} />
-            </div>
-          )}
-
-          <RecordGroup
-            title={copy.community}
-            facts={[...languageFacts, ...playStyleFacts]}
-            className={styles.personalNotes}
-          />
+          <RecordColumn title={copy.origin} facts={originFacts} />
+          <RecordColumn title={copy.lineage} facts={lineageFacts} />
+          <RecordColumn title={copy.affiliation} facts={affiliationFacts} />
         </div>
       </section>
     </div>

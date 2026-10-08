@@ -1,4 +1,4 @@
-import { profileCount, profileTiming } from '@/lib/performance-profile';
+import { profileCount, profileStart, profileTiming } from '@/lib/performance-profile';
 
 type UnicodeRange = readonly [start: number, end: number];
 
@@ -20,6 +20,48 @@ export interface PreparedCardFontCss {
 
 const MAX_INLINED_FONT_BYTES = 24 * 1024 * 1024;
 const FONT_FETCH_CONCURRENCY = 4;
+const FONT_DATA_URL_CACHE_MAX_BYTES = 8 * 1024 * 1024;
+const fontDataUrlCache = new Map<string, { dataUrl: string; bytes: number }>();
+let fontDataUrlCacheBytes = 0;
+
+function getCachedFontDataUrl(url: string): { dataUrl: string; bytes: number } | undefined {
+  const cached = fontDataUrlCache.get(url);
+  if (!cached) {
+    profileCount('export.fontCss.resourceCache.miss');
+    return undefined;
+  }
+  fontDataUrlCache.delete(url);
+  fontDataUrlCache.set(url, cached);
+  profileCount('export.fontCss.resourceCache.hit');
+  return cached;
+}
+
+function cacheFontDataUrl(url: string, resource: { dataUrl: string; bytes: number }): void {
+  if (resource.bytes > FONT_DATA_URL_CACHE_MAX_BYTES) return;
+
+  const previous = fontDataUrlCache.get(url);
+  if (previous) {
+    fontDataUrlCacheBytes -= previous.bytes;
+    fontDataUrlCache.delete(url);
+  }
+  while (fontDataUrlCache.size && fontDataUrlCacheBytes + resource.bytes > FONT_DATA_URL_CACHE_MAX_BYTES) {
+    const oldestUrl = fontDataUrlCache.keys().next().value;
+    if (oldestUrl === undefined) break;
+    const oldest = fontDataUrlCache.get(oldestUrl);
+    fontDataUrlCache.delete(oldestUrl);
+    if (oldest) fontDataUrlCacheBytes -= oldest.bytes;
+    profileCount('export.fontCss.resourceCache.evicted');
+  }
+
+  fontDataUrlCache.set(url, resource);
+  fontDataUrlCacheBytes += resource.bytes;
+  profileCount('export.fontCss.resourceCache.stored');
+}
+
+function responseHasImmutableCacheControl(response: Response): boolean {
+  const cacheControl = response.headers?.get('cache-control') ?? '';
+  return /(?:^|,)\s*immutable\s*(?:,|$)/iu.test(cacheControl);
+}
 
 function cssWhitespace(character: string | undefined): boolean {
   return character !== undefined && /[\t\n\f\r ]/u.test(character);
@@ -460,6 +502,13 @@ async function fetchFontData(
       next += 1;
       if (index >= urls.length) return;
       const url = urls[index];
+      const cached = getCachedFontDataUrl(url);
+      if (cached) {
+        totalBytes += cached.bytes;
+        if (totalBytes > MAX_INLINED_FONT_BYTES) throw new Error('Font resource budget exceeded');
+        results.set(url, cached);
+        continue;
+      }
       const response = await fetch(url, { signal, cache: 'force-cache', credentials: 'same-origin' });
       if (!response.ok) throw new Error('Font resource request failed');
       const bytes = await response.arrayBuffer();
@@ -469,7 +518,9 @@ async function fetchFontData(
       }
       totalBytes += bytes.byteLength;
       if (totalBytes > MAX_INLINED_FONT_BYTES) throw new Error('Font resource budget exceeded');
-      results.set(url, { dataUrl: buildDataUrl(bytes), bytes: bytes.byteLength });
+      const resource = { dataUrl: buildDataUrl(bytes), bytes: bytes.byteLength };
+      results.set(url, resource);
+      if (responseHasImmutableCacheControl(response)) cacheFontDataUrl(url, resource);
     }
   };
 
@@ -542,35 +593,52 @@ export async function prepareCardFontCss(
 
   try {
     abortIfNeeded(options.signal);
-    const rendered = collectRenderedGlyphs(node);
+    const finishGlyphScanTiming = profileStart('export.fontCss.glyphScan');
+    let rendered: ReturnType<typeof collectRenderedGlyphs>;
+    try {
+      rendered = collectRenderedGlyphs(node);
+    } finally {
+      finishGlyphScanTiming();
+    }
     if (!rendered) return null;
     const { glyphs, families } = rendered;
     glyphCount = glyphs.size;
 
-    const faces = collectFontFaces(node.ownerDocument);
+    const finishRuleScanTiming = profileStart('export.fontCss.ruleScan');
+    let faces: FontFaceRule[] | null;
+    try {
+      faces = collectFontFaces(node.ownerDocument);
+    } finally {
+      finishRuleScanTiming();
+    }
     if (!faces) return null;
     consideredFaceCount = faces.length;
 
     const selected: Array<{ rule: FontFaceRule; sources: SourceItem[] }> = [];
-    for (const rule of faces) {
-      abortIfNeeded(options.signal);
-      const familyValue = rule.style.getPropertyValue('font-family');
-      const faceFamilies = familyValue ? parseFamilyList(familyValue) : null;
-      if (!faceFamilies) return null;
-      if (!faceFamilies.some((family) => families.has(family))) continue;
+    const finishFaceSelectionTiming = profileStart('export.fontCss.faceSelection', { consideredFaceCount });
+    try {
+      for (const rule of faces) {
+        abortIfNeeded(options.signal);
+        const familyValue = rule.style.getPropertyValue('font-family');
+        const faceFamilies = familyValue ? parseFamilyList(familyValue) : null;
+        if (!faceFamilies) return null;
+        if (!faceFamilies.some((family) => families.has(family))) continue;
 
-      const unicodeRange = rule.style.getPropertyValue('unicode-range').trim();
-      if (unicodeRange) {
-        const matchesText = faceUnicodeRangeMatches(unicodeRange, glyphs);
-        if (matchesText === null) return null;
-        if (!matchesText) continue;
+        const unicodeRange = rule.style.getPropertyValue('unicode-range').trim();
+        if (unicodeRange) {
+          const matchesText = faceUnicodeRangeMatches(unicodeRange, glyphs);
+          if (matchesText === null) return null;
+          if (!matchesText) continue;
+        }
+
+        const src = rule.style.getPropertyValue('src');
+        const sources = src ? parseCssFontSourceList(src) : null;
+        if (!sources) return null;
+        if (!sources.some((source) => source.kind === 'woff2' || source.kind === 'local')) return null;
+        selected.push({ rule, sources: sources.filter((source) => source.kind !== 'other-url') });
       }
-
-      const src = rule.style.getPropertyValue('src');
-      const sources = src ? parseCssFontSourceList(src) : null;
-      if (!sources) return null;
-      if (!sources.some((source) => source.kind === 'woff2' || source.kind === 'local')) return null;
-      selected.push({ rule, sources: sources.filter((source) => source.kind !== 'other-url') });
+    } finally {
+      finishFaceSelectionTiming();
     }
 
     selectedFaceCount = selected.length;
@@ -589,41 +657,51 @@ export async function prepareCardFontCss(
 
     const uniqueUrls = Array.from(uniqueUrlSet);
     uniqueFontResourceCount = uniqueUrls.length;
-    const resources = uniqueUrls.length ? await fetchFontData(uniqueUrls, fetchController.signal) : new Map();
+    const finishResourceTiming = profileStart('export.fontCss.resourceLoad', { uniqueFontResourceCount });
+    let resources: Map<string, { dataUrl: string; bytes: number }>;
+    try {
+      resources = uniqueUrls.length ? await fetchFontData(uniqueUrls, fetchController.signal) : new Map();
+    } finally {
+      finishResourceTiming();
+    }
     abortIfNeeded(options.signal);
 
-    const cssRules: string[] = [];
-    for (const face of selected) {
-      const outputSources: string[] = [];
-      for (const source of face.sources) {
-        if (source.kind === 'local') {
-          outputSources.push(source.cssText);
-          continue;
-        }
-        if (source.kind !== 'woff2') continue;
+    const finishSerializationTiming = profileStart('export.fontCss.serialize', { selectedFaceCount });
+    let cssText: string;
+    try {
+      const cssRules: string[] = [];
+      for (const face of selected) {
+        const outputSources: string[] = [];
+        for (const source of face.sources) {
+          if (source.kind === 'local') {
+            outputSources.push(source.cssText);
+            continue;
+          }
+          if (source.kind !== 'woff2') continue;
 
-        if (source.url.startsWith('data:')) {
+          if (source.url.startsWith('data:')) {
+            const format = source.format ? ` format("${source.format}")` : '';
+            outputSources.push(`url("${source.url}")${format}`);
+            continue;
+          }
+
+          const resource = source.resolvedUrl ? resources.get(source.resolvedUrl) : undefined;
+          if (!resource) return null;
+          source.dataUrl = resource.dataUrl;
+          source.bytes = resource.bytes;
+          inlinedBytes += resource.bytes;
           const format = source.format ? ` format("${source.format}")` : '';
-          outputSources.push(`url("${source.url}")${format}`);
-          continue;
+          outputSources.push(`url("${resource.dataUrl}")${format}`);
         }
-
-        const resource = source.resolvedUrl ? resources.get(source.resolvedUrl) : undefined;
-        if (!resource) return null;
-        source.dataUrl = resource.dataUrl;
-        source.bytes = resource.bytes;
-        inlinedBytes += resource.bytes;
-        const format = source.format ? ` format("${source.format}")` : '';
-        outputSources.push(`url("${resource.dataUrl}")${format}`);
+        if (!outputSources.length) return null;
+        const serialized = serializeFaceWithSource(face.rule, outputSources.join(', '));
+        if (!serialized) return null;
+        cssRules.push(serialized);
       }
-
-      if (!outputSources.length) return null;
-      const serialized = serializeFaceWithSource(face.rule, outputSources.join(', '));
-      if (!serialized) return null;
-      cssRules.push(serialized);
+      cssText = cssRules.join('\n');
+    } finally {
+      finishSerializationTiming();
     }
-
-    const cssText = cssRules.join('\n');
     if (!cssText) return null;
     cssLength = cssText.length;
     prepared = true;

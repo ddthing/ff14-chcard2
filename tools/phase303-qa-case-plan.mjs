@@ -18,7 +18,7 @@ const sourceClassByJob = {
   gunbreaker: "xivapi-svg",
   "white-mage": "xivapi-svg",
   "black-mage": "xivapi-svg",
-  astrologian: "fan-kit",
+  astrologian: "xivapi-raster",
   reaper: "xivapi-raster",
   beastmaster: "generic-fallback",
 };

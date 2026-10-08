@@ -42,6 +42,9 @@ const STYLESHEET_LOADERS: Readonly<Record<TypographyStylesheetId, StylesheetLoad
 };
 
 const stylesheetPromises = new Map<TypographyStylesheetId, Promise<void>>();
+const FONT_FACE_CACHE_LIMIT = 96;
+const FONT_FACE_CACHE_MAX_KEY_LENGTH = 4096;
+const fontFaceLoadCache = new WeakMap<FontFaceSet, Map<string, Promise<FontFace[]>>>();
 
 function importStylesheet(id: TypographyStylesheetId): Promise<void> {
   const current = stylesheetPromises.get(id);
@@ -236,7 +239,39 @@ export function loadProfiledFontFace(
   profileCount('fonts.faceset.load.calls');
   const finishTiming = profileStart('fonts.faceset.load', profileDetails);
   try {
-    return document.fonts.load(font, glyphs).finally(finishTiming);
+    const fontSet = document.fonts;
+    const canCache = font.length + 1 + glyphs.length <= FONT_FACE_CACHE_MAX_KEY_LENGTH;
+    const cacheKey = canCache ? `${font}\u0000${glyphs}` : '';
+    let cache = canCache ? fontFaceLoadCache.get(fontSet) : undefined;
+    if (canCache && cache) {
+      const cached = cache.get(cacheKey);
+      if (cached) {
+        profileCount('fonts.faceset.cache.hit');
+        cache.delete(cacheKey);
+        cache.set(cacheKey, cached);
+        return cached.finally(finishTiming);
+      }
+    }
+
+    profileCount(canCache ? 'fonts.faceset.cache.miss' : 'fonts.faceset.cache.bypass');
+    const request = fontSet.load(font, glyphs);
+    if (!canCache) return request.finally(finishTiming);
+
+    cache ??= new Map<string, Promise<FontFace[]>>();
+    if (!fontFaceLoadCache.has(fontSet)) fontFaceLoadCache.set(fontSet, cache);
+    const pending = request.then((faces) => {
+      if (faces.length === 0 && cache?.get(cacheKey) === pending) cache.delete(cacheKey);
+      return faces;
+    }, (error: unknown) => {
+      if (cache?.get(cacheKey) === pending) cache.delete(cacheKey);
+      throw error;
+    });
+    if (cache.size >= FONT_FACE_CACHE_LIMIT) {
+      cache.delete(cache.keys().next().value!);
+      profileCount('fonts.faceset.cache.eviction');
+    }
+    cache.set(cacheKey, pending);
+    return pending.finally(finishTiming);
   } catch (error) {
     finishTiming();
     throw error;

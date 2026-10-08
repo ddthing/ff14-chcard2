@@ -4,11 +4,12 @@ import { register } from 'node:module';
 
 register('./ts-alias-loader.mjs', import.meta.url);
 
-const { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER, MASTER_DESIGN_VERSION, masterFieldProps } = await import('../src/lib/master-card-config.ts');
+const { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER, MASTER_DESIGN_VERSION, MASTER_VISUAL_VERSION, masterFieldProps } = await import('../src/lib/master-card-config.ts');
 const { MASTER_ART_TOKENS } = await import('../src/lib/card-art-tokens.ts');
 
 test('the picker exposes exactly the three locked Master A directions', () => {
   assert.equal(MASTER_DESIGN_VERSION, '2.6.4');
+  assert.equal(MASTER_VISUAL_VERSION, '3.0.0');
   assert.deepEqual(MASTER_TEMPLATE_ORDER.map(family => [MASTER_CARD_CONFIG[family].id, MASTER_CARD_CONFIG[family].direction, MASTER_CARD_CONFIG[family].layout]), [
     ['cinematic-master', 'c2', 'a'], ['editorial-master', 'e2', 'a'], ['identity-master', 'i3', 'a'],
   ]);

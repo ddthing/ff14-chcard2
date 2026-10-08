@@ -4,7 +4,7 @@ import { evidenceTests } from './qa-evidence-gate.mjs';
 import {readFile} from 'node:fs/promises';
 import sharp from 'sharp';
 import {CARD_NAME_ENVELOPES,fitOpticalName} from '../src/lib/card-name-envelope.ts';
-import {getEditorialPaperShape} from '../src/lib/card-graphics/editorial-shape.ts';
+import {getEditorialBrushShape} from '../src/lib/card-graphics/editorial-shape.ts';
 const evidenceTest=evidenceTests(test,'expressive-precision');
 
 test('optical envelopes have script caps and measured dense glyphs shrink without changing the stored name',()=>{
@@ -18,15 +18,16 @@ test('optical envelopes have script caps and measured dense glyphs shrink withou
  }
 });
 
-test('Editorial silhouettes use distinct few-gesture cubic paths instead of serrated polygons',()=>{
- const paths=new Set();
+test('Editorial ratios reuse the authored dry-brush silhouette and select a readable card composition',()=>{
+ const ids=new Set();
  for(const ratio of ['1:1','4:5','3:4','9:16','16:9']){
-  const shape=getEditorialPaperShape(ratio);paths.add(shape.path);
-  assert.match(shape.path,/^M /);assert.match(shape.path,/Z$/);
-  const gestures=(shape.path.match(/C /g)||[]).length;assert.ok(gestures>=2&&gestures<=5);
-  assert.doesNotMatch(shape.path,/NaN|Infinity|polygon|filter|http/);
+  const shape=getEditorialBrushShape(ratio);ids.add(shape.id);
+  assert.match(shape.inkOutline,/^\/assets\/card-materials\/v3\/.+\.svg$/);
+  assert.ok(['side-panel','stacked'].includes(shape.composition));
  }
- assert.equal(paths.size,5);
+ assert.equal(ids.size,5);
+ assert.equal(getEditorialBrushShape('9:16').composition,'stacked');
+ assert.equal(new Set(['1:1','4:5','3:4','9:16','16:9'].map(ratio=>getEditorialBrushShape(ratio).inkOutline)).size,1);
 });
 
 async function evidence(stem){return JSON.parse(await readFile(new URL(`../docs/qa/expressive-precision/exports/${stem}.json`,import.meta.url),'utf8'));}

@@ -8,8 +8,14 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-## APP UI / EDITOR CORE V1 — FROZEN
+## APP UI / CARD DESIGN V3 — IMPLEMENTATION CONTRACT
 
-Phase 2.17.1 closes the Editor UI baseline. Follow `docs/design/APP_UI_EDITOR_CORE_V1_FROZEN.md`.
-Do not redesign or cosmetically iterate on Editor UI. Change it only for a user-requested new feature or a clear, reproducible bug, preserving the Card/renderer/icon/store and accessibility boundaries.
-Home/marketing work is outside this Editor freeze; shared shell changes must preserve the frozen Editor branch.
+The user's 2026-10-08 request explicitly authorizes the V3 UI/UX and card redesign.
+Read `docs/design/v3/README.md`, then its master specification, design tokens,
+screen prompts, and QA/repair guide before changing visual design.
+Use the linked live Figma frames together with these documents. Preserve the
+CardPreview/renderer/export, XIVAPI original icon, store/history/persistence,
+localization, appearance preference, and accessibility boundaries.
+`docs/design/APP_UI_EDITOR_CORE_V1_FROZEN.md` remains the historical V1 baseline;
+its source hashes are not the acceptance criteria for this authorized V3 redesign.
+Future cosmetic changes need a user request or a reproducible in-scope defect.

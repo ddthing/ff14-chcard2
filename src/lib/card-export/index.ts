@@ -225,32 +225,30 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
   const signal = options.signal;
   profileCount('export.assets.wait.calls');
   const finishTotalTiming = profileStart('export.assets.wait.total');
+  const readinessController = new AbortController();
+  const abortReadiness = () => readinessController.abort();
+  signal?.addEventListener('abort', abortReadiness, { once: true });
+  if (signal?.aborted) readinessController.abort();
   try {
     if (typeof document === 'undefined' || !document.fonts) {
       throw new CardExportError('font-load-failed');
     }
 
-    {
-      const fontSet = document.fonts;
-      if (typeof fontSet.ready?.then !== 'function') {
-        throw new CardExportError('font-load-failed');
-      }
-      profileCount('export.assets.fonts.ready.calls');
-      const finishFontTiming = profileStart('export.assets.fonts.ready');
-      try {
-        await withCardExportTimeout(
-          () => fontSet.ready,
-          options.fontTimeoutMs ?? CARD_EXPORT_FONT_TIMEOUT_MS,
-          'font-timeout',
-          signal,
-        );
-      } catch (error) {
-        if (error instanceof CardExportError) throw error;
-        throw new CardExportError('font-load-failed');
-      } finally {
-        finishFontTiming();
-      }
+    const fontSet = document.fonts;
+    if (typeof fontSet.ready?.then !== 'function') {
+      throw new CardExportError('font-load-failed');
     }
+    profileCount('export.assets.fonts.ready.calls');
+    const finishFontTiming = profileStart('export.assets.fonts.ready');
+    const fontsReady = withCardExportTimeout(
+      () => fontSet.ready,
+      options.fontTimeoutMs ?? CARD_EXPORT_FONT_TIMEOUT_MS,
+      'font-timeout',
+      readinessController.signal,
+    ).catch((error: unknown) => {
+      if (error instanceof CardExportError) throw error;
+      throw new CardExportError('font-load-failed');
+    }).finally(finishFontTiming);
 
     const maxStablePasses = 4;
     for (let pass = 0; pass < maxStablePasses; pass += 1) {
@@ -259,11 +257,20 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
       profileCount('export.assets.images.count', imageCount);
       const finishImagesTiming = profileStart('export.assets.images.decode', { imageCount });
       try {
-        await waitForCurrentCardImages(
+        const imagesReady = waitForCurrentCardImages(
           node,
           options.imageTimeoutMs ?? CARD_EXPORT_IMAGE_TIMEOUT_MS,
-          signal,
+          readinessController.signal,
         );
+        try {
+          // Font fetching and image decoding have no dependency on each other.
+          // Start both together so a slow CJK font shard does not hold up the
+          // material/photo decodes the renderer needs next.
+          await Promise.all([fontsReady, imagesReady]);
+        } catch (error) {
+          readinessController.abort();
+          throw error;
+        }
       } finally {
         finishImagesTiming();
       }
@@ -288,6 +295,8 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
     }
     throw new CardExportError('image-failed');
   } finally {
+    signal?.removeEventListener('abort', abortReadiness);
+    readinessController.abort();
     finishTotalTiming();
   }
 }
@@ -480,33 +489,51 @@ async function waitForImage(image: HTMLImageElement, timeoutMs: number, signal?:
 
 async function waitForOpticalNames(node: HTMLElement, timeoutMs: number, signal?: AbortSignal): Promise<void> {
   const names = Array.from(node.querySelectorAll<HTMLElement>('[data-optical-name]'));
-  await Promise.all(names.map((name) => waitForPredicate(
-    () => name.dataset.opticalReady === 'true',
+  if (!names.length) return;
+
+  const Observer = node.ownerDocument?.defaultView?.MutationObserver
+    ?? (typeof MutationObserver === 'function' ? MutationObserver : undefined);
+  await waitForPredicate(
+    () => names.every((name) => name.dataset.opticalReady === 'true'),
     timeoutMs,
     'optical-timeout',
     signal,
-  )));
+    Observer ? (check) => {
+      const observer = new Observer(() => check());
+      observer.observe(node, {
+        attributes: true,
+        attributeFilter: ['data-optical-ready'],
+        subtree: true,
+      });
+      return () => observer.disconnect();
+    } : undefined,
+  );
 }
+
+type PredicateSubscription = (check: () => void) => () => void;
 
 function waitForPredicate(
   predicate: () => boolean,
   timeoutMs: number,
   timeoutCode: CardExportErrorCode,
   signal?: AbortSignal,
+  subscribe?: PredicateSubscription,
 ): Promise<void> {
   if (predicate()) return Promise.resolve();
   if (signal?.aborted) return Promise.reject(new CardExportError('cancelled'));
 
   return new Promise<void>((resolve, reject) => {
     let settled = false;
-    const interval = setInterval(check, 32);
+    let interval: ReturnType<typeof setInterval> | undefined;
+    let unsubscribe: (() => void) | undefined;
     const timeout = setTimeout(() => finish(new CardExportError(timeoutCode)), timeoutMs);
     const onAbort = () => finish(new CardExportError('cancelled'));
     const finish = (error?: CardExportError) => {
       if (settled) return;
       settled = true;
-      clearInterval(interval);
+      if (interval !== undefined) clearInterval(interval);
       clearTimeout(timeout);
+      unsubscribe?.();
       signal?.removeEventListener('abort', onAbort);
       if (error) reject(error);
       else resolve();
@@ -521,8 +548,37 @@ function waitForPredicate(
 
     signal?.addEventListener('abort', onAbort, { once: true });
     if (signal?.aborted) onAbort();
-    else check();
+    else {
+      if (subscribe) {
+        try {
+          unsubscribe = subscribe(check);
+        } catch {
+          interval = setInterval(check, 32);
+        }
+      } else {
+        interval = setInterval(check, 32);
+      }
+      check();
+    }
   });
+}
+
+type CardExportRenderer = typeof import('modern-screenshot');
+type CardExportRendererImport =
+  | { ok: true; renderer: CardExportRenderer }
+  | { ok: false; error: unknown };
+
+function startCardExportRendererImport(): { promise: Promise<CardExportRendererImport> } {
+  const startedAt = performance.now();
+  profileCount('export.renderer.import.calls');
+  const promise = import('modern-screenshot').then(
+    (renderer): CardExportRendererImport => ({ ok: true, renderer }),
+    (error: unknown): CardExportRendererImport => ({ ok: false, error }),
+  ).then((result) => {
+    profileTiming('export.renderer.import', performance.now() - startedAt, { overlappedReadiness: true });
+    return result;
+  });
+  return { promise };
 }
 
 export async function renderCardBlob(
@@ -538,25 +594,27 @@ export async function renderCardBlob(
   profileCount('export.renderer.calls');
 
   onProgress({ stage: 'fonts', progress: 0.08 });
+  const rendererImport = startCardExportRendererImport();
   await waitForCardAssets(node, { signal: options.signal });
   onProgress({ stage: 'image', progress: 0.2 });
   assertCardExportCanvasAvailable(node);
 
-  let renderer: typeof import('modern-screenshot');
-  const finishRendererImportTiming = profileStart('export.renderer.import');
+  let renderer: CardExportRenderer;
+  const finishRendererWaitTiming = profileStart('export.renderer.import.wait');
   try {
-    profileCount('export.renderer.import.calls');
-    renderer = await withCardExportTimeout(
-      () => import('modern-screenshot'),
+    const result = await withCardExportTimeout(
+      () => rendererImport.promise,
       CARD_EXPORT_RENDERER_LOAD_TIMEOUT_MS,
       'renderer-timeout',
       options.signal,
     );
+    if (!result.ok) throw new CardExportError('renderer-load-failed');
+    renderer = result.renderer;
   } catch (error) {
     if (error instanceof CardExportError) throw error;
     throw new CardExportError('renderer-load-failed');
   } finally {
-    finishRendererImportTiming();
+    finishRendererWaitTiming();
   }
 
   let blob: Blob;
@@ -600,6 +658,7 @@ export async function renderCardBlob(
         type: format === 'webp' ? 'image/webp' : 'image/png',
         quality: format === 'webp' ? 0.94 : undefined,
         filter: (element) => element.nodeType !== 1 || (element as Element).getAttribute('data-material-preload') !== 'true',
+        onCloneEachNode: preserveCardLocalSvgClip,
         maximumCanvasSize: CARD_EXPORT_MAX_EDGE,
         timeout: CARD_EXPORT_RENDERER_TIMEOUT_MS,
         font,
@@ -739,6 +798,16 @@ export function sanitizeCardExportName(name: string): string {
   return bounded.join('').replace(/[\s.-]+$/gu, '') || 'adventurer-card';
 }
 
+/** Keep instance-local SVG defs local when computed styles are serialized. */
+export function preserveCardLocalSvgClip(cloned: Node): void {
+  if (cloned.nodeType !== 1) return;
+  const element = cloned as HTMLElement;
+  const id = element.getAttribute('data-card-local-clip');
+  if (!id || !/^[A-Za-z0-9_-]+$/.test(id) || !element.style) return;
+  element.style.setProperty('clip-path', `url("#${id}")`);
+  element.style.setProperty('-webkit-clip-path', `url("#${id}")`);
+}
+
 export function getCardExportFilename(
   name: string,
   ratio: CardRatio,
@@ -746,7 +815,8 @@ export function getCardExportFilename(
   format: CardExportFormat,
 ): string {
   const safeName = sanitizeCardExportName(name);
-  return `${safeName}-${ratio.replace(':', 'x')}-${scale}x.${format}`;
+  const capLabel = getCardExportSize(ratio, scale).capped ? '-capped' : '';
+  return `${safeName}-${ratio.replace(':', 'x')}-${scale}x${capLabel}.${format}`;
 }
 
 export function downloadCardBlob(blob: Blob, data: AdventurerCardData, format: CardExportFormat, scale: CardExportScale): void {

@@ -15,6 +15,10 @@
   color-scheme: dark;
 }
 
+.appShell :is(button, a, input, select, textarea, summary):focus-visible {
+  outline-color: var(--app-focus);
+}
+
 .appHeader {
   position: sticky;
   z-index: 60;
@@ -153,8 +157,8 @@
 
 .appearanceTrigger {
   display: grid;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   place-items: center;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -203,7 +207,7 @@
 
 .appearanceOption {
   display: flex;
-  min-height: 2.25rem;
+  min-height: 44px;
   align-items: center;
   gap: 8px;
   border-radius: 4px;
@@ -238,8 +242,8 @@
 
 .languageButton {
   display: inline-grid;
-  min-width: 32px;
-  min-height: 32px;
+  min-width: 44px;
+  min-height: 44px;
   place-items: center;
   border: 1px solid transparent;
   border-radius: 4px;
@@ -268,7 +272,7 @@
 .languageSelect {
   display: none;
   min-width: 2.75rem;
-  height: 32px;
+  height: 44px;
   border: 1px solid var(--app-border);
   border-radius: 4px;
   padding-inline: 4px;
@@ -312,7 +316,22 @@
   white-space: nowrap;
 }
 
+.backArrow { font-size: 24px; font-weight: 400; }
+.brand { min-width: 44px; min-height: 44px; justify-content: center; }
+.editorName { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--font-display); font-size: 24px; }
+.headerExport { flex: 0 0 auto; min-height: 44px; border: 0; border-radius: 6px; padding: 0 20px; background: var(--app-accent); color: var(--app-on-accent); font-size: 13px; font-weight: 600; cursor: pointer; }
+.mobileSettings { display: none; position: relative; }
+.mobileSettings summary { display: grid; width: 44px; height: 44px; place-items: center; cursor: pointer; list-style: none; font-size: 16px; }
+.mobileSettings summary::-webkit-details-marker { display: none; }
+.settingsContent { position: absolute; right: 0; top: calc(100% + 8px); display: flex; align-items: center; gap: 12px; padding: 12px; border: 1px solid var(--app-border-strong); border-radius: 12px; background: var(--app-surface-raised); box-shadow: var(--app-shadow-overlay); }
+.settingsContent .languageSelect { display: block; }
+
 @media (max-width: 640px) {
+  .desktopAppearance, .actionDivider, .headerDivider { display: none; }
+  .mobileSettings { display: block; }
+  .headerExport { padding-inline: 16px; }
+  .editorName { font-size: 22px; }
+  .saveStatus { font-size: 10px; gap: 4px; }
   .appHeader {
     gap: 6px;
   }
@@ -392,3 +411,53 @@
     outline-color: Highlight;
   }
 }
+
+/* Contemporary atelier header: document context, quiet status, one primary action. */
+.appHeader { border-bottom-color: color-mix(in srgb, var(--app-border) 62%, transparent); padding-inline: clamp(12px, 2vw, 28px); background: var(--app-surface); gap: 16px; }
+.headerLeft { gap: 20px; }
+.brand { min-width: 56px; min-height: 44px; padding: 4px 0; color: var(--app-text); }
+.brandMark { display: none; }
+.brandWordmark { display: grid; justify-items: center; line-height: 1; gap: 3px; }
+.brandWordmark strong { font-family: var(--font-display-latin); font-size: 26px; font-weight: 500; color: var(--app-accent); }
+.brandWordmark small { font-family: var(--font-ui); font-size: 8px; font-weight: 750; letter-spacing: .17em; }
+.headerDivider { width: 1px; height: 28px; background: var(--app-border); }
+.documentIdentity { display: grid; min-width: 0; gap: 2px; }
+.documentLabel { color: var(--app-text-muted); font-size: 10px; font-weight: 550; line-height: 1.3; }
+.editorName, .sectionLabel { min-width: 0; color: var(--app-text); font-family: var(--font-ui); font-size: 16px; font-weight: 650; line-height: 1.4; letter-spacing: -.02em; }
+.headerRight { gap: 12px; }
+.actionDivider { display: none; }
+.saveStatus { font-size: 11px; gap: 7px; }
+.saveStatus[data-status='saved'] .saveStatusDot { background: var(--app-success); }
+.desktopLanguage { display: block; min-width: 96px; min-height: 44px; border: 1px solid transparent; border-radius: 10px; padding: 0 10px; background: var(--app-control); color: var(--app-text); font-family: var(--font-ui); font-size: 12px; cursor: pointer; }
+.desktopLanguage:hover { border-color: var(--app-border); }
+.desktopLanguage:focus-visible { outline: 2px solid var(--app-focus); outline-offset: 2px; }
+.appearanceTrigger { border-radius: 12px; color: var(--app-text); }
+.headerExport { display: inline-flex; align-items: center; justify-content: center; gap: 12px; min-height: 44px; padding-inline: 20px; border-radius: 12px; font-size: 13px; font-weight: 650; box-shadow: 0 3px 8px color-mix(in srgb, var(--app-accent) 14%, transparent); transition: transform var(--motion-fast), box-shadow var(--motion-fast); }
+.headerExport:hover { transform: translateY(-1px); box-shadow: 0 5px 12px color-mix(in srgb, var(--app-accent) 22%, transparent); }
+.mobileSettings summary { border-radius: 12px; background: var(--app-control); color: var(--app-text); }
+.settingsContent { min-width: 174px; border-color: var(--app-border); border-radius: 16px; padding: 10px; }
+.settingsContent .languageSelect { min-width: 104px; border: 0; border-radius: 10px; color: var(--app-text); font-family: var(--font-ui); font-size: 12px; }
+@media (max-width: 640px) {
+  .appHeader { padding-inline: 12px; gap: 8px; }
+  .headerLeft { gap: 8px; }
+  .brand { min-width: 44px; width: 44px; flex: 0 0 44px; border-radius: 12px; background: var(--app-control); }
+  .brandMark { display: grid; width: 44px; height: 44px; color: var(--app-text); }
+  .brandWordmark, .desktopLanguage { display: none; }
+  .backArrow { font-size: 22px; line-height: 1; }
+  .documentLabel { font-size: 10px; }
+  .editorName, .sectionLabel { font-size: 15px; }
+  .headerRight { gap: 6px; }
+  .headerExport { padding-inline: 14px; gap: 0; font-size: 12px; }
+  .headerExport svg { display: none; }
+  .saveStatus { flex: 0 0 auto; padding: 0; }
+  .saveStatus > span:last-child { display: none; }
+  .saveStatusDot { width: 6px; height: 6px; }
+}
+@media (max-width: 360px) {
+  .appHeader { padding-inline: 8px; gap: 6px; }
+  .headerLeft { gap: 6px; }
+  .headerRight { gap: 4px; }
+  .headerExport { padding-inline: 12px; }
+}
+@media (prefers-reduced-motion: reduce) { .headerExport { transition: none; } .headerExport:hover { transform: none; } }
+@media (forced-colors: active) { .desktopLanguage, .headerExport { border: 1px solid ButtonText; } }

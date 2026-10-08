@@ -3,7 +3,13 @@ import test from 'node:test';
 import { register } from 'node:module';
 
 register('./ts-alias-loader.mjs', import.meta.url);
-const [{ demoAdventurerData }, { normalizeCardData }, { editorStore }, { getSampleConfirmationFocusTarget, hasNonSampleDraft }] = await Promise.all([
+const [{ demoAdventurerData }, { normalizeCardData }, { editorStore }, {
+  getSampleConfirmationFocusTarget,
+  getUploadConfirmationFocusTarget,
+  getTemplatePhotoPath,
+  parseTemplateChoice,
+  hasNonSampleDraft,
+}] = await Promise.all([
   import('../src/components/cards/types.ts'),
   import('../src/store/editor-persistence.ts'),
   import('../src/store/editor-store.ts'),
@@ -36,4 +42,25 @@ test('sample replacement focus opens on confirmation, restores on cancel, and st
   assert.equal(getSampleConfirmationFocusTarget(true, false), 'confirmation');
   assert.equal(getSampleConfirmationFocusTarget(false, true), 'trigger');
   assert.equal(getSampleConfirmationFocusTarget(true, true), null);
+});
+
+test('upload replacement focus opens on confirmation and returns to the picker on cancel', () => {
+  assert.equal(getUploadConfirmationFocusTarget(false, false), null);
+  assert.equal(getUploadConfirmationFocusTarget(true, false), 'confirmation');
+  assert.equal(getUploadConfirmationFocusTarget(false, true, 'cancelled'), 'trigger');
+  assert.equal(getUploadConfirmationFocusTarget(false, true, 'accepted'), 'continue');
+  assert.equal(getUploadConfirmationFocusTarget(true, true), null);
+});
+
+test('each selected master carries into the photo step in the URL', () => {
+  assert.equal(getTemplatePhotoPath('cinematic'), '/create?template=cinematic');
+  assert.equal(getTemplatePhotoPath('editorial'), '/create?template=editorial');
+  assert.equal(getTemplatePhotoPath('id-card'), '/create?template=id-card');
+});
+
+test('route template selection accepts only known masters', () => {
+  assert.equal(parseTemplateChoice('editorial'), 'editorial');
+  assert.equal(parseTemplateChoice(['id-card', 'cinematic']), 'id-card');
+  assert.equal(parseTemplateChoice('other'), null);
+  assert.equal(parseTemplateChoice(null), null);
 });

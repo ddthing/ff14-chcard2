@@ -5,7 +5,7 @@ import { getJobTheme } from '@/lib/job-themes';
 import type { Locale } from '@/lib/types';
 import { JobIcon } from '@/components/ffxiv/job-icon';
 import { FFXIVAttribution } from '@/components/ffxiv/ffxiv-attribution';
-import { getJob, getLanguage, localizeFfxivLabel } from '@/data/ffxiv';
+import { getJob, localizeFfxivLabel } from '@/data/ffxiv';
 import {
   detectTypographyScript,
   getMasterTypographyFamily,
@@ -17,7 +17,8 @@ import {
 } from '@/lib/typography-presets';
 import { resolveJobIcon } from '@/lib/ffxiv-assets';
 import { getCardNameLayout } from '@/lib/card-name-layout';
-import { getCardMicrocopy } from '@/lib/card-microcopy';
+import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
+import { CARD_LEGACY_COPY, CARD_UI_LABELS, getCardDisplayBio, getCardPhotoAlt } from '@/lib/card-copy';
 import { getMasterArtProperties } from '@/lib/card-art-tokens';
 import { getCardMaterialAssets } from '@/lib/card-materials';
 import { getCraftMaterialProperties } from '@/lib/card-graphics/materials';
@@ -30,12 +31,6 @@ import renderScopeStyles from './card-render-scope.module.css';
 import type { AdventurerCardCharacter, AdventurerCardData, CardRatio } from './types';
 
 type CardCustomProperties = CSSProperties & Record<string, string | number>;
-
-const CARD_UI_LABELS: Record<Locale, Record<'level' | 'world' | 'dataCenter' | 'freeCompany' | 'grandCompany' | 'race' | 'clan' | 'unofficial', string>> = {
-  ko: { level: '레벨', world: '월드', dataCenter: '데이터 센터', freeCompany: '자유부대', grandCompany: '총사령부', race: '종족', clan: '부족', unofficial: '비공식 · 팬메이드' },
-  en: { level: 'LEVEL', world: 'WORLD', dataCenter: 'DATA CENTER', freeCompany: 'FREE COMPANY', grandCompany: 'GRAND COMPANY', race: 'RACE', clan: 'CLAN', unofficial: 'UNOFFICIAL / FAN-MADE' },
-  ja: { level: 'レベル', world: 'ワールド', dataCenter: 'データセンター', freeCompany: 'フリーカンパニー', grandCompany: 'グランドカンパニー', race: '種族', clan: '部族', unofficial: '非公式・ファンメイド' },
-};
 
 export interface CardImageAdjustment {
   x: number;
@@ -139,12 +134,12 @@ function getLocalizedCharacterFields(character: AdventurerCardCharacter, locale:
   const domainCharacter = character as CharacterWithDomainIds;
   return {
     job: localizeFfxivLabel('job', domainCharacter.jobId ?? character.job, locale),
-    world: localizeFfxivLabel('world', domainCharacter.worldId ?? character.world, locale),
+    world: localizeCardWorld(character, locale),
     dataCenter: localizeFfxivLabel('dataCenter', domainCharacter.dataCenterId ?? character.dataCenter, locale),
     race: localizeFfxivLabel('race', domainCharacter.raceId ?? character.race, locale),
     clan: localizeFfxivLabel('clan', domainCharacter.clanId ?? character.clan, locale),
     grandCompany: localizeFfxivLabel('grandCompany', domainCharacter.grandCompanyId ?? character.grandCompany, locale),
-    languages: character.languages.map((language) => getLanguage(language)?.abbreviation ?? language.toUpperCase()),
+    languages: character.languages.map((language) => localizeFfxivLabel('language', language, locale)),
     languageNames: character.languages.map((language) => localizeFfxivLabel('language', language, locale)),
     playStyles: character.playStyles.map((playStyle) => localizeFfxivLabel('playStyle', playStyle, locale)),
   };
@@ -232,10 +227,11 @@ function getCardProperties(
   const scale = adjustments.scale ?? data.design.imageScale ?? 1;
   const brightness = (adjustments.brightness ?? 1) * 2 ** exposure;
   const localized = getLocalizedCharacterFields(data.character, locale);
+  const displayBio = getCardDisplayBio(data.character, data.imageUrl, locale);
   const typography = data.design.typographyPreset as string;
   const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
   const displayScript = detectTypographyScript(data.character.name, localeScript);
-  const bodyScript = detectTypographyScript(data.character.bio, localeScript);
+  const bodyScript = detectTypographyScript(displayBio, localeScript);
   const metadataScript = detectTypographyScript(`${localized.job} ${localized.world} ${localized.dataCenter}`, localeScript);
   const informationScript = detectTypographyScript(
     `${localized.job} ${localized.world} ${localized.dataCenter} ${data.character.freeCompany} ${localized.grandCompany}`,
@@ -250,17 +246,17 @@ function getCardProperties(
   const nameSize = Math.min(nameBase, 72 / nameLayout.maxLineUnits);
   const nameLeading = cjk ? 1.03 : 0.91;
   const jobIconColor = getJobIconColor(design.jobIconColor);
-  const microcopy = getCardMicrocopy(data.character);
+  const microcopy = getCardMicrocopy(data.character, locale);
   const isMaster = (design.layoutVariant ?? 'a') === 'a';
   const masterTypographyProperties = isMaster
     ? getMasterTypographyProperties(data.design.template, {
       display: displayScript,
-      secondaryDisplay: detectTypographyScript(data.character.bio, localeScript),
+      secondaryDisplay: detectTypographyScript(displayBio, localeScript),
       job: detectTypographyScript(`${localized.job} ${microcopy.jobAbbreviation ?? ''}`, localeScript),
       information: informationScript,
       label: localeScript,
       caption: detectTypographyScript(
-        `${microcopy.origin ?? ''} ${CARD_UI_LABELS[locale].unofficial} ${data.character.bio} ${data.character.freeCompany} ${localized.playStyles.join(' ')}`,
+        `${microcopy.origin ?? ''} ${CARD_UI_LABELS[locale].unofficial} ${displayBio} ${data.character.freeCompany} ${localized.playStyles.join(' ')}`,
         localeScript,
       ),
       micro: localeScript,
@@ -313,7 +309,7 @@ function MasterMaterial({ family }: { family: AdventurerCardData['design']['temp
   );
 }
 
-function CardImage({ data, className }: { data: AdventurerCardData; className: string }) {
+function CardImage({ data, locale, className }: { data: AdventurerCardData; locale: Locale; className: string }) {
   const { character, imageUrl } = data;
 
   return (
@@ -322,7 +318,7 @@ function CardImage({ data, className }: { data: AdventurerCardData; className: s
         <Image
           fill
           src={imageUrl}
-          alt={`${character.name} adventurer portrait`}
+          alt={getCardPhotoAlt(character.name, locale)}
           sizes="(max-width: 640px) 90vw, (max-width: 1200px) 42vw, 560px"
           loading="eager"
           decoding="async"
@@ -394,7 +390,7 @@ function CardRoot({
       data-highlight-field={highlightField}
       data-locale={resolvedLocale}
       lang={resolvedLocale}
-      aria-label={`${data.character.name}, ${getLocalizedCharacterFields(data.character, resolvedLocale).job} adventurer card`}
+      aria-label={`${data.character.name}, ${getLocalizedCharacterFields(data.character, resolvedLocale).job} ${CARD_UI_LABELS[resolvedLocale].cardAltSuffix}`}
     >
       {children}
       {layoutVariant === 'a' && <MasterMaterial family={data.design.template} />}
@@ -405,12 +401,14 @@ function CardRoot({
 export function CinematicCard({ data, ratio, className, highlightField, imageAdjustment, locale = 'en' }: AdventurerCardProps) {
   profileRender('CinematicCard');
   const { character } = data;
+  const displayBio = getCardDisplayBio(character, data.imageUrl, locale);
   const labels = getLocalizedCharacterFields(character, locale);
   const ui = CARD_UI_LABELS[locale];
   const job = getJobVisuals(character);
   const master = (data.design.layoutVariant ?? 'a') === 'a';
   const jobMotifVisible = data.design.jobMotifVisible !== false;
-  const microcopy = getCardMicrocopy(character);
+  const microcopy = getCardMicrocopy(character, locale);
+  const copy = CARD_LEGACY_COPY.cinematic[locale];
 
   if (master) return <CardRoot data={data} ratio={ratio} className={className} template="cinematic" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
     <CinematicMaster data={data} locale={locale} ratio={ratio} />
@@ -419,7 +417,7 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
 
   return (
     <CardRoot data={data} ratio={ratio} className={className} template="cinematic" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
-      <CardImage data={data} className={styles.cinematicArt} />
+      <CardImage data={data} locale={locale} className={styles.cinematicArt} />
       <div className={styles.cinematicShade} aria-hidden="true" />
       <div className={styles.cinematicFrame} aria-hidden="true" />
       {jobMotifVisible && (!master || resolveJobIcon({ jobId: job.id, usage: 'cardSmall' })) && <div className={styles.cinematicJobEmblem}>
@@ -428,8 +426,8 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
       <CardAssetAttribution character={character} jobId={job.id} locale={locale} visible={jobMotifVisible} />
       <div className={styles.cinematicContent}>
         <div className={styles.cinematicMasthead}>
-          <span>{master && microcopy.jobAbbreviation && <b className={styles.cinematicIndex}>{microcopy.jobAbbreviation}</b>}ADVENTURER RECORD</span>
-          {master ? microcopy.origin && <span>{microcopy.origin}</span> : <span>HYDAELYN&nbsp; / &nbsp;EORZEA</span>}
+          <span>{master && microcopy.jobAbbreviation && <b className={styles.cinematicIndex}>{microcopy.jobAbbreviation}</b>}{copy.title}</span>
+          {master ? microcopy.origin && <span>{microcopy.origin}</span> : <span>{copy.location}</span>}
         </div>
 
         <div className={styles.cinematicBase}>
@@ -445,7 +443,7 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
           </div>
 
           <div className={styles.cinematicDetails}>
-            {character.bio.trim() && <p className={styles.cinematicBio} data-field="bio">{character.bio}</p>}
+            {displayBio.trim() && <p className={styles.cinematicBio} data-field="bio">{displayBio}</p>}
             <dl className={styles.cinematicFacts}>
               <div>
                 <dt>{ui.world}</dt>
@@ -462,7 +460,7 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
             </dl>
           </div>
         </div>
-        {master && (labels.languages.length > 0 || labels.playStyles.length > 0) && <footer className={styles.cinematicFootnote}>
+        {(labels.languages.length > 0 || labels.playStyles.length > 0) && <footer className={styles.cinematicFootnote}>
           {labels.playStyles.length > 0 && <span data-field="playStyles">{labels.playStyles.join(' · ')}</span>}
           {labels.languages.length > 0 && <span data-field="languages" aria-label={labels.languageNames.join(', ')}>{labels.languages.join(' / ')}</span>}
         </footer>}
@@ -474,12 +472,14 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
 export function EditorialCard({ data, ratio, className, highlightField, imageAdjustment, locale = 'en' }: AdventurerCardProps) {
   profileRender('EditorialCard');
   const { character } = data;
+  const displayBio = getCardDisplayBio(character, data.imageUrl, locale);
   const labels = getLocalizedCharacterFields(character, locale);
   const ui = CARD_UI_LABELS[locale];
   const job = getJobVisuals(character);
   const master = (data.design.layoutVariant ?? 'a') === 'a';
   const jobMotifVisible = data.design.jobMotifVisible !== false;
-  const microcopy = getCardMicrocopy(character);
+  const microcopy = getCardMicrocopy(character, locale);
+  const copy = CARD_LEGACY_COPY.editorial[locale];
   const nameLayout = getCardNameLayout(character.name, locale);
 
   if (master) return <CardRoot data={data} ratio={ratio} className={className} template="editorial" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
@@ -489,14 +489,14 @@ export function EditorialCard({ data, ratio, className, highlightField, imageAdj
 
   return (
     <CardRoot data={data} ratio={ratio} className={className} template="editorial" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
-      <CardImage data={data} className={styles.editorialArt} />
+      <CardImage data={data} locale={locale} className={styles.editorialArt} />
       {jobMotifVisible && (!master || resolveJobIcon({ jobId: job.id, usage: 'cardDisplay' })) && <div className={styles.editorialJobAnchor}>
         <JobIcon jobId={job.id || null} role={job.role || null} label={labels.job} size={112} usage="cardDisplay" decorative />
       </div>}
       <CardAssetAttribution character={character} jobId={job.id} locale={locale} visible={jobMotifVisible} />
       <header className={styles.editorialMasthead}>
-          <span>ADVENTURER</span>
-          {master ? microcopy.origin && <span>{microcopy.origin}</span> : <span>FIELD NOTES&nbsp; / &nbsp;EORZEA</span>}
+          <span>{copy.title}</span>
+          {master ? microcopy.origin && <span>{microcopy.origin}</span> : <span>{copy.location}</span>}
       </header>
 
       <div className={styles.editorialBody}>
@@ -511,7 +511,7 @@ export function EditorialCard({ data, ratio, className, highlightField, imageAdj
         {master && <aside className={styles.editorialJobStudy}>
           {microcopy.jobAbbreviation && <strong className={styles.editorialJobCode}>{microcopy.jobAbbreviation}</strong>}
           <p className={styles.editorialRole} data-field="job">{labels.job}</p>
-          <span className={styles.editorialLevel}>LV. <b data-field="level">{character.level}</b></span>
+          <span className={styles.editorialLevel}>{ui.level} <b data-field="level">{character.level}</b></span>
         </aside>}
 
         <dl className={styles.editorialFacts}>
@@ -533,7 +533,7 @@ export function EditorialCard({ data, ratio, className, highlightField, imageAdj
           </div>}
         </dl>
 
-        {character.bio.trim() && <p className={styles.editorialBio} data-field="bio">{character.bio}</p>}
+        {displayBio.trim() && <p className={styles.editorialBio} data-field="bio">{displayBio}</p>}
         {(labels.playStyles.length > 0 || labels.languages.length > 0) && <footer className={styles.editorialFooter}>
           {labels.playStyles.length > 0 && <span data-field="playStyles">{((data.design.layoutVariant ?? 'a') === 'a' ? labels.playStyles : labels.playStyles.slice(0, 2)).join('  ·  ')}</span>}
           {labels.languages.length > 0 && <span data-field="languages" aria-label={labels.languageNames.join(', ')}>{labels.languages.join(' / ')}</span>}
@@ -546,12 +546,14 @@ export function EditorialCard({ data, ratio, className, highlightField, imageAdj
 export function AdventurerIdCard({ data, ratio, className, highlightField, imageAdjustment, locale = 'en' }: AdventurerCardProps) {
   profileRender('IdentityCard');
   const { character } = data;
+  const displayBio = getCardDisplayBio(character, data.imageUrl, locale);
   const labels = getLocalizedCharacterFields(character, locale);
   const ui = CARD_UI_LABELS[locale];
   const job = getJobVisuals(character);
   const master = (data.design.layoutVariant ?? 'a') === 'a';
   const jobMotifVisible = data.design.jobMotifVisible !== false;
-  const microcopy = getCardMicrocopy(character);
+  const microcopy = getCardMicrocopy(character, locale);
+  const copy = CARD_LEGACY_COPY.identity[locale];
 
   if (master) return <CardRoot data={data} ratio={ratio} className={className} template="id-card" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
     <IdentityMaster data={data} locale={locale} ratio={ratio} />
@@ -562,19 +564,19 @@ export function AdventurerIdCard({ data, ratio, className, highlightField, image
     <CardRoot data={data} ratio={ratio} className={className} template="id-card" highlightField={highlightField} imageAdjustment={imageAdjustment} locale={locale}>
       <CardAssetAttribution character={character} jobId={job.id} locale={locale} visible={jobMotifVisible} />
       <header className={styles.idMasthead}>
-        <span>{master ? <><b className={styles.idPublication}>ADVENTURER</b><small className={styles.idPublicationCaption}>IDENTIFICATION</small></> : 'ADVENTURER IDENTIFICATION'}</span>
+        <span>{master ? <><b className={styles.idPublication}>{copy.title}</b><small className={styles.idPublicationCaption}>{copy.subtitle}</small></> : copy.fullTitle}</span>
         <span className={styles.idUnofficial}>{ui.unofficial}</span>
         {jobMotifVisible && (master && !resolveJobIcon({ jobId: job.id, usage: 'micro' }) ? microcopy.jobAbbreviation && <span className={styles.idJobCode} title={labels.job}>{microcopy.jobAbbreviation}</span> : <span className={styles.idSeal} aria-hidden="true"><JobIcon jobId={job.id || null} role={job.role || null} label={labels.job} size={22} usage="micro" decorative /></span>)}
       </header>
 
       <div className={styles.idBody}>
-        <CardImage data={data} className={styles.idPortrait} />
+        <CardImage data={data} locale={locale} className={styles.idPortrait} />
 
         <div className={styles.idInformation}>
-          {master ? microcopy.origin && <p className={styles.idEyebrow}>{microcopy.origin}</p> : <p className={styles.idEyebrow}>EORZEAN CHARACTER PROFILE</p>}
+          {master ? microcopy.origin && <p className={styles.idEyebrow}>{microcopy.origin}</p> : <p className={styles.idEyebrow}>{copy.profile}</p>}
           <h2 data-field="name">{character.name}</h2>
           <p className={styles.idRole}>
-            <span data-field="job">{labels.job}</span><span aria-hidden="true"> / </span>Lv. <span data-field="level">{character.level}</span>
+            <span data-field="job">{labels.job}</span><span aria-hidden="true"> / </span>{ui.level} <span data-field="level">{character.level}</span>
           </p>
 
           <dl className={styles.idFacts}>
@@ -606,8 +608,8 @@ export function AdventurerIdCard({ data, ratio, className, highlightField, image
         </div>
       </div>
 
-      {(character.bio.trim() || labels.playStyles.length > 0 || labels.languages.length > 0) && <footer className={styles.idFooter}>
-        {character.bio.trim() && <p data-field="bio">{character.bio}</p>}
+      {(displayBio.trim() || labels.playStyles.length > 0 || labels.languages.length > 0) && <footer className={styles.idFooter}>
+        {displayBio.trim() && <p data-field="bio">{displayBio}</p>}
         {(labels.playStyles.length > 0 || labels.languages.length > 0) && <div className={styles.idFooterMeta}>
           {labels.playStyles.length > 0 && <span data-field="playStyles">{((data.design.layoutVariant ?? 'a') === 'a' ? labels.playStyles : labels.playStyles.slice(0, 2)).join('  ·  ')}</span>}
           {labels.languages.length > 0 && <span data-field="languages" aria-label={labels.languageNames.join(', ')}>{labels.languages.join(' / ')}</span>}

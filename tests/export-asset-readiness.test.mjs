@@ -434,6 +434,54 @@ test('export waits for optical name measurement and times out if it never comple
   }
 });
 
+test('optical readiness wakes on its attribute change instead of polling when MutationObserver is available', async () => {
+  const previousDocument = globalThis.document;
+  const previousRaf = globalThis.requestAnimationFrame;
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+  const name = { dataset: { opticalReady: 'false' } };
+  let observed;
+  let notifyMutation;
+  let observerCreated = false;
+  let disconnected = false;
+  class FakeMutationObserver {
+    constructor(callback) {
+      observerCreated = true;
+      notifyMutation = () => callback([], this);
+    }
+    observe(target, options) { observed = { target, options }; }
+    disconnect() { disconnected = true; }
+  }
+  const node = {
+    ownerDocument: { defaultView: { MutationObserver: FakeMutationObserver } },
+    querySelectorAll: selector => selector === '[data-optical-name]' ? [name] : [],
+  };
+  let waiting;
+  try {
+    waiting = waitForCardAssets(node, { opticalTimeoutMs: 100 });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(observed.target, node);
+    assert.deepEqual(observed.options, {
+      attributes: true,
+      attributeFilter: ['data-optical-ready'],
+      subtree: true,
+    });
+
+    name.dataset.opticalReady = 'true';
+    notifyMutation();
+    await waiting;
+    assert.equal(disconnected, true);
+  } finally {
+    if (observerCreated && !disconnected) {
+      name.dataset.opticalReady = 'true';
+      notifyMutation?.();
+    }
+    await waiting?.catch(() => undefined);
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+    if (previousRaf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previousRaf;
+  }
+});
+
 test('bounded operations reject on abort and timeout with stable export error codes', async () => {
   const controller = new AbortController();
   const pending = withCardExportTimeout(new Promise(() => {}), 1_000, 'render-timeout', controller.signal);
@@ -454,7 +502,9 @@ test('a hanging dynamic font stylesheet import fails with a stable timeout', asy
 
 test('filenames preserve bounded Unicode names and remove path-breaking characters', () => {
   assert.equal(getCardExportFilename('Coner 光月', '4:5', 2, 'png'), 'Coner-光月-4x5-2x.png');
-  assert.equal(getCardExportFilename('コナー・XIV!?', '16:9', 4, 'webp'), 'コナー・XIV!-16x9-4x.webp');
+  assert.equal(getCardExportFilename('コナー・XIV!?', '16:9', 4, 'webp'), 'コナー・XIV!-16x9-4x-capped.webp');
+  assert.equal(getCardExportFilename('Coner', '9:16', 4, 'png'), 'Coner-9x16-4x-capped.png');
+  assert.equal(getCardExportFilename('Coner', '1:1', 4, 'png'), 'Coner-1x1-4x.png');
   assert.equal(sanitizeCardExportName(''), 'adventurer-card');
   assert.equal(sanitizeCardExportName('../../<Coner>|?:'), 'Coner');
   assert.ok(Array.from(sanitizeCardExportName('모서리'.repeat(100))).length <= 64);

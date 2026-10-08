@@ -1,102 +1,136 @@
-import { useId } from 'react';
-import { masterFieldProps } from '@/lib/master-card-config';
-import { getEditorialPaperShape } from '@/lib/card-graphics/editorial-shape';
+import Image from 'next/image';
+import { Fragment, useId, type CSSProperties } from 'react';
+import { getJob, JOB_CATEGORIES } from '@/data/ffxiv';
+import { masterFieldProps, type MasterField } from '@/lib/master-card-config';
+import { getEditorialBrushShape } from '@/lib/card-graphics/editorial-shape';
+import { EDITORIAL_BRUSH_PATH } from '@/lib/card-graphics/editorial-brush-path';
 import { resolveCardMaterial } from '@/lib/card-materials';
 import { JobIcon } from '@/components/ffxiv/job-icon';
-import { getJobIdentityGlyphCqiSize, getJobIdentityGlyphLogicalSize } from '@/lib/job-identity-optics';
 import { OpticalName } from '@/components/cards/craft/optical-name';
+import { CARD_STOCK_COPY } from '@/lib/card-copy';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './editorial-master.module.css';
 
-const EDITORIAL_COPY = {
-  ko: { job: '직업', service: '서비스 · 지역' },
-  en: { job: 'JOB', service: 'SERVICE / REGION' },
-  ja: { job: 'ジョブ', service: 'サービス・地域' },
-} as const;
+type EditorialBrushStyle = CSSProperties & {
+  '--editorial-brush-clip': string;
+};
+
+type EditorialFactPart = {
+  field: MasterField;
+  value: string;
+  role: 'job' | 'information' | 'micro' | 'caption';
+  separator?: string;
+};
 
 const EDITORIAL_PAPER_SURFACE = resolveCardMaterial('editorial', 'editorial-paper-surface').src;
 const EDITORIAL_INK_DENSITY = resolveCardMaterial('editorial', 'editorial-ink-density').src;
 
-function EditorialBio({ bio, className, placement }: { bio: string; className: string; placement: 'paper' | 'lower' }) {
-  return (
-    <blockquote className={className} data-bio-placement={placement}>
-      <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('editorial', 'bio')}>
-        {bio}
-      </p>
-    </blockquote>
-  );
-}
-
 export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
-  const paperTextureId = `editorial-paper-texture-${useId().replace(/[^A-Za-z0-9_-]/g, '')}`;
-  const { character, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = EDITORIAL_COPY[locale];
+  const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
+  const copy = CARD_STOCK_COPY.editorial[locale];
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const resolvedRatio = ratio ?? data.design.ratio;
-  const paperShape = getEditorialPaperShape(resolvedRatio);
+  const brushShape = getEditorialBrushShape(resolvedRatio);
+  const brushClipId = `editorial-brush-clip-${useId().replace(/[^A-Za-z0-9_-]/g, '')}`;
+  const brushStyle: EditorialBrushStyle = {
+    '--editorial-brush-clip': `url(#${brushClipId})`,
+  };
   const jobMotifVisible = data.design.jobMotifVisible !== false;
-  const jobGlyphSize = getJobIdentityGlyphLogicalSize(resolvedRatio);
-  const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(resolvedRatio);
-  const bio = character.bio.trim();
+  const hasLevel = Number.isFinite(character.level) && character.level > 0;
+  const bio = localizedBio.trim();
   const bioUnits = Array.from(bio).length;
-  const paperBio =
-    bio.length > 0 &&
-    bioUnits <= (nameLayout.script === 'latin' ? 70 : 34) &&
-    nameLayout.category === 'short' &&
-    nameLines.length === 1;
+  const paperBio = bio.length > 0 && bioUnits <= (nameLayout.script === 'latin' ? 70 : 34) && nameLayout.category === 'short' && nameLines.length === 1;
+  const photoBio = bio.length > 0 && !paperBio;
+  const selectedJob = getJob(character.jobId ?? character.job);
+  const jobCategory = JOB_CATEGORIES.find(({ id }) => id === selectedJob?.category);
+  const jobRoleLabel = jobCategory?.id === 'magical-ranged-dps' && locale === 'en'
+    ? 'CASTER'
+    : jobCategory?.localizedName[locale] ?? '';
+  const lineageLabel = labels.race && labels.clan
+    ? `${ui.race} / ${ui.clan}`
+    : labels.race ? ui.race : ui.clan;
+
+  const facts: Array<{ id: string; label: string; parts: EditorialFactPart[] }> = [
+    {
+      id: 'job',
+      label: copy.job,
+      parts: [
+        ...(labels.job ? [{ field: 'job' as const, value: labels.job, role: 'job' as const }] : []),
+        ...(microcopy.jobAbbreviation ? [{ field: 'jobAbbreviation' as const, value: microcopy.jobAbbreviation, role: 'micro' as const, separator: ' / ' }] : []),
+      ],
+    },
+    { id: 'level', label: ui.level, parts: hasLevel ? [{ field: 'level', value: String(character.level), role: 'information' }] : [] },
+    { id: 'world', label: ui.world, parts: labels.world ? [{ field: 'world', value: labels.world, role: 'information' }] : [] },
+    { id: 'data-center', label: ui.dataCenter, parts: labels.dataCenter ? [{ field: 'dataCenter', value: labels.dataCenter, role: 'information' }] : [] },
+    {
+      id: 'lineage',
+      label: lineageLabel,
+      parts: [
+        ...(labels.race ? [{ field: 'race' as const, value: labels.race, role: 'information' as const }] : []),
+        ...(labels.clan ? [{ field: 'clan' as const, value: labels.clan, role: 'information' as const, separator: ' · ' }] : []),
+      ],
+    },
+    { id: 'free-company', label: ui.freeCompany, parts: character.freeCompany.trim() ? [{ field: 'freeCompany', value: character.freeCompany, role: 'information' }] : [] },
+    { id: 'service', label: copy.service, parts: microcopy.origin ? [{ field: 'origin', value: microcopy.origin, role: 'caption' }] : [] },
+  ];
 
   return (
     <div
       className={styles.canvas}
       data-ratio={resolvedRatio}
-      data-paper-shape={paperShape.id}
+      data-brush-shape={brushShape.id}
+      data-brush-composition={brushShape.composition}
+      data-brush-source={brushShape.inkOutline}
+      data-brush-clip-id={brushClipId}
       data-name-script={nameLayout.script}
       data-name-category={nameLayout.category}
       data-name-lines={nameLines.length}
       lang={locale}
+      style={brushStyle}
     >
       <div className={styles.paperGround} aria-hidden="true" />
-      <ArtPhoto data={data} className={styles.photo} />
-      <svg
-        className={styles.paperEdge}
-        viewBox="0 0 1000 1000"
-        preserveAspectRatio="none"
+      <Image
+        className={styles.paperMaterial}
+        src={EDITORIAL_PAPER_SURFACE}
+        alt=""
+        width={1280}
+        height={1600}
+        unoptimized
+        loading="eager"
         aria-hidden="true"
-        focusable="false"
-        data-paper-shape={paperShape.id}
-      >
+        data-material-layer="editorial-paper-surface"
+      />
+      <Image
+        className={styles.inkDensity}
+        src={EDITORIAL_INK_DENSITY}
+        alt=""
+        width={1280}
+        height={1600}
+        unoptimized
+        loading="eager"
+        aria-hidden="true"
+        data-material-layer="editorial-ink-density"
+      />
+      <svg className={styles.clipDefinitions} aria-hidden="true" focusable="false">
         <defs>
-          <pattern id={paperTextureId} patternUnits="userSpaceOnUse" width="1000" height="1000">
-            <image href={EDITORIAL_PAPER_SURFACE} x="0" y="0" width="1000" height="1000" preserveAspectRatio="none" />
-          </pattern>
+          <clipPath id={brushClipId} clipPathUnits="objectBoundingBox">
+            <path
+              d={EDITORIAL_BRUSH_PATH}
+              fillRule="evenodd"
+              clipRule="evenodd"
+              transform="scale(0.0009765625 0.0006510416666666666)"
+            />
+          </clipPath>
         </defs>
-        <path className={styles.paperShape} d={paperShape.path} data-paper-path={paperShape.path} />
-        <path className={styles.paperTexture} d={paperShape.path} fill={`url(#${paperTextureId})`} />
       </svg>
+      <div className={styles.brushUnderlay} data-card-local-clip={brushClipId} aria-hidden="true" />
+      <div className={styles.photoClip} data-card-local-clip={brushClipId}>
+        <ArtPhoto data={data} className={styles.photoArt} locale={locale} />
+      </div>
 
-      {jobMotifVisible && microcopy.jobAbbreviation && (
-        <div className={styles.motifLayer} aria-hidden="true">
-          <span
-            className={styles.customMotif}
-            data-master-typography-role="job"
-            {...masterFieldProps('editorial', 'jobAbbreviation')}
-          >
-            {microcopy.jobAbbreviation}
-            <span
-              className={styles.inkDensity}
-              aria-hidden="true"
-              data-material-layer="editorial-ink-density"
-              style={{ backgroundImage: `url("${EDITORIAL_INK_DENSITY}")` }}
-            >
-              {microcopy.jobAbbreviation}
-            </span>
-          </span>
-        </div>
-      )}
-
-      <header className={styles.masthead} aria-label="ADVENTURER" {...masterFieldProps('editorial', 'masthead')}>
-        <span className={styles.mastheadTitle} data-master-typography-role="micro">ADVENTURER</span>
-        <span className={styles.mastheadMeta} data-master-typography-role="caption">{ui.unofficial}</span>
+      <header className={styles.masthead} aria-label={copy.masthead}>
+        <span className={styles.mastheadTitle} data-master-typography-role="micro">{copy.masthead}</span>
+        <span className={styles.mastheadMeta} data-master-typography-role="caption" lang="en">{CARD_STOCK_COPY.brand.finalFantasy}</span>
       </header>
 
       <div className={styles.identityStack}>
@@ -113,92 +147,58 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
           data-name-script={nameLayout.script}
           data-name-category={nameLayout.category}
         />
-        {paperBio && <EditorialBio bio={bio} className={styles.bioPaperNote} placement="paper" />}
+        {paperBio && <p className={styles.quote} data-master-typography-role="secondaryDisplay" {...masterFieldProps('editorial', 'bio')}>{bio}</p>}
       </div>
 
-      {bio && !paperBio && <EditorialBio bio={bio} className={styles.bioNote} placement="lower" />}
+      <div
+        className={styles.photoStory}
+        data-photo-story={photoBio ? 'bio' : 'copy'}
+        data-master-typography-role={photoBio ? 'secondaryDisplay' : 'caption'}
+        {...(photoBio ? masterFieldProps('editorial', 'bio') : {})}
+      >
+        {photoBio ? bio : copy.story}
+      </div>
 
-      <section className={styles.facts}>
-        <div className={styles.jobColumn}>
-          <div className={`${styles.jobAnchor} ${jobMotifVisible ? '' : styles.jobAnchorWithoutMark}`} data-job-identity="editorial">
-            {jobMotifVisible && (
-              <span className={styles.jobPrint} style={{ fontSize: `${jobGlyphCqiSize}cqi` }} aria-hidden="true" data-job-identity-mark="editorial">
-                <JobIcon
-                  className={styles.jobGlyph}
-                  jobId={character.jobId ?? character.job}
-                  label={labels.job}
-                  size={jobGlyphSize}
-                  usage="cardMedium"
-                />
-              </span>
-            )}
-            <div className={styles.jobIdentity}>
-              <span className={styles.jobLabel} data-master-typography-role="label">{copy.job}</span>
-              <span className={styles.jobName} data-master-typography-role="job" {...masterFieldProps('editorial', 'job')}>
-                {labels.job}
-              </span>
-            </div>
-            <div className={styles.levelFact}>
-                <span className={styles.factLabel} data-master-typography-role="label">{ui.level}</span>
-                <b className={styles.levelValue} data-master-typography-role="information" {...masterFieldProps('editorial', 'level')}>
-                {character.level}
-              </b>
-            </div>
+      <dl className={styles.facts} aria-label={copy.details}>
+        {facts.filter((fact) => fact.parts.length > 0).map((fact) => (
+          <div className={styles.fact} data-editorial-row={fact.id} key={fact.id}>
+            <dt className={styles.factLabel} data-master-typography-role="label">{fact.label}</dt>
+            <dd className={styles.factValue}>
+              {fact.parts.map((part) => (
+                <Fragment key={part.field}>
+                  {part.separator && <span className={styles.factSeparator} aria-hidden="true">{part.separator}</span>}
+                  <span data-master-typography-role={part.role} {...masterFieldProps('editorial', part.field)}>
+                    {part.value}
+                  </span>
+                </Fragment>
+              ))}
+            </dd>
           </div>
+        ))}
+      </dl>
 
-          {(labels.race || labels.clan) && (
-            <div className={`${styles.fact} ${styles.lineage}`}>
-              <span className={styles.factLabel} data-master-typography-role="label">
-                {labels.race && ui.race}
-                {labels.race && labels.clan && <span aria-hidden="true"> / </span>}
-                {labels.clan && ui.clan}
-              </span>
-              <span className={styles.lineageValue} data-master-typography-role="information">
-                {labels.race && <span {...masterFieldProps('editorial', 'race')}>{labels.race}</span>}
-                {labels.race && labels.clan && <span aria-hidden="true"> · </span>}
-                {labels.clan && <span {...masterFieldProps('editorial', 'clan')}>{labels.clan}</span>}
-              </span>
-            </div>
+      {jobMotifVisible && labels.job && (
+        <section className={styles.jobInsignia} data-job-identity-mark="editorial" aria-label={labels.job}>
+          <JobIcon
+            className={styles.jobGlyph}
+            jobId={character.jobId ?? character.job}
+            label={labels.job}
+            size={108}
+            usage="cardDisplay"
+            decorative
+          />
+          <span className={styles.insigniaJob} data-master-typography-role="job" {...masterFieldProps('editorial', 'job')}>
+            {labels.job}
+          </span>
+          {microcopy.jobAbbreviation && (
+            <span className={styles.insigniaCode} data-master-typography-role="micro" {...masterFieldProps('editorial', 'jobAbbreviation')}>
+              {[jobRoleLabel, microcopy.jobAbbreviation].filter(Boolean).join(' · ')}
+            </span>
           )}
-        </div>
+          <span className={styles.insigniaCaption} data-master-typography-role="caption">{copy.warriorOfLight}</span>
+        </section>
+      )}
 
-        <div className={styles.placeColumn}>
-          {labels.world && (
-            <div className={`${styles.fact} ${styles.worldFact}`}>
-              <span className={styles.factLabel} data-master-typography-role="label">{ui.world}</span>
-              <span className={styles.worldValue} data-master-typography-role="information" {...masterFieldProps('editorial', 'world')}>
-                {labels.world}
-              </span>
-            </div>
-          )}
-          <div className={styles.secondaryFacts}>
-            {labels.dataCenter && (
-              <div className={`${styles.fact} ${styles.dataCenterFact}`}>
-                <span className={styles.factLabel} data-master-typography-role="label">{ui.dataCenter}</span>
-                <span className={styles.factValue} data-master-typography-role="information" {...masterFieldProps('editorial', 'dataCenter')}>
-                  {labels.dataCenter}
-                </span>
-              </div>
-            )}
-            {character.freeCompany.trim() && (
-              <div className={`${styles.fact} ${styles.companyFact}`}>
-                <span className={styles.factLabel} data-master-typography-role="label">{ui.freeCompany}</span>
-                <span className={styles.factValue} data-master-typography-role="information" {...masterFieldProps('editorial', 'freeCompany')}>
-                  {character.freeCompany}
-                </span>
-              </div>
-            )}
-            {microcopy.origin && (
-              <div className={`${styles.fact} ${styles.originFact}`}>
-                <span className={styles.factLabel} data-master-typography-role="label">{copy.service}</span>
-                <span className={styles.factValue} data-master-typography-role="caption" {...masterFieldProps('editorial', 'origin')}>
-                  {microcopy.origin}
-                </span>
-              </div>
-            )}
-          </div>
-        </div>
-      </section>
     </div>
   );
 }

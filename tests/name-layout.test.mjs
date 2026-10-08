@@ -33,6 +33,18 @@ test('short and medium Korean names use deliberate two-line composition', () => 
   assert.equal(getCardNameLayout('Kael Orion', 'ko').script, 'latin');
 });
 
+test('cached name layouts keep normalized-equivalent keys and return independent lines', () => {
+  const first = getCardNameLayout('  Kael   Orion  ', 'en');
+  const expectedLines = [...first.lines];
+  const expectedScale = first.scale;
+  first.lines[0] = 'mutated by caller';
+  first.scale = 0.1;
+
+  const second = getCardNameLayout('Kael Orion', 'en');
+  assert.deepEqual(second.lines, expectedLines);
+  assert.equal(second.scale, expectedScale);
+});
+
 test('Japanese middle dot stays with the preceding name segment', () => {
   const layout = getCardNameLayout('カエル・オリオン', 'ja');
   assert.equal(layout.script, 'japanese');

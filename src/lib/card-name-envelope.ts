@@ -28,11 +28,11 @@ export const CARD_NAME_ENVELOPES:Readonly<Record<AdventurerCardTemplate,Readonly
   '16:9':envelope(58,14,12.3,8.9,9.7),
  },
  'id-card':{
-  '4:5':envelope(27,9.2,8.8,6,6.8),
-  '1:1':envelope(29,8.6,8,5.6,6.2),
-  '3:4':envelope(27,9.2,8.8,6,6.8),
-  '9:16':envelope(25,9.4,8.5,5.9,6.5),
-  '16:9':envelope(16,8,3.9,2.8,3.1),
+  '4:5':envelope(48,13,15,8.6,9.3),
+  '1:1':envelope(46,12,13.8,8,8.8),
+  '3:4':envelope(48,13,15,8.6,9.3),
+  '9:16':envelope(42,13,15,8.6,9.3),
+  '16:9':envelope(22,8.4,9.5,5.2,5.8),
  },
 };
 

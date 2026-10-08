@@ -132,10 +132,16 @@ test('font CSS preparation includes whitespace and quoted pseudo families withou
   };
 
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => ({
-    ok: true,
-    arrayBuffer: async () => Uint8Array.of(0x77, 0x4f, 0x46, 0x32, 1, 2, 3).buffer,
-  });
+  let fetchCount = 0;
+  let cacheControl = 'public, max-age=31536000, immutable';
+  globalThis.fetch = async () => {
+    fetchCount += 1;
+    return {
+      ok: true,
+      headers: { get: name => name.toLowerCase() === 'cache-control' ? cacheControl : null },
+      arrayBuffer: async () => Uint8Array.of(0x77, 0x4f, 0x46, 0x32, 1, 2, 3).buffer,
+    };
+  };
   try {
     const prepared = await prepareCardFontCss(node);
     assert.ok(prepared);
@@ -143,6 +149,19 @@ test('font CSS preparation includes whitespace and quoted pseudo families withou
     assert.equal(prepared.glyphCount, 2);
     assert.match(prepared.cssText, /src: url\("data:font\/woff2;base64,[^"]+"\) format\("woff2"\), local\("Font A"\)/);
     assert.match(prepared.cssText, /src: local\("Font B"\), url\("data:font\/woff2;base64,[^"]+"\) format\("woff2"\)/);
+    assert.equal(fetchCount, prepared.uniqueFontResourceCount);
+
+    const repeated = await prepareCardFontCss(node);
+    assert.equal(repeated?.cssText, prepared.cssText);
+    assert.equal(fetchCount, prepared.uniqueFontResourceCount, 'immutable font bytes are reused across exports');
+
+    faceA.style.values.set('src', 'url("./font-c.woff2") format("woff2")');
+    sheet.cssRules = [faceA, faceB];
+    cacheControl = '';
+    const beforeUncacheableFetches = fetchCount;
+    await prepareCardFontCss(node);
+    await prepareCardFontCss(node);
+    assert.equal(fetchCount, beforeUncacheableFetches + 2, 'mutable resources are not retained between exports');
 
     sheet.cssRules = [{ cssRules: [faceB] }, faceA];
     assert.equal(await prepareCardFontCss(node), null, 'conditional font faces must fall back to the original renderer scan');

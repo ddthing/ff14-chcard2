@@ -16,7 +16,7 @@ type MasterDefinition = {
 
 export const MASTER_DESIGN_VERSION = '2.6.4';
 /** The stable identity contract above is separate from the authorized visual pass. */
-export const MASTER_VISUAL_VERSION = '2.7.8';
+export const MASTER_VISUAL_VERSION = '3.0.0';
 export const MASTER_TEMPLATE_ORDER = ['cinematic', 'editorial', 'id-card'] as const;
 
 /** Frozen identity/information contract. Geometry tokens live in each Master

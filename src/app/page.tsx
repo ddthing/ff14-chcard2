@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  preload("/assets/samples/coner/optimized/landscape.webp", { as: "image", fetchPriority: "high" });
+  preload("/assets/samples/coner/optimized/portrait.webp", { as: "image", fetchPriority: "high" });
   return <HomePage />;
 }
 

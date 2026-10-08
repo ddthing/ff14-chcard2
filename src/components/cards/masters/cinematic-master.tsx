@@ -6,30 +6,27 @@ import { JobIcon } from '@/components/ffxiv/job-icon';
 import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
+import { CARD_STOCK_COPY } from '@/lib/card-copy';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './cinematic-master.module.css';
-
-const CINEMATIC_COPY = {
-  ko: { job: '직업', service: '서비스', details: '모험가 정보' },
-  en: { job: 'JOB', service: 'SERVICE', details: 'Adventurer details' },
-  ja: { job: 'ジョブ', service: 'サービス', details: '冒険者情報' },
-} as const;
 
 const CINEMATIC_FILM_GRAIN = resolveCardMaterial('cinematic', 'cinematic-film-grain').src;
 
 export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
-  const { character, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
+  const { character, bio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [character.name];
+  const resolvedRatio = ratio ?? data.design.ratio;
   const jobMotifVisible = data.design.jobMotifVisible !== false;
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
-  const hasBio = character.bio.trim().length > 0;
-  const copy = CINEMATIC_COPY[locale];
-  const jobGlyphSize = getJobIdentityGlyphLogicalSize(ratio ?? data.design.ratio);
-  const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(ratio ?? data.design.ratio);
+  const hasBio = bio.trim().length > 0;
+  const copy = CARD_STOCK_COPY.cinematic[locale];
+  const jobGlyphSize = getJobIdentityGlyphLogicalSize(resolvedRatio);
+  const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(resolvedRatio, 'cinematicSeal');
+  const hasWorldFacts = Boolean(labels.world || labels.dataCenter);
 
   return (
-    <div className={styles.canvas} data-ratio={ratio ?? data.design.ratio}>
-      <ArtPhoto data={data} className={styles.photo} />
+    <div className={styles.canvas} data-ratio={resolvedRatio} lang={locale}>
+      <ArtPhoto data={data} locale={locale} className={styles.photo} />
       <Image
         className={styles.photoMaterial}
         src={CINEMATIC_FILM_GRAIN}
@@ -43,12 +40,23 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
       />
       <div className={styles.veil} aria-hidden="true" />
 
-      {hasBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('cinematic', 'bio')}>{character.bio}</p>}
+      <div className={styles.topPromise} aria-hidden="true">
+        <p data-master-typography-role="micro">{copy.promise.map((line) => <span key={line}>{line}</span>)}</p>
+        <span className={styles.promiseRule} />
+        <p className={styles.topQuote} data-master-typography-role="caption">{copy.quote.map((line) => <span key={line}>{line}</span>)}</p>
+      </div>
+
+      <div className={styles.topSignature} aria-hidden="true">
+        <p data-master-typography-role="caption">{copy.signature.map((line) => <span key={line}>{line}</span>)}</p>
+        <span className={styles.signaturePlace} data-master-typography-role="micro">{copy.place}</span>
+      </div>
+
+      {hasBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('cinematic', 'bio')}>{bio}</p>}
 
       <section className={styles.identity} aria-label={copy.details}>
         <OpticalName
           family="cinematic"
-          ratio={ratio ?? data.design.ratio}
+          ratio={resolvedRatio}
           name={nameLayout.normalizedName}
           lines={nameLines}
           script={nameLayout.script}
@@ -60,7 +68,11 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           data-name-composition={nameLayout.category}
         />
 
-        <EngravingMark kind="divider" className={styles.nameDivider} />
+        <div className={styles.nameDivider} aria-hidden="true">
+          <span />
+          <EngravingMark kind="divider" className={styles.nameDiamond} />
+          <span />
+        </div>
 
         <dl className={styles.metadata}>
           {labels.job && (
@@ -97,28 +109,22 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
               <dd className={`${styles.metaValue} ${styles.levelValue}`} data-master-typography-role="information" {...masterFieldProps('cinematic', 'level')}>{character.level}</dd>
             </div>
           )}
-          {labels.world && (
-            <div className={styles.metaCell} data-cinema-fact="world">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{ui.world}</dt>
-              <dd className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'world')}>{labels.world}</dd>
-            </div>
-          )}
-          {labels.dataCenter && (
-            <div className={styles.metaCell} data-cinema-fact="data-center">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{ui.dataCenter}</dt>
-              <dd className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'dataCenter')}>{labels.dataCenter}</dd>
+          {hasWorldFacts && (
+            <div className={styles.metaCell} data-cinema-fact="world-data-center">
+              <dt className={styles.metaLabel} data-master-typography-role="label">{copy.worldDc}</dt>
+              <dd className={styles.metaValue}>
+                {labels.world && <span {...masterFieldProps('cinematic', 'world')}>{labels.world}</span>}
+                {labels.world && labels.dataCenter && <span aria-hidden="true"> / </span>}
+                {labels.dataCenter && <span {...masterFieldProps('cinematic', 'dataCenter')}>{labels.dataCenter}</span>}
+              </dd>
             </div>
           )}
           {character.freeCompany.trim() && (
             <div className={styles.metaCell} data-cinema-fact="free-company">
               <dt className={styles.metaLabel} data-master-typography-role="label">{ui.freeCompany}</dt>
-              <dd className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'freeCompany')}>{character.freeCompany}</dd>
-            </div>
-          )}
-          {microcopy.origin && (
-            <div className={styles.metaCell} data-cinema-fact="service">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{copy.service}</dt>
-              <dd className={`${styles.metaValue} ${styles.origin}`} data-master-typography-role="micro" {...masterFieldProps('cinematic', 'origin')}>{microcopy.origin}</dd>
+              <dd className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'freeCompany')}>
+                {character.freeCompany}
+              </dd>
             </div>
           )}
         </dl>

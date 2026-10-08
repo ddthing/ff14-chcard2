@@ -1191,7 +1191,7 @@
   font-style: italic;
 }
 
-/* Focused editor values get one short, quiet refocus cue in the rendered card. */
+/* Keep the editor's field link visible without animating printed content. */
 .card[data-highlight-field='name'] [data-field='name'],
 .card[data-highlight-field='character.name'] [data-field='name'],
 .card[data-highlight-field='world'] [data-field='world'],
@@ -1205,12 +1205,9 @@
 .card[data-highlight-field='bio'] [data-field='bio'],
 .card[data-highlight-field='languages'] [data-field='languages'],
 .card[data-highlight-field='playStyles'] [data-field='playStyles'] {
-  animation: cardValueRefocus 300ms ease-out both;
-}
-
-@keyframes cardValueRefocus {
-  from { filter: blur(1.6px); opacity: 0.72; }
-  to { filter: blur(0); opacity: 1; }
+  outline: max(1px, var(--master-rule-weight, .13cqi)) solid color-mix(in srgb, var(--master-accent, var(--card-accent, currentColor)) 78%, transparent);
+  outline-offset: .12em;
+  border-radius: .04em;
 }
 
 /* Cinematic A: full-bleed portrait, quiet lower information veil (base composition). */

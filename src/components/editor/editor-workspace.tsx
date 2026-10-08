@@ -6,6 +6,7 @@ import {
   Profiler,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -18,9 +19,11 @@ import {
 import { useI18n } from '@/lib/i18n';
 import { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER } from '@/lib/master-card-config';
 import { getJobTheme } from '@/lib/job-themes';
+import { localizeCardWorld } from '@/lib/card-microcopy';
 import { getJob, LANGUAGES, PLAY_STYLES } from '@/data/ffxiv';
 import { prepareImageFile, ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
 import { EditorBoundary } from './editor-boundary';
+import { EDITOR_TASK_FOR_PANEL as TASK_FOR_PANEL, EDITOR_TASK_IDS as TASK_IDS, EDITOR_TASK_PANEL as TASK_PANEL, type EditorTaskId } from './editor-navigation';
 import { getUploadErrorMessage } from './editor-errors';
 import { committedLevel, isImeComposing, validLevelInput } from './editor-input';
 import { cancelPendingEditorUploads, registerUploadCancellation } from './upload-session';
@@ -36,7 +39,7 @@ import { InlineConfirm } from '@/components/editor/inline-confirm';
 import { resolveEditorKeyboardAction } from '@/components/editor/editor-keyboard';
 import { FFXIVAttribution } from '@/components/ffxiv/ffxiv-attribution';
 import { GrandCompanyPicker, JobPicker, RaceClanPicker, WorldPicker } from '@/components/editor/ffxiv-pickers';
-import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate, type CardRatio } from '@/components/cards/types';
+import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate } from '@/components/cards/types';
 import { RatioPicker } from '@/components/editor/ratio-picker';
 import {
   isSampleArtworkSource,
@@ -46,12 +49,10 @@ import {
 } from '@/components/editor/editor-ux';
 import {
   hasFileTransfer,
-  INSPECTOR_CLOSE_FALLBACK_MS,
   canBeginCanvasDrag,
   isBrowserZoomWheelGesture,
   isCanvasDragPointer,
   isEditorShortcutSuppressed,
-  shouldRetainInspectorForExit,
   tryReleasePointerCapture,
   trySetPointerCapture,
   transitionUploadInteractionState,
@@ -59,18 +60,14 @@ import {
   type UploadInteractionState,
 } from '@/components/editor/editor-interaction';
 import type { Locale } from '@/lib/types';
-import { editorStore, useEditorStore, type EditorImageState, type EditorPanelId } from '@/store/editor-store';
+import { editorStore, useEditorStore, type EditorImageState } from '@/store/editor-store';
 import { FFXIV_OFFICIAL_ASSETS_ENABLED } from '@/lib/ffxiv-assets';
 import styles from '@/app/editor/editor.module.css';
 
-const PANEL_IDS: EditorPanelId[] = ['screenshot', 'character', 'information', 'template', 'style', 'effects'];
-const PANEL_ICONS: Record<EditorPanelId, EditorIconName> = {
-  screenshot: 'screenshot',
-  character: 'character',
-  information: 'information',
-  template: 'template',
-  style: 'style',
-  effects: 'effects',
+const TASK_ICONS: Record<EditorTaskId, EditorIconName> = {
+  photo: 'screenshot',
+  information: 'character',
+  design: 'template',
 };
 const CARD_TEMPLATES = MASTER_TEMPLATE_ORDER;
 const SAMPLE_ARTWORK_SOURCES = new Set([
@@ -113,6 +110,24 @@ function ratioNumber(value: string): [number, number] {
 
 function getTemplateLabel(copy: EditorCopy, template: AdventurerCardTemplate): string {
   return copy.templates[template];
+}
+
+function moreCanvasControlsLabel(locale: Locale): string {
+  if (locale === 'ko') return '추가 도구';
+  if (locale === 'ja') return 'その他';
+  return 'More tools';
+}
+
+function compactMoreCanvasControlsLabel(locale: Locale): string {
+  if (locale === 'ko') return '더보기';
+  if (locale === 'ja') return 'その他';
+  return 'More';
+}
+
+function photoAdjustmentsLabel(locale: Locale): string {
+  if (locale === 'ko') return '사진 조정';
+  if (locale === 'ja') return '写真の調整';
+  return 'Photo adjustments';
 }
 
 function selectMasterTemplate(template: AdventurerCardTemplate) {
@@ -239,29 +254,113 @@ function FieldGrid({ children }: { children: ReactNode }) {
   return <div className={styles.fieldGrid}>{children}</div>;
 }
 
+function TypographyPresetPicker({
+  copy,
+  selectedPreset,
+  specimenName,
+  nameScript,
+}: {
+  copy: EditorCopy;
+  selectedPreset: TypographyPresetId;
+  specimenName: string;
+  nameScript: TypographyScript;
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  return (
+    <details
+      className={`${styles.editorGroup} ${styles.disclosure} ${styles.typographyDisclosure}`}
+      open={isOpen}
+      onToggle={(event) => setIsOpen(event.currentTarget.open)}
+    >
+      <summary className={styles.typeSummary}>
+        <span className={styles.typeSummaryText}>
+          <span className={styles.typeSummaryLabel}>{copy.typography}</span>
+          <strong className={styles.typeSummaryValue}>{copy.typographyNames[selectedPreset]}</strong>
+        </span>
+        <span className={styles.typeSummaryIndicator} aria-hidden="true" />
+      </summary>
+      {isOpen && (
+        <>
+          <div className={styles.typeChoices}>
+            {TYPOGRAPHY_IDS.map((preset) => (
+              <button
+                type="button"
+                key={preset}
+                className={styles.typeChoice}
+                aria-label={`${copy.typographyNames[preset]} · ${specimenName}`}
+                aria-pressed={selectedPreset === preset}
+                onClick={() => editorStore.getState().updateDesign('typographyPreset', preset)}
+              >
+                <span className={styles.typeChoiceHead}>
+                  <span className={styles.typeSample} aria-hidden="true">Aa</span>
+                  <strong>{copy.typographyNames[preset]}</strong>
+                  {selectedPreset === preset && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
+                </span>
+                <span className={styles.typeCurrentName} style={{ fontFamily: getTypographyFontFamily(preset, 'display', nameScript) }}>{specimenName}</span>
+              </button>
+            ))}
+          </div>
+          <details className={styles.typeSpecimenDisclosure}>
+            <summary>{copy.typographySpecimens}</summary>
+            <div className={styles.typeSpecimenList}>
+              {TYPOGRAPHY_IDS.map((preset) => (
+                <div className={styles.typeSpecimenGroup} key={preset}>
+                  <strong>{copy.typographyNames[preset]}</strong>
+                  {([
+                    ['EN', 'latin'],
+                    ['KO', 'korean'],
+                    ['JA', 'japanese'],
+                  ] as const).map(([label, script]) => (
+                    <span className={styles.typeSpecimenRow} key={script}>
+                      <i>{label}</i>
+                      <span style={{ fontFamily: getTypographyFontFamily(preset, 'display', script) }}>{TYPOGRAPHY_SPECIMENS[script]}</span>
+                    </span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </details>
+        </>
+      )}
+    </details>
+  );
+}
+
 function EditorInspector({
   copy,
-  activePanel,
+  activeTask,
+  isMobileViewport,
   onFocusField,
   onClose,
   onSuccessfulUpload,
-  headingRef,
   locale,
   isOpen,
 }: {
   copy: EditorCopy;
-  activePanel: EditorPanelId;
+  activeTask: EditorTaskId;
+  isMobileViewport: boolean;
   onFocusField: (field: string) => void;
   onClose: () => void;
   onSuccessfulUpload: () => void;
-  headingRef: { current: HTMLHeadingElement | null };
   locale: Locale;
   isOpen: boolean;
 }) {
   const character = useEditorStore((state) => state.character);
-  const design = useEditorStore((state) => state.design);
-  const image = useEditorStore((state) => state.image);
-  const isSampleArtwork = isSampleArtworkSource(image.src, SAMPLE_ARTWORK_SOURCES);
+  const designTemplate = useEditorStore((state) => state.design.template);
+  const layoutVariant = useEditorStore((state) => state.design.layoutVariant);
+  const ratio = useEditorStore((state) => state.design.ratio);
+  const typographyPreset = useEditorStore((state) => state.design.typographyPreset);
+  const colorMode = useEditorStore((state) => state.design.colorMode);
+  const palette = useEditorStore((state) => state.design.palette);
+  const jobMotifVisible = useEditorStore((state) => state.design.jobMotifVisible);
+  const jobIconColor = useEditorStore((state) => state.design.jobIconColor);
+  const effects = useEditorStore((state) => state.design.effects);
+  const design = { template: designTemplate, layoutVariant, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects };
+  const imageSource = useEditorStore((state) => state.image.src);
+  const imageFileName = useEditorStore((state) => state.image.fileName);
+  const image = useEditorStore((state) => activeTask === 'photo' ? state.image : null);
+  const isSampleArtwork = isSampleArtworkSource(imageSource, SAMPLE_ARTWORK_SOURCES);
   const isHydrated = useEditorStore((state) => state.isHydrated);
   const [uploadError, setUploadError] = useState('');
   const [uploadState, setUploadState] = useState<UploadInteractionState>('idle');
@@ -271,10 +370,34 @@ function EditorInspector({
   const uploadDragDepth = useRef(0);
   const uploadSuccessTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inspectorRef = useRef<HTMLElement>(null);
-  const copyForPanel = copy.sections[activePanel];
+  const inspectorBodyRef = useRef<HTMLDivElement>(null);
+  const previousTaskRef = useRef(activeTask);
+  const copyForPanel = copy.tasks[activeTask];
   profileRender('EditorInspector');
-  if (activePanel === 'template') profileRender('TemplatePicker.subtree');
-  if (activePanel === 'style') profileRender('TypographyPicker.subtree');
+  if (activeTask === 'design') {
+    profileRender('TemplatePicker.subtree');
+    profileRender('TypographyPicker.subtree');
+  }
+
+  useLayoutEffect(() => {
+    const previousTask = previousTaskRef.current;
+    if (previousTask === activeTask) return;
+    previousTaskRef.current = activeTask;
+
+    const body = inspectorBodyRef.current;
+    if (!body) return;
+    if (!isMobileViewport) body.scrollTop = 0;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const animation = body.animate(
+      [
+        { opacity: 0.84, transform: 'translate3d(0, 6px, 0)' },
+        { opacity: 1, transform: 'translate3d(0, 0, 0)' },
+      ],
+      { duration: 160, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'both' },
+    );
+    return () => animation.cancel();
+  }, [activeTask, isMobileViewport]);
 
   useEffect(() => {
     let frame = 0;
@@ -284,7 +407,7 @@ function EditorInspector({
         const inspector = inspectorRef.current;
         const input = document.activeElement;
         if (!inspector || !(input instanceof HTMLElement) || !inspector.contains(input) || !input.matches('input, textarea, select')) return;
-        const body = inspector.querySelector<HTMLElement>(`.${styles.inspectorBody}`);
+        const body = inspectorBodyRef.current;
         if (!body) return;
         const bounds = body.getBoundingClientRect(), rect = input.getBoundingClientRect();
         const viewport = window.visualViewport;
@@ -482,7 +605,7 @@ function EditorInspector({
   ].join(' ');
 
   function getControlValue(key: ImageControlKey): number {
-    return image[key];
+    return image?.[key] ?? editorStore.getState().image[key];
   }
 
   function renderImageControl(key: ImageControlKey) {
@@ -533,56 +656,93 @@ function EditorInspector({
   const specimenName = character.name || copy.typographyNameFallback;
 
   useEffect(() => {
-    if (activePanel !== 'style') return;
+    if (activeTask !== 'design') return;
     const textByScript = {
       korean: `${TYPOGRAPHY_SPECIMENS.korean} ${nameScript === 'korean' ? character.name : ''}`,
       japanese: `${TYPOGRAPHY_SPECIMENS.japanese} ${nameScript === 'japanese' ? character.name : ''}`,
     };
-    void loadTypographyFonts(design.typographyPreset, ['korean', 'japanese'], textByScript).catch(() => undefined);
-  }, [activePanel, character.name, design.typographyPreset, nameScript]);
+    void loadTypographyFonts(typographyPreset, ['korean', 'japanese'], textByScript).catch(() => undefined);
+  }, [activeTask, character.name, typographyPreset, nameScript]);
 
   return (
-    <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector} aria-label={copyForPanel}
+    <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector} role="tabpanel"
+      aria-labelledby={`editor-task-tab-${isMobileViewport ? 'mobile' : 'desktop'}-${activeTask}`}
       data-state={isOpen ? 'open' : 'closing'} aria-hidden={!isOpen} inert={!isOpen}>
       <div className={styles.sheetHandle} aria-hidden="true"><span /></div>
       <div className={styles.inspectorHead}>
         <div className={styles.inspectorTitle}>
-          <span className={styles.inspectorIcon}><EditorIcon name={PANEL_ICONS[activePanel]} /></span>
-          <div><span className={styles.panelIndex}>{String(PANEL_IDS.indexOf(activePanel) + 1).padStart(2, '0')} / 06</span><h2 ref={headingRef} tabIndex={-1}>{copyForPanel}</h2></div>
+          <span className={styles.inspectorIcon}><EditorIcon name={TASK_ICONS[activeTask]} /></span>
+          <div><span className={styles.panelIndex}>{String(TASK_IDS.indexOf(activeTask) + 1).padStart(2, '0')} / 03</span><h2>{copyForPanel}</h2></div>
         </div>
         <button className={styles.closeInspector} type="button" onClick={onClose} aria-label={copy.closeInspector}><EditorIcon name="close" size={16} /></button>
       </div>
 
-      <div className={styles.inspectorBody}>
-        {activePanel === 'screenshot' && (
-          <>
+      <div ref={inspectorBodyRef} className={styles.inspectorBody}>
+        {activeTask === 'photo' && (
+          <div className={styles.photoPanel}>
+            <section className={styles.photoControls} aria-label={copy.image}>
+              <div className={styles.photoControlsHeading}>
+                <h3>{photoAdjustmentsLabel(locale)}</h3>
+                <button type="button" className={styles.imageResetButton} aria-label={`${copy.image}: ${copy.resetImage}`} onClick={resetImageAdjustments}>{copy.resetImage}</button>
+              </div>
+              <div className={styles.imageControlList}>
+                {BASIC_IMAGE_CONTROL_KEYS.map(renderImageControl)}
+                <details className={styles.disclosure}>
+                  <summary>{copy.moreImageAdjustments}</summary>
+                  <div className={styles.imageControlList}>{ADVANCED_IMAGE_CONTROL_KEYS.map(renderImageControl)}</div>
+                </details>
+              </div>
+            </section>
             <div
-              className={`${styles.uploadZone} ${uploadState === 'drag-over' ? styles.uploadZoneActive : ''}`}
+              className={`${styles.uploadZone} ${styles.uploadZoneCompact} ${uploadState === 'drag-over' ? styles.uploadZoneActive : ''}`}
               data-state={uploadState}
               onDragEnter={onFileDragEnter}
               onDragOver={onFileDragOver}
               onDragLeave={onFileDragLeave}
               onDrop={onDrop}
             >
-              <span className={styles.uploadSymbol}><EditorIcon name="upload" size={21} /></span>
-              <strong aria-live={uploadState === 'drag-over' ? 'polite' : undefined}>
-                {uploadState === 'drag-over' ? copy.dropToUpload : isSampleArtwork ? copy.uploadTitle : copy.replaceImage}
-              </strong>
+              {isSampleArtwork ? (
+                <>
+                  <strong aria-live={uploadState === 'drag-over' ? 'polite' : undefined}>
+                    {uploadState === 'drag-over' ? copy.dropToUpload : copy.uploadTitle}
+                  </strong>
+                  <button
+                    type="button"
+                    className={styles.uploadButton}
+                    onClick={() => {
+                      if (uploadState === 'processing') return;
+                      fileInput.current?.click();
+                    }}
+                    aria-disabled={uploadState === 'processing'}
+                    aria-label={`${copy.chooseFile} · ${copy.uploadScreenshot}`}
+                    aria-controls={SCREENSHOT_INPUT_ID}
+                    aria-describedby={screenshotDescriptionIds}
+                  >
+                    {copy.chooseFile}
+                  </button>
+                </>
+              ) : (
+                <div className={styles.currentImage}>
+                  <span className={styles.currentImageMark} aria-hidden="true">✓</span>
+                  <span title={imageFileName ?? copy.uploadedScreenshot}>{imageFileName ?? copy.uploadedScreenshot}</span>
+                  <button
+                    type="button"
+                    className={styles.uploadButton}
+                    onClick={() => {
+                      if (uploadState === 'processing') return;
+                      fileInput.current?.click();
+                    }}
+                    aria-disabled={uploadState === 'processing'}
+                    aria-label={`${copy.replaceImage} · ${copy.uploadScreenshot}`}
+                    aria-controls={SCREENSHOT_INPUT_ID}
+                    aria-describedby={screenshotDescriptionIds}
+                  >
+                    {copy.replaceImage}
+                  </button>
+                </div>
+              )}
+              <span className={styles.fileTypes} id={SCREENSHOT_TYPES_ID}>{copy.fileTypes}</span>
               <span className={styles.uploadSubcopy} id={SCREENSHOT_HELP_ID}>{copy.uploadDescription}</span>
-              <button
-                type="button"
-                className={styles.uploadButton}
-                onClick={() => {
-                  if (uploadState === 'processing') return;
-                  fileInput.current?.click();
-                }}
-                aria-disabled={uploadState === 'processing'}
-                aria-label={`${isSampleArtwork ? copy.chooseFile : copy.replaceImage} · ${copy.uploadScreenshot}`}
-                aria-controls={SCREENSHOT_INPUT_ID}
-                aria-describedby={screenshotDescriptionIds}
-              >
-                {isSampleArtwork ? copy.chooseFile : copy.replaceImage}
-              </button>
               <span id={SCREENSHOT_STATUS_ID} className={styles.uploadStatus ?? ''} role="status" aria-live="polite" aria-atomic="true">
                 {uploadState === 'processing' ? copy.uploading : uploadState === 'success' ? copy.uploadSuccess : ''}
               </span>
@@ -600,7 +760,6 @@ function EditorInspector({
                 tabIndex={-1}
                 disabled={uploadState === 'processing'}
               />
-              <span className={styles.fileTypes} id={SCREENSHOT_TYPES_ID}>{copy.fileTypes}</span>
             </div>
             {isSampleArtwork && (
               <div className={styles.sampleNotice}>
@@ -608,114 +767,91 @@ function EditorInspector({
                 <div><strong>{copy.sampleArtwork}</strong><p>{copy.sampleArtworkHint}</p></div>
               </div>
             )}
-            {!isSampleArtwork && (
-              <div className={styles.currentImage}>
-                <span className={styles.currentImageMark} aria-hidden="true">✓</span>
-                <span title={image.fileName ?? copy.uploadedScreenshot}>{image.fileName ?? copy.uploadedScreenshot}</span>
-              </div>
-            )}
             <p className={styles.privacyNote}>{copy.privacy}</p>
             {uploadError && <p className={styles.errorMessage} id={SCREENSHOT_ERROR_ID} role="alert" aria-atomic="true">{getUploadErrorMessage(uploadError, locale)}</p>}
-            <details className={`${styles.sectionRule} ${styles.disclosure}`} open>
-              <summary className={styles.sectionHeading}><div><span>02</span><h3>{copy.image}</h3></div></summary>
-              <div className={styles.imageControlList}>
-                <button type="button" className={styles.imageResetButton} aria-label={`${copy.image}: ${copy.resetImage}`} onClick={resetImageAdjustments}>{copy.resetImage}</button>
-                {BASIC_IMAGE_CONTROL_KEYS.map(renderImageControl)}
-                <details className={styles.disclosure}>
-                  <summary>{copy.moreImageAdjustments}</summary>
-                  <div className={styles.imageControlList}>{ADVANCED_IMAGE_CONTROL_KEYS.map(renderImageControl)}</div>
-                </details>
-              </div>
-            </details>
-          </>
-        )}
-
-        {activePanel === 'character' && (
-          <div className={styles.formSection}>
-            <p className={styles.panelIntro}>{copy.subtitle}</p>
-            <FieldGrid>
-              <CharacterInput field="name" value={character.name} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-              <JobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
-            </FieldGrid>
-            <section className={styles.editorGroup} aria-label={copy.fields.world}>
-              <WorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
-            </section>
-            <details className={styles.disclosure}>
-              <summary>{copy.additionalCharacterDetails}</summary>
-              <div className={styles.fieldGrid}>
-                <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-                <RaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
-              </div>
-            </details>
           </div>
         )}
 
-        {activePanel === 'information' && (
+        {activeTask === 'information' && (
           <div className={styles.formSection}>
             <p className={styles.panelIntro}>{copy.informationIntro}</p>
-            <FieldGrid>
+            <section className={styles.editorGroup} aria-label={copy.sections.character}>
+              <div className={styles.sectionHeading}><h3>{copy.sections.character}</h3></div>
+              <CharacterInput field="name" value={character.name} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
+              <FieldGrid>
+                <JobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+                <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
+              </FieldGrid>
+              <WorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+              <FieldGrid>
+                <RaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+              </FieldGrid>
               <CharacterInput field="freeCompany" value={character.freeCompany} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-              <GrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
-            </FieldGrid>
-            <div className={styles.chipField}>
-              <span className={styles.controlLabel}>{copy.fields.languages}<small className={styles.chipCount}>{copy.picker.selectedCount(character.languages.length, copy.picker.maxLanguages)}</small></span>
-              <div className={styles.choiceChips}>
-                {[...LANGUAGES].sort((left, right) => left.sortOrder - right.sortOrder).map((language) => (
-                  <button
-                    type="button"
-                    className={styles.choiceChip}
-                    key={language.id}
-                    aria-pressed={character.languages.includes(language.id)}
-                    aria-label={`${copy.fields.languages}: ${language.localizedName[locale]}`}
-                    disabled={!character.languages.includes(language.id) && character.languages.length >= copy.picker.maxLanguages}
-                    onFocus={() => onFocusField('languages')}
-                    onBlur={() => onFocusField('')}
-                    onClick={() => changeArrayField('languages', language.id, copy.picker.maxLanguages)}
-                  >{language.localizedName[locale]}</button>
-                ))}
+            </section>
+            <details className={`${styles.disclosure} ${styles.editorGroup}`}>
+              <summary>{copy.additionalCharacterDetails}</summary>
+              <div className={styles.additionalInformation}>
+                <GrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+                <div className={styles.chipField}>
+                  <span className={styles.controlLabel}>{copy.fields.languages}<small className={styles.chipCount}>{copy.picker.selectedCount(character.languages.length, copy.picker.maxLanguages)}</small></span>
+                  <div className={styles.choiceChips}>
+                    {[...LANGUAGES].sort((left, right) => left.sortOrder - right.sortOrder).map((language) => (
+                      <button
+                        type="button"
+                        className={styles.choiceChip}
+                        key={language.id}
+                        aria-pressed={character.languages.includes(language.id)}
+                        aria-label={`${copy.fields.languages}: ${language.localizedName[locale]}`}
+                        disabled={!character.languages.includes(language.id) && character.languages.length >= copy.picker.maxLanguages}
+                        onFocus={() => onFocusField('languages')}
+                        onBlur={() => onFocusField('')}
+                        onClick={() => changeArrayField('languages', language.id, copy.picker.maxLanguages)}
+                      >{language.localizedName[locale]}</button>
+                    ))}
+                  </div>
+                </div>
+                <div className={styles.chipField}>
+                  <span className={styles.controlLabel}>{copy.fields.playStyles}<small className={styles.chipCount}>{copy.picker.selectedCount(character.playStyles.length, copy.picker.maxPlayStyles)}</small></span>
+                  <div className={styles.choiceChips}>
+                    {[...PLAY_STYLES].sort((left, right) => left.sortOrder - right.sortOrder).map((playStyle) => (
+                      <button
+                        type="button"
+                        className={styles.choiceChip}
+                        key={playStyle.id}
+                        aria-pressed={character.playStyles.includes(playStyle.id)}
+                        aria-label={`${copy.fields.playStyles}: ${playStyle.localizedName[locale]}`}
+                        disabled={!character.playStyles.includes(playStyle.id) && character.playStyles.length >= copy.picker.maxPlayStyles}
+                        onFocus={() => onFocusField('playStyles')}
+                        onBlur={() => onFocusField('')}
+                        onClick={() => changeArrayField('playStyles', playStyle.id, copy.picker.maxPlayStyles)}
+                      >{playStyle.localizedName[locale]}</button>
+                    ))}
+                  </div>
+                </div>
+                <CharacterInput field="bio" value={character.bio} copy={copy} onUpdate={updateText} onFocusField={onFocusField}/>
+                <FFXIVAttribution
+                  className={styles.privacyNote}
+                  locale={locale}
+                  officialAssetsUsed={FFXIV_OFFICIAL_ASSETS_ENABLED}
+                  service={character.service === 'korea' ? 'KOREA' : 'GLOBAL'}
+                />
               </div>
-            </div>
-            <div className={styles.chipField}>
-              <span className={styles.controlLabel}>{copy.fields.playStyles}<small className={styles.chipCount}>{copy.picker.selectedCount(character.playStyles.length, copy.picker.maxPlayStyles)}</small></span>
-              <div className={styles.choiceChips}>
-                {[...PLAY_STYLES].sort((left, right) => left.sortOrder - right.sortOrder).map((playStyle) => (
-                  <button
-                    type="button"
-                    className={styles.choiceChip}
-                    key={playStyle.id}
-                    aria-pressed={character.playStyles.includes(playStyle.id)}
-                    aria-label={`${copy.fields.playStyles}: ${playStyle.localizedName[locale]}`}
-                    disabled={!character.playStyles.includes(playStyle.id) && character.playStyles.length >= copy.picker.maxPlayStyles}
-                    onFocus={() => onFocusField('playStyles')}
-                    onBlur={() => onFocusField('')}
-                    onClick={() => changeArrayField('playStyles', playStyle.id, copy.picker.maxPlayStyles)}
-                  >{playStyle.localizedName[locale]}</button>
-                ))}
-              </div>
-            </div>
-            <CharacterInput field="bio" value={character.bio} copy={copy} onUpdate={updateText} onFocusField={onFocusField}/>
-            <FFXIVAttribution
-              className={styles.privacyNote}
-              locale={locale}
-              officialAssetsUsed={FFXIV_OFFICIAL_ASSETS_ENABLED}
-              service={character.service === 'korea' ? 'KOREA' : 'GLOBAL'}
-            />
+            </details>
           </div>
         )}
 
-        {activePanel === 'template' && (
+        {activeTask === 'design' && (
           <div className={`${styles.formSection} ${styles.templatePanel}`}>
             <section className={`${styles.editorGroup} ${styles.masterTemplateGrid}`} aria-label={copy.template}>
-              <div className={styles.sectionHeading}><div><span>01</span><h3>{copy.template}</h3></div></div>
+              <div className={styles.sectionHeading}><h3>{copy.template}</h3></div>
               <div className={styles.templateChoices}>
                 {CARD_TEMPLATES.map((template) => {
-                  const selected = design.template === template && design.layoutVariant === MASTER_CARD_CONFIG[template].layout;
+                  const selected = template === designTemplate && layoutVariant === MASTER_CARD_CONFIG[template].layout;
                   return (
                     <div key={template} className={styles.templateChoice} data-selected={selected}>
                       <MasterTemplateProof template={template} locale={locale} />
                       <button type="button" className={styles.templateChoiceAction} aria-label={`${copy.template}: ${getTemplateLabel(copy, template)}`} aria-pressed={selected} onClick={() => {
                         selectMasterTemplate(template);
-                        if (window.matchMedia('(max-width: 900px)').matches) onClose();
                       }}>
                         <span className={styles.templateChoiceName}>{getTemplateLabel(copy, template)}</span>
                         <span className={styles.templateIntent}>{copy.templateIntents[template]}</span>
@@ -728,12 +864,21 @@ function EditorInspector({
               </div>
             </section>
 
+            <section className={styles.editorGroup} aria-label={copy.ratio}>
+              <div className={styles.sectionHeading}><h3>{copy.ratio}</h3></div>
+              <RatioPicker
+                label={copy.ratio}
+                value={design.ratio}
+                onChange={(nextRatio) => editorStore.getState().updateDesign('ratio', nextRatio)}
+              />
+            </section>
+
             <details className={`${styles.disclosure} ${styles.experimentalDisclosure}`}>
               <summary>{copy.experimentalLabel}</summary>
               <p className={styles.panelIntro}>{copy.experimentalHint}</p>
               <div className={styles.variationChoices} aria-label={copy.templateVariation}>
                 {(['b', 'c'] as const).map((variant) => (
-                  <button type="button" key={variant} className={styles.variationChoice} aria-pressed={design.layoutVariant === variant} onClick={() => editorStore.getState().updateDesign('layoutVariant', variant)}>
+                  <button type="button" key={variant} className={styles.variationChoice} aria-pressed={layoutVariant === variant} onClick={() => editorStore.getState().updateDesign('layoutVariant', variant)}>
                     <span>{copy.variationNames[variant]}</span>
                   </button>
                 ))}
@@ -742,76 +887,40 @@ function EditorInspector({
           </div>
         )}
 
-        {activePanel === 'style' && (
+        {activeTask === 'design' && (
           <div className={styles.formSection}>
             <p className={styles.panelIntro}>{copy.styleIntro}</p>
-            <section className={styles.editorGroup} aria-label={copy.typography}>
-              <div className={styles.sectionHeading}><div><span>01</span><h3>{copy.typography}</h3></div></div>
-              <div className={styles.typeChoices}>
-                {TYPOGRAPHY_IDS.map((preset) => (
-                  <button
-                    type="button"
-                    key={preset}
-                    className={styles.typeChoice}
-                    aria-label={`${copy.typographyNames[preset]} · ${specimenName}`}
-                    aria-pressed={design.typographyPreset === preset}
-                    onClick={() => editorStore.getState().updateDesign('typographyPreset', preset)}
-                  >
-                    <span className={styles.typeChoiceHead}>
-                      <span className={styles.typeSample} aria-hidden="true">Aa</span>
-                      <strong>{copy.typographyNames[preset]}</strong>
-                      {design.typographyPreset === preset && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
-                    </span>
-                    <span className={styles.typeCurrentName} style={{ fontFamily: getTypographyFontFamily(preset, 'display', nameScript) }}>{specimenName}</span>
-                  </button>
-                ))}
-              </div>
-              <details className={styles.typeSpecimenDisclosure}>
-                <summary>{copy.typographySpecimens}</summary>
-                <div className={styles.typeSpecimenList}>
-                  {TYPOGRAPHY_IDS.map((preset) => (
-                    <div className={styles.typeSpecimenGroup} key={preset}>
-                      <strong>{copy.typographyNames[preset]}</strong>
-                      {([
-                        ['EN', 'latin'],
-                        ['KO', 'korean'],
-                        ['JA', 'japanese'],
-                      ] as const).map(([label, script]) => (
-                        <span className={styles.typeSpecimenRow} key={script}>
-                          <i>{label}</i>
-                          <span style={{ fontFamily: getTypographyFontFamily(preset, 'display', script) }}>{TYPOGRAPHY_SPECIMENS[script]}</span>
-                        </span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            </section>
+            <TypographyPresetPicker
+              copy={copy}
+              selectedPreset={typographyPreset}
+              specimenName={specimenName}
+              nameScript={nameScript}
+            />
 
-            <details className={`${styles.editorGroup} ${styles.disclosure}`}>
-              <summary className={styles.sectionHeading}><div><span>02</span><h3>{copy.colors}</h3></div></summary>
+            <section className={styles.editorGroup} aria-label={copy.colors}>
+              <div className={styles.sectionHeading}><h3>{copy.colors}</h3></div>
               <div className={styles.modeChoices} role="group" aria-label={copy.colors}>
                 {(['auto', 'custom', 'job'] as const).map((mode) => (
-                  <button type="button" key={mode} aria-pressed={design.colorMode === mode} onClick={() => editorStore.getState().updateDesign('colorMode', mode)}>{copy.colorModes[mode]}</button>
+                  <button type="button" key={mode} aria-pressed={colorMode === mode} onClick={() => editorStore.getState().updateDesign('colorMode', mode)}>{copy.colorModes[mode]}</button>
                 ))}
               </div>
               <p className={styles.panelIntro}>{copy.colorModesHint}</p>
-              {design.colorMode === 'auto' && (
+              {colorMode === 'auto' && (
                 <div className={styles.autoPalette}>
                   <div className={styles.paletteSwatches}>
-                    {COLOR_KEYS.map((key) => <span key={key} title={`${copy.colorNames[key]} ${design.palette[key]}`} style={{ backgroundColor: design.palette[key] }} />)}
+                    {COLOR_KEYS.map((key) => <span key={key} title={`${copy.colorNames[key]} ${palette[key]}`} style={{ backgroundColor: palette[key] }} />)}
                   </div>
-                  <p>{copy.colorModes.auto} · {isSampleArtwork ? copy.sampleArtwork : image.fileName ?? copy.uploadedScreenshot}</p>
+                  <p>{copy.colorModes.auto} · {isSampleArtwork ? copy.sampleArtwork : imageFileName ?? copy.uploadedScreenshot}</p>
                 </div>
               )}
-              {design.colorMode === 'custom' && (
+              {colorMode === 'custom' && (
                 <div className={styles.paletteControls}>
                   {COLOR_KEYS.map((key: ColorKey) => (
                     <label className={styles.colorControl} key={key}>
                       <span>{copy.colorNames[key]}</span>
                       <input
                         type="color"
-                        value={design.palette[key]}
+                        value={palette[key]}
                         aria-label={copy.colorNames[key]}
                         onInput={(event) => updatePaletteColor(key, event.currentTarget.value)}
                         onChange={(event) => updatePaletteColor(key, event.currentTarget.value)}
@@ -820,7 +929,7 @@ function EditorInspector({
                   ))}
                 </div>
               )}
-              {design.colorMode === 'job' && (
+              {colorMode === 'job' && (
                 <div className={styles.jobThemePreview}>
                   <span className={styles.jobCrest} style={{ '--job-accent': activeJobTheme.accent, '--job-secondary': activeJobTheme.secondary } as CSSProperties} aria-hidden="true">✦</span>
                   <span><strong>{jobRecord?.localizedName[locale] ?? character.job}</strong><small>{copy.jobThemeHint}</small></span>
@@ -829,14 +938,14 @@ function EditorInspector({
                   </div>
                 </div>
               )}
-            </details>
+            </section>
 
             <section className={styles.editorGroup} aria-label={copy.jobMotif}>
               <button
                 type="button"
                 className={styles.effectRow}
-                aria-pressed={design.jobMotifVisible !== false}
-                onClick={() => editorStore.getState().updateDesign('jobMotifVisible', design.jobMotifVisible === false)}
+                aria-pressed={jobMotifVisible !== false}
+                onClick={() => editorStore.getState().updateDesign('jobMotifVisible', jobMotifVisible === false)}
               >
                 <span className={styles.effectIcon} aria-hidden="true">✦</span>
                 <span><strong>{copy.jobMotif}</strong><small>{copy.jobMotifHint}</small></span>
@@ -847,7 +956,7 @@ function EditorInspector({
                   <span>{copy.jobIconColor}</span>
                   <input
                     type="color"
-                    value={design.jobIconColor ?? design.palette.accent}
+                    value={jobIconColor ?? palette.accent}
                     aria-label={copy.jobIconColor}
                     onInput={(event) => editorStore.getState().updateDesign('jobIconColor', event.currentTarget.value)}
                     onChange={(event) => editorStore.getState().updateDesign('jobIconColor', event.currentTarget.value)}
@@ -857,7 +966,7 @@ function EditorInspector({
                   <button
                     type="button"
                     aria-label={copy.useFamilyAccent}
-                    disabled={!design.jobIconColor}
+                    disabled={!jobIconColor}
                     onClick={() => editorStore.getState().updateDesign('jobIconColor', null)}
                   >{copy.useFamilyAccent}</button>
                 </div>
@@ -866,25 +975,28 @@ function EditorInspector({
           </div>
         )}
 
-        {activePanel === 'effects' && (
+        {activeTask === 'design' && (
           <div className={styles.formSection}>
-            <p className={styles.panelIntro}>{copy.effectsHint}</p>
-            {(['grain', 'holographic'] as const).map((effect) => {
-              const selected = design.effects.includes(effect);
-              return (
-                <button
-                  type="button"
-                  className={styles.effectRow}
-                  key={effect}
-                  aria-pressed={selected}
-                  onClick={() => editorStore.getState().updateDesign('effects', selected ? design.effects.filter((item) => item !== effect) : [...design.effects, effect])}
-                >
-                  <span className={styles.effectIcon} aria-hidden="true">{effect === 'grain' ? '∴' : '✧'}</span>
-                  <span><strong>{effect === 'grain' ? copy.grain : copy.holographic}</strong><small>{effect === 'grain' ? copy.grainDescription : copy.holographicDescription}</small></span>
-                  <i className={styles.switchTrack} aria-hidden="true"><b /></i>
-                </button>
-              );
-            })}
+            <details className={`${styles.editorGroup} ${styles.disclosure}`}>
+              <summary className={styles.sectionHeading}><h3>{copy.sections.effects}</h3></summary>
+              <p className={styles.panelIntro}>{copy.effectsHint}</p>
+              {(['grain', 'holographic'] as const).map((effect) => {
+                const selected = design.effects.includes(effect);
+                return (
+                  <button
+                    type="button"
+                    className={styles.effectRow}
+                    key={effect}
+                    aria-pressed={selected}
+                    onClick={() => editorStore.getState().updateDesign('effects', selected ? design.effects.filter((item) => item !== effect) : [...design.effects, effect])}
+                  >
+                    <span className={styles.effectIcon} aria-hidden="true">{effect === 'grain' ? '∴' : '✧'}</span>
+                    <span><strong>{effect === 'grain' ? copy.grain : copy.holographic}</strong><small>{effect === 'grain' ? copy.grainDescription : copy.holographicDescription}</small></span>
+                    <i className={styles.switchTrack} aria-hidden="true"><b /></i>
+                  </button>
+                );
+              })}
+            </details>
           </div>
         )}
         {!isHydrated && <span className={styles.hydrationHint} aria-live="polite">{copy.hydrating}</span>}
@@ -901,7 +1013,6 @@ function EditorCanvas({
   highlightField,
   panMode,
   onTogglePan,
-  onExport,
   onRequestScreenshot,
   onEscapeClose,
   showImageDragHint,
@@ -912,7 +1023,6 @@ function EditorCanvas({
   highlightField: string;
   panMode: boolean;
   onTogglePan: () => void;
-  onExport: () => void;
   onRequestScreenshot: () => void;
   onEscapeClose: () => void;
   showImageDragHint: boolean;
@@ -933,18 +1043,19 @@ function EditorCanvas({
     cancelPendingEditorUploads();
     editorStore.getState().reset();
   }, []);
-  const changeRatio = useCallback((ratio: CardRatio) => {
-    editorStore.getState().updateDesign('ratio', ratio);
-  }, []);
   const stageRef = useRef<HTMLDivElement>(null);
   const cardFrameRef = useRef<HTMLDivElement>(null);
   const previewButtonRef = useRef<HTMLButtonElement>(null);
+  const moreControlsRef = useRef<HTMLDetailsElement>(null);
+  const moreControlsSummaryRef = useRef<HTMLElement>(null);
   const dragRef = useRef<
     | { kind: 'pan'; pointerId: number; startX: number; startY: number; originX: number; originY: number }
     | { kind: 'image'; pointerId: number; startX: number; startY: number; originX: number; originY: number; width: number; height: number }
     | null
   >(null);
   const fallbackPointerCleanupRef = useRef<(() => void) | null>(null);
+  const pendingPointerEventRef = useRef<Pick<PointerEvent, 'pointerId' | 'clientX' | 'clientY'> | null>(null);
+  const pointerFrameRef = useRef<number | null>(null);
   const spaceHeld = useRef(false);
   profileRender('CanvasControls.subtree');
   const wheelGroupActive = useRef(false);
@@ -1039,32 +1150,54 @@ function EditorCanvas({
     };
   }, [adjustZoom, fitCanvas, onEscapeClose]);
 
-  const movePointer = useCallback((event: Pick<PointerEvent, 'pointerId' | 'clientX' | 'clientY'>) => {
+  const flushPointerMove = useCallback((pointerId?: number, updatePan = true) => {
+    const event = pendingPointerEventRef.current;
+    if (!event || (pointerId !== undefined && event.pointerId !== pointerId)) return;
+    if (pointerFrameRef.current !== null) cancelAnimationFrame(pointerFrameRef.current);
+    pointerFrameRef.current = null;
+    pendingPointerEventRef.current = null;
+
     const drag = dragRef.current;
     if (!drag || !isCanvasDragPointer(drag.pointerId, event.pointerId)) return;
     if (drag.kind === 'pan') {
-      setPanOffset({ x: drag.originX + event.clientX - drag.startX, y: drag.originY + event.clientY - drag.startY });
-    } else {
-      const x = drag.originX - ((event.clientX - drag.startX) / drag.width) * 100;
-      const y = drag.originY - ((event.clientY - drag.startY) / drag.height) * 100;
-      editorStore.getState().setImage({ x, y }, { groupId: 'canvas-image-drag' });
+      if (updatePan) setPanOffset({ x: drag.originX + event.clientX - drag.startX, y: drag.originY + event.clientY - drag.startY });
+      return;
     }
+
+    const x = drag.originX - ((event.clientX - drag.startX) / drag.width) * 100;
+    const y = drag.originY - ((event.clientY - drag.startY) / drag.height) * 100;
+    editorStore.getState().setImage({ x, y }, { groupId: 'canvas-image-drag' });
   }, []);
+
+  const movePointer = useCallback((event: Pick<PointerEvent, 'pointerId' | 'clientX' | 'clientY'>) => {
+    const drag = dragRef.current;
+    if (!drag || !isCanvasDragPointer(drag.pointerId, event.pointerId)) return;
+    pendingPointerEventRef.current = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY };
+    if (pointerFrameRef.current !== null) return;
+    pointerFrameRef.current = requestAnimationFrame(() => {
+      pointerFrameRef.current = null;
+      flushPointerMove();
+    });
+  }, [flushPointerMove]);
 
   const onPointerMove = useCallback((event: ReactPointerEvent<HTMLDivElement>) => movePointer(event), [movePointer]);
 
   const finishPointerDrag = useCallback((pointerId: number) => {
     const drag = dragRef.current;
     if (!drag || !isCanvasDragPointer(drag.pointerId, pointerId)) return;
+    flushPointerMove(pointerId);
     if (drag.kind === 'image') editorStore.getState().endImageAdjustmentGroup();
     dragRef.current = null;
     setIsDragging(false);
     tryReleasePointerCapture(stageRef.current, pointerId);
     fallbackPointerCleanupRef.current?.();
     fallbackPointerCleanupRef.current = null;
-  }, []);
+  }, [flushPointerMove]);
 
-  const onPointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => finishPointerDrag(event.pointerId), [finishPointerDrag]);
+  const onPointerEnd = useCallback((event: ReactPointerEvent<HTMLDivElement>) => {
+    movePointer(event);
+    finishPointerDrag(event.pointerId);
+  }, [finishPointerDrag, movePointer]);
 
   const attachPointerFallback = useCallback((pointerId: number) => {
     fallbackPointerCleanupRef.current?.();
@@ -1074,7 +1207,9 @@ function EditorCanvas({
       movePointer(event);
     };
     const onFallbackEnd = (event: PointerEvent) => {
-      if (event.pointerId === pointerId) finishPointerDrag(pointerId);
+      if (event.pointerId !== pointerId) return;
+      movePointer(event);
+      finishPointerDrag(pointerId);
     };
     window.addEventListener('pointermove', onFallbackMove);
     window.addEventListener('pointerup', onFallbackEnd);
@@ -1113,11 +1248,13 @@ function EditorCanvas({
   }, [attachPointerFallback, image.x, image.y, onImageDragStart, panMode, panOffset.x, panOffset.y]);
 
   useEffect(() => () => {
+    const drag = dragRef.current;
+    flushPointerMove(undefined, false);
+    if (drag?.kind === 'image') editorStore.getState().endImageAdjustmentGroup();
+    dragRef.current = null;
     fallbackPointerCleanupRef.current?.();
     fallbackPointerCleanupRef.current = null;
-    if (dragRef.current?.kind === 'image') editorStore.getState().endImageAdjustmentGroup();
-    dragRef.current = null;
-  }, []);
+  }, [flushPointerMove]);
 
   const onWheel = useCallback((event: WheelEvent) => {
     if (isBrowserZoomWheelGesture(event)) return;
@@ -1150,7 +1287,7 @@ function EditorCanvas({
   }, [onWheel]);
 
   return (
-    <section className={`${styles.canvasColumn} ${previewOpen ? styles.canvasPreviewMode : ''}`} aria-label={`${copy.canvasLabel}: ${copy.cardPreviewSummary(character.name, summaryJob, character.world)}`}>
+    <section className={`${styles.canvasColumn} ${previewOpen ? styles.canvasPreviewMode : ''}`} aria-label={`${copy.canvasLabel}: ${copy.cardPreviewSummary(character.name, summaryJob, localizeCardWorld(character, locale))}`}>
       <div className={styles.canvasHeading}>
         <div>
           <span className={styles.canvasEyebrow}>{copy.canvasLabel}</span>
@@ -1159,8 +1296,16 @@ function EditorCanvas({
           </span>
         </div>
         <div className={styles.canvasHeadingActions}>
-          <button type="button" className={`${styles.canvasTool} ${safeAreaVisible ? styles.canvasToolActive : ''}`} aria-pressed={safeAreaVisible} onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}>
-            <EditorIcon name="safe-area" size={15} />{copy.safeArea}
+          {isSampleArtwork && (
+            <>
+              <span className={styles.stageSampleBadge}>{copy.sampleBadge}</span>
+              <button type="button" className={styles.stageUpload} onClick={onRequestScreenshot} aria-label={copy.uploadScreenshot}>
+                <EditorIcon name="upload" size={15} /><span>{copy.uploadScreenshot}</span>
+              </button>
+            </>
+          )}
+          <button type="button" className={`${styles.canvasTool} ${safeAreaVisible ? styles.canvasToolActive : ''}`} aria-label={copy.safeArea} aria-pressed={safeAreaVisible} onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}>
+            <EditorIcon name="safe-area" size={15} /><span>{copy.safeArea}</span>
           </button>
           <span className={styles.canvasStatus}><i aria-hidden="true" />{copy.preview}</span>
         </div>
@@ -1183,46 +1328,17 @@ function EditorCanvas({
           {safeAreaVisible && <div className={styles.safeAreaGuide} aria-hidden="true" />}
         </div>
         {showImageDragHint && <span className={styles.stageDragHint} role="status" aria-live="polite">{copy.dragToReposition}</span>}
-        {isSampleArtwork && (
-          <div className={styles.stageUploadActions}>
-            <span className={styles.stageSampleBadge}>{copy.sampleBadge}</span>
-            <button type="button" className={styles.stageUpload} onClick={onRequestScreenshot}>
-              <EditorIcon name="upload" size={15} />{copy.uploadScreenshot}
-            </button>
-          </div>
-        )}
         <span className={styles.stageLabel}>{design.ratio} · {Math.round(zoom * 100)}%</span>
         <span className={styles.stageTip} aria-hidden="true">{copy.panHint}</span>
       </div>
 
       <div className={styles.bottomTools} role="toolbar" aria-label={copy.title}>
-        <div className={styles.toolbarUtilityGroup}>
+        <div className={styles.toolbarPrimary}>
           <div className={styles.historyTools}>
             <HistoryButton action="undo" copy={copy} />
             <HistoryButton action="redo" copy={copy} />
-            <InlineConfirm
-              triggerLabel={copy.reset}
-              triggerClassName={styles.resetButton}
-              triggerContent={resetTriggerContent}
-              prompt={copy.resetCardPrompt}
-              cancelLabel={copy.cancel}
-              confirmLabel={copy.confirmReset}
-              onConfirm={resetCard}
-            />
           </div>
-          <div className={styles.zoomTools}>
-            <ToolbarTooltipButton type="button" onClick={() => adjustZoom(-0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomOut}`} aria-keyshortcuts="-" tooltip={`${copy.canvasLabel}: ${copy.zoomOut} · -`}><EditorIcon name="zoom-out" size={15} /></ToolbarTooltipButton>
-            <input type="range" min="0.55" max="1.5" step="0.05" value={zoom} onChange={(event) => editorStore.getState().setUi({ zoom: Number(event.currentTarget.value) })} aria-label={`${copy.canvasLabel}: ${copy.zoom}`} aria-valuetext={formatAccessiblePercent(locale, zoom * 100)} />
-            <ToolbarTooltipButton type="button" onClick={() => adjustZoom(0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomIn}`} aria-keyshortcuts="+" tooltip={`${copy.canvasLabel}: ${copy.zoomIn} · +`}><EditorIcon name="zoom-in" size={15} /></ToolbarTooltipButton>
-            <output aria-live="off" aria-hidden="true">{Math.round(zoom * 100)}%</output>
-          </div>
-        </div>
-        <div className={styles.toolbarViewGroup}>
           <ToolbarTooltipButton type="button" className={styles.fitButton} onClick={fitCanvas} aria-label={copy.fitCanvas} aria-keyshortcuts="0" tooltip={`${copy.fitCanvas} · 0`}><EditorIcon name="fit" size={15} /><span>{copy.fitCanvas}</span></ToolbarTooltipButton>
-          <ToolbarTooltipButton type="button" className={`${styles.panToggle} ${panMode ? styles.panToggleActive : ''}`} aria-pressed={panMode} onClick={onTogglePan} aria-label={copy.panMode} tooltip={copy.panHint}><EditorIcon name="pan" size={16} /></ToolbarTooltipButton>
-          <RatioPicker label={copy.ratio} value={design.ratio} onChange={changeRatio} />
-        </div>
-        <div className={styles.toolbarOutputGroup}>
           <button
             ref={previewButtonRef}
             type="button"
@@ -1235,10 +1351,45 @@ function EditorCanvas({
               editorStore.getState().setUi({ previewOpen: !previewOpen });
             }}
           >
-            <EditorIcon name="preview" size={15} />{previewOpen ? copy.backToEditor : copy.preview}
+            <EditorIcon name="preview" size={15} /><span>{previewOpen ? copy.backToEditor : copy.preview}</span>
           </button>
-          <button type="button" className={styles.exportButton} onClick={onExport}>{copy.export}<EditorIcon name="export" size={15} /></button>
         </div>
+        <details
+          ref={moreControlsRef}
+          className={styles.toolbarMore}
+          onKeyDown={(event) => {
+            if (event.key !== 'Escape' || isImeComposing(event.nativeEvent) || !moreControlsRef.current?.open) return;
+            event.preventDefault();
+            event.stopPropagation();
+            moreControlsRef.current.open = false;
+            moreControlsSummaryRef.current?.focus();
+          }}
+        >
+          <summary ref={moreControlsSummaryRef} aria-label={moreCanvasControlsLabel(locale)}>
+            <span className={styles.moreToolsLabel} aria-hidden="true">{moreCanvasControlsLabel(locale)}</span>
+            <span className={styles.moreToolsCompactLabel} aria-hidden="true">{compactMoreCanvasControlsLabel(locale)}</span>
+          </summary>
+          <div className={styles.toolbarMorePanel}>
+            <div className={styles.zoomTools}>
+              <ToolbarTooltipButton type="button" onClick={() => adjustZoom(-0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomOut}`} aria-keyshortcuts="-" tooltip={`${copy.canvasLabel}: ${copy.zoomOut} · -`}><EditorIcon name="zoom-out" size={15} /></ToolbarTooltipButton>
+              <input type="range" min="0.55" max="1.5" step="0.05" value={zoom} onChange={(event) => editorStore.getState().setUi({ zoom: Number(event.currentTarget.value) })} aria-label={`${copy.canvasLabel}: ${copy.zoom}`} aria-valuetext={formatAccessiblePercent(locale, zoom * 100)} />
+              <ToolbarTooltipButton type="button" onClick={() => adjustZoom(0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomIn}`} aria-keyshortcuts="+" tooltip={`${copy.canvasLabel}: ${copy.zoomIn} · +`}><EditorIcon name="zoom-in" size={15} /></ToolbarTooltipButton>
+              <output aria-live="off" aria-hidden="true">{Math.round(zoom * 100)}%</output>
+            </div>
+            <div className={styles.toolbarMoreActions}>
+              <ToolbarTooltipButton type="button" className={`${styles.panToggle} ${panMode ? styles.panToggleActive : ''}`} aria-pressed={panMode} onClick={onTogglePan} aria-label={copy.panMode} tooltip={copy.panHint}><EditorIcon name="pan" size={16} /><span>{copy.panMode}</span></ToolbarTooltipButton>
+              <InlineConfirm
+                triggerLabel={copy.reset}
+                triggerClassName={styles.resetButton}
+                triggerContent={resetTriggerContent}
+                prompt={copy.resetCardPrompt}
+                cancelLabel={copy.cancel}
+                confirmLabel={copy.confirmReset}
+                onConfirm={resetCard}
+              />
+            </div>
+          </div>
+        </details>
       </div>
     </section>
   );
@@ -1261,6 +1412,7 @@ export function EditorWorkspace() {
   const { locale } = useI18n();
   const copy = useMemo(() => getEditorCopy(locale), [locale]);
   const activePanel = useEditorStore((state) => state.ui.activePanel);
+  const activeTask = TASK_FOR_PANEL[activePanel];
   const inspectorOpen = useEditorStore((state) => state.ui.inspectorOpen);
   const previewOpen = useEditorStore((state) => state.ui.previewOpen);
   const saveStatus = useEditorStore((state) => state.saveStatus);
@@ -1270,11 +1422,7 @@ export function EditorWorkspace() {
   const [imageDragHintPhase, setImageDragHintPhase] = useState<ImageDragHintPhase>('idle');
   const imageDragHintPhaseRef = useRef<ImageDragHintPhase>('idle');
   const imageDragHintTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const toolButtonRefs = useRef(new Map<EditorPanelId, HTMLButtonElement>());
-  const inspectorHeadingRef = useRef<HTMLHeadingElement>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
-  const [isInspectorClosing, setIsInspectorClosing] = useState(false);
-  const inspectorCloseTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const dispatchImageDragHint = useCallback((event: ImageDragHintEvent) => {
     const currentPhase = imageDragHintPhaseRef.current;
@@ -1301,10 +1449,8 @@ export function EditorWorkspace() {
 
   const onSuccessfulUpload = useCallback(() => {
     dispatchImageDragHint('successful-upload');
-    if (!isMobileViewport || previewOpen || (!inspectorOpen && !isInspectorClosing)) {
-      dispatchImageDragHint('canvas-available');
-    }
-  }, [dispatchImageDragHint, inspectorOpen, isInspectorClosing, isMobileViewport, previewOpen]);
+    dispatchImageDragHint('canvas-available');
+  }, [dispatchImageDragHint]);
 
   const dismissImageDragHint = useCallback(() => {
     dispatchImageDragHint('image-drag');
@@ -1316,42 +1462,26 @@ export function EditorWorkspace() {
       dispatchImageDragHint('sample-reset');
       return;
     }
-    if (!isMobileViewport || previewOpen || (!inspectorOpen && !isInspectorClosing)) {
-      dispatchImageDragHint('canvas-available');
-    }
-  }, [dispatchImageDragHint, imageDragHintPhase, imageSource, inspectorOpen, isInspectorClosing, isMobileViewport, previewOpen]);
+    dispatchImageDragHint('canvas-available');
+  }, [dispatchImageDragHint, imageDragHintPhase, imageSource]);
 
   const closeInspector = useCallback(() => {
     const state = editorStore.getState();
-    if (inspectorCloseTimer.current) clearTimeout(inspectorCloseTimer.current);
-    inspectorCloseTimer.current = null;
-    const shouldRetain = shouldRetainInspectorForExit({
-      wasOpen: state.ui.inspectorOpen,
-      isMobile: isMobileViewport,
-      previewOpen: state.ui.previewOpen,
-      reducedMotion: window.matchMedia('(prefers-reduced-motion: reduce)').matches,
-    });
-    setIsInspectorClosing(shouldRetain);
     state.setUi({ inspectorOpen: false });
-    toolButtonRefs.current.get(state.ui.activePanel)?.focus();
-    if (shouldRetain) {
-      inspectorCloseTimer.current = setTimeout(() => {
-        inspectorCloseTimer.current = null;
-        setIsInspectorClosing(false);
-      }, INSPECTOR_CLOSE_FALLBACK_MS);
-    }
+    const task = TASK_FOR_PANEL[state.ui.activePanel];
+    requestAnimationFrame(() => {
+      const nav = isMobileViewport ? 'mobile' : 'desktop';
+      document.getElementById(`editor-task-tab-${nav}-${task}`)?.focus();
+    });
   }, [isMobileViewport]);
 
-  const openInspector = useCallback((panel: EditorPanelId) => {
-    if (inspectorCloseTimer.current) clearTimeout(inspectorCloseTimer.current);
-    inspectorCloseTimer.current = null;
-    setIsInspectorClosing(false);
-    editorStore.getState().setUi({ activePanel: panel, inspectorOpen: true });
+  const openTask = useCallback((task: EditorTaskId) => {
+    editorStore.getState().setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true });
   }, []);
 
   const requestScreenshotUpload = useCallback(() => {
-    openInspector('screenshot');
-  }, [openInspector]);
+    openTask('photo');
+  }, [openTask]);
 
   const togglePan = useCallback(() => setPanMode((value) => !value), []);
 
@@ -1361,12 +1491,7 @@ export function EditorWorkspace() {
     const mobileViewport = window.matchMedia('(max-width: 900px)');
     const applyViewport = (matches: boolean) => {
       setIsMobileViewport(matches);
-      if (!matches) {
-        if (inspectorCloseTimer.current) clearTimeout(inspectorCloseTimer.current);
-        inspectorCloseTimer.current = null;
-        setIsInspectorClosing(false);
-      }
-      editorStore.getState().setUi({ inspectorOpen: !matches });
+      editorStore.getState().setUi({ inspectorOpen: true });
     };
     applyViewport(mobileViewport.matches);
     const handleViewportChange = (event: MediaQueryListEvent) => {
@@ -1378,9 +1503,7 @@ export function EditorWorkspace() {
     window.addEventListener('pagehide', persist);
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
-      if (inspectorCloseTimer.current) clearTimeout(inspectorCloseTimer.current);
       if (imageDragHintTimeout.current) clearTimeout(imageDragHintTimeout.current);
-      inspectorCloseTimer.current = null;
       imageDragHintTimeout.current = null;
       mobileViewport.removeEventListener('change', handleViewportChange);
       window.removeEventListener('pagehide', persist);
@@ -1394,8 +1517,57 @@ export function EditorWorkspace() {
     router.push('/export');
   }, [router]);
 
+  function handleTaskTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, task: EditorTaskId, nav: 'desktop' | 'mobile') {
+    let nextIndex = -1;
+    const currentIndex = TASK_IDS.indexOf(task);
+    if (event.key === 'Home') nextIndex = 0;
+    else if (event.key === 'End') nextIndex = TASK_IDS.length - 1;
+    else if (nav === 'mobile' && event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TASK_IDS.length;
+    else if (nav === 'mobile' && event.key === 'ArrowLeft') nextIndex = (currentIndex + TASK_IDS.length - 1) % TASK_IDS.length;
+    else if (nav === 'desktop' && event.key === 'ArrowDown') nextIndex = (currentIndex + 1) % TASK_IDS.length;
+    else if (nav === 'desktop' && event.key === 'ArrowUp') nextIndex = (currentIndex + TASK_IDS.length - 1) % TASK_IDS.length;
+    if (nextIndex < 0) return;
+    event.preventDefault();
+    const nextTask = TASK_IDS[nextIndex];
+    openTask(nextTask);
+    requestAnimationFrame(() => document.getElementById(`editor-task-tab-${nav}-${nextTask}`)?.focus());
+  }
+
+  function renderTaskTabs(nav: 'desktop' | 'mobile') {
+    return (
+      <nav
+        className={nav === 'mobile' ? styles.mobileTaskTabs : styles.toolNav}
+        role="tablist"
+        aria-label={copy.workspaceLabel}
+        aria-orientation={nav === 'mobile' ? 'horizontal' : 'vertical'}
+        data-active-task={activeTask}
+        data-inspector-open={inspectorOpen}
+      >
+        {TASK_IDS.map((task, index) => (
+          <button
+            type="button"
+            key={task}
+            id={`editor-task-tab-${nav}-${task}`}
+            role="tab"
+            className={`${styles.toolButton} ${activeTask === task ? styles.toolButtonActive : ''}`}
+            aria-controls={!previewOpen ? 'editor-inspector' : undefined}
+            aria-selected={activeTask === task}
+            aria-label={copy.tasks[task]}
+            tabIndex={activeTask === task ? 0 : -1}
+            onKeyDown={(event) => handleTaskTabKeyDown(event, task, nav)}
+            onClick={() => openTask(task)}
+          >
+            <span className={styles.toolButtonIcon} aria-hidden="true"><EditorIcon name={TASK_ICONS[task]} /></span>
+            <span className={styles.toolButtonLabel}>{copy.tasks[task]}</span>
+            <small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small>
+          </button>
+        ))}
+      </nav>
+    );
+  }
+
   return (
-    <div className={`${styles.page} ${previewOpen ? styles.previewMode : ''}`}>
+    <div className={`${styles.page} ${previewOpen ? styles.previewMode : ''} ${!inspectorOpen && !previewOpen ? styles.inspectorClosed : ''}`}>
       <h1 className={styles.srOnly}>{copy.title}</h1>
 
       {saveStatus === 'error' && (
@@ -1410,33 +1582,8 @@ export function EditorWorkspace() {
       <div className={styles.workspace}>
         {!previewOpen && (
           <aside className={styles.leftSidebar} aria-label={copy.title}>
-            <div className={styles.sidebarHeader}><span>{copy.workspaceLabel}</span><small>XIV · 01</small></div>
-            <nav className={styles.toolNav} aria-label={copy.title}>
-              {PANEL_IDS.map((id, index) => (
-                <button
-                  type="button"
-                  key={id}
-                  className={`${styles.toolButton} ${activePanel === id ? styles.toolButtonActive : ''}`}
-                  ref={(node) => {
-                    if (node) toolButtonRefs.current.set(id, node);
-                    else toolButtonRefs.current.delete(id);
-                  }}
-                  aria-controls={!previewOpen && inspectorOpen ? 'editor-inspector' : undefined}
-                  aria-pressed={activePanel === id}
-                  aria-expanded={activePanel === id && inspectorOpen}
-                  aria-label={copy.sections[id]}
-                  onClick={(event) => {
-                    editorStore.getState().setUi({ activePanel: id, inspectorOpen: true });
-                    if (event.detail === 0) requestAnimationFrame(() => inspectorHeadingRef.current?.focus());
-                  }}
-                >
-                  <span className={styles.toolButtonIcon}><EditorIcon name={PANEL_ICONS[id]} /></span>
-                  <span className={styles.toolButtonLabel}>{copy.sections[id]}</span>
-                  <small>{String(index + 1).padStart(2, '0')}</small>
-                </button>
-              ))}
-            </nav>
-            <div className={styles.sidebarFoot}><span className={styles.railLine} /><span>ADVENTURER<br />CARD STUDIO</span></div>
+            <div className={styles.sidebarHeader}><span>{copy.workspaceLabel}</span><small>XIV / ATELIER</small></div>
+            {renderTaskTabs('desktop')}
           </aside>
         )}
 
@@ -1446,23 +1593,24 @@ export function EditorWorkspace() {
           highlightField={highlightField}
           panMode={panMode}
           onTogglePan={togglePan}
-          onExport={exportCard}
           onRequestScreenshot={requestScreenshotUpload}
           onEscapeClose={closeInspector}
           showImageDragHint={imageDragHintPhase === 'visible'}
           onImageDragStart={dismissImageDragHint}
         /></Profiler>
 
-        {!previewOpen && (inspectorOpen || isInspectorClosing) && (
-          <EditorBoundary resetKey={`${activePanel}-${locale}`}><MemoEditorInspector
+        {!previewOpen && renderTaskTabs('mobile')}
+
+        {!previewOpen && (
+          <EditorBoundary resetKey={`${activeTask}-${locale}`}><MemoEditorInspector
             copy={copy}
             locale={locale}
-            activePanel={activePanel}
+            activeTask={activeTask}
+            isMobileViewport={isMobileViewport}
             isOpen={inspectorOpen}
             onFocusField={setHighlightField}
             onClose={closeInspector}
             onSuccessfulUpload={onSuccessfulUpload}
-            headingRef={inspectorHeadingRef}
           /></EditorBoundary>
         )}
       </div>

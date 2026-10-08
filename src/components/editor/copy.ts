@@ -6,6 +6,8 @@ export type EditorFieldKey =
 
 export interface EditorCopy {
   title: string;
+  backToHome: string;
+  tasks: Record<'photo' | 'information' | 'design', string>;
   subtitle: string;
   sections: Record<'screenshot' | 'character' | 'information' | 'template' | 'style' | 'effects', string>;
   undo: string;
@@ -186,7 +188,7 @@ const copy: Record<AppLocale, RouteCopy> = {
     preview: '미리보기',
     cinematic: '시네마틱',
     editorial: '에디토리얼',
-    idCard: '어드벤처러 ID',
+    idCard: '모험가 기록',
     cinematicDesc: '스크린샷을 크게 담고, 여백에 캐릭터의 서사를 얹습니다.',
     editorialDesc: '잡지 표지처럼 이름과 모험을 우아하게 구성합니다.',
     idCardDesc: '월드와 직업 정보를 정돈된 프로필 카드로 보여줍니다.',
@@ -250,7 +252,7 @@ const copy: Record<AppLocale, RouteCopy> = {
     preview: 'Preview',
     cinematic: 'Cinematic',
     editorial: 'Editorial',
-    idCard: 'Adventurer ID',
+    idCard: 'Adventurer Record',
     cinematicDesc: 'Let the screenshot lead, with your character story in the margins.',
     editorialDesc: 'An elegant cover layout for the name and story behind the portrait.',
     idCardDesc: 'A precise profile card for your world, job, and company.',
@@ -314,7 +316,7 @@ const copy: Record<AppLocale, RouteCopy> = {
     preview: 'プレビュー',
     cinematic: 'シネマティック',
     editorial: 'エディトリアル',
-    idCard: 'アドベンチャラー ID',
+    idCard: '冒険者の記録',
     cinematicDesc: 'スクリーンショットを主役に、余白へキャラクターの物語を添えます。',
     editorialDesc: 'ポートレートと名前を雑誌の表紙のように優雅に配置します。',
     idCardDesc: 'ワールド、ジョブ、フリーカンパニーを整然と表示します。',
@@ -375,11 +377,13 @@ const copy: Record<AppLocale, RouteCopy> = {
 const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'imageValueLabel'>> = {
   ko: {
     title: '어드벤처 카드 에디터',
+    backToHome: '홈으로',
+    tasks: { photo: '사진', information: '정보', design: '디자인' },
     subtitle: '모험가의 이야기를 다듬어 보세요.',
     sections: { screenshot: '스크린샷', character: '캐릭터', information: '추가 정보', template: '템플릿', style: '스타일', effects: '효과' },
     undo: '실행 취소', redo: '다시 실행', reset: '초기화', resetCardPrompt: '이미지·캐릭터 정보·디자인을 초기화할까요?', cancel: '취소', confirmReset: '초기화', template: '템플릿', masterLabel: '마스터', experimentalLabel: '실험', experimentalHint: '완성된 마스터 밖의 레이아웃 변형입니다.', saved: '이 브라우저에 저장됨', saving: '이 브라우저에 저장 중…', saveError: '브라우저 저장 실패', saveErrorCompact: '저장 안 됨', saveErrorRecovery: '현재 편집 내용은 이 화면에 남아 있어요. 새로고침하기 전에 카드를 내보내 주세요.', saveErrorExportAction: '카드 내보내기', hydrating: '저장된 카드를 불러오는 중…', zoom: '확대', zoomIn: '확대하기', zoomOut: '축소하기', fitCanvas: '캔버스 맞춤', uploadScreenshot: '스크린샷 업로드', panMode: '캔버스 이동', ratio: '비율', preview: '미리보기', backToEditor: '편집으로 돌아가기', closeInspector: '인스펙터 닫기', export: '내보내기', safeArea: '안전 영역', canvasLabel: '실시간 캔버스', workspaceLabel: '작업 도구', panHint: 'Space 또는 가운데 버튼을 누른 채 이동',
-    templates: { cinematic: '시네마틱', editorial: '에디토리얼', 'id-card': '어드벤처러 ID' },
-    templateIntents: { cinematic: '사진이 중심인 포스터', editorial: '이름이 만드는 잡지 표지', 'id-card': '정보를 정돈한 신분증' },
+    templates: { cinematic: '시네마틱', editorial: '에디토리얼', 'id-card': '모험가 기록' },
+    templateIntents: { cinematic: '사진이 중심인 포스터', editorial: '이름이 만드는 잡지 표지', 'id-card': '정보를 정돈한 길드 기록' },
     templateVariation: '레이아웃', variationNames: { a: 'A · 마스터', b: 'B · 실험', c: 'C · 실험' },
     typography: '글꼴 프리셋', typographyNames: { editorial: '에디토리얼', modern: '모던', condensed: '콘덴스드', classic: '클래식', clean: '클린' }, typographyNameFallback: 'Coner', typographySpecimens: '다국어 글꼴 샘플',
     colors: '컬러 팔레트', colorModes: { auto: '자동', custom: '사용자 지정', job: '직업 테마' }, colorNames: { primary: '메인', accent: '포인트', light: '밝은색', dark: '어두운색' }, jobTheme: '직업 테마 사용', jobThemeHint: '선택한 직업의 포인트 컬러와 장식을 적용합니다.', jobMotif: '직업 문양', jobMotifHint: '카드에 선택한 직업의 문양을 표시합니다.', jobIconColor: '문양 색상', useFamilyAccent: '카드 포인트 색상 사용',
@@ -394,10 +398,12 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
   },
   en: {
     title: 'Adventurer Card Editor',
+    backToHome: 'Back to home',
+    tasks: { photo: 'Photo', information: 'Information', design: 'Design' },
     subtitle: 'Shape the story behind your character.',
     sections: { screenshot: 'Screenshot', character: 'Character', information: 'Additional info', template: 'Template', style: 'Style', effects: 'Effects' },
     undo: 'Undo', redo: 'Redo', reset: 'Reset', resetCardPrompt: 'Reset the image, character details and card settings?', cancel: 'Cancel', confirmReset: 'Reset', template: 'Template', masterLabel: 'Master', experimentalLabel: 'Experimental', experimentalHint: 'Layout variations beyond the approved masters.', saved: 'Saved in this browser', saving: 'Saving in this browser…', saveError: 'Could not save in this browser', saveErrorCompact: 'Not saved', saveErrorRecovery: 'Your latest edits are still on this screen. Export a copy before refreshing.', saveErrorExportAction: 'Export a copy', hydrating: 'Restoring saved card…', zoom: 'Zoom', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitCanvas: 'Fit canvas', uploadScreenshot: 'Upload screenshot', panMode: 'Pan canvas', ratio: 'Ratio', preview: 'Preview', backToEditor: 'Back to editor', closeInspector: 'Close inspector', export: 'Export', safeArea: 'Safe area', canvasLabel: 'Live canvas', workspaceLabel: 'Workspace', panHint: 'Hold Space or middle mouse to pan',
-    templates: { cinematic: 'Cinematic', editorial: 'Editorial', 'id-card': 'Adventurer ID' },
+    templates: { cinematic: 'Cinematic', editorial: 'Editorial', 'id-card': 'Adventurer Record' },
     templateIntents: { cinematic: 'Image first', editorial: 'Typography first', 'id-card': 'Information first' },
     templateVariation: 'Layout', variationNames: { a: 'A · Master', b: 'B · Experimental', c: 'C · Experimental' },
     typography: 'Font presets', typographyNames: { editorial: 'Editorial', modern: 'Modern', condensed: 'Condensed', classic: 'Classic', clean: 'Clean' }, typographyNameFallback: 'Coner', typographySpecimens: 'Multilingual specimens',
@@ -413,12 +419,14 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
   },
   ja: {
     title: 'アドベンチャーカードエディター',
+    backToHome: 'ホームへ',
+    tasks: { photo: '写真', information: '情報', design: 'デザイン' },
     subtitle: 'キャラクターの物語を整えましょう。',
     sections: { screenshot: 'スクリーンショット', character: 'キャラクター', information: '追加情報', template: 'テンプレート', style: 'スタイル', effects: 'エフェクト' },
     masterLabel: 'マスター', experimentalLabel: '実験', experimentalHint: 'マスター以外のレイアウトバリエーションです。', fitCanvas: 'キャンバスに合わせる', uploadScreenshot: 'スクリーンショットをアップロード',
     undo: '元に戻す', redo: 'やり直す', reset: 'リセット', resetCardPrompt: '画像・キャラクター情報・デザインを初期化しますか？', cancel: 'キャンセル', confirmReset: 'リセット', template: 'テンプレート', saved: 'このブラウザーに保存済み', saving: 'このブラウザーに保存中…', saveError: 'このブラウザーに保存できませんでした', saveErrorCompact: '未保存', saveErrorRecovery: '最新の編集内容はこの画面に残っています。再読み込みする前にカードをエクスポートしてください。', saveErrorExportAction: 'カードをエクスポート', hydrating: '保存したカードを復元中…', zoom: 'ズーム', zoomIn: '拡大', zoomOut: '縮小', panMode: 'キャンバスを移動', ratio: '比率', preview: 'プレビュー', backToEditor: '編集に戻る', closeInspector: 'インスペクターを閉じる', export: 'エクスポート', safeArea: 'セーフエリア', canvasLabel: 'ライブキャンバス', workspaceLabel: 'ワークスペース', panHint: 'Space または中ボタンを押して移動',
-    templates: { cinematic: 'シネマティック', editorial: 'エディトリアル', 'id-card': 'アドベンチャー ID' },
-    templateIntents: { cinematic: '写真を主役に', editorial: '文字でつくる表紙', 'id-card': '情報を整える ID' },
+    templates: { cinematic: 'シネマティック', editorial: 'エディトリアル', 'id-card': '冒険者の記録' },
+    templateIntents: { cinematic: '写真を主役に', editorial: '文字でつくる表紙', 'id-card': '情報を整えるギルド記録' },
     templateVariation: 'レイアウト', variationNames: { a: 'A · マスター', b: 'B · 実験', c: 'C · 実験' },
     typography: 'フォントプリセット', typographyNames: { editorial: 'エディトリアル', modern: 'モダン', condensed: 'コンデンス', classic: 'クラシック', clean: 'クリーン' }, typographyNameFallback: 'Coner', typographySpecimens: '多言語フォント見本',
     colors: 'カラーパレット', colorModes: { auto: '自動', custom: 'カスタム', job: 'ジョブテーマ' }, colorNames: { primary: 'プライマリー', accent: 'アクセント', light: 'ライト', dark: 'ダーク' }, jobTheme: 'ジョブテーマを使う', jobThemeHint: '選択中のジョブに合わせた控えめな色と装飾を適用します。', jobMotif: 'ジョブモチーフ', jobMotifHint: '選択したジョブの紋章をカードに表示します。', jobIconColor: 'モチーフの色', useFamilyAccent: 'カードのアクセント色を使う',

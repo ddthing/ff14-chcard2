@@ -7,13 +7,9 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 
 registerHooks({
   resolve(specifier, context, nextResolve) {
-    if (
-      (!specifier.startsWith('./') && !specifier.startsWith('../')) ||
-      extname(specifier)
-    ) {
+    if ((!specifier.startsWith('./') && !specifier.startsWith('../')) || extname(specifier)) {
       return nextResolve(specifier, context);
     }
-
     try {
       return nextResolve(specifier, context);
     } catch (error) {
@@ -27,19 +23,11 @@ registerHooks({
 
 process.env.NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED = 'false';
 
-const { FFXIV_OFFICIAL_ASSETS_ENABLED } = await import(
-  '../src/lib/ffxiv-assets/config.ts'
-);
-const { getOfficialJobIconAsset, getOfficialJobIconSrc } = await import(
-  '../src/lib/ffxiv-assets/job-icons.ts'
-);
+const { FFXIV_OFFICIAL_ASSETS_ENABLED, resolveJobIcon } = await import('../src/lib/ffxiv-assets/index.ts');
 
-test('official job asset adapter stays disabled and uses the fallback path by default', () => {
+test('the feature flag leaves XIVAPI assets disabled by default and keeps generic fallback available', () => {
   assert.equal(FFXIV_OFFICIAL_ASSETS_ENABLED, false);
-  assert.equal(getOfficialJobIconSrc('paladin'), null);
-  assert.equal(getOfficialJobIconSrc('warrior'), null);
-  assert.equal(getOfficialJobIconSrc(null), null);
-  assert.equal(getOfficialJobIconSrc('../paladin'), null);
-  assert.equal(getOfficialJobIconAsset('paladin'), null);
-  assert.equal(getOfficialJobIconAsset('beastmaster'), null);
+  for (const jobId of ['paladin', 'dark-knight', 'red-mage', 'beastmaster', null, undefined, '../paladin']) {
+    assert.equal(resolveJobIcon({ jobId, usage: 'picker' }), null);
+  }
 });

@@ -17,7 +17,7 @@
     "reviewedJobs": 34,
     "publishedSources": {
       "svg": 16,
-      "icons": 4,
+      "icons": 18,
       "companion": 0,
       "risingstones": 0
     }
@@ -75,7 +75,26 @@
     },
     "dark-knight": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/dark-knight.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "d02e67bef46d8dc33729f5de27ac7bb4a447c5a31aa5f0c4c00e4ca485926c55",
+        "sourcePath": "icons/darkknight.png",
+        "upstreamGitBlobSha": "4aa72209f5188a54cd82b5627bcadb9e953fd97c",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "gunbreaker": {
       "svg": {
@@ -154,7 +173,26 @@
     },
     "astrologian": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/astrologian.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "2fb851fe37eb3fc629deb4f49e3fc089688aa8a8337804cc1b2f5929887b72c5",
+        "sourcePath": "icons/astrologian.png",
+        "upstreamGitBlobSha": "f639782b1193ccecae10d46a1a66b66616a96481",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "sage": {
       "svg": {
@@ -233,7 +271,26 @@
     },
     "ninja": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/ninja.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "68183ef536b7dcb4569eb1244537e799d4caed7ee7756f97bfe8417bcde476c2",
+        "sourcePath": "icons/ninja.png",
+        "upstreamGitBlobSha": "7437214bfde75fb0a5f302e1eae0428d56e3a19b",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "samurai": {
       "svg": {
@@ -529,47 +586,256 @@
     },
     "carpenter": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/carpenter.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "9b00059e28b86da08fa9d66875551ca0672ea80c611f9fb81c37007f64396c7b",
+        "sourcePath": "icons/carpenter.png",
+        "upstreamGitBlobSha": "4e459bc62a8cf500842ce9ff6fadba5595e09f05",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "blacksmith": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/blacksmith.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "b2b7fa12709c2b6a0d8bdb0bf8bf6388622a9a4d8ed16a2bd168d03b5d7f5d3d",
+        "sourcePath": "icons/blacksmith.png",
+        "upstreamGitBlobSha": "6a5cefaeb507871e576e870e322cb9512cc1abda",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "armorer": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/armorer.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "b19885aecd3a2aa63b64291beeed4749e48e5b45d7e66746a9339aa650e13c0e",
+        "sourcePath": "icons/armorer.png",
+        "upstreamGitBlobSha": "451ea5c3f207369fe0214306f84fcab3df0fecc3",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "goldsmith": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/goldsmith.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "0a35bad4661790019f248fb5d51e256f0d45f1d49e24264c131db5fe1e91b184",
+        "sourcePath": "icons/goldsmith.png",
+        "upstreamGitBlobSha": "96afc1b6342be8f286a6079f29b97a99f54d89f8",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "leatherworker": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/leatherworker.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "d6dfbd86500c7da9d5cb1f7cb2c99922fb728789539d52e3e0555bdeaea58c93",
+        "sourcePath": "icons/leatherworker.png",
+        "upstreamGitBlobSha": "507f98bbf16d2fed8289fdc05101447afec9d718",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "weaver": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/weaver.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "bcda54ae7ebfbe88caa8bc33c6343caf809b3ef126ab6cc8967a2e5c646a1206",
+        "sourcePath": "icons/weaver.png",
+        "upstreamGitBlobSha": "c7ce4790b8eae09ea53875c14b5af00a6d8cff16",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "alchemist": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/alchemist.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "608ee7b23aac70f36a026b49113a4877f71933c0960f81981097beaafcef6079",
+        "sourcePath": "icons/alchemist.png",
+        "upstreamGitBlobSha": "1c2f9cca760d49296d3b24545e16da66db680a60",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "culinarian": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/culinarian.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "1f05188a59a4149d2d6bc4ac033b0e9b02238aeeec433ae7ed873f5ef70fb336",
+        "sourcePath": "icons/culinarian.png",
+        "upstreamGitBlobSha": "4aeef518505820682ca4c5ca835c6b7ce23bda2b",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "miner": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/miner.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "03a71d1392ce2c42882fa0f6d62536f6dc1e0fb80cc0f55c4c8b6f433b13f22a",
+        "sourcePath": "icons/miner.png",
+        "upstreamGitBlobSha": "c2e823a4a6b6d7b68efbf75f758ea2772e67b3a7",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "botanist": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/botanist.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "14994468717f20a289dfca55ff5c1e967b604dbe55b83ffb270b475de079794b",
+        "sourcePath": "icons/botanist.png",
+        "upstreamGitBlobSha": "023b75f943d8c59637cac2163368528213454790",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "fisher": {
       "svg": null,
-      "raster": null
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/fisher.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "42c552fe997339eca8c6b2e2524334ee2fd19cd3f79317f45413af17985e41fa",
+        "sourcePath": "icons/fisher.png",
+        "upstreamGitBlobSha": "70ad8a5006366422f24fc739093f981aa50bcb5b",
+        "visualReview": "2026-10-08 local source review: clean isolated alpha glyph, intact 256px canvas; approved for picker, micro, cardSmall, cardMedium and export. cardDisplay excluded.",
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
     },
     "beastmaster": {
       "svg": null,
