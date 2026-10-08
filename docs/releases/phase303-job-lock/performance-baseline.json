@@ -1,0 +1,5168 @@
+{
+  "recordedAt": "2026-10-08T03:53:44.998Z",
+  "stage": "baseline",
+  "url": "http://127.0.0.1:3333/phase303-qa",
+  "environment": {
+    "visibility": "visible",
+    "focus": true,
+    "width": 1440,
+    "height": 1200,
+    "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/154.0.0.0 Safari/537.36"
+  },
+  "protocol": "Same isolated production route, 1 warm-up and 5 warm samples per family, alternating family each sample; production font loader/export renderer unchanged.",
+  "resources": [
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 1235,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 300,
+      "decodedBodySize": 935
+    },
+    {
+      "url": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+      "transferSize": 0,
+      "decodedBodySize": 935
+    }
+  ],
+  "summary": {
+    "cinematic": {
+      "png2xMedianMs": 487.90000000596046,
+      "previewMedianMs": 196.09999999403954,
+      "sampleCount": 5
+    },
+    "editorial": {
+      "png2xMedianMs": 330.5,
+      "previewMedianMs": 119.19999998807907,
+      "sampleCount": 5
+    },
+    "id-card": {
+      "png2xMedianMs": 376.69999998807907,
+      "previewMedianMs": 168.90000000596046,
+      "sampleCount": 5
+    }
+  },
+  "samples": [
+    {
+      "round": 0,
+      "master": "cinematic",
+      "warmup": true,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-0",
+        "case": {
+          "caseId": "perf-baseline-cinematic-0",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 204.5,
+          "domCommitMs": 11.300000011920929,
+          "imageReadyMs": 184.69999998807907,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-0",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 599.4000000059605,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.099999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 84.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 89.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 89.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 92.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 94
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 108.2000000178814
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 599.4000000059605
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-0-png-2-1"
+      }
+    },
+    {
+      "round": 0,
+      "master": "editorial",
+      "warmup": true,
+      "ready": {
+        "caseId": "perf-baseline-editorial-0",
+        "case": {
+          "caseId": "perf-baseline-editorial-0",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 90.5,
+          "domCommitMs": 11.5,
+          "imageReadyMs": 71.2000000178814,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-0",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268747,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 477.09999999403954,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 65.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 69.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 69.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 69.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 70.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 71.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 84
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 477.09999999403954
+          }
+        ],
+        "blobId": "perf-baseline-editorial-0-png-2-2"
+      }
+    },
+    {
+      "round": 0,
+      "master": "id-card",
+      "warmup": true,
+      "ready": {
+        "caseId": "perf-baseline-id-card-0",
+        "case": {
+          "caseId": "perf-baseline-id-card-0",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 188.59999999403954,
+          "domCommitMs": 15.899999976158142,
+          "imageReadyMs": 156.80000001192093,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0.09999999403953552,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-0",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264526,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 452.2999999821186,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 46.29999998211861
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 170.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 176.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 176.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 176.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 176.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 182.09999999403954
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 452.2999999821186
+          }
+        ],
+        "blobId": "perf-baseline-id-card-0-png-2-3"
+      }
+    },
+    {
+      "round": 1,
+      "master": "cinematic",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-1",
+        "case": {
+          "caseId": "perf-baseline-cinematic-1",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 196.09999999403954,
+          "domCommitMs": 6.5,
+          "imageReadyMs": 181.90000000596046,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-1",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 518.3000000119209,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0.10000002384185791
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.400000005960464
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 79.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 83.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 83.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 86
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 88.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 99.5
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 518.3000000119209
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-1-png-2-4"
+      }
+    },
+    {
+      "round": 1,
+      "master": "editorial",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-editorial-1",
+        "case": {
+          "caseId": "perf-baseline-editorial-1",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 122.7000000178814,
+          "domCommitMs": 4.9000000059604645,
+          "imageReadyMs": 116.2000000178814,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0.09999999403953552,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-1",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268711,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 404.90000000596046,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 74.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 128.5
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 133.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 133.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 133.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 135
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 135.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 141.2999999821186
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 404.7999999821186
+          }
+        ],
+        "blobId": "perf-baseline-editorial-1-png-2-5"
+      }
+    },
+    {
+      "round": 1,
+      "master": "id-card",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-id-card-1",
+        "case": {
+          "caseId": "perf-baseline-id-card-1",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 109.90000000596046,
+          "domCommitMs": 9.599999994039536,
+          "imageReadyMs": 91.7999999821186,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-1",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264419,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 376.69999998807907,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 58.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 174.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 178.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 178.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 178.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 178.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 184.09999999403954
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 376.59999999403954
+          }
+        ],
+        "blobId": "perf-baseline-id-card-1-png-2-6"
+      }
+    },
+    {
+      "round": 2,
+      "master": "cinematic",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-2",
+        "case": {
+          "caseId": "perf-baseline-cinematic-2",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 205.7999999821186,
+          "domCommitMs": 6.699999988079071,
+          "imageReadyMs": 103.19999998807907,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-2",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 490.59999999403954,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 76.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 81.5
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 81.5
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 83.7000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 85.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 92.30000001192093
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 490.59999999403954
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-2-png-2-7"
+      }
+    },
+    {
+      "round": 2,
+      "master": "editorial",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-editorial-2",
+        "case": {
+          "caseId": "perf-baseline-editorial-2",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 117.19999998807907,
+          "domCommitMs": 6.0999999940395355,
+          "imageReadyMs": 101.30000001192093,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-2",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268657,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 280.7000000178814,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0.10000002384185791
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 15.5
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 62.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 66.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 66.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 66.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 67.7000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 68.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 74.60000002384186
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 280.7000000178814
+          }
+        ],
+        "blobId": "perf-baseline-editorial-2-png-2-8"
+      }
+    },
+    {
+      "round": 2,
+      "master": "id-card",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-id-card-2",
+        "case": {
+          "caseId": "perf-baseline-id-card-2",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 175.59999999403954,
+          "domCommitMs": 8.599999994039536,
+          "imageReadyMs": 159.90000000596046,
+          "opticalReadyMs": 0.09999999403953552,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-2",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264419,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 375.09999999403954,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 51.70000001788139
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 161.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 164.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 164.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 164.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 164.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 171.2000000178814
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 375.09999999403954
+          }
+        ],
+        "blobId": "perf-baseline-id-card-2-png-2-9"
+      }
+    },
+    {
+      "round": 3,
+      "master": "cinematic",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-3",
+        "case": {
+          "caseId": "perf-baseline-cinematic-3",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 207,
+          "domCommitMs": 5.300000011920929,
+          "imageReadyMs": 196.19999998807907,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-3",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 399,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0.09999999403953552
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 78.5
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 82.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 82.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 83.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 85.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 92.90000000596046
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 399
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-3-png-2-10"
+      }
+    },
+    {
+      "round": 3,
+      "master": "editorial",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-editorial-3",
+        "case": {
+          "caseId": "perf-baseline-editorial-3",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 157.90000000596046,
+          "domCommitMs": 9.800000011920929,
+          "imageReadyMs": 97.59999999403954,
+          "opticalReadyMs": 0.09999999403953552,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-3",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268733,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 330.5,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.299999982118607
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 64
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 67.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 67.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 67.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 69.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 69.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 75.19999998807907
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 330.5
+          }
+        ],
+        "blobId": "perf-baseline-editorial-3-png-2-11"
+      }
+    },
+    {
+      "round": 3,
+      "master": "id-card",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-id-card-3",
+        "case": {
+          "caseId": "perf-baseline-id-card-3",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 168.90000000596046,
+          "domCommitMs": 9,
+          "imageReadyMs": 155.19999998807907,
+          "opticalReadyMs": 0.10000002384185791,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-3",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264410,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 354.2999999821186,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 55.5
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 166
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 170
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 170
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 170.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 170.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 176.19999998807907
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 354.2999999821186
+          }
+        ],
+        "blobId": "perf-baseline-id-card-3-png-2-12"
+      }
+    },
+    {
+      "round": 4,
+      "master": "cinematic",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-4",
+        "case": {
+          "caseId": "perf-baseline-cinematic-4",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 195.09999999403954,
+          "domCommitMs": 5,
+          "imageReadyMs": 180.19999998807907,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-4",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 433.5,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 15.400000005960464
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 76.09999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 80.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 80.2999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 81.90000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 83.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 90.7999999821186
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 433.5
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-4-png-2-13"
+      }
+    },
+    {
+      "round": 4,
+      "master": "editorial",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-editorial-4",
+        "case": {
+          "caseId": "perf-baseline-editorial-4",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 114.40000000596046,
+          "domCommitMs": 7.4000000059604645,
+          "imageReadyMs": 99.69999998807907,
+          "opticalReadyMs": 0.09999999403953552,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-4",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268763,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 315.40000000596046,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 16.400000005960464
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 62.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 66.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 66.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 66.7999999821186
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 68
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 68.5
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 74
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 315.40000000596046
+          }
+        ],
+        "blobId": "perf-baseline-editorial-4-png-2-14"
+      }
+    },
+    {
+      "round": 4,
+      "master": "id-card",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-id-card-4",
+        "case": {
+          "caseId": "perf-baseline-id-card-4",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 178.90000000596046,
+          "domCommitMs": 9.099999994039536,
+          "imageReadyMs": 155.90000000596046,
+          "opticalReadyMs": 0.09999999403953552,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-4",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264530,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 396.90000000596046,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 12.599999994039536
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 121.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 125.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 125.19999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 125.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 125.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 132.40000000596046
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 396.90000000596046
+          }
+        ],
+        "blobId": "perf-baseline-id-card-4-png-2-15"
+      }
+    },
+    {
+      "round": 5,
+      "master": "cinematic",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-cinematic-5",
+        "case": {
+          "caseId": "perf-baseline-cinematic-5",
+          "master": "cinematic",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 114.90000000596046,
+          "domCommitMs": 7.199999988079071,
+          "imageReadyMs": 103.30000001192093,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0.09999999403953552,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "cinematic",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 526.734375,
+              "y": 734.1875,
+              "width": 371.515625,
+              "height": 128.9375,
+              "right": 898.25,
+              "bottom": 863.125
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 526.734375,
+              "y": 890.71875,
+              "width": 57.84375,
+              "height": 9.328125,
+              "right": 584.578125,
+              "bottom": 900.046875
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 545.71875,
+              "y": 448.90625,
+              "width": 22.109375,
+              "height": 6.484375,
+              "right": 567.828125,
+              "bottom": 455.390625
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 589.25,
+              "y": 890.71875,
+              "width": 35.765625,
+              "height": 10.1875,
+              "right": 625.015625,
+              "bottom": 900.90625
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 526.734375,
+                "y": 444.59375,
+                "width": 15.109375,
+                "height": 15.109375,
+                "right": 541.84375,
+                "bottom": 459.703125
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/landscape.webp",
+              "naturalWidth": 3840,
+              "naturalHeight": 2160,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/cinematic-film-grain.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "cinematic",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "31.757",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-cinematic-5",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 9384189,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 487.90000000596046,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 17
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 76.69999998807907
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 80.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 80.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 82
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 84.59999999403954
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 92.69999998807907
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 487.90000000596046
+          }
+        ],
+        "blobId": "perf-baseline-cinematic-5-png-2-16"
+      }
+    },
+    {
+      "round": 5,
+      "master": "editorial",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-editorial-5",
+        "case": {
+          "caseId": "perf-baseline-editorial-5",
+          "master": "editorial",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 119.19999998807907,
+          "domCommitMs": 8,
+          "imageReadyMs": 108.19999998807907,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0.10000002384185791,
+          "loadedImageCount": 4,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "editorial",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 762.171875,
+              "y": 466.1875,
+              "width": 149.0625,
+              "height": 59.78125,
+              "right": 911.234375,
+              "bottom": 525.96875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 778.140625,
+              "y": 605.328125,
+              "width": 109.5625,
+              "height": 10.4375,
+              "right": 887.703125,
+              "bottom": 615.765625
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM\nRDM",
+            "rect": {
+              "x": 726.75,
+              "y": 822.59375,
+              "width": 181.4375,
+              "height": 73.875,
+              "right": 908.1875,
+              "bottom": 896.46875
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 897.890625,
+              "y": 603.671875,
+              "width": 15.5,
+              "height": 13.125,
+              "right": 913.390625,
+              "bottom": 616.796875
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 762.171875,
+                "y": 601,
+                "width": 11.65625,
+                "height": 11.65625,
+                "right": 773.828125,
+                "bottom": 612.65625
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-paper-surface.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/editorial-ink-density.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "editorial",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "14.125",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-editorial-5",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 6268626,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 376.40000000596046,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 41.400000005960464
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.2553846153846154,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.3107692307692308,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.36615384615384616,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.42153846153846153,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.47692307692307695,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.5323076923076924,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.5876923076923077,
+            "atMs": 88.10000002384186
+          },
+          {
+            "stage": "render",
+            "value": 0.6430769230769231,
+            "atMs": 92.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.6984615384615385,
+            "atMs": 92.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.7538461538461538,
+            "atMs": 92.2000000178814
+          },
+          {
+            "stage": "render",
+            "value": 0.8092307692307692,
+            "atMs": 93.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.8646153846153846,
+            "atMs": 94.40000000596046
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 99.7000000178814
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 376.30000001192093
+          }
+        ],
+        "blobId": "perf-baseline-editorial-5-png-2-17"
+      }
+    },
+    {
+      "round": 5,
+      "master": "id-card",
+      "warmup": false,
+      "ready": {
+        "caseId": "perf-baseline-id-card-5",
+        "case": {
+          "caseId": "perf-baseline-id-card-5",
+          "master": "id-card",
+          "jobId": "red-mage",
+          "ratio": "4:5",
+          "locale": "en",
+          "characterName": "Coner"
+        },
+        "expectedJobName": "Red Mage",
+        "expectedAbbreviation": "RDM",
+        "readiness": {
+          "previewReadyMs": 105.90000000596046,
+          "domCommitMs": 9.200000017881393,
+          "imageReadyMs": 89.59999999403954,
+          "opticalReadyMs": 0,
+          "fontsReadyMs": 0,
+          "loadedImageCount": 5,
+          "opticalNameCount": 1,
+          "loadedFontFaces": 2,
+          "documentFontStatus": "loaded"
+        },
+        "card": {
+          "attributes": {
+            "template": "id-card",
+            "ratio": "4:5",
+            "layout": "a",
+            "locale": "en",
+            "lang": "en",
+            "jobId": "red-mage",
+            "job": "Red Mage"
+          },
+          "rect": {
+            "x": 496.5,
+            "y": 406.796875,
+            "width": 432,
+            "height": 540,
+            "right": 928.5,
+            "bottom": 946.796875
+          },
+          "characterName": {
+            "text": "Coner",
+            "visibleText": "Coner",
+            "rect": {
+              "x": 523.71875,
+              "y": 746.0625,
+              "width": 158.9375,
+              "height": 34.8125,
+              "right": 682.65625,
+              "bottom": 780.875
+            }
+          },
+          "jobName": {
+            "text": "Red Mage",
+            "visibleText": "Red Mage",
+            "rect": {
+              "x": 715,
+              "y": 766.34375,
+              "width": 124.15625,
+              "height": 10,
+              "right": 839.15625,
+              "bottom": 776.34375
+            }
+          },
+          "jobAbbreviation": {
+            "text": "RDM",
+            "visibleText": "RDM",
+            "rect": {
+              "x": 842.59375,
+              "y": 771.34375,
+              "width": 8.859375,
+              "height": 4.46875,
+              "right": 851.453125,
+              "bottom": 775.8125
+            }
+          },
+          "jobAbbreviationElementCount": 1,
+          "level": {
+            "text": "100",
+            "visibleText": "100",
+            "rect": {
+              "x": 865.125,
+              "y": 760.65625,
+              "width": 36.15625,
+              "height": 20.6875,
+              "right": 901.28125,
+              "bottom": 781.34375
+            }
+          },
+          "marks": [
+            {
+              "source": "xivapi-svg",
+              "jobId": "red-mage",
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "usage": null,
+              "rect": {
+                "x": 696.96875,
+                "y": 761.65625,
+                "width": 13.53125,
+                "height": 13.53125,
+                "right": 710.5,
+                "bottom": 775.1875
+              },
+              "visible": true,
+              "loadedImage": true,
+              "imageNaturalDimensions": {
+                "width": 150,
+                "height": 150
+              }
+            }
+          ],
+          "markCount": 1,
+          "visibleMarkCount": 1,
+          "duplicateMarkCount": 0,
+          "images": [
+            {
+              "src": "http://127.0.0.1:3333/assets/samples/coner/optimized/portrait.webp",
+              "naturalWidth": 2160,
+              "naturalHeight": 3840,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "cover"
+            },
+            {
+              "src": "http://127.0.0.1:3333/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+              "naturalWidth": 150,
+              "naturalHeight": 150,
+              "loaded": true,
+              "objectFit": "fill"
+            },
+            {
+              "src": "http://127.0.0.1:3333/images/materials/identity-matte-fiber.webp",
+              "naturalWidth": 1280,
+              "naturalHeight": 1600,
+              "loaded": true,
+              "objectFit": "fill"
+            }
+          ],
+          "opticalNames": [
+            {
+              "family": "id-card",
+              "ratio": "4:5",
+              "script": "latin",
+              "ready": true,
+              "sizeCqi": "8.8",
+              "lines": null
+            }
+          ],
+          "visible": true,
+          "documentLocale": "ko",
+          "fontStatus": "loaded",
+          "loadedFontFaces": 2
+        }
+      },
+      "rendered": {
+        "caseId": "perf-baseline-id-card-5",
+        "format": "png",
+        "requestedScale": 2,
+        "mimeType": "image/png",
+        "byteLength": 4264419,
+        "logicalDimensions": {
+          "width": 432,
+          "height": 540
+        },
+        "actualPixelDimensions": {
+          "width": 2160,
+          "height": 2700
+        },
+        "scaleActual": 2,
+        "capped": false,
+        "rasterWallMs": 384.7000000178814,
+        "fontStatus": "loaded",
+        "loadedFontFaceCount": 2,
+        "progress": [
+          {
+            "stage": "fonts",
+            "value": 0.08,
+            "atMs": 0
+          },
+          {
+            "stage": "image",
+            "value": 0.2,
+            "atMs": 58
+          },
+          {
+            "stage": "render",
+            "value": 0.2,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.26,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.32,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.38,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.44,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.5,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.56,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.62,
+            "atMs": 171.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.6799999999999999,
+            "atMs": 177.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.74,
+            "atMs": 177.30000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8,
+            "atMs": 177.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.8599999999999999,
+            "atMs": 177.80000001192093
+          },
+          {
+            "stage": "render",
+            "value": 0.9199999999999999,
+            "atMs": 184.30000001192093
+          },
+          {
+            "stage": "download",
+            "value": 0.96,
+            "atMs": 384.7000000178814
+          }
+        ],
+        "blobId": "perf-baseline-id-card-5-png-2-18"
+      }
+    }
+  ]
+}

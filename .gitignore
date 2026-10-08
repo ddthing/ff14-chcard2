@@ -1,0 +1,25 @@
+node_modules/
+.next/
+out/
+dist/
+.npm-cache/
+build/
+*.tsbuildinfo
+
+# Local credentials and per-machine Cloudflare bindings.
+.env*
+!.env.example
+.dev.vars*
+.wrangler/
+
+# Temporary worktrees, browsers and generated QA evidence.
+tmp/
+docs/qa/
+
+# Third-party texture sources and derivatives are local-only, never publish.
+.local-assets/resourceboy/
+.next-phase213-*/
+
+# Temporary isolated Phase 3 QA build and browser profile (not evidence).
+docs/qa/phase300/baseline-build*/
+docs/qa/phase300/.chrome-*/

@@ -1,0 +1,58 @@
+.root {
+  /* Remove ambient UI variables modern-screenshot would otherwise copy into its SVG. */
+  --app-accent: initial;
+  --app-accent-soft: initial;
+  --app-bg: initial;
+  --app-border: initial;
+  --app-border-strong: initial;
+  --app-control: initial;
+  --app-control-hover: initial;
+  --app-error: initial;
+  --app-error-surface: initial;
+  --app-focus: initial;
+  --app-header: initial;
+  --app-header-height: initial;
+  --app-on-accent: initial;
+  --app-overlay: initial;
+  --app-shadow-overlay: initial;
+  --app-success: initial;
+  --app-success-surface: initial;
+  --app-surface: initial;
+  --app-surface-raised: initial;
+  --app-text: initial;
+  --app-text-muted: initial;
+  --app-text-subtle: initial;
+  --app-workspace: initial;
+  --editor-accent: initial;
+  --editor-accent-soft: initial;
+  --editor-bg: initial;
+  --editor-control: initial;
+  --editor-control-hover: initial;
+  --editor-dim: initial;
+  --editor-ease-snappy: initial;
+  --editor-ease-soft: initial;
+  --editor-error: initial;
+  --editor-error-surface: initial;
+  --editor-focus: initial;
+  --editor-line: initial;
+  --editor-line-strong: initial;
+  --editor-motion-micro: initial;
+  --editor-motion-panel: initial;
+  --editor-motion-ui: initial;
+  --editor-muted: initial;
+  --editor-on-accent: initial;
+  --editor-panel: initial;
+  --editor-raised: initial;
+  --editor-stage: initial;
+  --editor-success: initial;
+  --editor-success-surface: initial;
+  --editor-text: initial;
+  --surface-glass: initial;
+
+  /* Freeze inherited renderer settings to their existing global values. */
+  color-scheme: dark;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}

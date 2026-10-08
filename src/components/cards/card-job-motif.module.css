@@ -1,0 +1,26 @@
+.motif {
+  display: inline-grid;
+  width: var(--job-motif-size);
+  height: var(--job-motif-size);
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--job-motif-color, var(--job-motif-family-color, var(--master-accent, var(--card-accent))));
+  opacity: var(--job-motif-opacity);
+  pointer-events: none;
+  vertical-align: middle;
+}
+
+.glyph {
+  display: inline-grid !important;
+  width: 100% !important;
+  height: 100% !important;
+  flex: 0 0 auto !important;
+  place-items: center !important;
+  overflow: visible !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: none !important;
+  color: currentColor !important;
+  font-size: calc(var(--job-motif-size) * 0.34) !important;
+}
+

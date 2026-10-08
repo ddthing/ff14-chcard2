@@ -1,0 +1,83 @@
+.jobIcon {
+  --job-icon-size-xs: 1rem;
+  --job-icon-size-sm: 1.75rem;
+  --job-icon-size-md: 2.5rem;
+  --job-icon-size-lg: 3rem;
+  --job-icon-size-display: 7rem;
+  --job-icon-font-xs: 0.625rem;
+  --job-icon-font-sm: 0.7rem;
+  --job-icon-font-md: 0.875rem;
+  --job-icon-font-lg: 1rem;
+  --job-icon-font-display: 2rem;
+  --job-icon-dimension: var(--job-icon-size-sm);
+  --job-icon-font-size: var(--job-icon-font-sm);
+
+  display: inline-grid;
+  flex: 0 0 auto;
+  place-items: center;
+  width: var(--job-icon-dimension);
+  height: var(--job-icon-dimension);
+  color: var(--job-icon-color, var(--card-accent, currentColor));
+  font-size: var(--job-icon-font-size);
+  vertical-align: middle;
+}
+
+.jobIcon[data-size='xs'] {
+  --job-icon-dimension: var(--job-icon-size-xs);
+  --job-icon-font-size: var(--job-icon-font-xs);
+}
+
+.jobIcon[data-size='sm'] {
+  --job-icon-dimension: var(--job-icon-size-sm);
+  --job-icon-font-size: var(--job-icon-font-sm);
+}
+
+.jobIcon[data-size='md'] {
+  --job-icon-dimension: var(--job-icon-size-md);
+  --job-icon-font-size: var(--job-icon-font-md);
+}
+
+.jobIcon[data-size='lg'] {
+  --job-icon-dimension: var(--job-icon-size-lg);
+  --job-icon-font-size: var(--job-icon-font-lg);
+}
+
+.jobIcon[data-size='display'] {
+  --job-icon-dimension: var(--job-icon-size-display);
+  --job-icon-font-size: var(--job-icon-font-display);
+}
+
+.officialGlyph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background-color: currentColor;
+  mask-image: var(--job-icon-mask-image);
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+  mask-mode: alpha;
+  -webkit-mask-image: var(--job-icon-mask-image);
+  -webkit-mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+}
+
+.preloadImage {
+  display: none;
+}
+
+.sourceImage {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.roleMark {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: inherit;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.04em;
+}

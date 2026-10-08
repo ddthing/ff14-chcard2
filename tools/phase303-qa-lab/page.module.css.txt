@@ -1,0 +1,25 @@
+.lab {
+  display: grid;
+  justify-items: start;
+  gap: 20px;
+  min-height: 100vh;
+  padding: 24px;
+  color: #1d1b18;
+  background: #f1eee7;
+}
+
+.status {
+  display: grid;
+  justify-items: start;
+  gap: 4px;
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+
+.cardStage {
+  width: min(432px, calc(100vw - 48px));
+  min-width: 0;
+}
+
+.cardStage[data-ratio='16:9'] {
+  width: min(640px, calc(100vw - 48px));
+}

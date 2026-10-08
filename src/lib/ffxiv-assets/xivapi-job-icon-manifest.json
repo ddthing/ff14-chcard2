@@ -1,0 +1,579 @@
+{
+  "schemaVersion": 1,
+  "provider": "XIVAPI classjob-icons",
+  "repository": "https://github.com/xivapi/classjob-icons",
+  "upstreamCommit": "766cb47831435a83f04d904146bd3472501564c5",
+  "retrievedAtLocalDate": "2026-10-07",
+  "repositoryDeclaredLicense": "MIT",
+  "artworkRightsNote": "Repository MIT terms cover its code, not FINAL FANTASY XIV artwork; see docs/design/job-icon-sources.md.",
+  "currentJobCount": 34,
+  "coverage": {
+    "sourceAvailable": {
+      "svg": 33,
+      "icons": 33,
+      "companion": 33,
+      "risingstones": 31
+    },
+    "reviewedJobs": 34,
+    "publishedSources": {
+      "svg": 16,
+      "icons": 4,
+      "companion": 0,
+      "risingstones": 0
+    }
+  },
+  "entries": {
+    "paladin": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/paladin.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "4433727da89d0b5dd4e6fce6e01bfccee46774b0e48bf889e52924e3d114b641",
+        "sourcePath": "svg/class_job_019.svg",
+        "visualScale": 0.8353986878452161,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.0068359375,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "warrior": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/warrior.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "575cebfd740f03d6fd0c9f115c0c2cbfe50fdee843b1e7754e9ed2ed5b5fab88",
+        "sourcePath": "svg/class_job_021.svg",
+        "visualScale": 0.8416254115301732,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.001953125,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "dark-knight": {
+      "svg": null,
+      "raster": null
+    },
+    "gunbreaker": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/gunbreaker.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "d7d468afb36becd85a1464a75c3ececb61904c4119f9d0bf9b4f797e3a5b7df0",
+        "sourcePath": "svg/class_job_037.svg",
+        "visualScale": 0.7701986421956302,
+        "opticalOffsetX": 0.004579496165442509,
+        "opticalOffsetY": -0.0048828125,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "white-mage": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/white-mage.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "f756b2e152a270d2e581b61c37309a6b2181bc5f86ffc7a4fdb5e3101bbd7d80",
+        "sourcePath": "svg/class_job_024.svg",
+        "visualScale": 0.8391097782992719,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.0009765625,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "scholar": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/scholar.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "3d566d2748863407585f5416c9081c7c8f0dc0f72dbddd59e83cb87b217e3ea2",
+        "sourcePath": "svg/class_job_028.svg",
+        "visualScale": 0.8380429216402504,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.0012100991867138866,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "astrologian": {
+      "svg": null,
+      "raster": null
+    },
+    "sage": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/sage.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "dff9c57aae6e2b72ff96a01a9aa57bf2bb3afecf7610f8f3a36489bae5980a7c",
+        "sourcePath": "svg/class_job_040.svg",
+        "visualScale": 0.7948113857274177,
+        "opticalOffsetX": 0.0126953125,
+        "opticalOffsetY": 0.012619307408116454,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "monk": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/monk.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "771819d0c510581620b4e0a9ec96af8df7aa3e0c5357a87f4bb8a5115d59281e",
+        "sourcePath": "svg/class_job_020.svg",
+        "visualScale": 0.8363345577125475,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.009143892165161593,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "dragoon": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/dragoon.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "c608c503ec43e8958cf288e3d2e0a6d454ae22f0507bbbe8ff4d04b912447bd4",
+        "sourcePath": "svg/class_job_022.svg",
+        "visualScale": 0.832155245088544,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.02308896963063561,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "ninja": {
+      "svg": null,
+      "raster": null
+    },
+    "samurai": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/samurai.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "e9a85e0e79f7fbd74283131a63ee07cdde6664129d3502771c87d76271a849e5",
+        "sourcePath": "svg/class_job_034.svg",
+        "visualScale": 0.7486302078401174,
+        "opticalOffsetX": 0.0087890625,
+        "opticalOffsetY": 0.005859375,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "reaper": {
+      "svg": null,
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/reaper.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "556fd714bbe8ab84a6f4601faa56dcf4677ce07e443d99b96041be0dc662fd4b",
+        "sourcePath": "icons/reaper.png",
+        "visualScale": 0.5625591824926673,
+        "opticalOffsetX": 0.0244140625,
+        "opticalOffsetY": -0.0166015625,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
+    },
+    "viper": {
+      "svg": null,
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/viper.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "c074d0da8a0f0e8371136196dada887f6467fa1d3cc4947c7a785fcdfa92c775",
+        "sourcePath": "icons/viper.png",
+        "visualScale": 0.5478749851797847,
+        "opticalOffsetX": 0.01127722166521461,
+        "opticalOffsetY": 0.01953125,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
+    },
+    "bard": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/bard.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "97c7b674cbe008b98084d6807637435b4ec65c07b95860f295f8fe330b5b69e6",
+        "sourcePath": "svg/class_job_023.svg",
+        "visualScale": 0.8387913441075627,
+        "opticalOffsetX": 0.0029296875,
+        "opticalOffsetY": 0.010144446719800415,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "machinist": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/machinist.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "ad370e56ba54fa739bb31aba8c60dbdf1dd5fda04290f87d551d5d545a7021e4",
+        "sourcePath": "svg/class_job_031.svg",
+        "visualScale": 0.8370232923087478,
+        "opticalOffsetX": 0.0087890625,
+        "opticalOffsetY": -0.0048828125,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "dancer": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/dancer.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "2f6bc1d65d07b5c101bbdcf5a33b8f09a66384e2e16845aa493ffe619b0f8282",
+        "sourcePath": "svg/class_job_038.svg",
+        "visualScale": 0.7857792663073191,
+        "opticalOffsetX": 0.006417537629506476,
+        "opticalOffsetY": 0.0035581757122856716,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "black-mage": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/black-mage.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "890b495cc5153b92ac1e0ea94b3b3ecb3e12fcf2f2972848b940704c2bbfcefa",
+        "sourcePath": "svg/class_job_025.svg",
+        "visualScale": 0.8332967114348853,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.0068359375,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "summoner": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/summoner.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "f05eb540d2d088750b1571ae8b733a313eafb95f21f67fec52fb5293455b87ac",
+        "sourcePath": "svg/class_job_027.svg",
+        "visualScale": 0.8292002696595526,
+        "opticalOffsetX": 0.0263671875,
+        "opticalOffsetY": 0.00350000526678812,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/summoner.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "0a35c062a9df766ed71a3427a90dbd45e3af92c6fc49ed881969fadf91397d35",
+        "sourcePath": "icons/summoner.png",
+        "visualScale": 0.6499939297465537,
+        "opticalOffsetX": 0.0263671875,
+        "opticalOffsetY": -0.019677669167199263,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
+    },
+    "red-mage": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/red-mage.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "549c7ac7bca100e6ec3bb2724b47bd9c838a3ecd2052b50be50da96d9d8a3822",
+        "sourcePath": "svg/class_job_035.svg",
+        "visualScale": 0.782594744777742,
+        "opticalOffsetX": -0.0478515625,
+        "opticalOffsetY": 0.007047933969834275,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "pictomancer": {
+      "svg": null,
+      "raster": {
+        "src": "/assets/ffxiv/jobs/xivapi/icons/pictomancer.png",
+        "width": 256,
+        "height": 256,
+        "provider": "icons",
+        "colorMode": "source-color-and-alpha-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "fbd232b312ea11eaf2849fe522cec3f546bbcbe213363d4aee0cfbbb6cad483e",
+        "sourcePath": "icons/pictomancer.png",
+        "visualScale": 0.5570180947917293,
+        "opticalOffsetX": 0.0078125,
+        "opticalOffsetY": 0.00389339565124458,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "export"
+        ]
+      }
+    },
+    "blue-mage": {
+      "svg": {
+        "src": "/assets/ffxiv/jobs/xivapi/svg/blue-mage.svg",
+        "width": 1000,
+        "height": 1000,
+        "provider": "svg",
+        "colorMode": "monochrome-mask",
+        "verified": true,
+        "integrityVerified": true,
+        "sha256": "04e0da06eb6b74c7dab9439035703da1f9016570bdc97e249aa343c40a3a2837",
+        "sourcePath": "svg/class_job_036.svg",
+        "visualScale": 0.7404524748757808,
+        "opticalOffsetX": 0.0009765625,
+        "opticalOffsetY": 0.0205078125,
+        "verifiedUsages": [
+          "picker",
+          "micro",
+          "cardSmall",
+          "cardMedium",
+          "cardDisplay",
+          "export"
+        ]
+      },
+      "raster": null
+    },
+    "carpenter": {
+      "svg": null,
+      "raster": null
+    },
+    "blacksmith": {
+      "svg": null,
+      "raster": null
+    },
+    "armorer": {
+      "svg": null,
+      "raster": null
+    },
+    "goldsmith": {
+      "svg": null,
+      "raster": null
+    },
+    "leatherworker": {
+      "svg": null,
+      "raster": null
+    },
+    "weaver": {
+      "svg": null,
+      "raster": null
+    },
+    "alchemist": {
+      "svg": null,
+      "raster": null
+    },
+    "culinarian": {
+      "svg": null,
+      "raster": null
+    },
+    "miner": {
+      "svg": null,
+      "raster": null
+    },
+    "botanist": {
+      "svg": null,
+      "raster": null
+    },
+    "fisher": {
+      "svg": null,
+      "raster": null
+    },
+    "beastmaster": {
+      "svg": null,
+      "raster": null
+    }
+  }
+}

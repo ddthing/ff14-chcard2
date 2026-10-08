@@ -1,0 +1,79 @@
+{
+  "generator": "tools/generate-card-materials.mjs",
+  "provenance": "Deterministic procedural maps generated in this repository; no external reference pixels, photographs, or AI-generated pixels were used.",
+  "dimensions": {
+    "width": 1280,
+    "height": 1600,
+    "channels": 4
+  },
+  "encoding": {
+    "format": "webp",
+    "quality": 39,
+    "alphaQuality": 82,
+    "effort": 6,
+    "smartSubsample": false
+  },
+  "assets": {
+    "cinematic-film-grain": {
+      "file": "cinematic-film-grain.webp",
+      "seed": "0x1f1a0a11",
+      "dimensions": "1280x1600",
+      "bytes": 411220,
+      "encodedSha256": "0e74e3ffb411fd6de5280a64a52059b67fa6888fb241b7eb9495d44961dd191d",
+      "sourceSha256": "ab409718156f5b731e4cd2ec3021ce23b817bb0a8107152dbfe4b181e285c5c1",
+      "alpha": {
+        "nonTransparentPixels": 164441,
+        "nonTransparentFraction": 0.08029,
+        "meanAlphaIncludingTransparent": 3.212,
+        "maxAlpha": 56,
+        "alphaWeightedMeanLuminance": 127.95
+      }
+    },
+    "editorial-paper-surface": {
+      "file": "editorial-paper-surface.webp",
+      "seed": "0x4e2c7993",
+      "dimensions": "1280x1600",
+      "bytes": 313904,
+      "encodedSha256": "bf38a588f357bbe599d754cfa636f4322ca914739bd01492758ae2bd93e47405",
+      "sourceSha256": "d5dbba522afc7d2adbbd71b1f10ccb765d63888efb21d04907a7f07953d65a0e",
+      "alpha": {
+        "nonTransparentPixels": 2048000,
+        "nonTransparentFraction": 1,
+        "meanAlphaIncludingTransparent": 3.993,
+        "maxAlpha": 69,
+        "alphaWeightedMeanLuminance": 126.69
+      }
+    },
+    "editorial-ink-density": {
+      "file": "editorial-ink-density.webp",
+      "seed": "0x6d928c31",
+      "dimensions": "1280x1600",
+      "bytes": 147160,
+      "encodedSha256": "c771f87fa91164dd95d7a42b6c11d0cd92a5a6b2ee2ef019b97cc8c2b928f95e",
+      "sourceSha256": "14c5841898d1e67a70c28b118803453d133472ae605248d5755336c140fc1ea5",
+      "alpha": {
+        "nonTransparentPixels": 50049,
+        "nonTransparentFraction": 0.02444,
+        "meanAlphaIncludingTransparent": 0.79,
+        "maxAlpha": 55,
+        "alphaWeightedMeanLuminance": 124.69
+      }
+    },
+    "identity-matte-fiber": {
+      "file": "identity-matte-fiber.webp",
+      "seed": "0x83a1f50d",
+      "dimensions": "1280x1600",
+      "bytes": 113854,
+      "encodedSha256": "9456109acaa3ae7557a39b5a23473e7112949bb85f26b21b4e472a98ddb247b0",
+      "sourceSha256": "00c9c9eb8c67afd3cb11341a55ad98693a9fd38bfdbd8880e335d3d15aba719a",
+      "alpha": {
+        "nonTransparentPixels": 2048000,
+        "nonTransparentFraction": 1,
+        "meanAlphaIncludingTransparent": 2.029,
+        "maxAlpha": 50,
+        "alphaWeightedMeanLuminance": 127.93
+      }
+    }
+  },
+  "totalBytes": 986138
+}

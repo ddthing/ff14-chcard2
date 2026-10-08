@@ -1,0 +1,801 @@
+.canvas {
+  --identity-ribbon-top: 5.5%;
+  --identity-ribbon-left: 4.5%;
+  --identity-ribbon-width: 10.9%;
+  --identity-ribbon-height: 22.5%;
+  --identity-unofficial-right: 5.6%;
+  --identity-photo-width: 100%;
+  --identity-photo-height: 61%;
+  --identity-photo-inset: 0 0 auto;
+  --identity-paper-inset: 61% 0 0;
+  --identity-paper-padding: 2.35cqi 6.1cqi 7.4cqi;
+  --identity-hero-rule-span: 92%;
+  --identity-association-rule-span: 86%;
+  --identity-label-size: 1.1cqi;
+  --identity-value-size: 1.84cqi;
+  --identity-micro-size: 1.08cqi;
+  --identity-icon-size: 2.9cqi;
+  --identity-group-gap: 1.2cqi;
+  --identity-rule: var(--master-rule-weight, .13cqi);
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--craft-ink);
+  font-family: var(--card-font-body, sans-serif);
+}
+
+.photo {
+  position: absolute;
+  z-index: 1;
+  inset: var(--identity-photo-inset);
+  width: var(--identity-photo-width);
+  height: var(--identity-photo-height);
+}
+
+.stock {
+  position: absolute;
+  z-index: 0;
+  inset: var(--identity-paper-inset);
+  background: var(--craft-paper);
+}
+
+.stockMaterial {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: calc(var(--material-identity-matte-fiber-opacity, .3) * var(--material-strength-factor, 1));
+  pointer-events: none;
+}
+
+.masthead {
+  position: absolute;
+  z-index: 4;
+  top: var(--identity-ribbon-top);
+  left: var(--identity-ribbon-left);
+  display: flex;
+  width: var(--identity-ribbon-width);
+  height: var(--identity-ribbon-height);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .8cqi;
+  padding: 2.4cqi .6cqi 2cqi;
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--craft-red) 86%, var(--craft-ink)),
+    color-mix(in srgb, var(--craft-red) 68%, var(--craft-ink))
+  );
+  color: var(--craft-ivory);
+  clip-path: polygon(0 0, 100% 0, 100% 91%, 50% 100%, 0 91%);
+  font-family: var(--card-font-metadata, sans-serif);
+  text-transform: uppercase;
+}
+
+.ribbonMaterial {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: calc(var(--material-identity-matte-fiber-opacity, .3) * var(--material-strength-factor, 1));
+  pointer-events: none;
+}
+
+.ribbonCompass {
+  position: relative;
+  z-index: 2;
+  width: 3.8cqi;
+  height: 3.8cqi;
+  flex: 0 0 auto;
+  margin-top: .35cqi;
+  color: var(--craft-brass);
+}
+
+.ribbonRule {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: color-mix(in srgb, var(--craft-brass) 88%, var(--craft-ivory));
+  pointer-events: none;
+}
+
+.mastheadTitle,
+.mastheadNote {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.mastheadTitle {
+  max-width: 100%;
+  color: var(--craft-ivory);
+  font-size: .94cqi;
+  font-family: var(--master-font-micro, inherit);
+  font-weight: var(--master-micro-weight, 650);
+  letter-spacing: var(--master-micro-tracking, .09em);
+  line-height: var(--master-micro-leading, 1.12);
+  overflow-wrap: anywhere;
+}
+
+.canvas[data-locale='en'] .mastheadTitle {
+  font-family: var(--font-editorial, Georgia, serif), var(--card-font-metadata, sans-serif);
+  font-size: .86cqi;
+  letter-spacing: .13em;
+}
+
+.mastheadNote {
+  border-top: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--craft-brass) 66%, transparent),
+    color-mix(in srgb, var(--craft-brass) 66%, transparent)
+  );
+  background-size: 100% var(--identity-rule);
+  background-position: top;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-top: .5cqi;
+  color: color-mix(in srgb, var(--craft-ivory) 78%, transparent);
+  font-family: var(--master-font-caption, inherit);
+  font-size: var(--master-micro-min, .84cqi);
+  font-weight: var(--master-caption-weight, 550);
+  letter-spacing: var(--master-caption-tracking, .11em);
+  line-height: var(--master-caption-leading, 1);
+}
+
+.unofficialNote {
+  position: absolute;
+  z-index: 4;
+  top: 5.3%;
+  right: var(--identity-unofficial-right);
+  max-width: 40%;
+  color: var(--craft-ivory);
+  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
+  font-size: max(.78cqi, var(--master-micro-min, .84cqi));
+  font-weight: var(--master-micro-weight, 560);
+  letter-spacing: var(--master-micro-tracking, .09em);
+  line-height: var(--master-micro-leading, 1.2);
+  opacity: .9;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+.paper {
+  position: absolute;
+  z-index: 3;
+  inset: var(--identity-paper-inset);
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 1.25cqi;
+  padding: var(--identity-paper-padding);
+  color: var(--craft-ink);
+}
+
+.paper::before {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: var(--identity-rule);
+  background: linear-gradient(90deg,
+      var(--craft-brass) 0 44%,
+      transparent 44% 56%,
+      var(--craft-brass) 56% 100%);
+  content: '';
+}
+
+.seamDivider {
+  position: absolute;
+  z-index: 5;
+  top: calc(var(--identity-photo-height) - .65cqi);
+  left: 50%;
+  width: 8cqi;
+  height: 1cqi;
+  color: var(--craft-brass);
+  transform: translateX(-50%);
+}
+
+.heroIdentity {
+  position: relative;
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr) minmax(20cqi, 1.02fr) max-content;
+  align-items: center;
+  gap: 1.55cqi;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--craft-brass) 68%, transparent),
+    color-mix(in srgb, var(--craft-brass) 68%, transparent)
+  );
+  background-size: var(--identity-hero-rule-span) var(--identity-rule);
+  background-position: 1.15cqi bottom;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-bottom: 1.2cqi;
+}
+
+.nameBlock {
+  min-width: 0;
+}
+
+.name {
+  max-width: 100%;
+  margin: 0;
+  color: var(--craft-ink);
+  font-family: var(--card-font-display, Georgia, serif);
+  font-weight: var(--card-display-weight, 600);
+  letter-spacing: -.028em;
+  line-height: .92;
+  overflow-wrap: anywhere;
+}
+
+.name[data-name-script='latin'] {
+  font-family: var(--master-font-display, var(--font-editorial, Georgia, serif));
+  font-weight: 600;
+  letter-spacing: -.028em;
+  line-height: .92;
+}
+
+.name[data-name-script='korean'] {
+  font-family: var(--master-font-display, var(--card-font-information, var(--card-font-body, sans-serif)));
+  font-weight: var(--master-display-weight, 640);
+  letter-spacing: var(--master-display-tracking, -.01em);
+  line-height: var(--master-display-leading, 1.03);
+}
+
+.name[data-name-script='japanese'] {
+  font-family: var(--master-font-display, var(--card-font-display, var(--card-font-body, sans-serif)));
+  font-weight: var(--master-display-weight, 580);
+  letter-spacing: var(--master-display-tracking, -.005em);
+  line-height: var(--master-display-leading, 1.04);
+}
+
+.nameLine {
+  display: block;
+  max-width: 100%;
+  text-wrap: balance;
+}
+
+.name[data-name-script='korean'] .nameLine,
+.name[data-name-script='japanese'] .nameLine {
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.bio {
+  display: -webkit-box;
+  max-width: 100%;
+  margin: .7cqi 0 0;
+  overflow: hidden;
+  color: color-mix(in srgb, var(--craft-ink) 86%, transparent);
+  font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
+  font-size: 1.32cqi;
+  font-style: italic;
+  font-weight: var(--master-secondary-display-weight, 500);
+  letter-spacing: var(--master-secondary-display-tracking, .006em);
+  line-height: var(--master-secondary-display-leading, 1.22);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.jobPanel {
+  display: grid;
+  min-width: 0;
+  align-items: center;
+  padding: 0;
+}
+
+.jobBadge {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: 4.4cqi minmax(0, 1fr);
+  align-items: center;
+  gap: .85cqi;
+}
+
+.jobBadgeMark {
+  box-sizing: border-box;
+  display: grid;
+  width: 4.4cqi;
+  height: 4.4cqi;
+  flex: 0 0 auto;
+  place-items: center;
+  border: var(--identity-rule) solid color-mix(in srgb, var(--craft-red) 36%, transparent);
+  background: color-mix(in srgb, var(--craft-red) 7%, var(--craft-paper));
+  color: var(--job-motif-color, color-mix(in srgb, var(--craft-ink) 75%, var(--craft-brass) 25%));
+  --job-icon-color: var(--job-motif-color, color-mix(in srgb, var(--craft-ink) 75%, var(--craft-brass) 25%));
+}
+
+.jobBadgeWithoutMark {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.jobGlyph {
+  width: 1em !important;
+  height: 1em !important;
+  flex: 0 0 1em !important;
+  font-size: inherit !important;
+}
+
+.jobCopy {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: start;
+  gap: .14cqi 0;
+}
+
+.jobLabel {
+  grid-column: 1;
+  color: color-mix(in srgb, var(--craft-ink) 64%, transparent);
+  font-family: var(--master-font-label, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-label-size));
+  font-weight: var(--master-label-weight, 700);
+  letter-spacing: var(--master-label-tracking, .08em);
+  line-height: var(--master-label-leading, 1.1);
+}
+
+.jobName {
+  min-width: 0;
+  color: var(--craft-ink);
+  font-family: var(--master-font-job, var(--card-font-caption, var(--card-font-body, sans-serif)));
+  font-size: max(var(--master-micro-min, .84cqi), 1.92cqi);
+  font-weight: var(--master-job-weight, 650);
+  letter-spacing: var(--master-job-tracking, -.025em);
+  line-height: var(--master-job-leading, 1.05);
+  overflow-wrap: anywhere;
+}
+
+.jobAbbreviation {
+  color: var(--craft-red);
+  font-family: var(--card-font-metadata, sans-serif);
+  font-size: 1.04cqi;
+  font-weight: 750;
+  letter-spacing: .11em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.levelPanel {
+  display: flex;
+  min-width: 9.5cqi;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  margin: 0;
+  border-left: 1px solid transparent;
+  background-image: linear-gradient(var(--craft-brass), var(--craft-brass));
+  background-size: var(--identity-rule) 100%;
+  background-position: left;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding: .1cqi 0 .15cqi 1.4cqi;
+  text-align: right;
+}
+
+.levelPanel dt {
+  color: color-mix(in srgb, var(--craft-ink) 64%, transparent);
+  font-family: var(--master-font-label, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-label-size));
+  font-weight: var(--master-label-weight, 700);
+  letter-spacing: var(--master-label-tracking, .08em);
+  line-height: var(--master-label-leading, 1);
+}
+
+.levelPanel dd {
+  margin: .15cqi 0 0;
+  color: var(--craft-ink);
+  font-family: var(--card-font-display, Georgia, serif);
+  font-size: 5.35cqi;
+  font-weight: 680;
+  letter-spacing: -.065em;
+  line-height: .9;
+  font-variant-numeric: lining-nums tabular-nums;
+}
+
+.records {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: calc(var(--identity-group-gap) + .2cqi);
+}
+
+.paper:has(.name[data-name-lines='3']) .bio {
+  display: none;
+}
+
+.paper:has(.name[data-name-lines='3']) .records {
+  grid-template-rows: min-content min-content min-content;
+  align-content: start;
+}
+
+.paper:has(.name[data-name-fit='tight'][data-name-script='korean']) .records,
+.paper:has(.name[data-name-fit='tight'][data-name-script='japanese']) .records {
+  grid-template-rows: min-content min-content min-content;
+  align-content: start;
+}
+
+.recordGroup {
+  min-width: 0;
+}
+
+.groupTitle {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 1.15cqi;
+  margin: 0 0 .75cqi;
+  color: var(--craft-brass);
+  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-micro-size));
+  font-weight: var(--master-micro-weight, 700);
+  letter-spacing: var(--master-micro-tracking, .12em);
+  line-height: var(--master-micro-leading, 1);
+  text-transform: uppercase;
+}
+
+.groupTitle::after {
+  height: var(--identity-rule);
+  min-width: 1cqi;
+  flex: 1 1 auto;
+  background: linear-gradient(90deg,
+      color-mix(in srgb, var(--craft-brass) 66%, transparent),
+      color-mix(in srgb, var(--craft-brass) 10%, transparent));
+  content: '';
+}
+
+.originGroup .groupTitle::after { max-width: 86%; }
+.lineageGroup .groupTitle::after { max-width: 72%; }
+.affiliationGroup .groupTitle::after { max-width: 90%; }
+.personalNotes .groupTitle::after { max-width: 68%; }
+
+.affiliationGroup {
+  padding-top: .3cqi;
+}
+
+.recordList {
+  display: grid;
+  min-width: 0;
+  align-content: start;
+  gap: .8cqi 1.25cqi;
+}
+
+.originGroup .recordList {
+  grid-template-columns: minmax(0, 1.18fr) minmax(0, .94fr) minmax(0, 1fr);
+}
+
+.recordEntry {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: var(--identity-icon-size) minmax(0, 1fr);
+  align-items: center;
+  gap: 1cqi;
+}
+
+.recordPictogram {
+  display: grid;
+  width: var(--identity-icon-size);
+  height: var(--identity-icon-size);
+  place-items: center;
+  color: var(--craft-brass);
+}
+
+.pictogram {
+  width: 100%;
+  height: 100%;
+}
+
+.recordCopy {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: min-content min-content;
+  align-content: start;
+  row-gap: .18cqi;
+  margin: 0;
+}
+
+.recordLabel,
+.recordCopy dd {
+  display: block;
+  max-width: 100%;
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.canvas[data-locale='en'] .jobName,
+.canvas[data-locale='en'] .recordCopy dd {
+  font-family: var(--font-editorial, Georgia, serif), var(--card-font-body, sans-serif);
+  font-weight: 520;
+  letter-spacing: -.012em;
+}
+
+.canvas[data-locale='en'] .jobName {
+  font-family: var(--master-font-job, var(--font-editorial, Georgia, serif), var(--card-font-body, sans-serif));
+  font-weight: var(--master-job-weight, 520);
+  letter-spacing: var(--master-job-tracking, -.012em);
+  line-height: var(--master-job-leading, normal);
+}
+
+.canvas[data-locale='en'] .recordCopy dd {
+  font-family: var(--master-font-information, var(--font-editorial, Georgia, serif), var(--card-font-body, sans-serif));
+  font-weight: var(--master-information-weight, 520);
+  letter-spacing: var(--master-information-tracking, -.012em);
+  line-height: var(--master-information-leading, normal);
+}
+
+/* Serif ink needs a larger optical measure than the previous dense UI face. */
+.canvas[data-ratio='4:5'][data-locale='en'] {
+  --identity-value-size: 2.15cqi;
+}
+
+.recordLabel {
+  color: color-mix(in srgb, var(--craft-ink) 68%, transparent);
+  font-family: var(--master-font-label, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-label-size));
+  font-weight: var(--master-label-weight, 680);
+  letter-spacing: var(--master-label-tracking, .075em);
+  line-height: var(--master-label-leading, 1.12);
+  text-transform: uppercase;
+}
+
+.recordCopy dd {
+  margin-top: 0;
+  color: var(--craft-ink);
+  font-family: var(--master-font-information, var(--card-font-body, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-value-size));
+  font-weight: var(--master-information-weight, 650);
+  letter-spacing: var(--master-information-tracking, -.02em);
+  line-height: var(--master-information-leading, 1.14);
+}
+
+.originGroup [data-record-field='world'] dd {
+  color: var(--craft-ink);
+  font-family: var(--master-font-information, var(--card-font-display, Georgia, serif));
+  font-size: max(var(--master-micro-min, .84cqi), 2.35cqi);
+  font-weight: var(--master-information-weight, 640);
+  letter-spacing: var(--master-information-tracking, -.04em);
+  line-height: 1;
+}
+
+.associations {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: minmax(0, .86fr) minmax(0, 1.14fr);
+  gap: 2.2cqi;
+  border-top: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--craft-brass) 44%, transparent),
+    color-mix(in srgb, var(--craft-brass) 44%, transparent)
+  );
+  background-size: var(--identity-association-rule-span) var(--identity-rule);
+  background-position: 1.25cqi top;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-top: 1.05cqi;
+}
+
+.lineageGroup .recordList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.affiliationGroup .recordList {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .8cqi 1.4cqi;
+}
+
+.affiliationGroup [data-record-field='freeCompany'] dd {
+  font-size: max(var(--master-micro-min, .84cqi), 2.08cqi);
+  font-weight: var(--master-information-weight, 660);
+  letter-spacing: var(--master-information-tracking, -.035em);
+}
+
+.personalNotes {
+  padding-top: 1.25cqi;
+}
+
+.personalNotes .recordList {
+  grid-template-columns: repeat(auto-fit, minmax(31%, 1fr));
+  gap: .8cqi 2cqi;
+}
+
+.personalNotes [data-record-field='languages'] dd {
+  font-family: var(--card-font-metadata, sans-serif);
+  font-size: 1.55cqi;
+  font-weight: 670;
+  letter-spacing: .12em;
+}
+
+.personalNotes [data-record-field='playStyles'] dd {
+  font-size: 1.65cqi;
+}
+
+/* Square cards trade some image height for a calmer, roomier print field. */
+.canvas[data-ratio='1:1'] {
+  --identity-ribbon-top: 8.3%;
+  --identity-ribbon-width: 11.7%;
+  --identity-ribbon-height: 22.5%;
+  --identity-photo-height: 51%;
+  --identity-paper-inset: 51% 0 0;
+  --identity-paper-padding: 2.45cqi 5.8cqi 7.8cqi;
+  --identity-hero-rule-span: 94%;
+  --identity-association-rule-span: 84%;
+  --identity-label-size: .98cqi;
+  --identity-value-size: 1.62cqi;
+  --identity-micro-size: .98cqi;
+  --identity-icon-size: 2.45cqi;
+  --identity-group-gap: 1cqi;
+}
+
+.canvas[data-ratio='1:1'] .masthead {
+  padding-top: 2.5cqi;
+}
+
+.canvas[data-ratio='1:1'] .mastheadTitle { font-size: .92cqi; }
+.canvas[data-ratio='1:1'] .heroIdentity { grid-template-columns: minmax(0, 1fr) minmax(18cqi, .94fr) max-content; gap: 1.2cqi; padding-bottom: 1cqi; }
+.canvas[data-ratio='1:1'] .jobBadge { grid-template-columns: 4.05cqi minmax(0, 1fr); gap: .65cqi; }
+.canvas[data-ratio='1:1'] .jobBadgeWithoutMark { grid-template-columns: minmax(0, 1fr); }
+.canvas[data-ratio='1:1'] .jobBadgeMark { width: 4.05cqi; height: 4.05cqi; }
+.canvas[data-ratio='1:1'] .jobName { font-size: 1.72cqi; }
+.canvas[data-ratio='1:1'] .levelPanel { min-width: 8.7cqi; padding-left: 1.1cqi; }
+.canvas[data-ratio='1:1'] .levelPanel dd { font-size: 4.8cqi; }
+.canvas[data-ratio='1:1'] .recordList { gap: .65cqi 1cqi; }
+.canvas[data-ratio='1:1'] .originGroup [data-record-field='world'] dd { font-size: 2.1cqi; }
+.canvas[data-ratio='1:1'] .associations { gap: 1.7cqi; padding-top: .85cqi; }
+.canvas[data-ratio='1:1'] .affiliationGroup [data-record-field='freeCompany'] dd { font-size: 1.88cqi; }
+.canvas[data-ratio='1:1'] .personalNotes { padding-top: .85cqi; }
+
+/* The taller portrait crop leaves enough paper for the complete record. */
+.canvas[data-ratio='3:4'] {
+  --identity-ribbon-top: 6.8%;
+  --identity-ribbon-width: 10.8%;
+  --identity-ribbon-height: 23.5%;
+  --identity-photo-height: 61%;
+  --identity-paper-inset: 61% 0 0;
+  --identity-paper-padding: 2.8cqi 6.1cqi 8.1cqi;
+  --identity-hero-rule-span: 90%;
+  --identity-association-rule-span: 88%;
+  --identity-value-size: 1.84cqi;
+  --identity-icon-size: 2.8cqi;
+  --identity-group-gap: 1.35cqi;
+}
+
+.canvas[data-ratio='3:4'] .records { gap: 1.3cqi; }
+
+/* The portrait poster ratio gives the character a long photographic field. */
+.canvas[data-ratio='9:16'] {
+  --identity-ribbon-top: 4.5%;
+  --identity-ribbon-width: 11.6%;
+  --identity-ribbon-height: 18.5%;
+  --identity-photo-height: 68%;
+  --identity-paper-inset: 68% 0 0;
+  --identity-paper-padding: 2.8cqi 6.2cqi 8cqi;
+  --identity-hero-rule-span: 88%;
+  --identity-association-rule-span: 91%;
+  --identity-label-size: 1.12cqi;
+  --identity-value-size: 1.95cqi;
+  --identity-micro-size: 1.12cqi;
+  --identity-icon-size: 3.05cqi;
+  --identity-group-gap: 1.55cqi;
+}
+
+.canvas[data-ratio='9:16'] .heroIdentity { grid-template-columns: minmax(0, 1fr) minmax(22cqi, 1fr) max-content; gap: 1.7cqi; }
+.canvas[data-ratio='9:16'] .jobBadge { grid-template-columns: 4.66cqi minmax(0, 1fr); gap: .9cqi; }
+.canvas[data-ratio='9:16'] .jobBadgeWithoutMark { grid-template-columns: minmax(0, 1fr); }
+.canvas[data-ratio='9:16'] .jobBadgeMark { width: 4.66cqi; height: 4.66cqi; }
+.canvas[data-ratio='9:16'] .jobName { font-size: 2cqi; }
+.canvas[data-ratio='9:16'] .levelPanel { min-width: 10.5cqi; }
+.canvas[data-ratio='9:16'] .levelPanel dd { font-size: 5.7cqi; }
+.canvas[data-ratio='9:16'] .associations { gap: 2.5cqi; }
+.canvas[data-ratio='9:16'] .recordList { gap: .9cqi 1.4cqi; }
+.canvas[data-ratio='9:16'] .originGroup [data-record-field='world'] dd { font-size: 2.5cqi; }
+.canvas[data-ratio='9:16'] .affiliationGroup [data-record-field='freeCompany'] dd { font-size: 2.18cqi; }
+
+/* Landscape is recomposed as a portrait panel beside a narrow archival index. */
+.canvas[data-ratio='16:9'] {
+  --identity-ribbon-top: 14%;
+  --identity-ribbon-left: 4%;
+  --identity-ribbon-width: 9%;
+  --identity-ribbon-height: 24%;
+  --identity-unofficial-right: 58%;
+  --identity-photo-width: 44%;
+  --identity-photo-height: 100%;
+  --identity-photo-inset: 0 auto 0 0;
+  --identity-paper-inset: 0 0 0 44%;
+  --identity-paper-padding: 4.1cqi 5.4cqi 6.4cqi;
+  --identity-hero-rule-span: 95%;
+  --identity-association-rule-span: 82%;
+  --identity-label-size: .82cqi;
+  --identity-value-size: 1.32cqi;
+  --identity-micro-size: .87cqi;
+  --identity-icon-size: 1.75cqi;
+  --identity-group-gap: 1.2cqi;
+}
+
+.canvas[data-ratio='16:9'] .masthead {
+  justify-content: flex-start;
+  gap: .65cqi;
+  padding: 1.2cqi .35cqi 1.4cqi;
+}
+
+.canvas[data-ratio='16:9'] .ribbonCompass { width: 1.6cqi; height: 1.6cqi; margin-top: .35cqi; }
+.canvas[data-ratio='16:9'] .mastheadTitle { font-size: .74cqi; letter-spacing: .055em; }
+.canvas[data-ratio='16:9'] .mastheadNote { font-size: .56cqi; letter-spacing: .07em; }
+.canvas[data-ratio='16:9'] .unofficialNote { top: 5.4%; max-width: 35%; font-size: max(.57cqi, var(--master-micro-min, .5cqi)); }
+.canvas[data-ratio='16:9'] .heroIdentity {
+  grid-template-columns: minmax(0, 1fr) minmax(12cqi, .95fr) max-content;
+  gap: 1.05cqi;
+  padding-bottom: .9cqi;
+}
+
+.canvas[data-ratio='16:9'] .jobPanel {
+  width: 100%;
+}
+
+.canvas[data-ratio='16:9'] .jobBadge { grid-template-columns: 3.15cqi minmax(0, 1fr); gap: .58cqi; }
+.canvas[data-ratio='16:9'] .jobBadgeWithoutMark { grid-template-columns: minmax(0, 1fr); }
+.canvas[data-ratio='16:9'] .jobBadgeMark { width: 3.15cqi; height: 3.15cqi; }
+.canvas[data-ratio='16:9'] .jobLabel { font-size: .72cqi; }
+.canvas[data-ratio='16:9'] .jobName { font-size: 1.28cqi; }
+.canvas[data-ratio='16:9'] .jobAbbreviation { font-size: .72cqi; }
+.canvas[data-ratio='16:9'] .levelPanel { min-width: 6.6cqi; border-left-width: 1px; padding-left: .85cqi; }
+.canvas[data-ratio='16:9'] .levelPanel dt { font-size: .7cqi; }
+.canvas[data-ratio='16:9'] .levelPanel dd { font-size: 3.5cqi; }
+.canvas[data-ratio='16:9'] .bio { margin-top: .35cqi; font-size: .9cqi; -webkit-line-clamp: 1; }
+.canvas[data-ratio='16:9'] .records { gap: 1.05cqi; }
+.canvas[data-ratio='16:9'] .groupTitle { gap: .8cqi; margin-bottom: .55cqi; }
+.canvas[data-ratio='16:9'] .originGroup .recordList { grid-template-columns: 1fr; gap: .7cqi; }
+.canvas[data-ratio='16:9'] .recordEntry { grid-template-columns: var(--identity-icon-size) minmax(0, 1fr); gap: .6cqi; }
+.canvas[data-ratio='16:9'] .recordLabel { letter-spacing: .07em; }
+.canvas[data-ratio='16:9'] .recordCopy dd { margin-top: .12cqi; line-height: 1.04; }
+.canvas[data-ratio='16:9'] .originGroup [data-record-field='world'] dd { font-size: 1.52cqi; }
+.canvas[data-ratio='16:9'] .associations { grid-template-columns: 1fr 1fr; gap: 1.25cqi; padding-top: .7cqi; }
+.canvas[data-ratio='16:9'] .lineageGroup .recordList,
+.canvas[data-ratio='16:9'] .affiliationGroup .recordList { grid-template-columns: 1fr; gap: .55cqi; }
+.canvas[data-ratio='16:9'] .affiliationGroup [data-record-field='freeCompany'] dd { font-size: 1.45cqi; }
+.canvas[data-ratio='16:9'] .personalNotes { padding-top: .7cqi; }
+.canvas[data-ratio='16:9'] .personalNotes .recordList { grid-template-columns: 1fr 1.2fr; gap: 1.2cqi; }
+.canvas[data-ratio='16:9'] .personalNotes [data-record-field='languages'] dd { font-size: 1.08cqi; }
+.canvas[data-ratio='16:9'] .personalNotes [data-record-field='playStyles'] dd { font-size: 1.08cqi; }
+
+.canvas[data-ratio='16:9'] .seamDivider {
+  top: 50%;
+  left: 44%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* The saved locale drives its script-specific rhythm without name-specific hacks. */
+.canvas[data-locale='ko'] .recordLabel,
+.canvas[data-locale='ko'] .groupTitle,
+.canvas[data-locale='ja'] .recordLabel,
+.canvas[data-locale='ja'] .groupTitle {
+  letter-spacing: .035em;
+}
+
+.canvas[data-locale='ko'] .recordCopy dd,
+.canvas[data-locale='ja'] .recordCopy dd {
+  letter-spacing: -.02em;
+  line-height: 1.16;
+}
+
+/* Japanese lineage values keep their full measure instead of orphaning a final kana. */
+.canvas[data-ratio='4:5'][data-locale='ja'] .lineageGroup .recordList {
+  grid-template-columns: minmax(0, 1fr);
+}

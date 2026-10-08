@@ -1,0 +1,336 @@
+{
+  "sourcePage": "https://na.finalfantasyxiv.com/lodestone/special/fankit/icon/",
+  "sourcePackage": "User-provided extracted Class & Job Icons Fan Kit files; archive name/version and download date were not supplied.",
+  "entries": {
+    "paladin": {
+      "src": "/assets/ffxiv/jobs/official/paladin.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/paladin.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/01_TANK/Job/Paladin.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "39df75c2e7356d7700c55ec8da5845c56b402a79a0ed48cb8c4dbebffbc78bce",
+      "maskSha256": "d7cc767351f96b1e4867a19b474defb1e4d2efbc17a6f2ea71d97f14f38e446e",
+      "extractionMode": "gold-hue"
+    },
+    "warrior": {
+      "src": "/assets/ffxiv/jobs/official/warrior.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/warrior.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/01_TANK/Job/Warrior.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "07a9574ca9f620b99011b343118f64b139d985eda960d600865d91ae1aea8d92",
+      "maskSha256": "7258749368a68012ac747139eb36692026d9f36e69ffc2f1f8ac73039db482da",
+      "extractionMode": "gold-hue"
+    },
+    "dark-knight": {
+      "src": "/assets/ffxiv/jobs/official/dark-knight.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/dark-knight.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/01_TANK/Job/DarkKnight.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "74d94a0cada8b90a9c592851dd9b20c27462c9cea2c318dc3307d0076bfd4416",
+      "maskSha256": "fc45340080aed220bdf932d622fe08aa9b730e55f323875f68ee320dc11e5f18",
+      "extractionMode": "gold-hue"
+    },
+    "gunbreaker": {
+      "src": "/assets/ffxiv/jobs/official/gunbreaker.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/gunbreaker.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/01_TANK/Job/Gunbreaker.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "bf4db953210331b9b5cd7a9837d8a91b8d276ca9a4d320dafac5933bbd488531",
+      "maskSha256": "8b627b50693ac5d6cdffb13cc9b2d05e668689d3dd0c453e5f4247affc5282dd",
+      "extractionMode": "gold-hue"
+    },
+    "white-mage": {
+      "src": "/assets/ffxiv/jobs/official/white-mage.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/white-mage.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/02_HEALER/Job/WhiteMage.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "a47e7a50e69ebef420687aa39b4bddf17e0366feac9bce815aba70808b10e287",
+      "maskSha256": "8700fd37fc634e6f6d8bf0af8cc4793b3f43b9691ba9fb998d01772d4ec25545",
+      "extractionMode": "gold-hue"
+    },
+    "scholar": {
+      "src": "/assets/ffxiv/jobs/official/scholar.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/scholar.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/02_HEALER/Job/Scholar.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "b70f194c56dedb0dc5dc76ef43986f68e559b83b9dbc05cc0a5405e6c092da02",
+      "maskSha256": "c1c78f392179eb3673b19e68cbe7454380d9b1df092ab495e2b89d045d5360cf",
+      "extractionMode": "gold-hue"
+    },
+    "astrologian": {
+      "src": "/assets/ffxiv/jobs/official/astrologian.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/astrologian.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/02_HEALER/Job/Astrologian.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "edbfb9ec633fd3bc0d096ef2cd4bb57f368c7389fd7c05790ba1371ed4dc86d9",
+      "maskSha256": "9b4763a900384eadeb4c8fd4a4405c05e41dcc964fe665dccad040a6bd596833",
+      "extractionMode": "gold-hue"
+    },
+    "sage": {
+      "src": "/assets/ffxiv/jobs/official/sage.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/sage.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/02_HEALER/Job/Sage.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "be685ff4b8a89fb7cc2fe2be95480d2d0b639eee7b26b67a0d20dd4e9474a254",
+      "maskSha256": "fb0c4153c4ac7f355ffd2b9aa2749512914f45e7170263245ae9d24d4fedf88d",
+      "extractionMode": "gold-hue"
+    },
+    "monk": {
+      "src": "/assets/ffxiv/jobs/official/monk.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/monk.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Monk.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "cd3c7e277e3f8698541391e3ec3470f70ee4546d6de0b3cc236990b2d508810c",
+      "maskSha256": "917c8b81ed47445ae44f51aed41c30fe1c65bb7fb7964c300bfc65fa100b8d9a",
+      "extractionMode": "gold-hue"
+    },
+    "dragoon": {
+      "src": "/assets/ffxiv/jobs/official/dragoon.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/dragoon.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Dragoon.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "86e9eb15afaeb67b5278040c5eccfa94d84edd813d2144fba70ed5a4494082be",
+      "maskSha256": "43385f56d931b1b24622a955e4d83802d6eed34d6671120e7e8542dee183da38",
+      "extractionMode": "gold-hue"
+    },
+    "ninja": {
+      "src": "/assets/ffxiv/jobs/official/ninja.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/ninja.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Ninja.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "a75817044f728ab25e0933a2d8e9ea7c17715ceb67bd544f59de7c975be1ca83",
+      "maskSha256": "f00b568d458578e83bf176c78ebf9db25d4a6cb587ec4e07fa3357db2ae10378",
+      "extractionMode": "gold-hue"
+    },
+    "samurai": {
+      "src": "/assets/ffxiv/jobs/official/samurai.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/samurai.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Samurai.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "8a8862c3bbaeccafd911a6a611c44ba97975500d3949ec9a1be9deffbc856fbb",
+      "maskSha256": "6647e2ba1c010349c478111ff0be9dad95f88d6735ff1ca2728fe64f855f96d6",
+      "extractionMode": "gold-hue"
+    },
+    "reaper": {
+      "src": "/assets/ffxiv/jobs/official/reaper.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/reaper.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Reaper.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "de60ea4aca17e57b9ff8c5614a60bae24d22d2da575f232f1dda03944a840e80",
+      "maskSha256": "f5a47a74bffa57995302efcb3c9b8df2eb6b5e8218eccd98ef77125f9add5111",
+      "extractionMode": "gold-hue"
+    },
+    "viper": {
+      "src": "/assets/ffxiv/jobs/official/viper.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/viper.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Viper.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "221fa009bb279a4f3985339ca6f818788fe05732fbdc201e054ae98939beb385",
+      "maskSha256": "cfabf2974d282099733df3c14865f7d20dca6dbf9dabdfd6e68f583c64996e60",
+      "extractionMode": "gold-hue"
+    },
+    "bard": {
+      "src": "/assets/ffxiv/jobs/official/bard.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/bard.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Bard.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "69560ef119a418304c1982a82d46321efa57d37bd97597cc57b9ce4f4599ec26",
+      "maskSha256": "5782e92a7be032b2d27683fb393d65dc97505150c4cba842e85122cb51df19d7",
+      "extractionMode": "gold-hue"
+    },
+    "machinist": {
+      "src": "/assets/ffxiv/jobs/official/machinist.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/machinist.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Machinist.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "2ae7674ab41877dd142ea0f7a25bd1b41b6e212b086bf9c8a16bbfcf371d6673",
+      "maskSha256": "40bc2044b4b7e6c7a22b52714a21b0e303be02a45e376e36981c02a12b93f97f",
+      "extractionMode": "gold-hue"
+    },
+    "dancer": {
+      "src": "/assets/ffxiv/jobs/official/dancer.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/dancer.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Dancer.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "f45b6444c119734c09a71dd647bef8ce1280bead1f72be273dc69d7ad540cda4",
+      "maskSha256": "eca88bd9b27ec6027e9ce89b544f524a2afe0b968d5d90de162a5a353bc1c8d5",
+      "extractionMode": "gold-hue"
+    },
+    "black-mage": {
+      "src": "/assets/ffxiv/jobs/official/black-mage.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/black-mage.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/BlackMage.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "86d16a8535bc6baf62ac3aedc6733cfcf9fe979aaa2f3328f4ea38e3266332d5",
+      "maskSha256": "4fa84134bc1d80b593da347cc5d1714d260ced88c36e4086a1003dc0e60ddd2b",
+      "extractionMode": "gold-hue"
+    },
+    "summoner": {
+      "src": "/assets/ffxiv/jobs/official/summoner.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/summoner.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Summoner.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "6f526d076f6441de2c64dc328f4851e735ac681aee3e60e735ae33e60c4784d3",
+      "maskSha256": "e28a4fe64ab92e72591a28e01f0b3ef252e38990d5c88aeb2d915c9d05119c09",
+      "extractionMode": "gold-hue"
+    },
+    "red-mage": {
+      "src": "/assets/ffxiv/jobs/official/red-mage.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/red-mage.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/RedMage.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "9711e42332c7260dec01acb49c0c4e0d04316f4a1994dcf9de1d6d712446f96c",
+      "maskSha256": "694036b62844a3faf67268f3466c0cfaf3a327be0be328c809c920825ad41ef9",
+      "extractionMode": "gold-hue"
+    },
+    "pictomancer": {
+      "src": "/assets/ffxiv/jobs/official/pictomancer.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/pictomancer.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/03_DPS/Job/Pictomancer.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "6758ec6fb61a4579cb6147b4559d9df43274b1900adcc662b486d7ff7cbcb987",
+      "maskSha256": "e2556d6903f61a8dd6a8e62bd57353a10f3b6243f6f30a07d28f291bf539d0c0",
+      "extractionMode": "gold-hue"
+    },
+    "blue-mage": {
+      "src": "/assets/ffxiv/jobs/official/blue-mage.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/blue-mage.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/06_LIMITED/BlueMage.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "90b821137aa75c9f81a680211b942157ca503830465864a4a5abee4d690a3004",
+      "maskSha256": "0063994e6b6d311b901f532bed62f4b1f4b11feee7c8ccac0547ac3adad1e75a",
+      "extractionMode": "gold-hue"
+    },
+    "carpenter": {
+      "src": "/assets/ffxiv/jobs/official/carpenter.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/carpenter.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Carpenter.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "5f9ac92fca1ff31c3f8800c7cbdaab684b7a205339177f53b126cf7d3631c47b",
+      "maskSha256": "34069b999e78f4ced89e93b3126688e9bbfddd22f240948f621067fc5892aabb",
+      "extractionMode": "neutral-luminance"
+    },
+    "blacksmith": {
+      "src": "/assets/ffxiv/jobs/official/blacksmith.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/blacksmith.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Blacksmith.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "06fa23bd723508e6ef75d5ae0d17d3e22517e8fb8f7581fe474f12622137be3f",
+      "maskSha256": "621907935e5aa8a8a36c88461a5fd473794f764bf8a5678368b31a81db461478",
+      "extractionMode": "neutral-luminance"
+    },
+    "armorer": {
+      "src": "/assets/ffxiv/jobs/official/armorer.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/armorer.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Armorer.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "b7827dd8517dc19fb5446c0ed2cb1f04f3a537fbde5013b05be315d8e0de18e4",
+      "maskSha256": "f9c0d6a1a22f91eca36cf0b584b3444ccd8c11103d15d2875777706ce5bb9547",
+      "extractionMode": "neutral-luminance"
+    },
+    "goldsmith": {
+      "src": "/assets/ffxiv/jobs/official/goldsmith.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/goldsmith.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Goldsmith.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "cd3f61dba88361425f617128c702ac61d9e0edde005a075b2856a99002a5eda0",
+      "maskSha256": "b48842e7587681335369145524b487f26b2449adbc7f9ec806baa3d056a59808",
+      "extractionMode": "neutral-luminance"
+    },
+    "leatherworker": {
+      "src": "/assets/ffxiv/jobs/official/leatherworker.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/leatherworker.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Leatherworker.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "32a805e4599fbcbfa339c83c6c841d77b0c00e65f7a6ea708d6b68682fe55d4f",
+      "maskSha256": "a7f241237672f59784edab451f12b4c3b72557da656b87697b734f874ede1653",
+      "extractionMode": "neutral-luminance"
+    },
+    "weaver": {
+      "src": "/assets/ffxiv/jobs/official/weaver.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/weaver.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Weaver.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "8b07dff9b6ca972ba11521bfffb9f30c23e187f1141fa2b06afb32f2ae220b5c",
+      "maskSha256": "e64b8c228313ab2bf1a4df33c64a2794374757790ef7f75e422bc994dcab11cf",
+      "extractionMode": "neutral-luminance"
+    },
+    "alchemist": {
+      "src": "/assets/ffxiv/jobs/official/alchemist.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/alchemist.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Alchemist.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "2d5a2a91415c0146ef09d5aff7c282ecbd69a78f77afb1e7f90a20d2a476914e",
+      "maskSha256": "22a22d7a66b3a0bd32e676ba4436095d2da3d541438516a853f7f83539441fcd",
+      "extractionMode": "neutral-luminance"
+    },
+    "culinarian": {
+      "src": "/assets/ffxiv/jobs/official/culinarian.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/culinarian.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/04_CRAFTER/Culinarian.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "6ca1694ea9ac3205754a00934e9f0b934b6e4d26678749e4fe3fc2972e76d667",
+      "maskSha256": "093d5a19d0a13546050ca0b364f1ae3b63d484789bdd504db6bf2ac774efe013",
+      "extractionMode": "neutral-luminance"
+    },
+    "miner": {
+      "src": "/assets/ffxiv/jobs/official/miner.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/miner.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/05_GATHERER/Miner.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "31a9fb8a83234d90eca8a5be874f6662b7d2de7b8a52234dcb4caf3627a09414",
+      "maskSha256": "d3af21c23070ace07c8c6bdeb61bdaaa25395174c85b825028edd583da03bdd4",
+      "extractionMode": "neutral-luminance"
+    },
+    "botanist": {
+      "src": "/assets/ffxiv/jobs/official/botanist.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/botanist.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/05_GATHERER/Botanist.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "6cec26bbb8f503b5e20dd5a0b4371946ced6665f0848dc84d202b02bcf03c6c8",
+      "maskSha256": "7ed9ef5c0644eb3b798798d1f5a093b6cd4351b4675de87aae59a97dc0e512d5",
+      "extractionMode": "neutral-luminance"
+    },
+    "fisher": {
+      "src": "/assets/ffxiv/jobs/official/fisher.png",
+      "maskSrc": "/assets/ffxiv/jobs/official/masks/fisher.png",
+      "sourcePath": "vendor/ffxiv-fankit/class-job-icons/05_GATHERER/Fisher.png",
+      "width": 76,
+      "height": 76,
+      "sourceSha256": "8f98bbedbc2c005276d91dd8072213e9d9192d3320d9788fd64250c103af0d75",
+      "maskSha256": "6afb31e7b29623ea39b2a3b8056d71cee896bcac9801582946168640dc2d4c0e",
+      "extractionMode": "neutral-luminance"
+    }
+  }
+}

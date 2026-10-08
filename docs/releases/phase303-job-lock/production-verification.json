@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-08T04:25:01.146Z",
+  "productionBuildId": "QZ2lM1x4xP2oSXnPCFe9m",
+  "commands": {
+    "typecheck": "PASS",
+    "lint": "PASS, 0 warnings",
+    "test": "233/233 PASS",
+    "build": "PASS"
+  },
+  "captureCount": 63,
+  "passingCaptureCount": 63,
+  "exports": 99,
+  "verifiedAssetCount": 162,
+  "assetErrors": [],
+  "strictGeometry": {
+    "pass": 61,
+    "fail": 2
+  },
+  "geometryDisposition": {
+    "strictGeometryPassCount": 61,
+    "strictGeometryFailCount": 2,
+    "grandfatheredDecorativeCropCount": 2,
+    "actionableJobIdentityFailureCount": 0,
+    "evidence": "baseline-decoration-proof.json",
+    "cases": [
+      {
+        "caseId": "ratio-e2-red-mage-16-9-en-coner",
+        "baselineCaseId": "baseline-proof-e2-red-mage-16-9",
+        "status": "grandfathered-decorative-motif-crop"
+      },
+      {
+        "caseId": "ratio-e2-astrologian-16-9-en-coner",
+        "baselineCaseId": "baseline-proof-e2-astrologian-16-9",
+        "status": "grandfathered-decorative-motif-crop"
+      }
+    ],
+    "note": "Strict text-role/card containment reports remain unchanged. Both failures are confined to the pre-existing, aria-hidden E2 decorative acronym motif; the semantic Job Identity block/icon/name passes. This evidence does not grant a general overflow exemption."
+  },
+  "protectedBoundaryPass": true,
+  "previousExplorationsUnchanged": true,
+  "viewerPass": true,
+  "bundleScan": {
+    "files": 58,
+    "qaMarkerHits": []
+  },
+  "jobAssetUrlsAdded": [],
+  "performance": {
+    "cinematic": {
+      "png2xChangePercent": -9.838081573972868,
+      "previewChangePercent": -37.582865879816005
+    },
+    "editorial": {
+      "png2xChangePercent": -7.473524958571575,
+      "previewChangePercent": -4.530201322733374
+    },
+    "id-card": {
+      "png2xChangePercent": -4.141226438686807,
+      "previewChangePercent": 1.3617525232917371
+    }
+  },
+  "cleanup": {
+    "baselineLabRemoved": true,
+    "finalLabRemoved": true,
+    "qaBrowserProfileRemoved": true
+  },
+  "cloudflare": {
+    "mode": "Next.js static export for Cloudflare Pages",
+    "buildCommand": "npm run build:cloudflare",
+    "outputDirectory": "out",
+    "staticHtmlPages": 7,
+    "cleanFlag": "NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED=false",
+    "officialAssetPathsExcluded": true,
+    "xivapiAssetPathsExcluded": true,
+    "measurementBytes": 26,
+    "verifiedAt": "2026-10-08T04:42:12.501Z"
+  }
+}

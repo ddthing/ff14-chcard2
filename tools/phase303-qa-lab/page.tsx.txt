@@ -1,0 +1,347 @@
+'use client';
+
+import { useEffect, useRef, useState } from 'react';
+import { CardPreview } from '@/components/editor/card-preview';
+import { getConerSample, type AdventurerCardData, type AdventurerCardTemplate, type CardRatio } from '@/components/cards/types';
+import { getJob } from '@/data/ffxiv';
+import styles from './page.module.css';
+import {
+  getCardExportLogicalDimensions,
+  renderCardBlob,
+  type CardExportFormat,
+  type CardExportScale,
+} from '@/lib/card-export';
+import type { Locale } from '@/lib/types';
+
+type Phase303CaseInput = {
+  caseId: string;
+  master: AdventurerCardTemplate;
+  jobId: string;
+  ratio: CardRatio;
+  locale: Locale;
+  characterName: string;
+};
+
+type ActiveCase = { input: Phase303CaseInput; data: AdventurerCardData };
+type ReadyReport = {
+  caseId: string;
+  case: Phase303CaseInput;
+  expectedJobName: string;
+  expectedAbbreviation: string;
+  readiness: {
+    previewReadyMs: number;
+    domCommitMs: number;
+    imageReadyMs: number;
+    opticalReadyMs: number;
+    fontsReadyMs: number;
+    loadedImageCount: number;
+    opticalNameCount: number;
+    loadedFontFaces: number;
+    documentFontStatus: string;
+  };
+  card: Record<string, unknown>;
+};
+
+type Phase303Api = {
+  version: 1;
+  ready: true;
+  apply(input: Phase303CaseInput): Promise<ReadyReport>;
+  render(input: { format: CardExportFormat; scale: CardExportScale }): Promise<Record<string, unknown>>;
+  readBlob(id: string, offset: number, length?: number): Promise<{ base64: string; bytes: number; done: boolean }>;
+  releaseBlob(id: string): boolean;
+  snapshot(): { caseId: string | null; case: Phase303CaseInput | null };
+};
+
+type Phase303Window = Window & { __PHASE303_QA__?: Phase303Api };
+type PendingApply = { caseId: string; startedAt: number; resolve(value: ReadyReport): void; reject(error: Error): void };
+
+function makeCaseData(input: Phase303CaseInput): AdventurerCardData {
+  const job = getJob(input.jobId);
+  if (!job) throw new Error(`Unknown canonical Job id: ${input.jobId}`);
+  const sample = getConerSample(input.master, input.ratio);
+  return {
+    ...sample,
+    character: {
+      ...sample.character,
+      name: input.characterName,
+      job: job.localizedName.en,
+      jobId: job.id,
+      level: 100,
+    },
+    design: {
+      ...sample.design,
+      template: input.master,
+      ratio: input.ratio,
+      layoutVariant: 'a',
+    },
+  };
+}
+
+function inspectProductionCard(card: HTMLElement, data: AdventurerCardData, locale: Locale) {
+  const rectData = (element: Element | null) => {
+    if (!element) return null;
+    const box = element.getBoundingClientRect();
+    return { x: box.x, y: box.y, width: box.width, height: box.height, right: box.right, bottom: box.bottom };
+  };
+  const fieldData = (selector: string) => {
+    const element = card.querySelector<HTMLElement>(selector);
+    const directText = element
+      ? Array.from(element.childNodes).filter((node) => node.nodeType === Node.TEXT_NODE).map((node) => node.textContent ?? '').join(' ').trim()
+      : '';
+    return { text: directText || element?.innerText?.trim() || element?.textContent?.trim() || null, visibleText: element?.innerText?.trim() ?? null, rect: rectData(element) };
+  };
+  const semanticText = (element: Element | null, excludedSelector?: string): string => {
+    if (!element) return '';
+    const collect = (node: Node): string => {
+      if (node.nodeType === Node.ELEMENT_NODE && excludedSelector && (node as Element).matches(excludedSelector)) return '';
+      if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? '';
+      return Array.from(node.childNodes).map(collect).join('');
+    };
+    return collect(element).replace(/\s+/g, ' ').trim();
+  };
+  const visible = (element: Element) => {
+    const style = getComputedStyle(element);
+    const box = element.getBoundingClientRect();
+    return style.display !== 'none' && style.visibility !== 'hidden' && Number(style.opacity) > 0 && box.width > 0 && box.height > 0;
+  };
+  const marks = Array.from(card.querySelectorAll<HTMLElement>('[data-icon-source]')).map((element) => {
+    const sourceImage = element.querySelector<HTMLImageElement>('img');
+    return {
+      source: element.getAttribute('data-icon-source'),
+      jobId: element.getAttribute('data-job-id') ?? card.getAttribute('data-job-id') ?? data.character.jobId,
+      src: element.getAttribute('data-icon-src') ?? element.getAttribute('src') ?? sourceImage?.currentSrc ?? sourceImage?.src ?? null,
+      usage: element.getAttribute('data-icon-usage'),
+      rect: rectData(element),
+      visible: visible(element),
+      loadedImage: sourceImage ? sourceImage.complete && sourceImage.naturalWidth > 0 : null,
+      imageNaturalDimensions: sourceImage ? { width: sourceImage.naturalWidth, height: sourceImage.naturalHeight } : null,
+    };
+  });
+  const visibleMarkKeys = marks.filter((mark) => mark.visible).map((mark) => `${mark.jobId ?? data.character.jobId}|${mark.src ?? mark.source}`);
+  const box = card.getBoundingClientRect();
+  const imageNodes = Array.from(card.querySelectorAll<HTMLImageElement>('img'));
+  return {
+    attributes: {
+      template: card.getAttribute('data-template'),
+      ratio: card.getAttribute('data-ratio'),
+      layout: card.getAttribute('data-layout'),
+      locale: card.getAttribute('data-locale'),
+      lang: card.getAttribute('lang'),
+      jobId: card.getAttribute('data-job-id'),
+      job: card.getAttribute('data-job'),
+    },
+    rect: rectData(card),
+    characterName: fieldData('[data-field="name"]'),
+    jobName: fieldData('[data-field="job"]'),
+    jobAbbreviation: {
+      ...fieldData('[data-field="jobAbbreviation"]'),
+      semanticText: semanticText(card.querySelector('[data-field="jobAbbreviation"]'), '[data-material-layer="editorial-ink-density"]'),
+      excludedMaterialLayer: 'editorial-ink-density',
+    },
+    jobAbbreviationElementCount: card.querySelectorAll('[data-field="jobAbbreviation"]').length,
+    level: fieldData('[data-field="level"]'),
+    marks,
+    markCount: marks.length,
+    visibleMarkCount: marks.filter((mark) => mark.visible).length,
+    duplicateMarkCount: visibleMarkKeys.length - new Set(visibleMarkKeys).size,
+    images: imageNodes.map((image) => ({
+      src: image.currentSrc || image.src,
+      naturalWidth: image.naturalWidth,
+      naturalHeight: image.naturalHeight,
+      loaded: image.complete && image.naturalWidth > 0,
+      objectFit: getComputedStyle(image).objectFit,
+    })),
+    opticalNames: Array.from(card.querySelectorAll<HTMLElement>('[data-optical-name]')).map((node) => ({
+      family: node.getAttribute('data-optical-name'),
+      ratio: node.getAttribute('data-optical-ratio'),
+      script: node.getAttribute('data-optical-script'),
+      ready: node.getAttribute('data-optical-ready') === 'true',
+      sizeCqi: node.getAttribute('data-optical-size'),
+      lines: node.getAttribute('data-optical-lines'),
+    })),
+    visible: box.width > 0 && box.height > 0,
+    documentLocale: document.documentElement.lang,
+    fontStatus: document.fonts.status,
+    loadedFontFaces: Array.from(document.fonts).filter((font) => font.status === 'loaded').length,
+  };
+}
+
+export default function Phase303QaPage() {
+  const initial: Phase303CaseInput = {
+    caseId: 'baseline-editorial-red-mage-4-5-en-coner',
+    master: 'editorial',
+    jobId: 'red-mage',
+    ratio: '4:5',
+    locale: 'en',
+    characterName: 'Coner',
+  };
+  const [active, setActive] = useState<ActiveCase>(() => ({ input: initial, data: makeCaseData(initial) }));
+  const cardHost = useRef<HTMLDivElement>(null);
+  const activeRef = useRef(active);
+  const pendingApply = useRef<PendingApply | null>(null);
+  const blobs = useRef(new Map<string, Blob>());
+  const nextBlobId = useRef(0);
+  activeRef.current = active;
+
+  async function waitForPreviewReady(current: ActiveCase, domCommitMs: number, startedAt: number): Promise<ReadyReport> {
+    const deadline = performance.now() + 25_000;
+    let card: HTMLElement | null = null;
+    while (performance.now() < deadline) {
+      card = cardHost.current?.querySelector<HTMLElement>('article[data-card-render-scope="true"]') ?? null;
+      if (card && card.getAttribute('data-ratio') === current.input.ratio && card.getAttribute('data-template') === current.input.master) break;
+      await new Promise((resolve) => setTimeout(resolve, 16));
+    }
+    if (!card) throw new Error('Production CardPreview did not mount an article[data-card-render-scope].');
+
+    const imageStart = performance.now();
+    const imageNodes = Array.from(card.querySelectorAll<HTMLImageElement>('img'));
+    await Promise.all(imageNodes.map(async (image) => {
+      if (!image.complete) await new Promise<void>((resolve, reject) => {
+        const timeout = setTimeout(() => reject(new Error(`Image readiness timeout: ${image.src}`)), 20_000);
+        image.addEventListener('load', () => { clearTimeout(timeout); resolve(); }, { once: true });
+        image.addEventListener('error', () => { clearTimeout(timeout); reject(new Error(`Image load failed: ${image.src}`)); }, { once: true });
+      });
+      if (image.naturalWidth <= 0) throw new Error(`Production card image is not decoded: ${image.src}`);
+      if (typeof image.decode === 'function') await image.decode();
+    }));
+    const imageReadyMs = performance.now() - imageStart;
+
+    const opticalStart = performance.now();
+    let opticalNames = Array.from(card.querySelectorAll<HTMLElement>('[data-optical-name]'));
+    while (performance.now() < deadline) {
+      opticalNames = Array.from(card.querySelectorAll<HTMLElement>('[data-optical-name]'));
+      if (opticalNames.length > 0 && opticalNames.every((node) => node.getAttribute('data-optical-ready') === 'true')) break;
+      await new Promise((resolve) => setTimeout(resolve, 16));
+    }
+    if (opticalNames.length === 0 || opticalNames.some((node) => node.getAttribute('data-optical-ready') !== 'true')) {
+      throw new Error('Production OpticalName layout did not become ready.');
+    }
+    const opticalReadyMs = performance.now() - opticalStart;
+
+    const fontsStart = performance.now();
+    await document.fonts.ready;
+    const fontsReadyMs = performance.now() - fontsStart;
+    await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+    const productionCard = inspectProductionCard(card, current.data, current.input.locale);
+    if (!productionCard.visible) throw new Error('Production card is not visible after readiness checks.');
+    return {
+      caseId: current.input.caseId,
+      case: current.input,
+      expectedJobName: getJob(current.input.jobId)?.localizedName[current.input.locale] ?? '',
+      expectedAbbreviation: getJob(current.input.jobId)?.abbreviation ?? '',
+      readiness: {
+        previewReadyMs: performance.now() - startedAt,
+        domCommitMs,
+        imageReadyMs,
+        opticalReadyMs,
+        fontsReadyMs,
+        loadedImageCount: productionCard.images.filter((image) => image.loaded).length,
+        opticalNameCount: productionCard.opticalNames.length,
+        loadedFontFaces: productionCard.loadedFontFaces,
+        documentFontStatus: String(productionCard.fontStatus),
+      },
+      card: productionCard,
+    };
+  }
+
+  useEffect(() => {
+    const bridge = window as Phase303Window;
+    const api: Phase303Api = {
+      version: 1,
+      ready: true,
+      apply(input) {
+        if (pendingApply.current) return Promise.reject(new Error('A Phase303 case is already being applied.'));
+        if (!input.caseId || !getJob(input.jobId)) return Promise.reject(new Error(`Invalid Phase303 case: ${JSON.stringify(input)}`));
+        const startedAt = performance.now();
+        return new Promise((resolve, reject) => {
+          pendingApply.current = { caseId: input.caseId, startedAt, resolve, reject };
+          try {
+            setActive({ input, data: makeCaseData(input) });
+          } catch (error) {
+            pendingApply.current = null;
+            reject(error instanceof Error ? error : new Error(String(error)));
+          }
+        });
+      },
+      async render({ format, scale }) {
+        const current = activeRef.current;
+        const card = cardHost.current?.querySelector<HTMLElement>('article[data-card-render-scope="true"]');
+        if (!card || card.getAttribute('data-template') !== current.input.master || card.getAttribute('data-ratio') !== current.input.ratio) {
+          throw new Error('The visible production CardPreview does not match the active Phase303 case.');
+        }
+        const startedAt = performance.now();
+        const progress: Array<{ stage: string; value: number; atMs: number }> = [];
+        const rendered = await renderCardBlob(card, current.data, format, scale, (event) => {
+          progress.push({ stage: event.stage, value: event.progress, atMs: performance.now() - startedAt });
+        });
+        const blobId = `${current.input.caseId}-${format}-${scale}-${++nextBlobId.current}`;
+        blobs.current.set(blobId, rendered.blob);
+        return {
+          caseId: current.input.caseId,
+          format,
+          requestedScale: scale,
+          mimeType: rendered.blob.type,
+          byteLength: rendered.blob.size,
+          logicalDimensions: getCardExportLogicalDimensions(current.input.ratio),
+          actualPixelDimensions: { width: rendered.size.width, height: rendered.size.height },
+          scaleActual: rendered.size.scale,
+          capped: rendered.size.capped,
+          rasterWallMs: performance.now() - startedAt,
+          fontStatus: document.fonts.status,
+          loadedFontFaceCount: Array.from(document.fonts).filter((font) => font.status === 'loaded').length,
+          progress,
+          blobId,
+        };
+      },
+      async readBlob(id, offset, length = 49_152) {
+        const blob = blobs.current.get(id);
+        if (!blob) throw new Error(`Unknown Phase303 blob id: ${id}`);
+        const start = Math.max(0, Math.floor(offset));
+        const end = Math.min(blob.size, start + Math.max(1, Math.floor(length)));
+        const bytes = new Uint8Array(await blob.slice(start, end).arrayBuffer());
+        let binary = '';
+        for (let index = 0; index < bytes.length; index += 1) binary += String.fromCharCode(bytes[index]);
+        return { base64: btoa(binary), bytes: bytes.length, done: end >= blob.size };
+      },
+      releaseBlob(id) {
+        return blobs.current.delete(id);
+      },
+      snapshot() {
+        const current = activeRef.current;
+        return { caseId: current.input.caseId, case: current.input };
+      },
+    };
+    bridge.__PHASE303_QA__ = api;
+    return () => {
+      if (bridge.__PHASE303_QA__ === api) delete bridge.__PHASE303_QA__;
+      blobs.current.clear();
+    };
+  }, []);
+
+  useEffect(() => {
+    const pending = pendingApply.current;
+    if (!pending || pending.caseId !== active.input.caseId) return;
+    const domCommitMs = performance.now() - pending.startedAt;
+    void waitForPreviewReady(active, domCommitMs, pending.startedAt)
+      .then((result) => {
+        if (pendingApply.current === pending) pendingApply.current = null;
+        pending.resolve(result);
+      })
+      .catch((error) => {
+        if (pendingApply.current === pending) pendingApply.current = null;
+        pending.reject(error instanceof Error ? error : new Error(String(error)));
+      });
+  }, [active]);
+
+  return (
+    <main className={styles.lab} data-phase303-qa-root="true">
+      <header className={styles.status}>
+        <strong>Phase 3.0.3 production renderer lab</strong>
+        <span data-phase303-active-case={active.input.caseId}>{active.input.caseId}</span>
+      </header>
+      <div ref={cardHost} className={styles.cardStage} data-ratio={active.input.ratio}>
+        <CardPreview data={active.data} locale={active.input.locale} />
+      </div>
+    </main>
+  );
+}

@@ -1,0 +1,15 @@
+.attribution {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.28em;
+  color: currentColor;
+  font-family: var(--font-sans, system-ui, sans-serif);
+  font-size: 0.66rem;
+  line-height: 1.45;
+  opacity: 0.72;
+}
+
+.separator {
+  opacity: 0.65;
+}

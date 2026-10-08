@@ -1,0 +1,7 @@
+:root {
+  --editor-motion-micro: 120ms;
+  --editor-motion-ui: 180ms;
+  --editor-motion-panel: 220ms;
+  --editor-ease-snappy: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --editor-ease-soft: cubic-bezier(0.22, 0.61, 0.36, 1);
+}

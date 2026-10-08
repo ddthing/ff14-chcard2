@@ -1,0 +1,897 @@
+.canvas {
+  --editorial-paper: var(--craft-paper, var(--craft-ivory, var(--master-surface-tone, #eee4d4)));
+  --editorial-ivory: var(--craft-ivory, var(--editorial-paper));
+  --editorial-ink: var(--craft-ink, var(--master-ink, #241d19));
+  --editorial-red: var(--craft-red, #843b35);
+  --editorial-brass: var(--craft-brass, var(--master-accent, #8c7559));
+  --editorial-photo-left: 0%;
+  --editorial-photo-top: 0%;
+  --editorial-photo-width: 61%;
+  --editorial-photo-height: 100%;
+  --editorial-name-top: 11%;
+  --editorial-name-left: 61.5%;
+  --editorial-name-right: 4%;
+  --editorial-name-leading: 0.9;
+  --editorial-facts-left: 61.5%;
+  --editorial-facts-right: 3.5%;
+  --editorial-facts-top: 32%;
+  --editorial-facts-height: 45%;
+  --editorial-motif-left: 58%;
+  --editorial-motif-top: 77%;
+  --editorial-motif-width: 42%;
+  --editorial-motif-height: 21%;
+  --editorial-motif-size: 18cqi;
+  position: absolute;
+  isolation: isolate;
+  inset: 0;
+  overflow: hidden;
+  background: var(--editorial-paper);
+  color: var(--editorial-ink);
+}
+
+.paperGround {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  background-color: var(--editorial-paper);
+  background-image:
+    linear-gradient(117deg, color-mix(in srgb, var(--editorial-ivory) 58%, transparent), transparent 58%),
+    repeating-linear-gradient(0deg, color-mix(in srgb, var(--editorial-ink) 1%, transparent) 0, transparent 1px, transparent 3px);
+}
+
+.photo {
+  position: absolute;
+  z-index: 3;
+  top: var(--editorial-photo-top);
+  left: var(--editorial-photo-left);
+  width: var(--editorial-photo-width);
+  height: var(--editorial-photo-height);
+  overflow: hidden;
+}
+
+.photo img {
+  object-fit: cover;
+  object-position: var(--card-image-position);
+}
+
+.paperEdge {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--editorial-paper);
+  pointer-events: none;
+}
+
+.paperShape {
+  fill: var(--editorial-paper);
+}
+
+.paperTexture {
+  opacity: calc(var(--material-editorial-paper-surface-opacity, .3) * var(--material-strength-factor, 1));
+  pointer-events: none;
+}
+
+.masthead {
+  position: absolute;
+  z-index: 7;
+  top: 4%;
+  right: 4.5%;
+  left: var(--editorial-name-left);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2cqi;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-ink) 38%, transparent),
+    color-mix(in srgb, var(--editorial-ink) 38%, transparent)
+  );
+  background-size: 100% var(--master-rule-weight, 0.13cqi);
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-bottom: 1.05cqi;
+  color: var(--editorial-ink);
+}
+
+.mastheadTitle {
+  font: 650 2.2cqi/1 var(--card-font-display);
+  letter-spacing: 0.16em;
+}
+
+.mastheadMeta {
+  color: color-mix(in srgb, var(--editorial-ink) 64%, transparent);
+  font: 550 1.05cqi/1.2 var(--card-font-caption);
+  font-family: var(--master-font-caption, var(--card-font-caption));
+  font-weight: var(--master-caption-weight, 550);
+  line-height: var(--master-caption-leading, 1.2);
+  letter-spacing: 0.06em;
+  letter-spacing: var(--master-caption-tracking, 0.06em);
+  text-align: right;
+}
+
+.identityStack {
+  position: absolute;
+  z-index: 7;
+  top: var(--editorial-name-top);
+  right: var(--editorial-name-right);
+  left: var(--editorial-name-left);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  justify-items: stretch;
+}
+
+.name {
+  position: relative;
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: start;
+  align-content: start;
+  gap: 0.25cqi;
+  margin: 0;
+  color: var(--editorial-ink);
+  font-family: var(--card-font-display);
+  font-weight: var(--card-display-weight, 500);
+  letter-spacing: -0.035em;
+  line-height: var(--editorial-name-leading);
+  text-wrap: pretty;
+}
+
+.nameLine {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  overflow-wrap: anywhere;
+  padding: 0 0.12em 0.08em 0;
+  white-space: normal;
+}
+
+.canvas[data-name-script='korean'] .nameLine,
+.canvas[data-name-script='japanese'] .nameLine {
+  overflow-wrap: normal;
+  padding-inline-end: 0;
+  white-space: nowrap;
+}
+
+.canvas[data-name-script='korean'] .name {
+  font-family: var(--master-font-display, var(--card-font-display));
+  font-weight: var(--master-display-weight, var(--card-display-weight, 500));
+  letter-spacing: var(--master-display-tracking, -0.015em);
+  --editorial-name-leading: var(--master-display-leading, 0.98);
+}
+
+.canvas[data-name-script='latin'] .name {
+  font-family: var(--master-font-display, var(--card-font-display));
+  font-weight: 650;
+}
+
+.canvas[data-name-script='japanese'] .name {
+  font-family: var(--master-font-display, var(--card-font-display));
+  font-weight: var(--master-display-weight, var(--card-display-weight, 500));
+  letter-spacing: var(--master-display-tracking, 0);
+  --editorial-name-leading: var(--master-display-leading, 1);
+}
+
+.motifLayer {
+  position: absolute;
+  z-index: 6;
+  top: var(--editorial-motif-top);
+  left: var(--editorial-motif-left);
+  width: var(--editorial-motif-width);
+  height: var(--editorial-motif-height);
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.customMotif {
+  position: relative;
+  display: block;
+  color: var(--job-motif-color, var(--editorial-red));
+  font-family: var(--font-editorial, var(--card-font-display));
+  font-size: var(--editorial-motif-size);
+  font-kerning: normal;
+  font-weight: 600;
+  letter-spacing: -0.08em;
+  line-height: 0.95;
+  opacity: 0.94;
+  text-rendering: geometricPrecision;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.inkDensity {
+  display: none;
+}
+
+@supports ((background-clip: text) or (-webkit-background-clip: text)) {
+  .inkDensity {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: hidden;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: transparent;
+    font: inherit;
+    letter-spacing: inherit;
+    line-height: inherit;
+    mix-blend-mode: multiply;
+    opacity: calc(var(--material-editorial-ink-density-opacity, .5) * var(--material-strength-factor, 1));
+    pointer-events: none;
+    text-transform: inherit;
+    white-space: inherit;
+    text-rendering: inherit;
+  }
+}
+
+.bioNote {
+  position: absolute;
+  z-index: 7;
+  bottom: 5.5%;
+  left: 4%;
+  width: 48%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0.65cqi 1.2cqi 0.65cqi 2.15cqi;
+  background-image:
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--editorial-paper) 84%, transparent) 0%,
+      color-mix(in srgb, var(--editorial-paper) 66%, transparent) 68%,
+      transparent 100%
+    ),
+    linear-gradient(var(--editorial-red), var(--editorial-red));
+  background-size:
+    100% 100%,
+    var(--master-rule-weight, 0.13cqi) 72%;
+  background-position: left center, left center;
+  background-repeat: no-repeat;
+}
+
+.bioPaperNote {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  width: 100%;
+  box-sizing: border-box;
+  margin: 0.75cqi 0 0;
+  padding: 0.35cqi 0 0.35cqi 1.9cqi;
+  background-image: linear-gradient(var(--editorial-red), var(--editorial-red));
+  background-size: var(--master-rule-weight, 0.13cqi) 72%;
+  background-position: left center;
+  background-repeat: no-repeat;
+}
+
+.bio {
+  display: -webkit-box;
+  max-height: 2.8em;
+  overflow: hidden;
+  margin: 0;
+  color: var(--editorial-ink);
+  font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display)));
+  font-size: 2.1cqi;
+  font-style: italic;
+  font-weight: var(--master-secondary-display-weight, 500);
+  line-height: var(--master-secondary-display-leading, 1.3);
+  letter-spacing: var(--master-secondary-display-tracking, 0.012em);
+  text-wrap: pretty;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.bioPaperNote .bio {
+  max-height: 2.65em;
+  font-size: 1.8cqi;
+  line-height: 1.32;
+  letter-spacing: 0.008em;
+}
+
+.canvas:lang(en) .jobName,
+.canvas:lang(en) .lineageValue,
+.canvas:lang(en) .worldValue,
+.canvas:lang(en) .factValue {
+  font-family: var(--font-editorial, var(--card-font-information));
+}
+
+.canvas:lang(en) .jobName {
+  font-family: var(--master-font-job, var(--font-editorial, var(--card-font-information)));
+}
+
+.canvas:lang(en) .lineageValue,
+.canvas:lang(en) .worldValue,
+.canvas:lang(en) .factValue {
+  font-family: var(--master-font-information, var(--font-editorial, var(--card-font-information)));
+}
+
+.facts {
+  position: absolute;
+  z-index: 8;
+  top: var(--editorial-facts-top);
+  right: var(--editorial-facts-right);
+  left: var(--editorial-facts-left);
+  display: grid;
+  height: var(--editorial-facts-height);
+  box-sizing: border-box;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 2.5cqi;
+  padding: 4cqi 0 7cqi;
+}
+
+.jobColumn {
+  display: grid;
+  align-content: start;
+  grid-template-rows: auto auto;
+  gap: 1.6cqi;
+  min-width: 0;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 55%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 55%, transparent)
+  );
+  background-size: 100% var(--master-rule-weight, 0.13cqi);
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-bottom: 1.4cqi;
+}
+
+.jobAnchor {
+  display: grid;
+  min-width: 0;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1cqi;
+}
+
+.jobAnchorWithoutMark {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.jobPrint {
+  display: grid;
+  width: 5.4cqi;
+  height: 5.4cqi;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 0.065cqi solid color-mix(in srgb, var(--editorial-ink) 23%, transparent);
+  background: color-mix(in srgb, var(--editorial-ivory) 22%, transparent);
+  color: var(--job-motif-color, var(--editorial-red));
+  --job-icon-color: var(--job-motif-color, var(--editorial-red));
+}
+
+.jobGlyph {
+  width: 1em !important;
+  height: 1em !important;
+  flex: 0 0 1em !important;
+  font-size: inherit !important;
+}
+
+.jobIdentity {
+  display: grid;
+  min-width: 0;
+  align-content: center;
+  gap: 0.35cqi;
+}
+
+.jobLabel,
+.factLabel {
+  display: block;
+  color: color-mix(in srgb, var(--editorial-ink) 63%, transparent);
+  font: 550 1.15cqi/1.2 var(--card-font-caption);
+  font-family: var(--master-font-label, var(--card-font-caption));
+  font-weight: var(--master-label-weight, 550);
+  line-height: var(--master-label-leading, 1.2);
+  letter-spacing: 0.045em;
+  letter-spacing: var(--master-label-tracking, 0.045em);
+  text-transform: uppercase;
+}
+
+.canvas:lang(ko) .jobLabel,
+.canvas:lang(ko) .factLabel {
+  font-size: 1.1cqi;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.canvas:lang(ja) .jobLabel,
+.canvas:lang(ja) .factLabel {
+  font-size: 1.1cqi;
+  letter-spacing: 0.02em;
+  text-transform: none;
+}
+
+.jobName {
+  display: block;
+  color: var(--editorial-ink);
+  font: 650 2.2cqi/1.1 var(--master-font-job, var(--card-font-information));
+  font-weight: var(--master-job-weight, 650);
+  line-height: var(--master-job-leading, 1.1);
+  letter-spacing: var(--master-job-tracking, -0.035em);
+  overflow-wrap: anywhere;
+}
+
+.levelFact {
+  display: grid;
+  justify-items: end;
+  align-content: center;
+  gap: 0.2cqi;
+  border-inline-start: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 58%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 58%, transparent)
+  );
+  background-size: var(--master-rule-weight, 0.13cqi) 100%;
+  background-position: left;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-inline-start: 1.1cqi;
+}
+
+.levelValue {
+  color: var(--editorial-red);
+  font: 650 3.2cqi/0.95 var(--card-font-display);
+  letter-spacing: -0.055em;
+}
+
+.fact {
+  display: grid;
+  align-content: start;
+  gap: 0.55cqi;
+  min-width: 0;
+}
+
+.lineage {
+  align-self: end;
+  border-top: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 46%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 46%, transparent)
+  );
+  background-size: 100% var(--master-rule-weight, 0.13cqi);
+  background-position: top;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-top: 1.35cqi;
+}
+
+.lineageValue {
+  display: block;
+  color: var(--editorial-ink);
+  font: 550 1.8cqi/1.22 var(--master-font-information, var(--card-font-body));
+  font-weight: var(--master-information-weight, 550);
+  line-height: var(--master-information-leading, 1.22);
+  letter-spacing: var(--master-information-tracking, -0.015em);
+  overflow-wrap: anywhere;
+}
+
+.placeColumn {
+  display: grid;
+  align-content: start;
+  grid-template-rows: auto 1fr;
+  gap: 1.6cqi;
+  min-width: 0;
+}
+
+.worldFact {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: 1.5cqi;
+  border-bottom: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-ink) 39%, transparent),
+    color-mix(in srgb, var(--editorial-ink) 39%, transparent)
+  );
+  background-size: 100% var(--master-rule-weight, 0.13cqi);
+  background-position: bottom;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-bottom: 0.8cqi;
+}
+
+.worldFact .factLabel {
+  display: inline-block;
+  color: var(--editorial-red);
+}
+
+.worldValue {
+  color: var(--editorial-ink);
+  font: 600 5.25cqi/0.95 var(--master-font-information, var(--card-font-world, var(--card-font-display)));
+  font-weight: var(--master-information-weight, 600);
+  line-height: var(--master-information-leading, 0.95);
+  letter-spacing: var(--master-information-tracking, -0.055em);
+  overflow-wrap: anywhere;
+}
+
+.secondaryFacts {
+  display: grid;
+  align-content: start;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  gap: 1.4cqi 1.8cqi;
+}
+
+.originFact {
+  grid-column: 1 / -1;
+  border-top: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 46%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 46%, transparent)
+  );
+  background-size: 100% var(--master-rule-weight, 0.13cqi);
+  background-position: top;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-top: 1cqi;
+}
+
+.factValue {
+  display: block;
+  color: var(--editorial-ink);
+  font: 560 1.75cqi/1.2 var(--master-font-information, var(--card-font-caption));
+  font-weight: var(--master-information-weight, 560);
+  line-height: var(--master-information-leading, 1.2);
+  letter-spacing: var(--master-information-tracking, -0.015em);
+  overflow-wrap: anywhere;
+}
+
+.companyFact .factValue {
+  font-family: var(--card-font-body);
+  font-size: 1.9cqi;
+}
+
+.originFact .factValue {
+  font-family: var(--master-font-caption, var(--master-font-information, var(--card-font-caption)));
+  font-weight: var(--master-caption-weight, var(--master-information-weight, 560));
+  letter-spacing: var(--master-caption-tracking, var(--master-information-tracking, -0.015em));
+  line-height: var(--master-caption-leading, var(--master-information-leading, 1.2));
+}
+
+.canvas[data-ratio='4:5'] .customMotif {
+  font-size: 18cqi;
+}
+
+.canvas[data-ratio='4:5'] {
+  --editorial-motif-left: 53.3%;
+}
+
+/* Square keeps the source screenshot close to its native portrait aspect. */
+.canvas[data-ratio='1:1'] {
+  --editorial-photo-width: 56.25%;
+  --editorial-name-left: 56.5%;
+  --editorial-name-right: 4%;
+  --editorial-facts-left: 56.5%;
+  --editorial-facts-top: 31%;
+  --editorial-facts-height: 48%;
+  --editorial-motif-top: 78%;
+  --editorial-motif-width: 46%;
+  --editorial-motif-height: 20%;
+  --editorial-motif-size: 18cqi;
+  --editorial-motif-left: 49%;
+}
+
+.canvas[data-ratio='1:1'] .facts {
+  padding-top: 3.8cqi;
+  padding-bottom: 6cqi;
+}
+
+.canvas[data-ratio='1:1'] .bioNote {
+  left: 3.5%;
+  width: 45%;
+}
+
+/* The 3:4 portrait reserves a stable paper column beside the face. */
+.canvas[data-ratio='3:4'] {
+  --editorial-photo-width: 62%;
+  --editorial-name-left: 62.5%;
+  --editorial-name-right: 3.5%;
+  --editorial-facts-left: 62.5%;
+  --editorial-facts-right: 3.5%;
+  --editorial-facts-top: 32%;
+  --editorial-facts-height: 47%;
+  --editorial-motif-top: 79%;
+  --editorial-motif-width: 40%;
+  --editorial-motif-height: 19%;
+  --editorial-motif-size: 16cqi;
+  --editorial-motif-left: 54%;
+}
+
+.canvas[data-ratio='3:4'] .facts {
+  gap: 2cqi;
+  padding-top: 3.5cqi;
+  padding-bottom: 6cqi;
+}
+
+.canvas[data-ratio='3:4'] .jobName {
+  font-size: 1.9cqi;
+}
+
+.canvas[data-ratio='3:4'] .lineageValue {
+  font-size: 1.55cqi;
+}
+
+.canvas[data-ratio='3:4'] .worldValue {
+  font-size: 4.5cqi;
+}
+
+.canvas[data-ratio='3:4'] .factValue {
+  font-size: 1.45cqi;
+}
+
+.canvas[data-ratio='3:4'] .companyFact .factValue {
+  font-size: 1.55cqi;
+}
+
+.canvas[data-ratio='3:4'] .bioNote {
+  left: 4%;
+  width: 53%;
+}
+
+/* Tall portrait: the only paper intrusion is a straight diagonal at the record edge. */
+.canvas[data-ratio='9:16'] {
+  --editorial-photo-width: 100%;
+  --editorial-photo-height: 100%;
+  --editorial-name-left: 5%;
+  --editorial-name-right: 5%;
+  --editorial-name-top: 64%;
+  --editorial-facts-left: 5%;
+  --editorial-facts-right: 5%;
+  --editorial-facts-top: 77%;
+  --editorial-facts-height: 20%;
+  --editorial-motif-left: 58%;
+  --editorial-motif-top: 54.5%;
+  --editorial-motif-width: 41%;
+  --editorial-motif-height: 11%;
+  --editorial-motif-size: 15cqi;
+}
+
+.canvas[data-ratio='9:16'] .masthead {
+  top: 3.2%;
+  right: 5%;
+  left: 5%;
+  border-bottom-color: color-mix(in srgb, var(--editorial-ivory) 54%, transparent);
+  color: var(--editorial-ivory);
+}
+
+.canvas[data-ratio='9:16'] .mastheadTitle {
+  font-size: 2.55cqi;
+}
+
+.canvas[data-ratio='9:16'] .mastheadMeta {
+  max-width: 53%;
+  color: color-mix(in srgb, var(--editorial-ivory) 78%, transparent);
+  font-size: 1.15cqi;
+}
+
+.canvas[data-ratio='9:16'] {
+  --editorial-name-leading: 0.86;
+}
+
+.canvas[data-ratio='9:16'] .facts {
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 2.6cqi;
+  padding: 3cqi 0 5cqi;
+}
+
+.canvas[data-ratio='9:16'] .jobColumn {
+  grid-template-rows: auto auto;
+  gap: 1.15cqi;
+  border-bottom: 0;
+  border-inline-end: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 52%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 52%, transparent)
+  );
+  background-size: var(--master-rule-weight, 0.13cqi) 100%;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding: 0 2cqi 0 0;
+}
+
+.canvas[data-ratio='9:16'] .jobAnchor {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8cqi;
+}
+
+.canvas[data-ratio='9:16'] .jobPrint {
+  width: 4.8cqi;
+  height: 4.8cqi;
+}
+
+.canvas[data-ratio='9:16'] .jobName,
+.canvas[data-ratio='9:16'] .lineageValue {
+  font-size: 1.45cqi;
+}
+
+.canvas[data-ratio='9:16'] .levelFact {
+  gap: 0;
+  border-inline-start: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 45%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 45%, transparent)
+  );
+  background-size: var(--master-rule-weight, 0.13cqi) 100%;
+  background-position: left;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding-inline-start: 0.8cqi;
+}
+
+.canvas[data-ratio='9:16'] .levelValue {
+  font-size: 2.8cqi;
+}
+
+.canvas[data-ratio='9:16'] .worldFact {
+  gap: 0.8cqi;
+  padding-bottom: 0.55cqi;
+}
+
+.canvas[data-ratio='9:16'] .worldValue {
+  font-size: 3.8cqi;
+}
+
+.canvas[data-ratio='9:16'] .secondaryFacts {
+  gap: 0.85cqi 1.3cqi;
+}
+
+.canvas[data-ratio='9:16'] .factValue,
+.canvas[data-ratio='9:16'] .companyFact .factValue {
+  font-size: 1.2cqi;
+}
+
+.canvas[data-ratio='9:16'] .originFact {
+  padding-top: 0.55cqi;
+}
+
+.canvas[data-ratio='9:16'] .bioNote {
+  top: 58.5%;
+  bottom: auto;
+  left: 5%;
+  width: 49%;
+}
+
+.canvas[data-ratio='9:16'] .bioPaperNote {
+  margin-top: 0.55cqi;
+  padding-inline-start: 1.5cqi;
+}
+
+.canvas[data-ratio='9:16'] .bioPaperNote .bio {
+  font-size: 1.3cqi;
+  line-height: 1.2;
+  max-height: 2.4em;
+}
+
+/* Landscape keeps the source portrait at near-native proportions. */
+.canvas[data-ratio='16:9'] {
+  --editorial-photo-width: 36%;
+  --editorial-name-top: 18%;
+  --editorial-name-left: 34%;
+  --editorial-name-right: 5%;
+  --editorial-facts-left: 34%;
+  --editorial-facts-right: 4%;
+  --editorial-facts-top: 42%;
+  --editorial-facts-height: 38%;
+  --editorial-motif-left: 54%;
+  --editorial-motif-top: 82%;
+  --editorial-motif-width: 44%;
+  --editorial-motif-height: 16%;
+  --editorial-motif-size: 12.5cqi;
+}
+
+.canvas[data-ratio='16:9'] .masthead {
+  top: 6%;
+  right: 4%;
+  left: 35%;
+  padding-bottom: 1.2cqi;
+}
+
+.canvas[data-ratio='16:9'] .mastheadTitle {
+  font-size: 2.05cqi;
+}
+
+.canvas[data-ratio='16:9'] .mastheadMeta {
+  font-size: 0.95cqi;
+}
+
+.canvas[data-ratio='16:9'] .facts {
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 2.3cqi;
+  padding: 2.4cqi 0 3.5cqi;
+}
+
+.canvas[data-ratio='16:9'] .jobColumn {
+  grid-template-rows: auto auto;
+  gap: 1.3cqi;
+  border-bottom: 0;
+  border-inline-end: 1px solid transparent;
+  background-image: linear-gradient(
+    color-mix(in srgb, var(--editorial-brass) 52%, transparent),
+    color-mix(in srgb, var(--editorial-brass) 52%, transparent)
+  );
+  background-size: var(--master-rule-weight, 0.13cqi) 100%;
+  background-position: right;
+  background-repeat: no-repeat;
+  background-origin: border-box;
+  background-clip: border-box;
+  padding: 0 2cqi 0 0;
+}
+
+.canvas[data-ratio='16:9'] .jobAnchor {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.8cqi;
+}
+
+.canvas[data-ratio='16:9'] .jobPrint {
+  width: 4cqi;
+  height: 4cqi;
+}
+
+.canvas[data-ratio='16:9'] .jobName {
+  font-size: 1.9cqi;
+}
+
+.canvas[data-ratio='16:9'] .lineageValue,
+.canvas[data-ratio='16:9'] .factValue {
+  font-size: 1.55cqi;
+}
+
+.canvas[data-ratio='16:9'] .worldValue {
+  font-size: 4.5cqi;
+}
+
+.canvas[data-ratio='16:9'] .levelValue {
+  font-size: 2.8cqi;
+}
+
+.canvas[data-ratio='16:9'] .secondaryFacts {
+  gap: 1cqi 1.4cqi;
+}
+
+.canvas[data-ratio='16:9'] .companyFact .factValue {
+  font-size: 1.55cqi;
+}
+
+.canvas[data-ratio='16:9'] .bioNote {
+  top: auto;
+  bottom: 5.5%;
+  left: 2%;
+  width: 27%;
+}
+
+.canvas[data-ratio='16:9'] .bio {
+  font-size: 1.75cqi;
+}
+
+.canvas[data-ratio='16:9'] .bioPaperNote {
+  margin-top: 0.45cqi;
+  padding-inline-start: 1.25cqi;
+}
+
+.canvas[data-ratio='16:9'] .bioPaperNote .bio {
+  max-height: 1.2em;
+  font-size: 1.35cqi;
+  line-height: 1.2;
+  -webkit-line-clamp: 1;
+}

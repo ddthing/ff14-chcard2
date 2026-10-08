@@ -1,0 +1,394 @@
+.appShell {
+  min-height: 100vh;
+  min-height: 100svh;
+  background: var(--app-bg);
+  color: var(--app-text);
+  color-scheme: dark;
+}
+
+:global(html[data-app-theme='light']) .appShell {
+  color-scheme: light;
+}
+
+/* Card rendering originally inherited the app's fixed dark native color context. */
+.appShell :global(article[data-template]) {
+  color-scheme: dark;
+}
+
+.appHeader {
+  position: sticky;
+  z-index: 60;
+  top: 0;
+  display: flex;
+  width: 100%;
+  height: var(--app-header-height);
+  min-height: var(--app-header-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid var(--app-border);
+  padding-inline: clamp(8px, 2.1vw, 20px);
+  background: var(--app-header);
+  color: var(--app-text);
+}
+
+.headerLeft,
+.headerRight {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+}
+
+.headerLeft {
+  flex: 1 1 auto;
+  gap: 8px;
+}
+
+.headerRight {
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.brand {
+  display: inline-flex;
+  min-width: 0;
+  min-height: 24px;
+  align-items: center;
+  gap: 6px;
+  border-radius: 4px;
+  color: var(--app-text);
+  font-size: 0.66rem;
+  font-weight: 650;
+  letter-spacing: 0.085em;
+  white-space: nowrap;
+}
+
+.brand:focus-visible,
+.skipLink:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.brandMark {
+  display: grid;
+  flex: 0 0 auto;
+  width: 1.25rem;
+  height: 1.25rem;
+  place-items: center;
+  color: var(--app-text-muted);
+}
+
+.brandMark svg {
+  display: block;
+}
+
+.brandFull {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.brandCompact {
+  display: none;
+}
+
+.headerDivider {
+  color: var(--app-text-subtle);
+  font-size: 0.78rem;
+}
+
+.sectionLabel {
+  overflow: hidden;
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.actionDivider {
+  width: 1px;
+  height: 16px;
+  flex: 0 0 auto;
+  background: var(--app-border);
+}
+
+.headerRight > .actionDivider:last-of-type {
+  display: none;
+}
+
+.saveStatus {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 6px;
+  color: var(--app-text-muted);
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.saveStatusDot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: var(--app-text-subtle);
+}
+
+.saveStatus[data-status='saving'] .saveStatusDot {
+  background: var(--app-accent);
+}
+
+.saveStatus[data-status='error'] {
+  color: var(--app-error);
+}
+
+.saveStatus[data-status='error'] .saveStatusDot {
+  background: var(--app-error);
+}
+
+.appearanceControl {
+  position: relative;
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.appearanceTrigger {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--app-text-muted);
+  cursor: pointer;
+}
+
+.appearanceTrigger:hover,
+.appearanceTrigger[aria-expanded='true'] {
+  border-color: var(--app-border);
+  background: var(--app-control-hover);
+  color: var(--app-text);
+}
+
+.appearanceTrigger:focus-visible,
+.languageButton:focus-visible,
+.languageSelect:focus-visible,
+.appearanceOption:focus-within {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.appearancePopup {
+  position: absolute;
+  z-index: 80;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  width: max-content;
+  min-width: 10.5rem;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 8px;
+  padding: 6px;
+  background: var(--app-surface-raised);
+  box-shadow: var(--app-shadow-overlay);
+  color: var(--app-text);
+}
+
+.appearanceFieldset {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.appearanceOption {
+  display: flex;
+  min-height: 2.25rem;
+  align-items: center;
+  gap: 8px;
+  border-radius: 4px;
+  padding-inline: 8px;
+  color: var(--app-text-muted);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.appearanceOption:hover {
+  background: var(--app-control-hover);
+  color: var(--app-text);
+}
+
+.appearanceOption input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  accent-color: var(--app-accent);
+}
+
+.appearanceOption:has(input:checked) {
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+}
+
+.languageButtons {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.languageButton {
+  display: inline-grid;
+  min-width: 32px;
+  min-height: 32px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding-inline: 0.25rem;
+  background: transparent;
+  color: var(--app-text-subtle);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.025em;
+}
+
+.languageButton:hover {
+  border-color: var(--app-border);
+  background: var(--app-control-hover);
+  color: var(--app-text);
+}
+
+.languageButton[aria-pressed='true'] {
+  border-color: var(--app-border-strong);
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+  font-weight: 700;
+}
+
+.languageSelect {
+  display: none;
+  min-width: 2.75rem;
+  height: 32px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  padding-inline: 4px;
+  background: var(--app-header);
+  color: var(--app-text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+}
+
+.appMain {
+  min-height: calc(100vh - var(--app-header-height));
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.skipLink {
+  position: fixed;
+  z-index: 100;
+  top: 0.35rem;
+  left: 0.5rem;
+  transform: translateY(-160%);
+  border: 1px solid var(--app-border-strong);
+  border-radius: 4px;
+  padding: 0.45rem 0.75rem;
+  background: var(--app-surface-raised);
+  color: var(--app-text);
+  font-size: 0.75rem;
+}
+
+.skipLink:focus {
+  transform: translateY(0);
+}
+
+.visuallyHidden {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .appHeader {
+    gap: 6px;
+  }
+
+  .brandFull {
+    display: none;
+  }
+
+  .brandCompact {
+    display: inline;
+  }
+
+  .headerLeft {
+    gap: 4px;
+  }
+
+  .headerRight {
+    gap: 4px;
+  }
+
+  .appearanceTrigger {
+    width: 44px;
+    height: 44px;
+  }
+
+  .languageButtons {
+    display: none;
+  }
+
+  .languageSelect {
+    display: block;
+    min-width: 44px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .appHeader {
+    gap: 6px;
+    padding-inline: 8px;
+  }
+
+  .brandMark {
+    width: 1rem;
+  }
+
+  .headerLeft {
+    gap: 4px;
+  }
+
+  .headerRight {
+    gap: 4px;
+  }
+
+  .saveStatus {
+    font-size: 0.62rem;
+  }
+}
+
+@media (forced-colors: active) {
+  .appHeader,
+  .appearancePopup,
+  .appearanceTrigger,
+  .languageButton,
+  .languageSelect {
+    border-color: CanvasText;
+  }
+
+  .saveStatusDot {
+    outline: 1px solid CanvasText;
+  }
+
+  .appearanceTrigger:focus-visible,
+  .languageButton:focus-visible,
+  .languageSelect:focus-visible,
+  .appearanceOption:focus-within {
+    outline-color: Highlight;
+  }
+}

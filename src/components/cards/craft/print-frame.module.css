@@ -1,0 +1,134 @@
+.frame {
+  --frame-stroke: var(--master-rule-weight, 1px);
+  --frame-inset: 22em;
+  --corner-size: 64em;
+  --corner-reach: 45em;
+  position: absolute;
+  z-index: 8;
+  inset: 0;
+  color: var(--craft-brass, var(--master-accent, currentColor));
+  font-size: var(--frame-stroke);
+  pointer-events: none;
+}
+
+.frame[data-print-frame='cinematic'] {
+  opacity: 0.72;
+}
+
+/* I3 keeps a quiet document rail; C2 leaves the long photo edges open. */
+.frame[data-print-frame='id-card'] {
+  opacity: 0.78;
+}
+
+.frame[data-print-frame='cinematic'] .leftRule,
+.frame[data-print-frame='cinematic'] .rightRule {
+  display: none;
+}
+
+.frame[data-print-frame='cinematic'] .topRule {
+  background: linear-gradient(
+    90deg,
+    currentColor 0 calc(50% - 17em),
+    transparent calc(50% - 17em) calc(50% + 17em),
+    currentColor calc(50% + 17em) calc(76% - 6em),
+    transparent calc(76% - 6em) calc(76% + 6em),
+    currentColor calc(76% + 6em) 100%
+  );
+}
+
+.frame[data-print-frame='cinematic'] .bottomRule {
+  right: 34%;
+}
+
+.frame[data-print-frame='cinematic'] .corner.br {
+  display: none;
+}
+
+.topRule,
+.bottomRule {
+  position: absolute;
+  right: calc(var(--frame-inset) + var(--corner-reach));
+  left: calc(var(--frame-inset) + var(--corner-reach));
+  height: var(--frame-stroke);
+}
+
+.topRule {
+  top: var(--frame-inset);
+  background: linear-gradient(
+    90deg,
+    currentColor 0 calc(50% - 17em),
+    transparent calc(50% - 17em) calc(50% + 17em),
+    currentColor calc(50% + 17em) 100%
+  );
+}
+
+.bottomRule {
+  bottom: var(--frame-inset);
+  background: currentColor;
+}
+
+.leftRule,
+.rightRule {
+  position: absolute;
+  top: calc(var(--frame-inset) + var(--corner-reach));
+  bottom: calc(var(--frame-inset) + var(--corner-reach));
+  width: var(--frame-stroke);
+  background: currentColor;
+}
+
+.leftRule {
+  left: var(--frame-inset);
+}
+
+.rightRule {
+  right: var(--frame-inset);
+}
+
+.corner {
+  position: absolute;
+  width: var(--corner-size);
+  height: var(--corner-size);
+}
+
+.corner svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.tl {
+  top: var(--frame-inset);
+  left: var(--frame-inset);
+}
+
+.tr {
+  top: var(--frame-inset);
+  right: var(--frame-inset);
+  transform: rotate(90deg);
+}
+
+.br {
+  right: var(--frame-inset);
+  bottom: var(--frame-inset);
+  transform: rotate(180deg);
+}
+
+.bl {
+  bottom: var(--frame-inset);
+  left: var(--frame-inset);
+  transform: rotate(270deg);
+}
+
+.topMark {
+  position: absolute;
+  top: calc(var(--frame-inset) - 14em);
+  left: calc(50% - 14em);
+  width: 28em;
+  height: 28em;
+}
+
+.topMark svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}

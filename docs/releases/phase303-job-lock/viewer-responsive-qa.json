@@ -1,0 +1,35 @@
+{
+  "results": [
+    {
+      "width": 661,
+      "height": 802,
+      "scrollWidth": 646,
+      "clientWidth": 646,
+      "imageLoaded": true,
+      "image": {
+        "width": 612,
+        "height": 765,
+        "naturalWidth": 1080
+      },
+      "caseCount": 63,
+      "boardLinks": 15,
+      "pass": true
+    },
+    {
+      "width": 390,
+      "height": 844,
+      "scrollWidth": 375,
+      "clientWidth": 375,
+      "imageLoaded": true,
+      "image": {
+        "width": 345,
+        "height": 431.25,
+        "naturalWidth": 1080
+      },
+      "caseCount": 63,
+      "boardLinks": 15,
+      "pass": true
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,2564 @@
+.card {
+  --card-ink: #f3ede3;
+  --card-muted: rgb(243 237 227 / 0.72);
+  --card-primary: #c5a474;
+  --card-light: #f3ede3;
+  --card-dark: #111315;
+  --card-font-display: var(--font-editorial, Georgia, 'Times New Roman', serif);
+  --card-font-body: var(--font-sans, Arial, sans-serif);
+  --card-font-metadata: var(--font-sans, Arial, sans-serif);
+  --card-display-weight: 500;
+  --card-display-tracking: -0.045em;
+  --card-metadata-tracking: 0.12em;
+  --card-display-transform: none;
+  position: relative;
+  isolation: isolate;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  container-type: inline-size;
+  border-radius: 0.55rem;
+  background: #111315;
+  color: var(--card-ink);
+  box-shadow: 0 1.2rem 3rem rgb(0 0 0 / 0.27);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.card::before {
+  position: absolute;
+  z-index: 5;
+  pointer-events: none;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+  opacity: 0;
+  background-image: repeating-radial-gradient(circle at 18% 24%, rgb(255 255 255 / 0.28) 0 0.45px, transparent 0.6px 3px);
+  background-size: 8px 8px;
+  mix-blend-mode: soft-light;
+}
+
+.card[data-effects~='grain']::before {
+  opacity: 0.14;
+}
+
+.card[data-effects~='holographic']::after {
+  position: absolute;
+  z-index: 4;
+  pointer-events: none;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+  opacity: 0.25;
+  background: linear-gradient(128deg, transparent 30%, rgb(110 192 204 / 0.18) 46%, rgb(214 173 211 / 0.17) 55%, transparent 69%);
+  mix-blend-mode: screen;
+}
+
+.imageFallback,
+.cinematicArt,
+.editorialArt,
+.idPortrait {
+  background:
+    radial-gradient(ellipse at 68% 26%, rgb(205 182 144 / 0.36), transparent 24%),
+    radial-gradient(ellipse at 48% 60%, rgb(90 107 109 / 0.48), transparent 48%),
+    linear-gradient(147deg, #253137 0%, #121619 58%, #07090a 100%);
+}
+
+.imageFallback {
+  position: absolute;
+  inset: 0;
+}
+
+.cinematicArt,
+.editorialArt,
+.idPortrait {
+  position: absolute;
+  overflow: hidden;
+}
+
+.cinematicArt img,
+.editorialArt img,
+.idPortrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--card-image-position, 50% 50%);
+  transform: scale(var(--card-image-scale, 1)) rotate(var(--card-image-rotation, 0deg));
+  filter: brightness(var(--card-image-brightness, 1)) contrast(var(--card-image-contrast, 1)) saturate(var(--card-image-saturation, 1));
+  transform-origin: center;
+}
+
+/* Cinematic: the image carries the emotion; typography sits in a calm lower veil. */
+.card[data-template='cinematic'] {
+  --card-ink: #f6f0e6;
+  border: 1px solid rgb(222 205 176 / 0.36);
+  background: #101214;
+}
+
+.cinematicArt {
+  z-index: -2;
+  inset: 0;
+}
+
+.cinematicShade {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgb(7 9 11 / 0.02) 26%, rgb(7 9 11 / 0.12) 43%, rgb(7 9 11 / 0.86) 76%, rgb(7 9 11 / 0.97) 100%),
+    linear-gradient(90deg, rgb(7 9 11 / 0.25), transparent 68%);
+}
+
+.cinematicFrame {
+  position: absolute;
+  z-index: 1;
+  inset: 0.58rem;
+  border: 1px solid rgb(246 236 216 / 0.22);
+  border-radius: 0.2rem;
+  pointer-events: none;
+}
+
+.cinematicFrame::before,
+.cinematicFrame::after {
+  position: absolute;
+  width: 1.1rem;
+  height: 1.1rem;
+  content: '';
+  border-color: var(--card-accent);
+  border-style: solid;
+  opacity: 0.72;
+}
+
+.cinematicFrame::before {
+  top: -1px;
+  left: -1px;
+  border-width: 1px 0 0 1px;
+}
+
+.cinematicFrame::after {
+  right: -1px;
+  bottom: -1px;
+  border-width: 0 1px 1px 0;
+}
+
+.cinematicContent {
+  position: absolute;
+  z-index: 2;
+  inset: 1.25rem 1.35rem 1.3rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1.25rem;
+  min-width: 0;
+}
+
+.cinematicMasthead,
+.editorialMasthead,
+.idMasthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.45rem, 1.55cqi, 0.67rem);
+  font-weight: 600;
+  letter-spacing: var(--card-metadata-tracking, 0.16em);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.cinematicMasthead {
+  padding-bottom: 0.55rem;
+  border-bottom: 1px solid rgb(246 236 216 / 0.36);
+  color: rgb(255 249 238 / 0.88);
+  text-shadow: 0 1px 8px rgb(0 0 0 / 0.56);
+}
+
+.cinematicMasthead span:last-child {
+  color: rgb(255 249 238 / 0.68);
+  font-size: 0.82em;
+  text-align: right;
+}
+
+.cinematicBase {
+  display: grid;
+  gap: 0.85rem;
+  min-width: 0;
+}
+
+.cinematicIdentity,
+.cinematicDetails {
+  min-width: 0;
+}
+
+.cinematicEyebrow,
+.editorialEyebrow,
+.idEyebrow {
+  margin: 0 0 0.38rem;
+  color: var(--card-accent);
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.5rem, 1.75cqi, 0.72rem);
+  font-weight: 650;
+  letter-spacing: var(--card-metadata-tracking, 0.15em);
+  line-height: 1.25;
+  text-transform: uppercase;
+}
+
+.cinematicIdentity h2,
+.editorialIdentity h2,
+.idInformation h2 {
+  margin: 0;
+  font-family: var(--card-font-display, var(--font-editorial, Georgia, 'Times New Roman', serif));
+  font-weight: var(--card-display-weight, 500);
+  letter-spacing: var(--card-display-tracking, -0.045em);
+  text-transform: var(--card-display-transform, none);
+  overflow-wrap: anywhere;
+}
+
+.card[data-typography='technical'] .cinematicIdentity h2,
+.card[data-typography='technical'] .editorialIdentity h2,
+.card[data-typography='technical'] .idInformation h2 {
+  font-weight: 650;
+  letter-spacing: -0.035em;
+}
+
+.cinematicIdentity h2 {
+  max-width: 12ch;
+  font-size: clamp(1.8rem, 11cqi, 4.3rem);
+  line-height: 0.92;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.48);
+}
+
+.cinematicJobline,
+.editorialRole,
+.idRole {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0.7rem 0 0;
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.61rem, 2.1cqi, 0.88rem);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.cinematicJobline span:nth-child(2) {
+  color: var(--card-accent);
+}
+
+.cinematicBio,
+.editorialBio,
+.idFooter p {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--card-font-body, var(--font-editorial, Georgia, 'Times New Roman', serif));
+  font-size: clamp(0.67rem, 2.05cqi, 0.9rem);
+  line-height: 1.38;
+  text-overflow: ellipsis;
+}
+
+.cinematicBio {
+  max-width: 42ch;
+  margin-bottom: 0.7rem;
+  color: var(--card-muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.cinematicFacts,
+.editorialFacts,
+.idFacts {
+  display: grid;
+  min-width: 0;
+  margin: 0;
+}
+
+.cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.55rem 1rem;
+  padding-top: 0.62rem;
+  border-top: 1px solid rgb(246 236 216 / 0.37);
+}
+
+.cinematicFacts div,
+.editorialFacts div,
+.idFacts div {
+  min-width: 0;
+}
+
+.cinematicFacts dt,
+.editorialFacts dt,
+.idFacts dt {
+  margin: 0 0 0.19rem;
+  color: var(--card-muted);
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.43rem, 1.38cqi, 0.62rem);
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.cinematicFacts dd,
+.editorialFacts dd,
+.idFacts dd {
+  margin: 0;
+  overflow: hidden;
+  font-family: var(--card-font-body, var(--font-editorial, Georgia, 'Times New Roman', serif));
+  font-size: clamp(0.64rem, 2.1cqi, 0.88rem);
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cinematicCompany {
+  grid-column: 1 / -1;
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicShade {
+  background:
+    linear-gradient(90deg, rgb(7 9 11 / 0.94) 0%, rgb(7 9 11 / 0.79) 36%, rgb(7 9 11 / 0.14) 76%, rgb(7 9 11 / 0.06) 100%),
+    linear-gradient(0deg, rgb(7 9 11 / 0.76), transparent 58%);
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicContent {
+  inset: 1.25rem 1.5rem;
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicBase {
+  grid-template-columns: minmax(0, 1.05fr) minmax(11rem, 0.75fr);
+  align-items: end;
+  gap: clamp(1.1rem, 3cqi, 2.5rem);
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicIdentity h2 {
+  font-size: clamp(2.2rem, 7.2cqi, 5.1rem);
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicDetails {
+  padding: 0.85rem 0 0.15rem 1rem;
+  border-left: 1px solid rgb(246 236 216 / 0.43);
+}
+
+.card[data-template='cinematic'][data-ratio='16:9'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card[data-template='cinematic'][data-ratio='1:1'] .cinematicContent {
+  inset: 0.95rem 1.05rem 1rem;
+}
+
+.card[data-template='cinematic'][data-ratio='1:1'] .cinematicDetails {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 0.7rem;
+  align-items: end;
+}
+
+.card[data-template='cinematic'][data-ratio='1:1'] .cinematicBio {
+  margin: 0;
+  -webkit-line-clamp: 3;
+}
+
+.card[data-template='cinematic'][data-ratio='1:1'] .cinematicFacts {
+  grid-template-columns: 1fr;
+  padding-top: 0.5rem;
+}
+
+.card[data-template='cinematic'][data-ratio='1:1'] .cinematicCompany {
+  grid-column: auto;
+}
+
+.card[data-template='cinematic'][data-ratio='9:16'] .cinematicContent {
+  inset: 1.3rem 1.2rem;
+}
+
+.card[data-template='cinematic'][data-ratio='9:16'] .cinematicIdentity h2 {
+  font-size: clamp(2.7rem, 13cqi, 5rem);
+}
+
+.card[data-template='cinematic'][data-ratio='9:16'] .cinematicDetails {
+  padding-top: 0.8rem;
+  border-top: 1px solid rgb(246 236 216 / 0.34);
+}
+
+/* Editorial: portrait-led, paper-toned, with a quiet, print-like information hierarchy. */
+.card[data-template='editorial'] {
+  --card-ink: #28251f;
+  --card-muted: #716b61;
+  border: 1px solid #d2c7b5;
+  border-radius: 0.35rem;
+  background: #e9e2d6;
+  box-shadow: 0 1.1rem 2.8rem rgb(0 0 0 / 0.25), inset 0 0 0 0.25rem rgb(255 255 255 / 0.24);
+}
+
+.editorialArt {
+  z-index: 0;
+  inset: 0 0 45%;
+  background-color: #cec6b9;
+}
+
+.editorialMasthead {
+  position: absolute;
+  z-index: 2;
+  inset: 1rem 1.1rem auto;
+  padding-bottom: 0.52rem;
+  border-bottom: 1px solid rgb(255 249 235 / 0.68);
+  color: #fffaf0;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.6);
+}
+
+.editorialMasthead span:last-child {
+  text-align: right;
+}
+
+.editorialBody {
+  position: absolute;
+  z-index: 1;
+  inset: 54% 0 0;
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.38rem;
+  min-width: 0;
+  padding: 0.82rem 1.05rem 0.78rem;
+  border-top: 1px solid rgb(105 89 67 / 0.28);
+  background:
+    linear-gradient(135deg, rgb(255 255 255 / 0.22), transparent 36%),
+    #e9e2d6;
+}
+
+.editorialIdentity h2 {
+  max-width: 15ch;
+  font-size: clamp(1.35rem, 7.7cqi, 3.2rem);
+  line-height: 0.98;
+}
+
+.editorialEyebrow {
+  margin-bottom: 0.3rem;
+  color: #705c41;
+  font-size: clamp(0.45rem, 1.52cqi, 0.66rem);
+}
+
+.editorialRole {
+  margin-top: 0.38rem;
+  color: #655d51;
+  font-size: clamp(0.55rem, 1.9cqi, 0.78rem);
+  letter-spacing: var(--card-metadata-tracking, 0.075em);
+}
+
+.editorialFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.35rem 0.8rem;
+  padding-top: 0.55rem;
+  border-top: 1px solid rgb(77 67 54 / 0.28);
+}
+
+.editorialFacts dt {
+  color: #6c6357;
+  font-size: clamp(0.4rem, 1.22cqi, 0.55rem);
+}
+
+.editorialFacts dd {
+  color: #302c26;
+  font-family: var(--card-font-body, var(--font-sans, Arial, sans-serif));
+  font-size: clamp(0.56rem, 1.68cqi, 0.75rem);
+  font-weight: 600;
+}
+
+.editorialBio {
+  align-self: end;
+  color: #625a4e;
+  font-size: clamp(0.55rem, 1.65cqi, 0.72rem);
+  -webkit-line-clamp: 1;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+}
+
+.editorialFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding-top: 0.48rem;
+  border-top: 1px solid rgb(77 67 54 / 0.28);
+  color: #665c50;
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.42rem, 1.35cqi, 0.59rem);
+  font-weight: 600;
+  letter-spacing: var(--card-metadata-tracking, 0.08em);
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.editorialFooter span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card[data-template='editorial'][data-ratio='16:9'] .editorialArt {
+  inset: 0 56% 0 0;
+}
+
+.card[data-template='editorial'][data-ratio='16:9'] .editorialMasthead {
+  inset: 1rem 58% auto 1rem;
+}
+
+.card[data-template='editorial'][data-ratio='16:9'] .editorialBody {
+  inset: 0 0 0 44%;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.7rem;
+  padding: 1.15rem 1.4rem 1rem;
+  border-top: 0;
+  border-left: 1px solid rgb(105 89 67 / 0.28);
+}
+
+.card[data-template='editorial'][data-ratio='16:9'] .editorialIdentity h2 {
+  font-size: clamp(1.7rem, 5cqi, 3.2rem);
+}
+
+.card[data-template='editorial'][data-ratio='16:9'] .editorialFacts {
+  gap: 0.65rem 1rem;
+}
+
+.card[data-template='editorial'][data-ratio='9:16'] .editorialArt {
+  bottom: 48%;
+}
+
+.card[data-template='editorial'][data-ratio='9:16'] .editorialBody {
+  top: 52%;
+  gap: 0.85rem;
+  padding: 1.2rem 1.2rem 1.05rem;
+}
+
+.card[data-template='editorial'][data-ratio='1:1'] .editorialArt {
+  bottom: 48%;
+}
+
+.card[data-template='editorial'][data-ratio='1:1'] .editorialBody {
+  top: 52%;
+  gap: 0.4rem;
+  padding: 0.8rem 0.95rem 0.78rem;
+}
+
+.card[data-template='editorial'][data-ratio='1:1'] .editorialFacts {
+  gap: 0.24rem 0.55rem;
+}
+
+/* Identification: a collectible pass with precise labels and a restrained foil seal. */
+.card[data-template='id-card'] {
+  --card-ink: #2b2924;
+  --card-muted: #7a7469;
+  border: 1px solid #c9bda9;
+  border-radius: 0.38rem;
+  background:
+    linear-gradient(124deg, rgb(255 255 255 / 0.55), transparent 42%),
+    #e5dfd4;
+  color: var(--card-ink);
+  box-shadow: 0 1rem 2.5rem rgb(0 0 0 / 0.25), inset 0 0 0 0.2rem rgb(255 255 255 / 0.25);
+}
+
+.idMasthead {
+  position: absolute;
+  z-index: 2;
+  inset: 0.9rem 1rem auto;
+  height: 1.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgb(81 72 57 / 0.34);
+  color: #62584a;
+  font-size: clamp(0.46rem, 1.48cqi, 0.65rem);
+}
+
+.idSeal {
+  display: grid;
+  width: 1.7rem;
+  height: 1.7rem;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 0;
+  color: #927853;
+  font-family: var(--font-editorial, Georgia, 'Times New Roman', serif);
+  font-size: 0.68rem;
+  letter-spacing: 0.03em;
+}
+
+.idBody {
+  position: absolute;
+  inset: 14% 7% 20%;
+  display: grid;
+  grid-template-rows: minmax(0, 0.72fr) minmax(0, 1fr);
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.idPortrait {
+  position: relative;
+  min-height: 0;
+  border: 1px solid rgb(74 67 56 / 0.28);
+  background-color: #d4ccbe;
+  box-shadow: inset 0 0 0 0.22rem rgb(255 255 255 / 0.42);
+}
+
+.idPortrait img {
+  padding: 0.25rem;
+}
+
+.idInformation {
+  min-width: 0;
+}
+
+.idEyebrow {
+  margin-bottom: 0.25rem;
+  color: #6f5d43;
+  font-size: clamp(0.4rem, 1.32cqi, 0.58rem);
+}
+
+.idInformation h2 {
+  font-size: clamp(1.1rem, 5.8cqi, 2.4rem);
+  line-height: 0.97;
+}
+
+.idRole {
+  margin-top: 0.36rem;
+  color: #71685b;
+  font-size: clamp(0.5rem, 1.72cqi, 0.74rem);
+  letter-spacing: var(--card-metadata-tracking, 0.08em);
+}
+
+.idFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.42rem 0.7rem;
+  margin-top: 0.65rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgb(81 72 57 / 0.28);
+}
+
+.idFacts dt {
+  color: #6f675b;
+  font-size: clamp(0.39rem, 1.18cqi, 0.52rem);
+}
+
+.idFacts dd {
+  color: #302d27;
+  font-family: var(--card-font-body, var(--font-sans, Arial, sans-serif));
+  font-size: clamp(0.51rem, 1.54cqi, 0.68rem);
+  font-weight: 600;
+}
+
+.idFooter {
+  position: absolute;
+  inset: auto 7% 0.9rem;
+  padding-top: 0.62rem;
+  border-top: 1px solid rgb(81 72 57 / 0.34);
+  color: #655e53;
+}
+
+.idFooter p {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  font-size: clamp(0.55rem, 1.75cqi, 0.76rem);
+}
+
+.idFooterMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  color: #705d42;
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  letter-spacing: var(--card-metadata-tracking, 0.12em);
+  font-size: clamp(0.4rem, 1.22cqi, 0.54rem);
+  font-weight: 650;
+  letter-spacing: var(--card-metadata-tracking, 0.09em);
+  text-transform: uppercase;
+}
+
+.idFooterMeta span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.card[data-template='id-card'][data-ratio='16:9'] .idMasthead {
+  inset-inline: 1.2rem;
+}
+
+.card[data-template='id-card'][data-ratio='16:9'] .idBody {
+  inset: 19% 1.2rem 14%;
+  grid-template-columns: minmax(0, 0.75fr) minmax(0, 1.35fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.card[data-template='id-card'][data-ratio='16:9'] .idFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.card[data-template='id-card'][data-ratio='16:9'] .idFooter {
+  inset-inline: 1.2rem;
+  bottom: 0.75rem;
+}
+
+.card[data-template='id-card'][data-ratio='9:16'] .idBody {
+  inset: 13% 7% 19%;
+  grid-template-rows: minmax(0, 0.9fr) minmax(0, 1fr);
+}
+
+.card[data-template='id-card'][data-ratio='1:1'] .idBody {
+  inset: 15% 6% 22%;
+  grid-template-rows: minmax(0, 0.56fr) minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.card[data-template='id-card'][data-ratio='1:1'] .idInformation h2 {
+  font-size: clamp(1rem, 5cqi, 1.8rem);
+}
+
+.card[data-template='id-card'][data-ratio='1:1'] .idFacts {
+  gap: 0.28rem 0.5rem;
+  margin-top: 0.42rem;
+}
+
+.card[data-template='id-card'][data-ratio='1:1'] .idFooter {
+  bottom: 0.65rem;
+}
+
+@container (min-width: 181px) and (max-width: 320px) {
+  .card[data-template='editorial']:not([data-ratio='16:9']) .editorialBody {
+    grid-template-rows: auto 1fr;
+    gap: 0.25rem;
+    padding: 0.48rem 0.68rem;
+  }
+
+  .card[data-template='editorial']:not([data-ratio='16:9']) .editorialFacts {
+    gap: 0.16rem 0.42rem;
+    padding-top: 0.26rem;
+  }
+
+  .card[data-template='editorial']:not([data-ratio='16:9']) .editorialBio,
+  .card[data-template='editorial']:not([data-ratio='16:9']) .editorialFooter {
+    display: none;
+  }
+
+  .card[data-template='editorial'][data-ratio='1:1'] .editorialFacts div:nth-child(n + 3) {
+    display: none;
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idBody {
+    inset: 13% 7% 15%;
+    grid-template-rows: minmax(0, 0.48fr) minmax(0, 1fr);
+    gap: 0.55rem;
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idInformation h2 {
+    font-size: clamp(1rem, 5.2cqi, 1.75rem);
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idFacts {
+    gap: 0.3rem 0.52rem;
+    margin-top: 0.44rem;
+    padding-top: 0.38rem;
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idFooter {
+    bottom: 0.48rem;
+    padding-top: 0.36rem;
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idFooter p {
+    font-size: clamp(0.5rem, 1.5cqi, 0.68rem);
+    -webkit-line-clamp: 1;
+  }
+
+  .card[data-template='id-card']:not([data-ratio='16:9']) .idFooterMeta {
+    gap: 0.3rem;
+    margin-top: 0.22rem;
+    font-size: clamp(0.37rem, 1.08cqi, 0.48rem);
+  }
+}
+
+@container (max-width: 180px) {
+  .cinematicFrame {
+    inset: 0.26rem;
+  }
+
+  .cinematicContent {
+    inset: 0.48rem;
+    gap: 0.35rem;
+  }
+
+  .cinematicMasthead {
+    gap: 0.2rem;
+    padding-bottom: 0.2rem;
+    font-size: 0.34rem;
+    letter-spacing: 0.11em;
+  }
+
+  .cinematicMasthead span:last-child {
+    display: none;
+  }
+
+  .cinematicBase {
+    gap: 0.35rem;
+  }
+
+  .cinematicEyebrow {
+    margin-bottom: 0.12rem;
+    font-size: 0.34rem;
+    letter-spacing: 0.1em;
+  }
+
+  .cinematicIdentity h2 {
+    font-size: 0.92rem;
+    line-height: 0.98;
+  }
+
+  .cinematicJobline {
+    gap: 0.22rem;
+    margin-top: 0.25rem;
+    font-size: 0.38rem;
+    letter-spacing: 0.06em;
+  }
+
+  .cinematicBio {
+    display: none;
+  }
+
+  .cinematicFacts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.22rem 0.36rem;
+    padding-top: 0.28rem;
+  }
+
+  .cinematicFacts dt {
+    margin-bottom: 0.08rem;
+    font-size: 0.3rem;
+    letter-spacing: 0.07em;
+  }
+
+  .cinematicFacts dd {
+    font-size: 0.4rem;
+  }
+
+  .cinematicCompany {
+    display: none;
+  }
+
+  .editorialMasthead {
+    inset: 0.36rem 0.42rem auto;
+    padding-bottom: 0.22rem;
+    font-size: 0.31rem;
+    letter-spacing: 0.1em;
+  }
+
+  .editorialBody {
+    gap: 0.2rem;
+    padding: 0.42rem 0.46rem;
+  }
+
+  .editorialEyebrow {
+    margin-bottom: 0.12rem;
+    font-size: 0.3rem;
+    letter-spacing: 0.08em;
+  }
+
+  .editorialIdentity h2 {
+    font-size: 0.74rem;
+    line-height: 1;
+  }
+
+  .editorialRole {
+    gap: 0.2rem;
+    margin-top: 0.18rem;
+    font-size: 0.34rem;
+    letter-spacing: 0.03em;
+  }
+
+  .editorialFacts {
+    gap: 0.15rem 0.32rem;
+    padding-top: 0.22rem;
+  }
+
+  .editorialFacts dt {
+    margin-bottom: 0.06rem;
+    font-size: 0.27rem;
+    letter-spacing: 0.07em;
+  }
+
+  .editorialFacts dd {
+    font-size: 0.36rem;
+  }
+
+  .editorialFacts div:nth-child(n + 3),
+  .editorialBio,
+  .editorialFooter {
+    display: none;
+  }
+
+  .idMasthead {
+    inset: 0.35rem 0.44rem auto;
+    height: auto;
+    padding-bottom: 0.24rem;
+    font-size: 0.31rem;
+    letter-spacing: 0.1em;
+  }
+
+  .idSeal {
+    display: none;
+  }
+
+  .idBody {
+    inset: 14% 0.44rem 7%;
+    grid-template-rows: minmax(0, 0.48fr) minmax(0, 1fr);
+    gap: 0.3rem;
+  }
+
+  .idPortrait img {
+    padding: 0.12rem;
+  }
+
+  .idEyebrow {
+    margin-bottom: 0.12rem;
+    font-size: 0.28rem;
+    letter-spacing: 0.07em;
+  }
+
+  .idInformation h2 {
+    font-size: 0.72rem;
+    line-height: 0.98;
+  }
+
+  .idRole {
+    gap: 0.2rem;
+    margin-top: 0.2rem;
+    font-size: 0.33rem;
+    letter-spacing: 0.04em;
+  }
+
+  .idFacts {
+    gap: 0.14rem 0.3rem;
+    margin-top: 0.28rem;
+    padding-top: 0.24rem;
+  }
+
+  .idFacts dt {
+    margin-bottom: 0.05rem;
+    font-size: 0.27rem;
+    letter-spacing: 0.06em;
+  }
+
+  .idFacts dd {
+    font-size: 0.35rem;
+  }
+
+  .idFacts div:nth-child(n + 5),
+  .idFooter {
+    display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .card[data-template='cinematic'][data-ratio='1:1'] .cinematicDetails {
+    display: block;
+  }
+
+  .card[data-template='cinematic'][data-ratio='1:1'] .cinematicFacts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .card[data-template='editorial'][data-ratio='16:9'] .editorialBody {
+    padding: 0.8rem 0.9rem;
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'] .idFacts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.32rem 0.55rem;
+  }
+}
+
+/* Phase 2: editor cards favor immediate, predictable manipulation over hover motion. */
+
+/* Palette tokens keep each family's established contrast while letting the editor recolor it. */
+.card[data-template='cinematic'] {
+  --card-ink: var(--card-light);
+  --card-muted: color-mix(in srgb, var(--card-light) 72%, transparent);
+  border-color: color-mix(in srgb, var(--card-light) 34%, transparent);
+  background: var(--card-dark);
+}
+
+.card[data-template='cinematic'] .cinematicShade {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card-dark) 2%, transparent) 26%, color-mix(in srgb, var(--card-dark) 12%, transparent) 43%, color-mix(in srgb, var(--card-dark) 86%, transparent) 76%, color-mix(in srgb, var(--card-dark) 97%, transparent) 100%),
+    linear-gradient(90deg, color-mix(in srgb, var(--card-dark) 25%, transparent), transparent 68%);
+}
+
+.card[data-template='cinematic'] .cinematicFrame,
+.card[data-template='cinematic'] .cinematicMasthead,
+.card[data-template='cinematic'] .cinematicFacts {
+  border-color: color-mix(in srgb, var(--card-light) 34%, transparent);
+}
+
+.card[data-template='cinematic'] .cinematicFrame {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--card-primary) 24%, transparent);
+}
+
+.cinematicJobEmblem {
+  position: absolute;
+  z-index: 3;
+  top: 2rem;
+  right: 1.3rem;
+  display: grid;
+  width: 2.45rem;
+  height: 2.45rem;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: var(--card-accent);
+  box-shadow: none;
+}
+
+.cinematicJobEmblem > span {
+  border: 0;
+  border-radius: 0;
+}
+
+.editorialJobAnchor {
+  position: absolute;
+  z-index: 1;
+  top: 15%;
+  right: -2%;
+  width: 23%;
+  height: 24%;
+  overflow: hidden;
+  color: var(--card-accent);
+  opacity: 0.22;
+  pointer-events: none;
+  clip-path: inset(0 0 10% 12%);
+}
+
+.editorialJobAnchor > span {
+  border: 0;
+  border-radius: 0;
+  transform: scale(1.32);
+}
+
+.editorialJobAnchor .officialImage {
+  object-position: center;
+}
+
+.idSeal > span {
+  border: 0;
+  border-radius: 0;
+}
+
+.card[data-layout='c'][data-template='id-card'] .idSeal > span {
+  transform: scale(0.86);
+}
+
+.card[data-template='editorial'] {
+  --card-ink: var(--card-dark);
+  --card-muted: color-mix(in srgb, var(--card-dark) 66%, transparent);
+  border-color: color-mix(in srgb, var(--card-dark) 20%, var(--card-light));
+  background: var(--card-light);
+  color: var(--card-dark);
+}
+
+.card[data-template='editorial'] .editorialBody {
+  border-color: color-mix(in srgb, var(--card-dark) 24%, transparent);
+  background:
+    linear-gradient(135deg, color-mix(in srgb, white 22%, transparent), transparent 36%),
+    var(--card-light);
+}
+
+.card[data-template='editorial'] .editorialFacts,
+.card[data-template='editorial'] .editorialFooter {
+  border-color: color-mix(in srgb, var(--card-primary) 38%, transparent);
+}
+
+.card[data-template='editorial'] .editorialEyebrow,
+.card[data-template='editorial'] .editorialRole,
+.card[data-template='editorial'] .editorialFacts dt,
+.card[data-template='editorial'] .editorialFacts dd,
+.card[data-template='editorial'] .editorialBio,
+.card[data-template='editorial'] .editorialFooter {
+  color: color-mix(in srgb, var(--card-dark) 76%, var(--card-light));
+}
+
+.card[data-template='editorial'] .editorialEyebrow {
+  color: var(--card-accent);
+}
+
+.card[data-template='id-card'] {
+  --card-ink: var(--card-dark);
+  --card-muted: color-mix(in srgb, var(--card-dark) 65%, transparent);
+  border-color: color-mix(in srgb, var(--card-dark) 22%, var(--card-light));
+  background: var(--card-light);
+  color: var(--card-dark);
+}
+
+.card[data-template='id-card'] .idMasthead,
+.card[data-template='id-card'] .idFacts,
+.card[data-template='id-card'] .idFooter {
+  border-color: color-mix(in srgb, var(--card-primary) 40%, color-mix(in srgb, var(--card-dark) 14%, transparent));
+}
+
+.card[data-template='id-card'] .idEyebrow,
+.card[data-template='id-card'] .idRole,
+.card[data-template='id-card'] .idFacts dt,
+.card[data-template='id-card'] .idFacts dd,
+.card[data-template='id-card'] .idFooter,
+.card[data-template='id-card'] .idFooterMeta {
+  color: color-mix(in srgb, var(--card-dark) 76%, var(--card-light));
+}
+
+.card[data-template='id-card'] .idEyebrow,
+.card[data-template='id-card'] .idFooterMeta {
+  color: var(--card-accent);
+}
+
+.card .cardAttribution {
+  position: absolute;
+  z-index: 7;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  min-height: 1.25rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.12rem 0.4rem;
+  padding: 0.2rem 0.35rem;
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--card-dark) 86%, transparent) 28%);
+  color: var(--card-light);
+  font-size: clamp(0.38rem, 1.15cqi, 0.55rem);
+  line-height: 1.18;
+  text-align: center;
+  opacity: 0.9;
+}
+
+.card .cardAttribution > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.card[data-template='editorial'] .cardAttribution,
+.card[data-template='id-card'] .cardAttribution {
+  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--card-light) 96%, transparent) 24%);
+  color: color-mix(in srgb, var(--card-dark) 82%, var(--card-light));
+}
+
+.card[data-template='cinematic']:has(.cardAttribution) .cinematicContent {
+  bottom: 1.6rem;
+}
+
+.card[data-template='editorial']:has(.cardAttribution) .editorialBody {
+  bottom: 1.6rem;
+}
+
+.card[data-template='id-card']:has(.cardAttribution) .idBody {
+  bottom: 23%;
+}
+
+.card[data-template='id-card']:has(.cardAttribution) .idFooter {
+  bottom: 1.6rem;
+}
+
+/* Job mode changes token color and metadata feel, keeping the selected family geometry. */
+.card[data-color-mode='job'][data-job-metadata='technical'] :is(.cinematicFacts dd, .editorialFacts dd, .idFacts dd) {
+  font-family: var(--font-mono, monospace);
+  letter-spacing: -0.035em;
+}
+
+.card[data-color-mode='job'][data-job-metadata='ornate'] :is(.cinematicFacts dd, .editorialFacts dd, .idFacts dd) {
+  letter-spacing: 0.035em;
+}
+
+.card[data-color-mode='job'][data-job-metadata='rhythmic'] :is(.cinematicFacts dd, .editorialFacts dd, .idFacts dd) {
+  font-style: italic;
+}
+
+/* Focused editor values get one short, quiet refocus cue in the rendered card. */
+.card[data-highlight-field='name'] [data-field='name'],
+.card[data-highlight-field='character.name'] [data-field='name'],
+.card[data-highlight-field='world'] [data-field='world'],
+.card[data-highlight-field='dataCenter'] [data-field='dataCenter'],
+.card[data-highlight-field='freeCompany'] [data-field='freeCompany'],
+.card[data-highlight-field='job'] [data-field='job'],
+.card[data-highlight-field='level'] [data-field='level'],
+.card[data-highlight-field='race'] [data-field='race'],
+.card[data-highlight-field='clan'] [data-field='clan'],
+.card[data-highlight-field='grandCompany'] [data-field='grandCompany'],
+.card[data-highlight-field='bio'] [data-field='bio'],
+.card[data-highlight-field='languages'] [data-field='languages'],
+.card[data-highlight-field='playStyles'] [data-field='playStyles'] {
+  animation: cardValueRefocus 300ms ease-out both;
+}
+
+@keyframes cardValueRefocus {
+  from { filter: blur(1.6px); opacity: 0.72; }
+  to { filter: blur(0); opacity: 1; }
+}
+
+/* Cinematic A: full-bleed portrait, quiet lower information veil (base composition). */
+
+/* Cinematic B: a sharp, angled crop cuts across a larger title and data grid. */
+.card[data-template='cinematic'][data-layout='b'] .cinematicArt {
+  clip-path: polygon(38% 0, 100% 0, 100% 69%, 69% 100%, 0 100%, 0 31%);
+}
+
+.card[data-template='cinematic'][data-layout='b'] .cinematicShade {
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card-dark) 6%, transparent) 23%, color-mix(in srgb, var(--card-dark) 60%, transparent) 60%, color-mix(in srgb, var(--card-dark) 98%, transparent) 100%);
+}
+
+.card[data-template='cinematic'][data-layout='b'] .cinematicBase {
+  grid-template-columns: minmax(0, 0.86fr) minmax(0, 1.14fr);
+  align-items: end;
+  gap: 1.1rem;
+}
+
+.card[data-template='cinematic'][data-layout='b'] .cinematicDetails {
+  padding-left: 0.85rem;
+  border-left: 1px solid color-mix(in srgb, var(--card-light) 38%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='b'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicArt {
+  inset: 0 0 0 42%;
+  clip-path: none;
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicShade {
+  background: linear-gradient(90deg, var(--card-dark) 0%, color-mix(in srgb, var(--card-dark) 94%, transparent) 38%, color-mix(in srgb, var(--card-dark) 8%, transparent) 78%);
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicMasthead,
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicBase {
+  width: 40%;
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicBase {
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='16:9'] .cinematicDetails {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 35%, transparent);
+  border-left: 0;
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='1:1'] .cinematicBase,
+.card[data-template='cinematic'][data-layout='b'][data-ratio='4:5'] .cinematicBase,
+.card[data-template='cinematic'][data-layout='b'][data-ratio='3:4'] .cinematicBase {
+  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr);
+  gap: 0.7rem;
+}
+
+.card[data-template='cinematic'][data-layout='b'][data-ratio='1:1'] .cinematicDetails,
+.card[data-template='cinematic'][data-layout='b'][data-ratio='4:5'] .cinematicDetails,
+.card[data-template='cinematic'][data-layout='b'][data-ratio='3:4'] .cinematicDetails {
+  padding-left: 0.5rem;
+}
+
+/* Cinematic C: a framed portrait window sits above a compact, centered field caption. */
+.card[data-template='cinematic'][data-layout='c'] .cinematicArt {
+  inset: 5.5% 6% 31%;
+  border: 1px solid color-mix(in srgb, var(--card-light) 35%, transparent);
+  clip-path: none;
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicShade {
+  background: linear-gradient(180deg, transparent 32%, color-mix(in srgb, var(--card-dark) 18%, transparent) 56%, color-mix(in srgb, var(--card-dark) 98%, transparent) 100%);
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicContent {
+  inset: auto 7% 6%;
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicMasthead,
+.card[data-template='cinematic'][data-layout='c'] .cinematicDetails .cinematicBio {
+  display: none;
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicBase {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicIdentity h2 {
+  font-size: clamp(1.35rem, 8.2cqi, 3.2rem);
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicDetails {
+  padding-left: 0.8rem;
+  border-left: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='c'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.4rem 0.7rem;
+  padding-top: 0;
+  border-top: 0;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='16:9'] .cinematicArt {
+  inset: 6% 36% 6% 6%;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='16:9'] .cinematicContent {
+  inset: 10% 5% 10% auto;
+  width: 28%;
+  display: flex;
+  align-items: center;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='16:9'] .cinematicBase {
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='16:9'] .cinematicDetails {
+  margin-top: 0.8rem;
+  padding: 0.6rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+  border-left: 0;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='9:16'] .cinematicArt {
+  inset: 5% 7% 39%;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='9:16'] .cinematicContent {
+  inset: auto 7% 6%;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='9:16'] .cinematicBase {
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='c'][data-ratio='9:16'] .cinematicDetails {
+  margin-top: 0.5rem;
+  padding: 0.45rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+  border-left: 0;
+}
+
+/* Editorial A: portrait-led, with a full-width paper field beneath. */
+
+/* Editorial B: the portrait floats from the upper corner over a warm paper spread. */
+.card[data-template='editorial'][data-layout='b'] .editorialArt {
+  inset: 0 0 43% 27%;
+}
+
+.card[data-template='editorial'][data-layout='b'] .editorialMasthead {
+  inset: 0.9rem 0.9rem auto 28%;
+  padding-bottom: 0.42rem;
+}
+
+.card[data-template='editorial'][data-layout='b'] .editorialBody {
+  inset: 39% 4% 3%;
+  padding: 0.85rem 1rem 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--card-dark) 22%, transparent);
+  box-shadow: 0 0.8rem 1.7rem rgb(0 0 0 / 0.2);
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='16:9'] .editorialArt {
+  inset: 7% 52% 7% 5%;
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='16:9'] .editorialMasthead {
+  inset: 0.85rem 52% auto 5%;
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='16:9'] .editorialBody {
+  inset: 7% 5% 7% 50%;
+  padding: 1rem 1.1rem;
+  border-top: 1px solid color-mix(in srgb, var(--card-dark) 22%, transparent);
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='9:16'] .editorialArt {
+  inset: 0 0 53% 18%;
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='9:16'] .editorialBody {
+  inset: 45% 4% 3%;
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='1:1'] .editorialArt {
+  inset: 0 0 44% 25%;
+}
+
+.card[data-template='editorial'][data-layout='b'][data-ratio='1:1'] .editorialBody {
+  inset: 39% 4% 4%;
+}
+
+/* Editorial C: full portrait with an inset paper plaque; landscape flips the reading axis. */
+.card[data-template='editorial'][data-layout='c'] .editorialArt {
+  inset: 0;
+}
+
+.card[data-template='editorial'][data-layout='c'] .editorialMasthead {
+  inset: 1rem 1.1rem auto;
+}
+
+.card[data-template='editorial'][data-layout='c'] .editorialBody {
+  inset: auto 6% 5%;
+  grid-template-rows: auto auto 1fr auto;
+  gap: 0.46rem;
+  padding: 0.9rem 1rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--card-dark) 24%, transparent);
+  box-shadow: 0 0.9rem 2rem rgb(0 0 0 / 0.28);
+}
+
+.card[data-template='editorial'][data-layout='c'][data-ratio='16:9'] .editorialArt {
+  inset: 0 0 0 52%;
+}
+
+.card[data-template='editorial'][data-layout='c'][data-ratio='16:9'] .editorialMasthead {
+  inset: 1rem 0.9rem auto 54%;
+}
+
+.card[data-template='editorial'][data-layout='c'][data-ratio='16:9'] .editorialBody {
+  inset: 6% 50% 6% 4%;
+  padding: 1rem 1.1rem;
+}
+
+.card[data-template='editorial'][data-layout='c'][data-ratio='9:16'] .editorialBody {
+  inset: auto 5% 4%;
+  padding: 1rem 1rem 0.85rem;
+}
+
+.card[data-template='editorial'][data-layout='c'][data-ratio='1:1'] .editorialBody {
+  inset: auto 5% 5%;
+  padding: 0.78rem 0.88rem;
+}
+
+/* ID A: traditional portrait pass with a separate identity and information zone. */
+
+/* ID B: credential split places a large portrait next to a dense but readable data column. */
+.card[data-template='id-card'][data-layout='b'] .idBody {
+  inset: 15% 6% 17%;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 0.72rem;
+}
+
+.card[data-template='id-card'][data-layout='b'] .idPortrait {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.card[data-template='id-card'][data-layout='b'] .idInformation {
+  grid-column: 2;
+  grid-row: 1;
+  align-self: center;
+}
+
+.card[data-template='id-card'][data-layout='b'] .idFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.48rem;
+}
+
+.card[data-template='id-card'][data-layout='b'] .idFooter {
+  inset-inline: 6%;
+}
+
+.card[data-template='id-card'][data-layout='b'][data-ratio='16:9'] .idBody {
+  inset: 19% 1.2rem 15%;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.card[data-template='id-card'][data-layout='b'][data-ratio='16:9'] .idFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card[data-template='id-card'][data-layout='b'][data-ratio='9:16'] .idBody {
+  inset: 13% 7% 19%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 0.72fr) minmax(0, 1fr);
+}
+
+.card[data-template='id-card'][data-layout='b'][data-ratio='9:16'] .idPortrait,
+.card[data-template='id-card'][data-layout='b'][data-ratio='9:16'] .idInformation {
+  grid-column: 1;
+}
+
+.card[data-template='id-card'][data-layout='b'][data-ratio='9:16'] .idPortrait { grid-row: 1; }
+.card[data-template='id-card'][data-layout='b'][data-ratio='9:16'] .idInformation { grid-row: 2; }
+
+/* ID C: an inverted pass with the information above a panoramic character portrait. */
+.card[data-template='id-card'][data-layout='c'] .idBody {
+  inset: 14% 7% 18%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1.12fr) minmax(0, 0.88fr);
+  gap: 0.6rem;
+}
+
+.card[data-template='id-card'][data-layout='c'] .idInformation {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+}
+
+.card[data-template='id-card'][data-layout='c'] .idPortrait {
+  grid-column: 1;
+  grid-row: 2;
+}
+
+.card[data-template='id-card'][data-layout='c'] .idFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.34rem 0.55rem;
+}
+
+.card[data-template='id-card'][data-layout='c'] .idFooter {
+  display: none;
+}
+
+.card[data-template='id-card'][data-layout='c'][data-ratio='16:9'] .idBody {
+  inset: 19% 1.2rem 15%;
+  grid-template-columns: minmax(0, 1.28fr) minmax(0, 0.72fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.card[data-template='id-card'][data-layout='c'][data-ratio='16:9'] .idInformation {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.card[data-template='id-card'][data-layout='c'][data-ratio='16:9'] .idPortrait {
+  grid-column: 2;
+  grid-row: 1;
+}
+
+.card[data-template='id-card'][data-layout='c'][data-ratio='16:9'] .idFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* Compact landscape canvases (common on narrow editor screens) need a tighter grid. */
+@container (max-width: 420px) {
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicContent {
+    inset: 0.52rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicMasthead {
+    width: 44%;
+    gap: 0.2rem;
+    padding-bottom: 0.22rem;
+    font-size: 0.32rem;
+    letter-spacing: 0.1em;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicMasthead span:last-of-type {
+    display: none;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicBase {
+    width: 44%;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicIdentity h2 {
+    font-size: clamp(1.05rem, 6.4cqi, 1.65rem);
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicJobline {
+    gap: 0.28rem;
+    margin-top: 0.3rem;
+    font-size: 0.42rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicDetails {
+    margin-top: 0.34rem;
+    padding-top: 0.28rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicBio {
+    display: none;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicFacts {
+    gap: 0.25rem 0.38rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicFacts dt {
+    font-size: 0.36rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='b'] .cinematicFacts dd {
+    font-size: 0.48rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicContent {
+    inset: 8% 4% 8% auto;
+    width: 35%;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicIdentity h2 {
+    font-size: clamp(0.95rem, 5.7cqi, 1.45rem);
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicJobline {
+    gap: 0.22rem;
+    margin-top: 0.28rem;
+    font-size: 0.4rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicDetails {
+    margin-top: 0.42rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicFacts {
+    grid-template-columns: 1fr;
+    gap: 0.24rem;
+  }
+
+  .card[data-template='cinematic'][data-ratio='16:9'][data-layout='c'] .cinematicCompany {
+    display: none;
+  }
+
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='b'] .editorialBody,
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='c'] .editorialBody {
+    gap: 0.38rem;
+    padding: 0.58rem 0.64rem;
+  }
+
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='b'] .editorialIdentity h2,
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='c'] .editorialIdentity h2 {
+    font-size: clamp(1rem, 5cqi, 1.45rem);
+  }
+
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='b'] .editorialFacts,
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='c'] .editorialFacts {
+    gap: 0.28rem 0.36rem;
+    padding-top: 0.32rem;
+  }
+
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='b'] .editorialFacts dd,
+  .card[data-template='editorial'][data-ratio='16:9'][data-layout='c'] .editorialFacts dd {
+    font-size: 0.46rem;
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='b'] .idBody {
+    inset: 18% 0.55rem 14%;
+    grid-template-columns: minmax(0, 0.72fr) minmax(0, 1.28fr);
+    gap: 0.4rem;
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='b'] .idInformation h2,
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='c'] .idInformation h2 {
+    font-size: clamp(0.95rem, 4.8cqi, 1.45rem);
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='b'] .idFacts,
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='c'] .idFacts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.22rem 0.32rem;
+    margin-top: 0.34rem;
+    padding-top: 0.3rem;
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='b'] .idFacts dt,
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='c'] .idFacts dt {
+    font-size: 0.35rem;
+  }
+
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='b'] .idFacts dd,
+  .card[data-template='id-card'][data-ratio='16:9'][data-layout='c'] .idFacts dd {
+    font-size: 0.46rem;
+  }
+}
+
+/* Phase 2.6 master compositions. A is the authored family master; B/C remain
+   exploratory studies and keep their existing geometry. */
+
+/* CINEMATIC 01 — a photographic key visual with one quiet, legible caption. */
+.card[data-template='cinematic'][data-layout='a'] {
+  --card-ink: var(--card-light);
+  --card-muted: color-mix(in srgb, var(--card-light) 76%, transparent);
+  border: 0;
+  border-radius: 0.08rem;
+  background: var(--card-dark);
+  box-shadow: 0 0.8rem 2rem rgb(0 0 0 / 0.24);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicArt {
+  z-index: 0;
+  inset: 0;
+  clip-path: none;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicShade {
+  z-index: 1;
+  background:
+    linear-gradient(0deg, color-mix(in srgb, var(--card-dark) 78%, transparent) 0%, color-mix(in srgb, var(--card-dark) 52%, transparent) 22%, color-mix(in srgb, var(--card-dark) 14%, transparent) 43%, transparent 62%),
+    linear-gradient(90deg, color-mix(in srgb, var(--card-dark) 15%, transparent), transparent 68%);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicFrame {
+  display: none;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicContent {
+  z-index: 2;
+  inset: 5.5% 6% 5.5%;
+  gap: 1rem;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicMasthead {
+  width: 72%;
+  padding: 0 0 0.42rem;
+  border-bottom-color: color-mix(in srgb, var(--card-light) 34%, transparent);
+  color: color-mix(in srgb, var(--card-light) 94%, transparent);
+  font-size: clamp(0.42rem, 1.35cqi, 0.64rem);
+  text-shadow: 0 1px 5px color-mix(in srgb, var(--card-dark) 42%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicMasthead span:last-child {
+  font-size: 0.78em;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicBase {
+  grid-template-columns: minmax(0, 1.06fr) minmax(0, 0.94fr);
+  align-items: end;
+  gap: clamp(0.65rem, 2.4cqi, 1.25rem);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicIdentity h2 {
+  max-width: 9ch;
+  font-size: calc(min(10.8cqi, 4.7rem) * var(--card-name-scale, 1));
+  line-height: 0.86;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+  text-shadow: 0 1px 9px color-mix(in srgb, var(--card-dark) 48%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicEyebrow {
+  margin-bottom: 0.3rem;
+  font-size: 1.5cqi;
+  text-shadow: 0 1px 5px color-mix(in srgb, var(--card-dark) 42%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobline {
+  flex-wrap: wrap;
+  gap: 0.32rem 0.48rem;
+  margin-top: 0.5rem;
+  font-size: 2cqi;
+  letter-spacing: 0.08em;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicDetails {
+  padding: 0 0 0 0.8rem;
+  border-left: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicBio {
+  display: -webkit-box;
+  margin: 0 0 0.48rem;
+  font-size: 1.6cqi;
+  line-height: 1.32;
+  -webkit-line-clamp: 1;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.38rem 0.52rem;
+  padding-top: 0.45rem;
+  border-top-color: color-mix(in srgb, var(--card-light) 34%, transparent);
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts dt {
+  margin-bottom: 0.12rem;
+  font-size: 1.4cqi;
+  letter-spacing: 0.11em;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts dd {
+  font-size: 2cqi;
+  line-height: 1.25;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicCompany {
+  display: block;
+  grid-column: 1 / -1;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobEmblem {
+  z-index: 3;
+  top: 5.4%;
+  right: 6%;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--card-accent);
+  box-shadow: none;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobEmblem > span {
+  width: 1.35rem !important;
+  height: 1.35rem !important;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.5rem !important;
+}
+
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobEmblem img {
+  width: 100%;
+  height: 100%;
+}
+
+.card[data-template='cinematic'][data-layout='a']:has(.cardAttribution) .cinematicContent {
+  bottom: 1.55rem;
+}
+
+/* The square is a tighter poster crop, while the story portrait gets a deeper
+   caption zone and the landscape card moves the title to a left-side veil. */
+.card[data-template='cinematic'][data-layout='a'][data-ratio='1:1'] .cinematicContent,
+.card[data-template='cinematic'][data-layout='a'][data-ratio='4:5'] .cinematicContent,
+.card[data-template='cinematic'][data-layout='a'][data-ratio='3:4'] .cinematicContent {
+  inset: 5% 5.5% 5.5%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicShade {
+  background: linear-gradient(0deg, color-mix(in srgb, var(--card-dark) 80%, transparent) 0%, color-mix(in srgb, var(--card-dark) 50%, transparent) 19%, color-mix(in srgb, var(--card-dark) 10%, transparent) 39%, transparent 59%);
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicContent {
+  inset: 4.5% 7% 4.5%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicBase {
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicIdentity h2 {
+  max-width: 11ch;
+  font-size: calc(min(11.4cqi, 5.2rem) * var(--card-name-scale, 1));
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicDetails {
+  display: grid;
+  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  gap: 0.55rem;
+  margin-top: 0.72rem;
+  padding: 0.55rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+  border-left: 0;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicShade {
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--card-dark) 78%, transparent) 0%, color-mix(in srgb, var(--card-dark) 57%, transparent) 30%, color-mix(in srgb, var(--card-dark) 20%, transparent) 54%, transparent 77%),
+    linear-gradient(0deg, color-mix(in srgb, var(--card-dark) 63%, transparent), transparent 45%);
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicContent {
+  inset: 6% 6%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicMasthead,
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicBase {
+  width: 48%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicBase {
+  display: block;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicIdentity h2 {
+  max-width: 10ch;
+  font-size: calc(min(8.4cqi, 5.2rem) * var(--card-name-scale, 1));
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicDetails {
+  margin-top: 0.68rem;
+  padding: 0.48rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+  border-left: 0;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+/* ADVENTURER ID 01 — a document grid with a measured portrait window and
+   information arranged on ruled baselines. */
+.card[data-template='id-card'][data-layout='a'] {
+  --card-ink: var(--card-dark);
+  --card-muted: color-mix(in srgb, var(--card-dark) 66%, transparent);
+  border: 1px solid color-mix(in srgb, var(--card-dark) 29%, var(--card-light));
+  border-radius: 0;
+  background: var(--card-light);
+  box-shadow: 0 0.65rem 1.5rem rgb(0 0 0 / 0.18);
+}
+
+.card[data-template='id-card'][data-layout='a'] .idMasthead {
+  inset: 5.2% 6% auto;
+  height: auto;
+  min-height: 1.35rem;
+  padding-bottom: 0.38rem;
+  border-bottom: 1px solid color-mix(in srgb, var(--card-dark) 34%, transparent);
+  color: var(--card-dark);
+  font-size: clamp(0.48rem, 1.45cqi, 0.68rem);
+  letter-spacing: 0.13em;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idUnofficial {
+  min-width: 0;
+  color: color-mix(in srgb, var(--card-dark) 70%, transparent);
+  font-family: var(--card-font-metadata, var(--font-sans, Arial, sans-serif));
+  font-size: clamp(0.38rem, 1.08cqi, 0.5rem);
+  font-weight: 600;
+  letter-spacing: 0.055em;
+  line-height: 1.2;
+  text-align: right;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idSeal {
+  width: 1.38rem;
+  height: 1.38rem;
+  border: 0;
+  border-left: 1px solid color-mix(in srgb, var(--card-accent) 72%, transparent);
+  border-radius: 0;
+  color: var(--card-accent);
+}
+
+.card[data-template='id-card'][data-layout='a'] .idSeal > span {
+  width: 1.15rem !important;
+  height: 1.15rem !important;
+  border: 0;
+  border-radius: 0;
+  font-size: 0.46rem !important;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idSeal img {
+  width: 100%;
+  height: 100%;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idBody {
+  inset: 16% 6% 18%;
+  grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
+  grid-template-rows: minmax(0, 1fr);
+  gap: 5%;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idPortrait {
+  width: 100%;
+  height: 88%;
+  aspect-ratio: 0.72;
+  align-self: center;
+  border: 1px solid color-mix(in srgb, var(--card-dark) 32%, transparent);
+  background: color-mix(in srgb, var(--card-primary) 16%, var(--card-light));
+  box-shadow: none;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idPortrait img {
+  padding: 0.12rem;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idInformation {
+  display: flex;
+  min-height: 0;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idEyebrow {
+  margin-bottom: 0.32rem;
+  color: var(--card-accent);
+  font-size: 1.35cqi;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idInformation h2 {
+  max-width: 13ch;
+  font-size: calc(min(6cqi, 3rem) * var(--card-name-scale, 1));
+  line-height: 0.94;
+  word-break: keep-all;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idRole {
+  flex-wrap: wrap;
+  gap: 0.22rem 0.38rem;
+  margin-top: 0.34rem;
+  color: color-mix(in srgb, var(--card-dark) 76%, transparent);
+  font-size: 1.6cqi;
+  letter-spacing: 0.08em;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.34rem 0.48rem;
+  margin-top: 0.48rem;
+  padding-top: 0.42rem;
+  border-top: 1px solid color-mix(in srgb, var(--card-dark) 30%, transparent);
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFacts dt {
+  margin-bottom: 0.1rem;
+  color: color-mix(in srgb, var(--card-dark) 68%, transparent);
+  font-size: 1.4cqi;
+  letter-spacing: 0.11em;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFacts dd {
+  color: var(--card-dark);
+  font-size: 2cqi;
+  line-height: 1.2;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFacts div:has([data-field='freeCompany']),
+.card[data-template='id-card'][data-layout='a'] .idFacts div:has([data-field='grandCompany']) {
+  grid-column: 1 / -1;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFooter {
+  inset: auto 6% 4.5%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.88fr);
+  align-items: end;
+  gap: 0.7rem;
+  padding-top: 0.42rem;
+  border-top: 1px solid color-mix(in srgb, var(--card-dark) 30%, transparent);
+  color: color-mix(in srgb, var(--card-dark) 76%, transparent);
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFooter p {
+  font-size: 1.65cqi;
+  line-height: 1.3;
+  -webkit-line-clamp: 2;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFooterMeta {
+  display: grid;
+  grid-template-columns: 1fr;
+  justify-content: initial;
+  gap: 0.2rem;
+  margin: 0;
+  color: var(--card-accent);
+  font-size: 1.2cqi;
+  letter-spacing: 0.075em;
+}
+
+.card[data-template='id-card'][data-layout='a'] .idFooterMeta span {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+.card[data-template='id-card'][data-layout='a']:has(.cardAttribution) .idBody {
+  bottom: 20%;
+}
+
+.card[data-template='id-card'][data-layout='a']:has(.cardAttribution) .idFooter {
+  bottom: 1.35rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idBody {
+  inset: 17% 5% 21%;
+  grid-template-columns: minmax(0, 0.78fr) minmax(0, 1.22fr);
+  gap: 4%;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idPortrait {
+  height: 82%;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idFacts {
+  gap: 0.24rem 0.35rem;
+  margin-top: 0.34rem;
+  padding-top: 0.32rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='9:16'] .idBody {
+  inset: 16% 7% 22%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 0.82fr) minmax(0, 1fr);
+  gap: 0.72rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='9:16'] .idPortrait {
+  width: 40%;
+  height: auto;
+  aspect-ratio: 0.72;
+  justify-self: center;
+  align-self: center;
+  max-height: 100%;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='9:16'] .idInformation {
+  justify-content: start;
+  padding-top: 0.2rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='9:16'] .idFacts {
+  gap: 0.42rem 0.7rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idBody {
+  inset: 18% 31% 15% 5%;
+  grid-template-columns: minmax(0, 0.76fr) minmax(0, 1.24fr);
+  gap: 4%;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idPortrait {
+  height: 100%;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.3rem 0.5rem;
+  margin-top: 0.36rem;
+  padding-top: 0.34rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFooter {
+  inset: 20% 5% 14% auto;
+  width: 25%;
+  grid-template-columns: 1fr;
+  align-content: center;
+  gap: 0.6rem;
+  padding: 0 0 0 0.8rem;
+  border-top: 0;
+  border-left: 1px solid color-mix(in srgb, var(--card-dark) 30%, transparent);
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFooterMeta {
+  gap: 0.36rem;
+}
+
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9']:has(.cardAttribution) .idFooter {
+  bottom: 1.2rem;
+}
+
+/* The legacy compact thumbnail rules may simplify decoration, but never omit
+   a master card's populated character data. */
+.card[data-template='id-card'][data-layout='a']:not([data-ratio='16:9']) .idFacts div:nth-child(n + 5) {
+  display: block;
+}
+
+/* Long names use a dedicated broad typographic field rather than shrinking
+   into a narrow column. Their full value remains present and wraps naturally. */
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicBase {
+  display: block;
+  width: 100%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicIdentity h2 {
+  width: 100%;
+  max-width: none;
+  font-size: calc(8.5cqi * var(--card-name-scale, 1));
+  line-height: 1.04;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicEyebrow {
+  margin-bottom: 0.14rem;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicJobline {
+  margin-top: 0.22rem;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicDetails {
+  margin-top: 0.42rem;
+  padding: 0.38rem 0 0;
+  border-top: 1px solid color-mix(in srgb, var(--card-light) 34%, transparent);
+  border-left: 0;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicBio {
+  display: none;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicFacts {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.3rem 0.5rem;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicFacts dt {
+  font-size: 1.4cqi;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-name-length='long'] .cinematicFacts dd {
+  font-size: 1.9cqi;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'][data-name-length='long'] .cinematicBase {
+  width: 66%;
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'][data-name-length='long'] .cinematicIdentity h2 {
+  font-size: calc(7.2cqi * var(--card-name-scale, 1));
+}
+
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'][data-name-length='long'] .cinematicFacts {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.card[data-template='id-card'][data-layout='a'][data-name-length='long'] .idInformation h2 {
+  width: 100%;
+  max-width: none;
+  font-size: calc(6.5cqi * var(--card-name-scale, 1));
+  line-height: 1.08;
+}
+
+/* CJK names often form two large, balanced lines on the editorial cover. Keep
+   the face clear by carrying the offset photo frame below that title strip. */
+/* A is the complete artifact at every presentation width. Compact legacy
+   studies may simplify data, but mobile Master previews match their exports. */
+.card[data-template='cinematic'][data-layout='a']:not([data-name-length='long']) .cinematicBio { display: -webkit-box; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicCompany { display: block; }
+.card[data-template='id-card'][data-layout='a'] .idFooter { display: grid; }
+
+.card[data-template='id-card'][data-layout='a'] .idFooterMeta span { white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
+
+.card[data-layout='a'] .imageFallback { background: color-mix(in srgb, var(--card-dark) 8%, var(--card-light)); }
+.card[data-template='cinematic'][data-layout='a'] .imageFallback { background: var(--card-dark); }
+.card[data-template][data-layout='a'] { box-shadow: none; }
+
+/* 2.6.1: existing rules become quieter, and every printed marker is data. */
+.card[data-template='cinematic'][data-layout='a'] .cinematicDetails { border-left: 0; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts,
+.card[data-template='cinematic'][data-layout='a'][data-ratio='9:16'] .cinematicDetails,
+.card[data-template='cinematic'][data-layout='a'][data-ratio='16:9'] .cinematicDetails { border-color: color-mix(in srgb, var(--card-light) 17%, transparent); }
+.card[data-template='cinematic'][data-layout='a'] .cinematicMasthead > span:last-child { white-space: nowrap; }
+
+/* Editorial: the photo begins at the last name line, not below a detached title. */
+.card[data-template='editorial'][data-layout='a'][data-name-composition] {
+  --card-ink: var(--card-dark);
+  --card-muted: color-mix(in srgb, var(--card-dark) 68%, transparent);
+  border: 0; border-radius: 0; background: var(--card-light); color: var(--card-dark); box-shadow: none;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead {
+  z-index: 4; inset: 4.8% 7% auto; display: flex; align-items: baseline; justify-content: space-between;
+  padding: 0 0 2cqi; border-bottom: 1px solid color-mix(in srgb, var(--card-dark) 30%, transparent); color: var(--card-dark); text-shadow: none; gap: 2cqi;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead > span:first-child {
+  font: 500 6.3cqi/.95 var(--card-font-display); letter-spacing: .025em;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead > span:last-child {
+  max-width: none; font-size: 1.6cqi; line-height: 1.3; letter-spacing: .08em; white-space: nowrap;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialArt {
+  z-index: 1; top: clamp(20%, calc(15% + var(--editorial-photo-offset)), 43%); right: 6%; bottom: 26%; left: 33%; border: 0; clip-path: none;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialBody {
+  z-index: 3; inset: 15% 7% 5.5%; display: grid; width: auto; padding: 0;
+  grid-template-columns: 58cqi minmax(0, 1fr); grid-template-rows: auto minmax(0,1fr) auto auto;
+  gap: 2cqi 4cqi; border: 0; background: transparent; box-shadow: none;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialIdentity { grid-area: 1 / 1 / 2 / -1; width: 100%; z-index: 3; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialEyebrow { margin-bottom: 1.4cqi; font-size: 1.45cqi; line-height: 1.3; color: var(--card-accent); letter-spacing: .10em; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialIdentity h2 {
+  display: block; width: 100%; max-width: none; margin: 0; padding: 0; background: transparent;
+  font-size: var(--editorial-name-size); line-height: var(--editorial-name-leading); letter-spacing: -.045em; text-shadow: none;
+}
+.nameLine { display: table; width: max-content; max-width: none; padding: 0 .10em .06em 0; margin-bottom: -.06em; background: var(--card-light); white-space: pre; }
+.nameLine + .nameLine { margin-inline-start: 8cqi; }
+.card[data-name-composition='long'] .nameLine + .nameLine { margin-inline-start: 2cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialRole {
+  display: table; width: max-content; max-width: 90%; margin-top: 2cqi; padding-right: 1cqi; background: var(--card-light);
+  color: var(--card-dark); font-size: 1.8cqi; line-height: 1.3; letter-spacing: .06em;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts {
+  grid-area: 3 / 1 / 4 / 2; align-self: end; grid-template-columns: 24cqi minmax(0,1fr); gap: 2cqi 2cqi; width: auto; margin: 0;
+  padding-top: 2cqi; border-top: 1px solid color-mix(in srgb, var(--card-dark) 28%, transparent);
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts div:nth-child(n) { display: block; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts dt { margin-bottom: .6cqi; color: var(--card-muted); font-size: 1.45cqi; line-height: 1.3; letter-spacing: .07em; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts dd { color: var(--card-dark); font-size: 2cqi; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialBio {
+  grid-area: 3 / 2 / 4 / 3; display: -webkit-box; align-self: end; margin: 0; padding: 0; border: 0;
+  font-size: 1.7cqi; line-height: 1.4; color: var(--card-muted); -webkit-line-clamp: 4;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFooter {
+  grid-area: 4 / 1 / 5 / -1; display: flex; justify-content: space-between; align-items: baseline; gap: 3cqi;
+  margin: 0; padding-top: 2cqi; border-top: 1px solid color-mix(in srgb, var(--card-dark) 28%, transparent);
+  color: var(--card-muted); font-size: 1.35cqi; line-height: 1.4; letter-spacing: .05em;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFooter span { overflow: visible; text-overflow: clip; white-space: normal; overflow-wrap: anywhere; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFooter [data-field='languages'] { flex: 0 0 auto; max-width: 27%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialJobAnchor { width: 5cqi; height: 5cqi; top: 14%; right: 7%; opacity: .65; clip-path: none; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialJobAnchor > span { width: 100% !important; height: 100% !important; transform: none; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='9:16'] .editorialBody { top: 14%; bottom: 5%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='9:16'] .editorialArt { top: clamp(19%, calc(14% + var(--editorial-photo-offset)), 38%); left: 26%; bottom: 28%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialArt { bottom: 31%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialBody { top: 17%; gap: 1.2cqi 4cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialIdentity h2 { font-size: calc(var(--editorial-name-size) * .8); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialBio { -webkit-line-clamp: 3; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialArt { inset: 0 0 0 49%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialMasthead { inset: 6% auto auto 6%; width: 39%; padding-bottom: 1.5cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialMasthead > span:first-child { font-size: 4.1cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialMasthead > span:last-child { font-size: 1.15cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialBody { inset: 21% auto 6% 6%; display: flex; flex-direction: column; width: 39%; gap: 1.25cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialIdentity h2 { font-size: var(--editorial-name-wide); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .nameLine + .nameLine { margin-inline-start: 2cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialEyebrow { margin-bottom: .8cqi; font-size: 1.15cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialRole { margin-top: 1cqi; font-size: 1.35cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFacts { grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8cqi 2cqi; padding-top: 1.2cqi; margin-top: auto; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFacts dt { font-size: 1.05cqi; margin-bottom: .3cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFacts dd { font-size: 1.4cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialBio { font-size: 1.2cqi; -webkit-line-clamp: 2; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFooter { padding-top: 1cqi; font-size: 1cqi; margin-top: 0; }
+
+/* Identification: lift the complete portrait/profile pair, keeping its internal rhythm. */
+.card[data-template='id-card'][data-layout='a'][data-ratio='4:5'] .idBody,
+.card[data-template='id-card'][data-layout='a'][data-ratio='3:4'] .idBody { inset: 8% 6% 26%; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='4:5'] .idFooter,
+.card[data-template='id-card'][data-layout='a'][data-ratio='3:4'] .idFooter { bottom: 7.5%; }
+.idJobCode { flex: 0 0 auto; color: var(--card-accent); font: 600 1.8cqi/1.2 var(--card-font-metadata); letter-spacing: .07em; }
+.card[data-template='id-card'][data-layout='a'] .idMasthead { gap: 3cqi; }
+.card[data-template='id-card'][data-layout='a'] .idUnofficial { margin-left: auto; }
+
+/* 2.6.2 — family-specific printing systems. These selectors only style A. */
+.card[data-layout='a'] {
+  --print-serif: var(--font-editorial, Georgia, serif);
+  --material-strength-factor: 1;
+  border-radius: var(--master-photo-radius);
+}
+.card[data-layout='a'][data-material-texture='off'] { --material-strength-factor: 0; }
+.card[data-layout='a']::before { display: none; }
+.masterMaterial {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 6;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  opacity: 0;
+  pointer-events: none;
+}
+.masterMaterial img { display: block; width: 1px; height: 1px; object-fit: fill; }
+
+/* Photograph + letterpress caption. Partial frame lines register the print's
+   edge; the city and face remain the loudest parts of the artifact. */
+.card[data-template='cinematic'][data-layout='a'] { --card-ink: var(--master-ink); --card-muted: var(--master-muted-ink); }
+.card[data-template='cinematic'][data-layout='a'] .cinematicFrame {
+  display: block; inset: 2.6%; border: 0; border-radius: 0;
+}
+.card[data-template='cinematic'][data-layout='a'] .cinematicFrame::before,
+.card[data-template='cinematic'][data-layout='a'] .cinematicFrame::after {
+  width: 13cqi; height: 5cqi; opacity: .6; border-color: var(--master-accent);
+  border-width: .13cqi 0 0 .13cqi;
+}
+.card[data-template='cinematic'][data-layout='a'] .cinematicFrame::after { border-width: 0 .13cqi .13cqi 0; width: 27cqi; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicMasthead {
+  width: 81%; font: 500 1.35cqi/1.25 var(--card-font-metadata); letter-spacing: .13em;
+  padding-bottom: 1.3cqi; border-bottom-width: .13cqi; border-color: var(--master-rule);
+}
+.card[data-template='cinematic'][data-layout='a'] .cinematicMasthead > span:first-child { display: flex; align-items: center; gap: 1.8cqi; }
+.cinematicIndex { padding-right: 1.8cqi; border-right: .13cqi solid var(--master-rule); font-weight: 700; color: var(--master-accent); letter-spacing: .025em; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicBase { margin-top: auto; margin-bottom: 4.5cqi; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicIdentity h2 { font-weight: 500; letter-spacing: -.045em; line-height: .97; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicEyebrow { color: var(--master-accent); font: 500 1.4cqi/1.3 var(--card-font-caption); letter-spacing: .14em; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobline {
+  font: 500 2.35cqi/1.35 var(--card-font-caption); letter-spacing: .02em; margin-top: 1.4cqi; gap: .8cqi;
+}
+.card[data-template='cinematic'][data-layout='a'] .cinematicJobline > span:last-child { font: 500 1.45cqi/1.3 var(--card-font-metadata); letter-spacing: .03em; }
+.cinematicLineage { margin: 1cqi 0 0; font: 400 1.2cqi/1.4 var(--card-font-caption); letter-spacing: .04em; color: var(--master-muted-ink); }
+.card[data-template='cinematic'][data-layout='a'] .cinematicDetails { padding-left: 0; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicBio { font: 500 1.7cqi/1.4 var(--card-font-body); color: var(--master-muted-ink); -webkit-line-clamp: 3; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts { border-top-width: var(--master-rule-weight); border-color: var(--master-rule); padding-top: 1.1cqi; gap: var(--master-metadata-gap) 2.3cqi; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts dt { font: 500 1.1cqi/1.4 var(--card-font-caption); color: var(--master-muted-ink); letter-spacing: .14em; margin-bottom: .4cqi; }
+.card[data-template='cinematic'][data-layout='a'] .cinematicFacts dd { font: 500 2.15cqi/1.25 var(--card-font-body); letter-spacing: -.025em; color: var(--master-ink); }
+.card[data-template='cinematic'][data-layout='a'] .cinematicCompany dd { font: 500 2.6cqi/1.1 var(--print-serif); }
+.cinematicFootnote { position: absolute; bottom: 0; inset-inline: 0; display: flex; justify-content: space-between; gap: 4cqi; padding-top: 1.1cqi; border-top: .13cqi solid var(--master-rule); font: 500 1.05cqi/1.45 var(--card-font-caption); letter-spacing: .12em; color: var(--master-muted-ink); }
+.cinematicFootnote [data-field='playStyles'] { max-width: 75%; }
+.cinematicFootnote [data-field='languages'] { flex: 0 0 auto; }
+
+/* Uncoated magazine sheet: serif masthead, sculpted name strip, condensed job
+   study in the image gutter, then a deliberately dense colophon. */
+.card[data-template='editorial'][data-layout='a'][data-name-composition] {
+  --card-ink: var(--master-ink); --card-muted: var(--master-muted-ink);
+  background: var(--master-surface-tone); color: var(--master-ink);
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead { inset-inline: var(--master-margin); color: var(--master-ink); border-color: var(--master-rule); border-bottom-width: var(--master-rule-weight); padding-bottom: 1.5cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead > span:first-child { font: 600 8.1cqi/.87 var(--print-serif); letter-spacing: -.035em; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialMasthead > span:last-child { font: 500 1.15cqi/1.4 var(--card-font-metadata); letter-spacing: .075em; color: var(--master-muted-ink); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialIdentity h2 { color: var(--master-ink); font-weight: 600; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .nameLine { background: var(--master-surface-tone); padding-right: .04em; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialEyebrow { color: var(--master-accent); font: 500 1.25cqi/1.4 var(--card-font-caption); letter-spacing: .13em; }
+.editorialJobStudy { position: absolute; top: calc(var(--editorial-photo-offset) + 8.4cqi); left: 0; width: 22cqi; display: flex; flex-direction: column; align-items: start; gap: 1cqi; }
+.editorialJobCode { font: 700 9.4cqi/.9 var(--card-font-information); letter-spacing: -.08em; color: var(--master-ink); margin-left: -.4cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialJobStudy .editorialRole { background: transparent; margin: 0; width: auto; max-width: 100%; padding: 0; color: var(--master-ink); font: 500 2cqi/1.3 var(--card-font-caption); letter-spacing: -.02em; }
+.editorialLevel { font: 500 1.15cqi/1.4 var(--card-font-metadata); letter-spacing: .08em; color: var(--master-muted-ink); padding-top: 1cqi; border-top: .13cqi solid var(--master-rule); width: 12cqi; }
+.editorialLevel b { font-weight: 600; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialArt { bottom: 25%; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts { gap: var(--master-metadata-gap) 2cqi; border-top: .24cqi solid var(--master-ink); padding-top: 1.5cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts dt { font: 500 1.05cqi/1.4 var(--card-font-caption); letter-spacing: .1em; color: var(--master-muted-ink); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts dd { color: var(--master-ink); font: 500 2cqi/1.25 var(--card-font-body); letter-spacing: -.02em; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFacts [data-field='world'] { font: 500 3.3cqi/1 var(--print-serif); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialBio { color: var(--master-muted-ink); font: italic 500 2cqi/1.4 var(--card-font-story); -webkit-line-clamp: 4; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFooter { border-top-width: .13cqi; border-color: var(--master-rule); font: 500 1.15cqi/1.5 var(--card-font-caption); color: var(--master-muted-ink); padding-top: 1.5cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition] .editorialFooter [data-field='languages'] { font-family: var(--card-font-metadata); color: var(--master-ink); letter-spacing: .12em; }
+
+/* Archival stock: a serif publication mark above structured sans identity,
+   numbered field captions and deliberately varied portrait/section rules. */
+.card[data-template='id-card'][data-layout='a'] { --card-ink: var(--master-ink); --card-muted: var(--master-muted-ink); background: var(--master-surface-tone); color: var(--master-ink); border: var(--master-frame-rule-width, 1px) solid var(--master-rule); }
+.card[data-template='id-card'][data-layout='a'] .idMasthead { inset: 3.5% 6% auto; padding-bottom: 1.3cqi; border-bottom: .26cqi solid var(--master-ink); color: var(--master-ink); align-items: end; }
+.idPublication { display: block; font: 600 3.8cqi/.88 var(--print-serif); letter-spacing: .015em; }
+.idPublicationCaption { display: block; margin-top: .8cqi; font: 500 1.05cqi/1.2 var(--card-font-metadata); letter-spacing: .23em; }
+.card[data-template='id-card'][data-layout='a'] .idUnofficial { max-width: 28%; font: 500 1.1cqi/1.35 var(--card-font-caption); color: var(--master-muted-ink); }
+.card[data-template='id-card'][data-layout='a'] .idJobCode { font: 600 3.4cqi/1 var(--card-font-information); color: var(--master-accent); letter-spacing: -.06em; }
+.card[data-template='id-card'][data-layout='a'] .idPortrait { border: .13cqi solid var(--master-rule); background: var(--master-surface-tone); padding: 0; box-shadow: none; }
+.card[data-template='id-card'][data-layout='a'] .idPortrait img { padding: .65cqi; }
+.card[data-template='id-card'][data-layout='a'] .idPortrait::after { content: ''; position: absolute; inset: 1.1cqi; border: .12cqi solid color-mix(in srgb, var(--master-ink) 17%, transparent); pointer-events: none; }
+.card[data-template='id-card'][data-layout='a'] .idInformation h2 { font-family: var(--card-font-information); font-weight: 650; letter-spacing: -.05em; line-height: 1.05; }
+.card[data-template='id-card'][data-layout='a'] .idEyebrow { color: var(--master-accent); font: 500 1.1cqi/1.3 var(--card-font-metadata); letter-spacing: .14em; margin-bottom: 1.6cqi; }
+.card[data-template='id-card'][data-layout='a'] .idRole { color: var(--master-muted-ink); font: 500 1.5cqi/1.4 var(--card-font-caption); letter-spacing: .035em; margin-top: 1.4cqi; }
+.card[data-template='id-card'][data-layout='a'] .idFacts { border-top: var(--master-rule-weight) solid var(--master-rule); padding-top: 1.6cqi; margin-top: 1.6cqi; gap: var(--master-metadata-gap) 2cqi; }
+.card[data-template='id-card'][data-layout='a'] .idFacts dt { font: 500 1.05cqi/1.3 var(--card-font-caption); color: var(--master-muted-ink); letter-spacing: .06em; margin-bottom: .5cqi; }
+.card[data-template='id-card'][data-layout='a'] .idFacts dd { font: 600 2.05cqi/1.25 var(--card-font-body); letter-spacing: -.015em; color: var(--master-ink); }
+.card[data-template='id-card'][data-layout='a'] .idFacts div:has([data-field='freeCompany']) { margin-top: .6cqi; padding-top: 1.3cqi; border-top: .13cqi solid var(--master-rule); }
+.card[data-template='id-card'][data-layout='a'] .idFacts [data-field='freeCompany'] { font: 600 2.6cqi/1.2 var(--card-font-body); }
+.card[data-template='id-card'][data-layout='a'] .idFooter { border-top: .13cqi solid var(--master-rule); padding-top: 1.6cqi; color: var(--master-muted-ink); }
+.card[data-template='id-card'][data-layout='a'] .idFooter p { font: italic 500 2cqi/1.4 var(--card-font-story); }
+.card[data-template='id-card'][data-layout='a'] .idFooterMeta { color: var(--master-muted-ink); font: 500 1.1cqi/1.4 var(--card-font-caption); gap: 1cqi; }
+.card[data-template='id-card'][data-layout='a'] .idFooterMeta [data-field='languages'] { color: var(--master-ink); font-family: var(--card-font-metadata); letter-spacing: .16em; }
+.fieldIndex { display: inline-block; margin-right: .8cqi; color: var(--master-accent); font: 500 .95cqi/1 var(--card-font-metadata); letter-spacing: .035em; }
+
+/* Lift the photograph behind the outer edge of a short cover title. The
+   Japanese and long-title studies retain their deeper face-safe start. */
+.card[data-template='editorial'][data-layout='a'][data-name-composition]:not([data-name-composition='long']):not([data-name-script='japanese']):not([data-ratio='16:9']) .editorialArt {
+  top: clamp(20%, calc(15% + var(--editorial-photo-offset) * .65), 36%);
+}
+
+/* The same publication becomes a spread in landscape, and a compact cover
+   in square. Job information changes reading direction with the composition. */
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialJobStudy {
+  position: static; width: 100%; display: grid; grid-template-columns: max-content minmax(0,1fr) max-content; align-items: center; gap: 1.3cqi;
+}
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialJobCode { font-size: 3.6cqi; margin-left: -.1cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialJobStudy .editorialRole { font-size: 1.2cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialLevel { font-size: .95cqi; width: auto; padding: 0; border: 0; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialMasthead { inset-inline: 6% auto; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFacts { margin-top: auto; padding-top: 1cqi; gap: .65cqi 2cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFacts [data-field='world'] { font-size: 2cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialBio { font-size: 1.4cqi; -webkit-line-clamp: 2; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialFooter { font-size: .95cqi; padding-top: 1cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialBody { top: 18%; gap: .85cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] .editorialIdentity h2 { font-size: calc(var(--editorial-name-wide) * .9); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='16:9'] :is(.editorialIdentity, .editorialJobStudy, .editorialFacts, .editorialBio, .editorialFooter) { flex-shrink: 0; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialJobStudy { position: relative; top: auto; grid-area: 2 / 1 / 3 / 2; align-self: start; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialJobCode { font-size: 6cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition='long'][data-ratio='1:1'] .editorialIdentity h2 { font-size: calc(var(--editorial-name-size) * .62); }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialJobStudy .editorialRole { font-size: 1.5cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialJobStudy { gap: .6cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialLevel { font-size: 1cqi; padding-top: .6cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialFacts { gap: 1cqi 2cqi; padding-top: 1cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialFacts [data-field='world'] { font-size: 2.6cqi; }
+.card[data-template='editorial'][data-layout='a'][data-name-composition][data-ratio='1:1'] .editorialFooter { padding-top: 1cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idMasthead { top: 5%; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idPublication { font-size: 2.7cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idPublicationCaption { font-size: .8cqi; margin-top: .4cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idJobCode { font-size: 2.8cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts { gap: .6cqi 1.3cqi; padding-top: .8cqi; margin-top: .8cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts dt { font-size: .9cqi; margin-bottom: .2cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts dd { font-size: 1.4cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts [data-field='freeCompany'] { font-size: 1.6cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFacts div:has([data-field='freeCompany']) { padding-top: .6cqi; margin-top: .3cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFooter p { font-size: 1.5cqi; -webkit-line-clamp: 3; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='16:9'] .idFooterMeta { font-size: .95cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idFacts { gap: 1cqi 1.5cqi; padding-top: 1cqi; margin-top: 1cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idFacts div:has([data-field='freeCompany']) { padding-top: .7cqi; margin-top: .2cqi; }
+.card[data-template='id-card'][data-layout='a'][data-ratio='1:1'] .idFacts [data-field='freeCompany'] { font-size: 2.1cqi; }
+
+/* Craft floor is proportional to the output, not the surrounding editor rem.
+   At PNG 2x: portrait/square 18.14px; landscape 19.2px. */
+.card[data-layout='a'] {
+  --master-micro-min: .84cqi;
+  --master-legal-size: 1.1cqi;
+}
+.card[data-layout='a'][data-ratio='16:9'] {
+  --master-micro-min: .5cqi;
+  --master-legal-size: .65cqi;
+}
+.card[data-layout='a'] .cardAttribution {
+  min-height: 0;
+  gap: .2cqi .7cqi;
+  padding: .6cqi 3.2cqi;
+  font-family: var(--card-font-caption, sans-serif);
+  font-size: var(--master-legal-size);
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.4;
+  opacity: 1;
+  text-wrap: pretty;
+}
+.card[data-layout='a'] .cardAttribution > span {
+  overflow-wrap: normal;
+}
+.card[data-layout='a'][data-template='cinematic'][data-effects~='grain']::before {
+  opacity: .07;
+}
+
+/* 2.7.5: printed lettering is separated by composition and ink, never a shadow. */
+.card,
+.card *,
+.card *::before,
+.card *::after { text-shadow:none !important; }
+.card[data-template] .cardAttribution {
+  left:auto;
+  right:4.2cqi;
+  bottom:3.6cqi;
+  width:max-content;
+  max-width:88%;
+  min-height:0;
+  padding:0;
+  margin:0;
+  background:none !important;
+  border:0;
+  box-shadow:none;
+  text-shadow:none !important;
+  color:var(--craft-credit-ink,var(--card-light));
+  font-size:var(--master-legal-size,1.1cqi);
+  line-height:1.25;
+  font-weight:500;
+  letter-spacing:.02em;
+  opacity:1;
+  -webkit-text-stroke:.045cqi var(--craft-credit-outline,var(--card-dark));
+  paint-order:stroke fill;
+}
+.card[data-template='editorial'],.card[data-template='id-card'] {
+  --craft-credit-ink:var(--craft-ink,var(--card-dark));
+  --craft-credit-outline:var(--craft-paper,var(--card-light));
+}
+.card[data-ratio='16:9'] .cardAttribution {
+  bottom:2.4cqi;
+  right:3.2cqi;
+  -webkit-text-stroke:.03cqi var(--craft-credit-outline,var(--card-dark));
+}
+/* Wide framed cards keep the overprinted credit clear of the corner curl. */
+.card[data-template='cinematic'][data-ratio='16:9'] .cardAttribution,
+.card[data-template='id-card'][data-ratio='16:9'] .cardAttribution { right:9cqi; }

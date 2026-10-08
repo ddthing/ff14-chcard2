@@ -1,0 +1,3 @@
+.photo { position: absolute; overflow: hidden; background: var(--master-surface-tone); }
+.photo:not(:has(img)) { background: var(--card-dark); }
+.photo img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--card-image-position); transform: scale(var(--card-image-scale)) rotate(var(--card-image-rotation)); transform-origin: center; filter: brightness(var(--card-image-brightness)) contrast(var(--card-image-contrast)) saturate(var(--card-image-saturation)); }

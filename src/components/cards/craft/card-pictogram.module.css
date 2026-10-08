@@ -1,0 +1,8 @@
+.pictogram {
+  display: block;
+  width: var(--craft-pictogram-size, 3cqi);
+  height: var(--craft-pictogram-size, 3cqi);
+  flex: none;
+  color: var(--craft-brass, currentColor);
+  overflow: visible;
+}

@@ -1,0 +1,401 @@
+.page {
+  --gallery-bg: var(--marketing-bg, var(--app-bg, #f3f0e8));
+  --gallery-surface: var(--marketing-surface, var(--app-surface, #ebe7dd));
+  --gallery-ink: var(--marketing-ink, var(--app-text, #24231f));
+  --gallery-muted: var(--marketing-muted, var(--app-text-muted, #706e66));
+  --gallery-line: var(--marketing-line, var(--app-border, rgb(36 35 31 / 0.2)));
+  --gallery-accent: var(--marketing-accent, var(--app-accent, #8d6846));
+  min-height: 100%;
+  padding: clamp(2rem, 3.7vw, 3.5rem) clamp(1rem, 5vw, 5.6rem) clamp(4rem, 8vw, 7rem);
+  overflow: hidden;
+  color: var(--gallery-ink);
+  background: var(--gallery-bg);
+}
+
+.wrap {
+  width: min(100%, 79rem);
+  margin-inline: auto;
+}
+
+.heading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 5vw, 5rem);
+  align-items: end;
+  margin-bottom: clamp(2rem, 4.2vw, 3.75rem);
+}
+
+.headingCopy { max-width: 58rem; }
+
+.eyebrow,
+.visualCaption {
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.64rem;
+  font-weight: 550;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-transform: uppercase;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  margin: 0 0 1rem;
+  color: var(--gallery-accent);
+}
+
+.eyebrow > span { width: 1.5rem; height: 1px; background: currentColor; }
+
+.heading h1 {
+  max-width: 100%;
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2.6rem, 4.4vw, 3.8rem);
+  font-weight: 400;
+  letter-spacing: -0.055em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.page[lang='ko'] .heading h1,
+.page[lang='ko'] .masterCopy h2 {
+  word-break: keep-all;
+  overflow-wrap: normal;
+  line-height: 1.25;
+}
+
+.page[lang='ko'] .intro,
+.page[lang='ko'] .description {
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+.page[lang='ja'] .heading h1,
+.page[lang='ja'] .masterCopy h2 {
+  word-break: normal;
+  line-break: strict;
+  line-height: 1.22;
+}
+
+.intro {
+  max-width: 39rem;
+  margin: 1.15rem 0 0;
+  color: var(--gallery-muted);
+  font-size: clamp(0.9rem, 1.2vw, 1rem);
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+
+.gallery {
+  display: grid;
+  gap: clamp(4.5rem, 10vw, 9.5rem);
+}
+
+.master {
+  display: grid;
+  grid-template-columns: minmax(0, 1.16fr) minmax(17rem, 0.74fr);
+  gap: clamp(2.5rem, 7vw, 7rem);
+  align-items: center;
+  min-width: 0;
+  scroll-margin-top: 7rem;
+}
+
+.masterVisual {
+  position: relative;
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0;
+  isolation: isolate;
+}
+
+.visualStage {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 35rem;
+  place-items: center;
+  overflow: hidden;
+  border-block: 1px solid var(--gallery-line);
+  background: var(--gallery-surface);
+  isolation: isolate;
+}
+
+.visualStage::before,
+.visualStage::after {
+  position: absolute;
+  z-index: -1;
+  pointer-events: none;
+  content: '';
+}
+
+.visualStage::before {
+  inset: 1.1rem 5.5%;
+  border: 1px solid color-mix(in srgb, var(--gallery-line) 78%, transparent);
+}
+
+.visualStage::after {
+  inset: auto 5.5% 1.1rem;
+  height: 1px;
+  background: color-mix(in srgb, var(--gallery-line) 78%, transparent);
+}
+
+.cardFrame {
+  position: relative;
+  z-index: 1;
+  width: min(67%, 26rem);
+  aspect-ratio: 4 / 5;
+}
+
+.masterCard {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  transition: transform 260ms cubic-bezier(.2, .7, .2, 1);
+}
+
+.masterCard article[data-template] { width: 100%; height: 100%; }
+
+.focusTarget {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.focusTarget:focus-visible {
+  outline: 2px solid var(--gallery-accent);
+  outline-offset: -0.35rem;
+}
+
+.visualCaption {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  color: var(--gallery-muted);
+  font-size: 0.58rem;
+}
+
+.masterCopy {
+  width: min(100%, 26rem);
+  padding-block: 1.25rem;
+}
+
+.masterCopy h2 {
+  margin: 0;
+  font-family: var(--font-editorial, Georgia, serif);
+  font-size: clamp(2.5rem, 4.3vw, 4rem);
+  font-weight: 400;
+  letter-spacing: -0.05em;
+  line-height: 1.02;
+  text-wrap: balance;
+}
+
+.description {
+  max-width: 26rem;
+  margin: 1rem 0 0;
+  color: var(--gallery-muted);
+  font-size: 0.92rem;
+  line-height: 1.8;
+  text-wrap: pretty;
+}
+
+.primaryAction {
+  display: flex;
+  width: min(100%, 21rem);
+  min-height: 3.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 0 1.1rem;
+  border: 1px solid var(--gallery-accent);
+  border-radius: 0.16rem;
+  background: var(--gallery-accent);
+  color: var(--marketing-on-accent, var(--app-on-accent, #fffaf2));
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  text-align: left;
+  cursor: pointer;
+  transition: transform 180ms ease, filter 180ms ease;
+}
+
+.primaryAction:hover { transform: translateY(-2px); filter: brightness(1.06); }
+.primaryAction span:last-child { font-size: 1.1rem; }
+.primaryAction:focus-visible { outline: 2px solid var(--gallery-ink); outline-offset: 3px; }
+
+/* C2 reads as a full bleed campaign poster with a wide, measured surround. */
+.master[data-template='cinematic'] .visualStage {
+  min-height: 38rem;
+  background: color-mix(in srgb, var(--gallery-surface) 82%, var(--gallery-ink));
+}
+
+.master[data-template='cinematic'] .cardFrame { width: min(61%, 26rem); }
+
+.master[data-template='cinematic'][data-selected='true'] .visualStage::before {
+  inset: 0.8rem 4%;
+  border-color: color-mix(in srgb, var(--gallery-accent) 48%, var(--gallery-line));
+}
+
+/* E2 reverses the reading direction and sits on a quieter paper field. */
+.master[data-template='editorial'] {
+  grid-template-columns: minmax(17rem, 0.78fr) minmax(0, 1.12fr);
+}
+
+.master[data-template='editorial'] .masterVisual { grid-column: 2; grid-row: 1; }
+.master[data-template='editorial'] .masterCopy { grid-column: 1; grid-row: 1; }
+
+.master[data-template='editorial'] .visualStage {
+  min-height: 34rem;
+  border: 0;
+  background: color-mix(in srgb, var(--gallery-accent) 11%, var(--gallery-surface));
+}
+
+.master[data-template='editorial'] .visualStage::before {
+  inset: 7% auto 7% 8%;
+  width: 57%;
+  border-color: color-mix(in srgb, var(--gallery-accent) 28%, transparent);
+}
+
+.master[data-template='editorial'] .visualStage::after {
+  inset: auto 8% 7%;
+  height: 1px;
+  background: color-mix(in srgb, var(--gallery-accent) 30%, transparent);
+}
+
+.master[data-template='editorial'] .masterCard {
+  transform: translateX(9%);
+}
+
+.master[data-template='editorial'] .cardFrame { width: min(60%, 24rem); }
+
+/* I3 is presented like a collected record: aligned to the left rule with an
+   open field for its compact information hierarchy. */
+.master[data-template='id-card'] {
+  grid-template-columns: minmax(0, 1.05fr) minmax(17rem, 0.75fr);
+  align-items: end;
+}
+
+.master[data-template='id-card'] .visualStage {
+  min-height: 35rem;
+  justify-items: start;
+  padding-left: 11%;
+  border-inline-start: 1px solid var(--gallery-line);
+  border-inline-end: 0;
+  background: transparent;
+}
+
+.master[data-template='id-card'] .visualStage::before {
+  inset: 1.8rem 0 1.8rem 7%;
+  border-inline-start: 0;
+  border-inline-end: 0;
+}
+
+.master[data-template='id-card'] .visualStage::after {
+  inset: auto 0 1.8rem 7%;
+  width: 37%;
+}
+
+.master[data-template='id-card'] .cardFrame { width: min(64%, 24rem); }
+.master[data-template='id-card'] .masterCopy { padding-bottom: clamp(2rem, 5vw, 4rem); }
+
+.master[data-selected='true'] .masterCard { filter: drop-shadow(0 1.7rem 2.3rem rgb(0 0 0 / 0.15)); }
+.master[data-selected='true'] .visualStage { box-shadow: inset 0 0 0 1px var(--gallery-accent); }
+
+.master:hover .masterCard { transform: translateY(-3px); }
+.master[data-template='editorial']:hover .masterCard { transform: translate(9%, -3px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .master { animation: gallery-arrive 240ms cubic-bezier(.2, .75, .3, 1) both; }
+  .master:nth-child(2) { animation-delay: 35ms; }
+  .master:nth-child(3) { animation-delay: 70ms; }
+  .primaryAction { animation: context-arrive 240ms cubic-bezier(.2, .75, .3, 1) both; }
+}
+
+@keyframes gallery-arrive {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes context-arrive {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (max-width: 780px) {
+  .page { padding-inline: 1.15rem; }
+  .heading { margin-bottom: 2.5rem; }
+  .master,
+  .master[data-template='editorial'],
+  .master[data-template='id-card'] {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .master[data-template='editorial'] .masterVisual,
+  .master[data-template='editorial'] .masterCopy { grid-column: auto; grid-row: auto; }
+
+  .visualStage,
+  .master[data-template='cinematic'] .visualStage,
+  .master[data-template='editorial'] .visualStage,
+  .master[data-template='id-card'] .visualStage {
+    min-height: clamp(25rem, 96vw, 34rem);
+  }
+
+  .master[data-template='cinematic'] .cardFrame,
+  .master[data-template='editorial'] .cardFrame,
+  .master[data-template='id-card'] .cardFrame {
+    width: min(78%, 23rem);
+  }
+
+  .master[data-template='id-card'] .visualStage { justify-items: center; padding-left: 0; }
+  .masterCopy { width: 100%; padding-top: 0.5rem; }
+  .masterCopy h2 { font-size: clamp(2.45rem, 9vw, 3.4rem); }
+  .description { max-width: 36rem; font-size: 0.9rem; }
+  .primaryAction { width: 100%; max-width: 28rem; margin-top: 1.35rem; }
+  .gallery { gap: 4.8rem; }
+}
+
+@media (max-width: 430px) {
+  .page { padding: 2.35rem 1rem 4.5rem; }
+  .heading { grid-template-columns: minmax(0, 1fr); gap: 1.15rem; margin-bottom: 2rem; }
+  .heading h1 { font-size: clamp(2.25rem, 9vw, 2.85rem); }
+  .intro { margin-top: 0.9rem; font-size: 0.87rem; line-height: 1.7; }
+  .gallery { gap: 4.1rem; }
+  .master,
+  .master[data-template='editorial'],
+  .master[data-template='id-card'] { gap: 1.1rem; }
+  .visualStage,
+  .master[data-template='cinematic'] .visualStage,
+  .master[data-template='editorial'] .visualStage,
+  .master[data-template='id-card'] .visualStage { min-height: 27rem; }
+  .master[data-template='cinematic'] .cardFrame,
+  .master[data-template='editorial'] .cardFrame,
+  .master[data-template='id-card'] .cardFrame { width: min(81%, 21rem); }
+  .masterCopy h2 { font-size: clamp(2.25rem, 10vw, 2.8rem); }
+  .description { margin-top: 0.75rem; font-size: 0.86rem; }
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .master[data-selected='false']:hover .masterCard { filter: drop-shadow(0 1.2rem 1.8rem rgb(0 0 0 / 0.12)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .masterCard,
+  .primaryAction { transition: none; }
+  .master:hover .masterCard,
+  .master[data-template='editorial']:hover .masterCard,
+  .primaryAction:hover { transform: none; }
+  .master { animation: none; }
+  .primaryAction { animation: none; }
+}

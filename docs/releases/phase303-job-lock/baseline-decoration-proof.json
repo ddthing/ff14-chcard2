@@ -1,0 +1,364 @@
+{
+  "schema": "phase303-baseline-decorative-crop-proof-v1",
+  "purpose": "Establish whether the two current E2 landscape typography-boundary findings were already present in the frozen pre-Phase303 production renderer and are confined to its aria-hidden decorative large-Job-motif clip, separate from the actual Job Identity block.",
+  "browser": {
+    "cdpPort": 9329,
+    "browser": "task-owned isolated Chrome"
+  },
+  "baseline": {
+    "root": "tmp/phase303-baseline-source",
+    "buildId": "MB_c83kv5iVf61uzFL-4q",
+    "publicOfficialAssetsFlag": "true",
+    "sourceManifest": "production-source-before.json",
+    "sourceHashes": [
+      {
+        "path": "src/components/cards/masters/editorial-master.tsx",
+        "expectedSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+        "actualSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+        "matchesFrozenSource": true
+      },
+      {
+        "path": "src/components/cards/masters/editorial-master.module.css",
+        "expectedSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+        "actualSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+        "matchesFrozenSource": true
+      }
+    ]
+  },
+  "caseCount": 2,
+  "passCount": 2,
+  "failCount": 0,
+  "cases": [
+    {
+      "sourcePath": "src/components/cards/masters/editorial-master.tsx and editorial-master.module.css from frozen pre-Phase303 snapshot",
+      "sourceManifest": "production-source-before.json",
+      "sourceHashes": [
+        {
+          "path": "src/components/cards/masters/editorial-master.tsx",
+          "expectedSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+          "actualSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+          "matchesFrozenSource": true
+        },
+        {
+          "path": "src/components/cards/masters/editorial-master.module.css",
+          "expectedSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+          "actualSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+          "matchesFrozenSource": true
+        }
+      ],
+      "baselineBuildId": "MB_c83kv5iVf61uzFL-4q",
+      "publicOfficialAssetsFlag": "true",
+      "serverUrl": "http://127.0.0.1:3333/phase303-qa",
+      "viewport": {
+        "width": 1440,
+        "height": 1120,
+        "deviceScaleFactor": 1
+      },
+      "foreground": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "width": 1440,
+        "height": 1120,
+        "scrollX": 0,
+        "scrollY": 0
+      },
+      "navigation": {
+        "settled": {
+          "elapsedMs": 299.7000000178814,
+          "fontStatus": "loaded",
+          "images": 3
+        },
+        "foreground": {
+          "visibility": "visible",
+          "hasFocus": true,
+          "width": 1440,
+          "height": 1120,
+          "scrollX": 0,
+          "scrollY": 0
+        }
+      },
+      "case": {
+        "caseId": "baseline-proof-e2-red-mage-16-9",
+        "master": "editorial",
+        "jobId": "red-mage",
+        "ratio": "16:9",
+        "locale": "en",
+        "characterName": "Coner"
+      },
+      "readyMs": 21.69999998807907,
+      "geometry": {
+        "caseId": "baseline-proof-e2-red-mage-16-9",
+        "card": {
+          "template": "editorial",
+          "ratio": "16:9",
+          "jobId": "red-mage",
+          "rect": {
+            "x": 392.5,
+            "y": 456.796875,
+            "width": 640,
+            "height": 360,
+            "right": 1032.5,
+            "bottom": 816.796875
+          }
+        },
+        "motif": {
+          "present": true,
+          "field": "jobAbbreviation",
+          "role": "job",
+          "text": "RDM RDM",
+          "rect": {
+            "x": 738.09375,
+            "y": 751.984375,
+            "width": 281.59375,
+            "height": 76,
+            "right": 1019.6875,
+            "bottom": 827.984375
+          },
+          "fontSize": "80px",
+          "lineHeight": "76px"
+        },
+        "clippingAncestor": {
+          "present": true,
+          "tag": "div",
+          "className": "editorial-master-module__mjOnVq__motifLayer",
+          "rect": {
+            "x": 738.09375,
+            "y": 751.984375,
+            "width": 281.59375,
+            "height": 57.59375,
+            "right": 1019.6875,
+            "bottom": 809.578125
+          },
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "ariaHidden": true,
+          "decorationAncestorAriaHidden": true,
+          "clippedEdges": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 18.40625
+          },
+          "actuallyClips": true
+        },
+        "visibleJobName": {
+          "text": "Red Mage",
+          "rect": {
+            "x": 632.46875,
+            "y": 635.75,
+            "width": 91.8125,
+            "height": 13.359375,
+            "right": 724.28125,
+            "bottom": 649.109375
+          }
+        },
+        "jobIcon": {
+          "source": "xivapi-svg",
+          "rect": {
+            "x": 610.09375,
+            "y": 628.265625,
+            "width": 17.265625,
+            "height": 17.265625,
+            "right": 627.359375,
+            "bottom": 645.53125
+          }
+        }
+      },
+      "screenshot": {
+        "path": "baseline-decoration-proof/baseline-proof-e2-red-mage-16-9.png",
+        "sha256": "8faa2350571af340acafa45c8e662543e5688d33c0a34ecb56645712feef5b55",
+        "byteLength": 1358397,
+        "cardRectCss": {
+          "x": 392.5,
+          "y": 456.796875,
+          "width": 640,
+          "height": 360
+        },
+        "screenshotScale": 3,
+        "targetShortSidePixels": 1080,
+        "pixelDimensions": {
+          "width": 1920,
+          "height": 1080
+        },
+        "purpose": "Read-only baseline Preview capture used to compare the pre-existing E2 decorative RDM/AST motif crop; not an export-engine raster."
+      },
+      "checks": {
+        "frozenSourceMatches": true,
+        "expectedJobMatches": true,
+        "expectedRatioMatches": true,
+        "abbreviationTextRole": true,
+        "decorativeAncestorIsAriaHidden": true,
+        "nearestOverflowAncestorIsHidden": true,
+        "textLineBoxExceedsDecorativeClip": true
+      },
+      "pass": true
+    },
+    {
+      "sourcePath": "src/components/cards/masters/editorial-master.tsx and editorial-master.module.css from frozen pre-Phase303 snapshot",
+      "sourceManifest": "production-source-before.json",
+      "sourceHashes": [
+        {
+          "path": "src/components/cards/masters/editorial-master.tsx",
+          "expectedSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+          "actualSha256": "7aad3723158046f8f9c4733b178cd48bd6bc33251b03c8dc685c2f5f4f7fb00c",
+          "matchesFrozenSource": true
+        },
+        {
+          "path": "src/components/cards/masters/editorial-master.module.css",
+          "expectedSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+          "actualSha256": "51890e39fe4723f1fbe6237f23429e85f1a1762edcd34ede25c80e99ade5805b",
+          "matchesFrozenSource": true
+        }
+      ],
+      "baselineBuildId": "MB_c83kv5iVf61uzFL-4q",
+      "publicOfficialAssetsFlag": "true",
+      "serverUrl": "http://127.0.0.1:3333/phase303-qa",
+      "viewport": {
+        "width": 1440,
+        "height": 1120,
+        "deviceScaleFactor": 1
+      },
+      "foreground": {
+        "visibility": "visible",
+        "hasFocus": true,
+        "width": 1440,
+        "height": 1120,
+        "scrollX": 0,
+        "scrollY": 48
+      },
+      "navigation": {
+        "settled": {
+          "elapsedMs": 299.7000000178814,
+          "fontStatus": "loaded",
+          "images": 3
+        },
+        "foreground": {
+          "visibility": "visible",
+          "hasFocus": true,
+          "width": 1440,
+          "height": 1120,
+          "scrollX": 0,
+          "scrollY": 0
+        }
+      },
+      "case": {
+        "caseId": "baseline-proof-e2-astrologian-16-9",
+        "master": "editorial",
+        "jobId": "astrologian",
+        "ratio": "16:9",
+        "locale": "en",
+        "characterName": "Coner"
+      },
+      "readyMs": 19.5,
+      "geometry": {
+        "caseId": "baseline-proof-e2-astrologian-16-9",
+        "card": {
+          "template": "editorial",
+          "ratio": "16:9",
+          "jobId": "astrologian",
+          "rect": {
+            "x": 392.5,
+            "y": 408.796875,
+            "width": 640,
+            "height": 360,
+            "right": 1032.5,
+            "bottom": 768.796875
+          }
+        },
+        "motif": {
+          "present": true,
+          "field": "jobAbbreviation",
+          "role": "job",
+          "text": "AST AST",
+          "rect": {
+            "x": 738.09375,
+            "y": 703.984375,
+            "width": 281.59375,
+            "height": 76,
+            "right": 1019.6875,
+            "bottom": 779.984375
+          },
+          "fontSize": "80px",
+          "lineHeight": "76px"
+        },
+        "clippingAncestor": {
+          "present": true,
+          "tag": "div",
+          "className": "editorial-master-module__mjOnVq__motifLayer",
+          "rect": {
+            "x": 738.09375,
+            "y": 703.984375,
+            "width": 281.59375,
+            "height": 57.59375,
+            "right": 1019.6875,
+            "bottom": 761.578125
+          },
+          "overflowX": "hidden",
+          "overflowY": "hidden",
+          "ariaHidden": true,
+          "decorationAncestorAriaHidden": true,
+          "clippedEdges": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "bottom": 18.40625
+          },
+          "actuallyClips": true
+        },
+        "visibleJobName": {
+          "text": "Astrologian",
+          "rect": {
+            "x": 632.46875,
+            "y": 587.75,
+            "width": 91.8125,
+            "height": 13.359375,
+            "right": 724.28125,
+            "bottom": 601.109375
+          }
+        },
+        "jobIcon": {
+          "source": "fan-kit",
+          "rect": {
+            "x": 610.09375,
+            "y": 580.265625,
+            "width": 17.265625,
+            "height": 17.265625,
+            "right": 627.359375,
+            "bottom": 597.53125
+          }
+        }
+      },
+      "screenshot": {
+        "path": "baseline-decoration-proof/baseline-proof-e2-astrologian-16-9.png",
+        "sha256": "e08306c1e4e8c480752aa6f26a4bb6c143d460aa7229afa63b39d5a1809b35d0",
+        "byteLength": 1354865,
+        "cardRectCss": {
+          "x": 392.5,
+          "y": 456.796875,
+          "width": 640,
+          "height": 360
+        },
+        "screenshotScale": 3,
+        "targetShortSidePixels": 1080,
+        "pixelDimensions": {
+          "width": 1920,
+          "height": 1080
+        },
+        "purpose": "Read-only baseline Preview capture used to compare the pre-existing E2 decorative RDM/AST motif crop; not an export-engine raster."
+      },
+      "checks": {
+        "frozenSourceMatches": true,
+        "expectedJobMatches": true,
+        "expectedRatioMatches": true,
+        "abbreviationTextRole": true,
+        "decorativeAncestorIsAriaHidden": true,
+        "nearestOverflowAncestorIsHidden": true,
+        "textLineBoxExceedsDecorativeClip": true
+      },
+      "pass": true
+    }
+  ],
+  "recordedAt": "2026-10-08T04:16:06.690Z",
+  "classificationApplied": true,
+  "geometryAuditUpdated": "geometry-audit.json"
+}
