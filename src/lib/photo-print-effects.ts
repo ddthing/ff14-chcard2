@@ -55,6 +55,11 @@ function mix(source: number, target: number, amount: number): number {
   return source + (target - source) * amount;
 }
 
+/** Ease print buildup toward the high end so default settings retain photo detail. */
+function effectAmount(strength: number): number {
+  return Math.pow(strength / 100, 1.5);
+}
+
 function hashNoise(x: number, y: number, seed: number): number {
   let value = Math.imul(x ^ seed, 0x45d9f3b);
   value = Math.imul(value ^ (value >>> 16) ^ y, 0x45d9f3b);
@@ -125,9 +130,9 @@ function applyXerox(
   const { width, height, data } = image;
   const output = new Uint8ClampedArray(data.length);
   const shortEdge = Math.min(width, height);
-  const broadNoise = createNoiseSampler(width, height, Math.max(4, shortEdge * 0.035), 0x58524f58);
-  const mottledNoise = createNoiseSampler(width, height, Math.max(2, shortEdge * 0.009), 0x544f4e45);
-  const amount = strength / 100;
+  const broadNoise = createNoiseSampler(width, height, Math.max(3, shortEdge * 0.018), 0x58524f58);
+  const mottledNoise = createNoiseSampler(width, height, Math.max(2, shortEdge * 0.004), 0x544f4e45);
+  const amount = effectAmount(strength);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -153,12 +158,12 @@ function applyXerox(
 
       // A photocopier pushes highlights toward stock white and concentrates
       // uneven toner in image shadows instead of laying noise over the page.
-      const tonerVariation = (broad * 0.16 + mottled * 0.1 + grain * 0.045) * (0.22 + inkCoverage * 0.78);
-      const copiedTone = clamp01((tone - 0.5) * 1.9 + 0.5 + tonerVariation);
+      const tonerVariation = (broad * 0.085 + mottled * 0.12 + grain * 0.055) * (0.22 + inkCoverage * 0.78);
+      const copiedTone = clamp01((tone - 0.5) * 1.55 + 0.5 + tonerVariation);
       const highlightPaper = smoothstep(0.68, 0.96, tone) * (1 - saturationProtection * 0.92);
       const chromaScale = mix(0.76 * (1 - smoothstep(0.68, 0.98, tone) * 0.88), 0.9, saturationProtection);
       const tonerTexture = (broad + 0.5) * 0.52 + (mottled + 0.5) * 0.3 + (grain + 0.5) * 0.18;
-      const tonerDropout = (1 - smoothstep(0.39, 0.68, tonerTexture)) * inkCoverage * 0.45;
+      const tonerDropout = (1 - smoothstep(0.39, 0.68, tonerTexture)) * inkCoverage * 0.24;
       const printedRed = clamp01(copiedTone + (red / 255 - tone) * chromaScale) * 255;
       const printedGreen = clamp01(copiedTone + (green / 255 - tone) * chromaScale) * 255;
       const printedBlue = clamp01(copiedTone + (blue / 255 - tone) * chromaScale) * 255;
@@ -188,8 +193,9 @@ function applyHalftone(
 ): PhotoPrintImageData {
   const { width, height, data } = image;
   const output = new Uint8ClampedArray(data.length);
-  const amount = strength / 100;
-  const cellSize = Math.max(4, Math.min(20, Math.min(width, height) / 110));
+  const amount = effectAmount(strength);
+  const shortEdge = Math.min(width, height);
+  const cellSize = Math.min(shortEdge, Math.max(2, Math.min(8, shortEdge / 400)));
   const columns = Math.ceil(width / cellSize);
   const rows = Math.ceil(height / cellSize);
   const cells: HalftoneCell[] = new Array(columns * rows);
@@ -249,7 +255,8 @@ function applyHalftone(
       // Gate each rasterized dot by its own pixel tone so a dark neighboring
       // cell cannot paint over white letter holes or a clean paper field.
       const localInk = imageInkCoverage(data[index], data[index + 1], data[index + 2], sourceTone);
-      const dotCoverage = circleCoverage * localInk * 0.92;
+      const localInkRetention = cellInk === 0 ? 0 : clamp01(localInk / cellInk);
+      const dotCoverage = circleCoverage * localInkRetention * 0.92;
       // At full strength this is a real print screen: sampled image color
       // occupies the dots and the gaps reveal stock paper. Lower settings
       // blend that print back with the unprocessed photo.
@@ -277,10 +284,10 @@ function applyDistressed(
 ): PhotoPrintImageData {
   const { width, height, data } = image;
   const output = new Uint8ClampedArray(data.length);
-  const amount = strength / 100;
+  const amount = effectAmount(strength);
   const shortEdge = Math.min(width, height);
-  const broadWear = createNoiseSampler(width, height, Math.max(5, shortEdge * 0.028), 0x57454152);
-  const fineWear = createNoiseSampler(width, height, Math.max(2, shortEdge * 0.006), 0x43484950);
+  const broadWear = createNoiseSampler(width, height, Math.max(3, shortEdge * 0.018), 0x57454152);
+  const fineWear = createNoiseSampler(width, height, Math.max(2, shortEdge * 0.004), 0x43484950);
 
   for (let y = 0; y < height; y++) {
     for (let x = 0; x < width; x++) {
@@ -301,14 +308,14 @@ function applyDistressed(
       const up = readTone(data, width, height, x, y - 1);
       const down = readTone(data, width, height, x, y + 1);
       const edge = clamp01((Math.abs(right - left) + Math.abs(down - up)) * 0.72);
-      const edgeWear = smoothstep(0.1, 0.48, edge) * localInk * 0.86;
+      const edgeWear = smoothstep(0.1, 0.48, edge) * localInk * 0.56;
       const eligibleRegion = Math.max(localInk, edgeWear);
 
       const coarse = broadWear(x, y);
       const detail = fineWear(x, y);
       const micro = hashNoise(x, y, 0x4d494352);
-      const wearPattern = coarse * 0.58 + detail * 0.34 + micro * 0.08;
-      const missingInk = (1 - smoothstep(0.2, 0.61, wearPattern)) * eligibleRegion;
+      const wearPattern = coarse * 0.24 + detail * 0.46 + micro * 0.3;
+      const missingInk = (1 - smoothstep(0.12, 0.42, wearPattern)) * eligibleRegion;
       const damage = missingInk * amount;
 
       output[index] = mix(data[index], paperRgb[0], damage);

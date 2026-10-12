@@ -1,0 +1,36 @@
+[
+  {
+    "role": "portrait",
+    "width": 2160,
+    "height": 3840,
+    "before": {
+      "meanAbsoluteRgbError": 30.320042116769546,
+      "maxChannelDelta": 86,
+      "p95PixelMaxChannelDelta": 63,
+      "alphaChanged": 0
+    },
+    "after": {
+      "meanAbsoluteRgbError": 9.458316173161009,
+      "maxChannelDelta": 34,
+      "p95PixelMaxChannelDelta": 21,
+      "alphaChanged": 0
+    }
+  },
+  {
+    "role": "landscape",
+    "width": 3840,
+    "height": 2160,
+    "before": {
+      "meanAbsoluteRgbError": 23.155297590342077,
+      "maxChannelDelta": 86,
+      "p95PixelMaxChannelDelta": 48,
+      "alphaChanged": 0
+    },
+    "after": {
+      "meanAbsoluteRgbError": 7.954508101851852,
+      "maxChannelDelta": 33,
+      "p95PixelMaxChannelDelta": 16,
+      "alphaChanged": 0
+    }
+  }
+]

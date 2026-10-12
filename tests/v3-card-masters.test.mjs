@@ -75,8 +75,9 @@ test('editorial embeds the exact supplied brush path as a unique local SVG clip'
   assert.equal(washArt.inset, '0');
   assert.equal(washArt.width, '100%');
   assert.equal(washArt.height, '100%');
-  assert.equal(Number(washPhoto.opacity), 0.16, 'the processed image stays visible beneath copy');
-  assert.match(washPhoto.filter, /blur\(\.22cqi\)/u, 'the wash keeps print shapes legible');
+  assert.ok(Number(washPhoto.opacity) >= 0.03 && Number(washPhoto.opacity) <= 0.08, 'the full-card wash remains faint beneath the original portrait and copy');
+  const washBlur = Number(washPhoto.filter.match(/blur\(([\d.]+)cqi\)/u)?.[1]);
+  assert.ok(washBlur >= 1 && washBlur <= 3, 'the background softens recognizable facial detail instead of showing a second sharp portrait');
   assert.equal(washPhoto['mask-image'], undefined, 'the photo no longer fades at a panel boundary');
   assert.equal(copyScrim.inset, '0', 'the paper scrim covers the full card');
   assert.match(copyScrim.background, /radial-gradient/u);
