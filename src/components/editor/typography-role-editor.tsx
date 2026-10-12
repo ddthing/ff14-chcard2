@@ -14,17 +14,17 @@ const ROLES: readonly CardTypographyRole[] = [
 const COPY = {
   ko: {
     title: '서체 세부 편집', role: '텍스트 그룹', font: '글꼴', size: '크기', weight: '굵기', spacing: '자간',
-    reset: '그룹 초기화', defaultFont: '카드 기본 글꼴', preview: '미리보기', sizeHelp: '카드 기본 크기 기준', licenseLink: '글꼴 사용 조건', fontSupport: '지원 문자',
+    reset: '그룹 초기화', defaultFont: '카드 기본 글꼴', preview: '미리보기', sizeHelp: '카드 기본 크기 기준', fontSupport: '지원 문자',
     roles: { display: '이름', secondaryDisplay: '소개', job: '직업', information: '정보 값', label: '레이블', caption: '캡션', micro: '짧은 문구' },
   },
   en: {
     title: 'Fine tune typography', role: 'Text group', font: 'Font family', size: 'Size', weight: 'Weight', spacing: 'Letter spacing',
-    reset: 'Reset group', defaultFont: 'Card default', preview: 'Preview', sizeHelp: 'Relative to the card default', licenseLink: 'Font use terms', fontSupport: 'Supports',
+    reset: 'Reset group', defaultFont: 'Card default', preview: 'Preview', sizeHelp: 'Relative to the card default', fontSupport: 'Supports',
     roles: { display: 'Name', secondaryDisplay: 'Story', job: 'Job', information: 'Information', label: 'Labels', caption: 'Captions', micro: 'Microcopy' },
   },
   ja: {
     title: '文字を細かく調整', role: 'テキストグループ', font: 'フォント', size: 'サイズ', weight: '太さ', spacing: '文字間隔',
-    reset: 'グループをリセット', defaultFont: 'カードの標準', preview: 'プレビュー', sizeHelp: 'カードの標準サイズを基準', licenseLink: 'フォントの利用条件', fontSupport: '対応文字',
+    reset: 'グループをリセット', defaultFont: 'カードの標準', preview: 'プレビュー', sizeHelp: 'カードの標準サイズを基準', fontSupport: '対応文字',
     roles: { display: '名前', secondaryDisplay: '紹介文', job: 'ジョブ', information: '情報', label: 'ラベル', caption: 'キャプション', micro: '短い文言' },
   },
 } as const;
@@ -259,9 +259,6 @@ export function TypographyRoleEditor({ locale }: { locale: Locale }) {
           >
             {copy.reset}
           </button>
-          <a className={styles.licenseLink} href="/fonts/NOTICE.txt" target="_blank" rel="noopener noreferrer">
-            {copy.licenseLink}
-          </a>
         </div>
       )}
     </details>
