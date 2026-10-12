@@ -63,7 +63,8 @@ test('editorial embeds the exact supplied brush path as a unique local SVG clip'
     assert.equal(shape.inkOutline, '/assets/card-materials/v3/editorial-brush-outline.svg');
   }
   assert.match(editorialCss, /\.photoClip\s*\{[^}]*clip-path:\s*var\(--editorial-brush-clip\)/s);
-  assert.match(editorialCss, /\.brushUnderlay\s*\{[^}]*clip-path:\s*var\(--editorial-brush-clip\)/s);
+  assert.doesNotMatch(editorialCss, /brushUnderlay/, 'the photo edge has no enlarged ink outline');
+  assert.doesNotMatch(editorialTsx, /brushUnderlay/, 'no dark underlay remains behind the clipped photo');
   assert.match(editorialCss, /data-brush-composition='side-panel'[\s\S]*?max-width:\s*calc\(var\(--editorial-copy-left\) - var\(--editorial-photo-left\) - 1\.8%\)/);
   assert.match(editorialCss, /data-brush-composition='stacked'[\s\S]*?max-width:\s*none/);
   assert.doesNotMatch(editorialCss, /editorial-brush-mask/);
@@ -97,7 +98,7 @@ test('editorial embeds the exact supplied brush path as a unique local SVG clip'
   assert.match(editorialTsx, /useId\(\)/);
   assert.match(editorialTsx, /clipPathUnits="objectBoundingBox"/);
   assert.match(editorialTsx, /transform="scale\(0\.0009765625 0\.0006510416666666666\)"/);
-  assert.equal([...editorialTsx.matchAll(/data-card-local-clip=\{brushClipId\}/g)].length, 2);
+  assert.equal([...editorialTsx.matchAll(/data-card-local-clip=\{brushClipId\}/g)].length, 1, 'the photo retains its instance-local clip for export');
   assert.match(editorialTsx, /data-photo-atmosphere aria-hidden="true"/);
   assert.match(editorialTsx, /className=\{styles\.photoArt\}/);
   assert.match(editorialTsx, /url\(#\$\{brushClipId\}\)/);

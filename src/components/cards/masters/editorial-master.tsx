@@ -176,7 +176,6 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
           </clipPath>
         </defs>
       </svg>
-      <div className={styles.brushUnderlay} data-card-local-clip={brushClipId} aria-hidden="true" />
       <div className={styles.photoClip} data-card-local-clip={brushClipId}>
         <ArtPhoto data={data} className={styles.photoArt} locale={locale} />
       </div>
