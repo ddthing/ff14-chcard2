@@ -336,31 +336,10 @@
   pointer-events: none;
 }
 
-.frame::before,
-.frame::after {
-  position: absolute;
-  z-index: 0;
-  border: var(--master-rule-weight, .13cqi) solid color-mix(in srgb, var(--craft-brass) 88%, var(--craft-ivory));
-  content: '';
-}
-
-.frame::before { inset: 1.6%; }
-.frame::after { inset: 2.35%; opacity: .62; }
-
 .frame :global([data-print-frame='cinematic']) {
-  --frame-inset: 20em;
-  --corner-size: 80em;
-  --corner-reach: 45em;
   z-index: 1;
   opacity: .9;
 }
-
-.frame :global([data-print-frame='cinematic'] > span:nth-of-type(-n+4)),
-.frame :global([data-print-frame='cinematic'] > span:nth-of-type(9)) {
-  display: none !important;
-}
-
-.frame :global([data-print-frame='cinematic'] > span:nth-of-type(7)) { display: block !important; }
 
 /* Square preserves a compact campaign title and the four precise print facts. */
 .canvas[data-ratio='1:1'] {

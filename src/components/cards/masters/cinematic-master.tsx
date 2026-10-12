@@ -132,7 +132,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
       </section>
 
       <div className={styles.frame} aria-hidden="true">
-        <PrintFrame family="cinematic" />
+        <PrintFrame family="cinematic" geometry="card" />
       </div>
     </div>
   );

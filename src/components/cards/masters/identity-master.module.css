@@ -1,8 +1,8 @@
 .canvas {
-  --identity-photo-left: 2.2%;
-  --identity-photo-top: 2.2%;
-  --identity-photo-width: 95.6%;
-  --identity-photo-height: 56.1%;
+  --identity-photo-left: 0%;
+  --identity-photo-top: 0%;
+  --identity-photo-width: 100%;
+  --identity-photo-height: 58.2%;
   --identity-reading-field-height: 28%;
   --identity-paper-top: 58.2%;
   --identity-paper-left: 0%;
@@ -117,31 +117,8 @@
   position: absolute;
   z-index: 10;
   inset: 0;
+  color: var(--craft-brass);
   pointer-events: none;
-}
-
-.frame::before,
-.frame::after {
-  position: absolute;
-  z-index: 0;
-  border: var(--identity-rule) solid color-mix(in srgb, var(--craft-brass) 84%, var(--craft-paper));
-  content: '';
-}
-
-.frame::before { inset: 1.65%; }
-.frame::after { inset: 2.45%; opacity: .62; }
-
-.frame :global([data-print-frame='id-card']) {
-  --frame-inset: 20em;
-  --corner-size: 80em;
-  --corner-reach: 35em;
-  z-index: 1;
-  opacity: .84;
-}
-
-.frame :global([data-print-frame='id-card'] > span:nth-of-type(-n+4)),
-.frame :global([data-print-frame='id-card'] > span:nth-of-type(9)) {
-  display: none;
 }
 
 .masthead {
@@ -535,7 +512,7 @@
 
 /* Square and portrait ratios reserve the lower half for the complete record. */
 .canvas[data-ratio='1:1'] {
-  --identity-photo-height: 48.5%;
+  --identity-photo-height: 50.8%;
   --identity-reading-field-height: 32.5%;
   --identity-paper-top: 50.8%;
   --identity-paper-padding: 3.4cqi 5.8cqi 6.5cqi;
@@ -560,7 +537,7 @@
 .canvas[data-ratio='1:1'] .recordColumn + .recordColumn { padding-left: 2.2cqi; }
 
 .canvas[data-ratio='3:4'] {
-  --identity-photo-height: 58.5%;
+  --identity-photo-height: 60.6%;
   --identity-reading-field-height: 27%;
   --identity-paper-top: 60.6%;
   --identity-paper-padding: 4.1cqi 6.1cqi 6.5cqi;
@@ -569,12 +546,9 @@
 }
 
 .canvas[data-ratio='9:16'] {
-  --identity-photo-left: 2.2%;
-  --identity-photo-top: 2.2%;
-  --identity-photo-width: 95.6%;
-  --identity-photo-height: 62.6%;
+  --identity-photo-height: 64.9%;
   --identity-reading-field-height: 25%;
-  --identity-paper-top: 64.8%;
+  --identity-paper-top: 64.9%;
   --identity-paper-padding: 3.6cqi 6.2cqi 6cqi;
   --identity-ribbon-left: 8.8%;
   --identity-ribbon-width: 12.4%;
@@ -601,17 +575,17 @@
 .canvas[data-ratio='9:16'] .photoQuote { font-size: 2.4cqi; }
 .canvas[data-ratio='9:16'] .photoStamp { font-size: 1.2cqi; }
 
-/* Landscape reflows into a portrait photograph and a compact archive panel. */
+/* Landscape fills the left side with the portrait and carries the record to the card edges. */
 .canvas[data-ratio='16:9'] {
-  --identity-photo-left: 1.65%;
-  --identity-photo-top: 2.2%;
-  --identity-photo-width: 43.5%;
-  --identity-photo-height: 95.6%;
+  --identity-photo-left: 0%;
+  --identity-photo-top: 0%;
+  --identity-photo-width: 45%;
+  --identity-photo-height: 100%;
   --identity-reading-field-height: 16.5%;
-  --identity-paper-top: 2.2%;
+  --identity-paper-top: 0%;
   --identity-paper-left: 45%;
-  --identity-paper-right: 2.2%;
-  --identity-paper-bottom: 2.2%;
+  --identity-paper-right: 0%;
+  --identity-paper-bottom: 0%;
   --identity-paper-padding: 7cqi 4.5cqi 5cqi;
   --identity-ribbon-safe-bottom: 4.5cqi;
   --identity-ribbon-left: 5%;
@@ -629,6 +603,11 @@
 .canvas[data-ratio='16:9'] .photoCopy { top: 5.8%; right: auto; left: 19%; width: 20%; }
 .canvas[data-ratio='16:9'] .photoQuote { font-size: 1.45cqi; }
 .canvas[data-ratio='16:9'] .photoStamp { font-size: .72cqi; }
+.canvas[data-ratio='16:9'] .seamDivider {
+  top: 50%;
+  left: 45%;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
 .canvas[data-ratio='16:9'] .heroIdentity {
   grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr) minmax(6cqi, .38fr);
   gap: 1.1cqi;

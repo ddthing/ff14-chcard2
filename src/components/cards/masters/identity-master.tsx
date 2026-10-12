@@ -115,7 +115,7 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
         />
       </div>
       <div className={styles.frame} aria-hidden="true">
-        <PrintFrame family="id-card" />
+        <PrintFrame family="id-card" geometry="card" />
       </div>
 
       <header
