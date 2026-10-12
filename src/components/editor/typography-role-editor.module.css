@@ -23,7 +23,6 @@
   font-weight: 550;
 }
 
-.field select,
 .rangeField select {
   width: 100%;
   min-height: 44px;
@@ -35,10 +34,111 @@
   font: inherit;
 }
 
-.field select:disabled,
 .rangeField select:disabled,
 .rangeField input:disabled {
   opacity: 0.55;
+}
+
+.fieldLabel {
+  color: var(--app-text);
+}
+
+.fontSearch {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.fontSearchInput {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-control);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 13px;
+}
+
+.fontOptions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  min-width: 0;
+}
+
+.fontChoice {
+  display: flex;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 7px 9px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--app-control);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  text-align: start;
+  word-break: normal;
+  cursor: pointer;
+}
+
+.fontChoiceText {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.fontChoiceDetail {
+  color: var(--app-text-muted);
+  font-size: 11px;
+  font-weight: 450;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+
+.fontChoice:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+.fontChoice[aria-pressed='true'] {
+  border-width: 2px;
+  border-color: var(--app-accent);
+  background: var(--app-control-hover);
+}
+
+.fontSelected {
+  flex: 0 0 auto;
+  color: var(--app-accent);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.fontChoice:hover {
+  background: var(--app-control-hover);
+}
+
+.noFontResults {
+  grid-column: 1 / -1;
+  align-self: center;
+  min-height: 44px;
+  padding-block: 12px;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-weight: 450;
+  line-height: 1.4;
 }
 
 .fontSupport,
@@ -108,10 +208,6 @@
   padding-block: 4px 12px;
 }
 
-@media (max-width: 900px) {
-  .primaryControls { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
-}
-
 .reset {
   justify-self: start;
   min-width: 44px;
@@ -127,15 +223,26 @@
   cursor: pointer;
 }
 
-.field select:focus-visible,
 .rangeField select:focus-visible,
 .rangeField input:focus-visible,
+.fontSearchInput:focus-visible,
+.fontChoice:focus-visible,
 .advanced summary:focus-visible,
 .reset:focus-visible {
   outline: 2px solid var(--app-focus);
   outline-offset: 2px;
 }
 
+@media (max-width: 900px) {
+  .primaryControls { grid-template-columns: minmax(0, 1fr); align-items: start; }
+  .fontOptions { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .sizeField { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: center; gap: 8px; }
+  .sizeField > span { grid-column: 1; grid-row: 1; align-items: center; }
+  .sizeField input[type='range'] { grid-column: 2; grid-row: 1; margin: 0; }
+}
+
 @media (forced-colors: active) {
   .advanced summary::after { border-color: ButtonText; }
+  .fontChoice[aria-pressed='true'] { border-color: Highlight; }
+  .fontSelected { color: Highlight; }
 }

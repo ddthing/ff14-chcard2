@@ -33,6 +33,7 @@ export function CardTextEditorNavigation({
   onSelectItem,
   children,
 }: CardTextEditorNavigationProps) {
+  const navigationRef = useRef<HTMLDetailsElement>(null);
   const categoryItems = getTextItemsForCategory(items, category);
   const selectedItem = resolveSelectedTextItem(items, category, selectedId);
   const selectedLabel = selectedItem?.kind === 'label'
@@ -45,79 +46,85 @@ export function CardTextEditorNavigation({
     if (!nextItems.some((item) => item.id === selectedId) && nextItems[0]) onSelectItem(nextItems[0]);
   }
 
+  function selectItem(item: CardTextItem) {
+    onSelectItem(item);
+    if (navigationRef.current) {
+      navigationRef.current.open = false;
+      navigationRef.current.querySelector('summary')?.focus({ preventScroll: true });
+    }
+  }
+
   return (
     <section className={styles.editor} data-text-editor="true" data-selected-text-id={selectedItem?.id ?? ''}>
-      <div className={styles.categories} role="group" aria-label={copy.textEditor.categories[category]}>
-        {CARD_TEXT_CATEGORIES.map((itemCategory) => {
-          const disabled = disabledCategories.includes(itemCategory);
-          return (
-            <button
-              key={itemCategory}
-              type="button"
-              disabled={disabled}
-              aria-pressed={category === itemCategory}
-              onClick={() => { if (!disabled) selectCategory(itemCategory); }}
-            >{copy.textEditor.categories[itemCategory]}</button>
-          );
-        })}
-      </div>
-
-      {categoryItems.length > 2 ? (
-        <label className={styles.itemSelect}>
-          <span className={styles.visuallyHidden}>{copy.textEditor.items}</span>
-          <select
-            data-text-item-select="true"
-            aria-label={copy.textEditor.items}
-            value={selectedItem?.id ?? ''}
-            onChange={(event) => {
-              const next = categoryItems.find((item) => item.id === event.currentTarget.value);
-              if (next) onSelectItem(next);
-            }}
-          >
-            {categoryItems.map((item) => {
-              const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
-              const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
-              return <option key={item.id} value={item.id}>{ordinal}. {label}{!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}</option>;
-            })}
-          </select>
-        </label>
-      ) : (
-        <div className={styles.itemGroup}>
-          <ul className={styles.itemList} aria-label={copy.textEditor.categories[category]}>
-            {categoryItems.map((item) => {
-              const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
-              const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
+      <details ref={navigationRef} className={styles.navigation} data-text-navigation>
+        <summary data-selected-text-context={selectedItem?.id ?? ''}>
+          <small className={styles.itemOrdinal} aria-hidden="true">{selectedItem ? getCardTextItemOrdinal(categoryItems, selectedItem.id) : ''}</small>
+          <strong>{selectedLabel || copy.textEditor.items}</strong>
+        </summary>
+        <div className={styles.navigationBody}>
+          <div className={styles.categories} role="group" aria-label={copy.textEditor.categories[category]}>
+            {CARD_TEXT_CATEGORIES.map((itemCategory) => {
+              const disabled = disabledCategories.includes(itemCategory);
               return (
-                <li key={item.id}>
-                  <button
-                    type="button"
-                    className={styles.itemButton}
-                    data-text-item-id={item.id}
-                    data-text-item-ordinal={ordinal}
-                    aria-pressed={selectedItem?.id === item.id}
-                    aria-label={`${label}${!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}`}
-                    onClick={() => onSelectItem(item)}
-                  >
-                    <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}</small>
-                    <span>{label}</span>
-                    {!item.value.trim() && <small>{copy.textEditor.hiddenText}</small>}
-                  </button>
-                </li>
+                <button
+                  key={itemCategory}
+                  type="button"
+                  disabled={disabled}
+                  aria-pressed={category === itemCategory}
+                  onClick={() => { if (!disabled) selectCategory(itemCategory); }}
+                >{copy.textEditor.categories[itemCategory]}</button>
               );
             })}
-          </ul>
+          </div>
+
+          {categoryItems.length > 2 ? (
+            <label className={styles.itemSelect}>
+              <span className={styles.visuallyHidden}>{copy.textEditor.items}</span>
+              <select
+                data-text-item-select="true"
+                aria-label={copy.textEditor.items}
+                value={selectedItem?.id ?? ''}
+                onChange={(event) => {
+                  const next = categoryItems.find((item) => item.id === event.currentTarget.value);
+                  if (next) selectItem(next);
+                }}
+              >
+                {categoryItems.map((item) => {
+                  const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
+                  const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
+                  return <option key={item.id} value={item.id}>{ordinal}. {label}{!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}</option>;
+                })}
+              </select>
+            </label>
+          ) : (
+            <div className={styles.itemGroup}>
+              <ul className={styles.itemList} aria-label={copy.textEditor.categories[category]}>
+                {categoryItems.map((item) => {
+                  const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
+                  const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
+                  return (
+                    <li key={item.id}>
+                      <button
+                        type="button"
+                        className={styles.itemButton}
+                        data-text-item-id={item.id}
+                        data-text-item-ordinal={ordinal}
+                        aria-pressed={selectedItem?.id === item.id}
+                        aria-label={`${label}${!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}`}
+                        onClick={() => selectItem(item)}
+                      >
+                        <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}</small>
+                        <span>{label}</span>
+                        {!item.value.trim() && <small>{copy.textEditor.hiddenText}</small>}
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
-      )}
-      {selectedItem && (
-        <p
-          className={styles.selectedItem}
-          data-selected-text-context={selectedItem.id}
-          aria-label={`${copy.textEditor.selectedItem}: ${getCardTextItemOrdinal(categoryItems, selectedItem.id)} · ${selectedLabel}`}
-        >
-          <small className={styles.itemOrdinal} aria-hidden="true">{getCardTextItemOrdinal(categoryItems, selectedItem.id)}</small>
-          <strong>{selectedLabel}</strong>
-        </p>
-      )}
+      </details>
 
       {children}
     </section>

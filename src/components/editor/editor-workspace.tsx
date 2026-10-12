@@ -488,6 +488,10 @@ function EditorInspector({
   }, [onSelectTextItem, selectedTextId, selectedTextItem]);
 
   useLayoutEffect(() => {
+    if (isOpen && activeTask === 'information' && inspectorBodyRef.current) inspectorBodyRef.current.scrollTop = 0;
+  }, [activeTask, isOpen, selectedTextItem?.id]);
+
+  useLayoutEffect(() => {
     const previousTask = previousTaskRef.current;
     const inspectorWasOpen = previousInspectorOpenRef.current;
     previousTaskRef.current = activeTask;
@@ -986,11 +990,24 @@ function EditorInspector({
               onCategoryChange={onSelectTextCategory}
               onSelectItem={onSelectTextItem}
             >
-              {activeTextCategory !== 'copy' && renderSelectedProfileControl()}
-
-              {!supportsPerItemTextEditing && (
-                <p className={styles.globalTypographyNotice} role="note">{copy.textEditor.globalTypographyOnly}</p>
-              )}
+              {supportsPerItemTextEditing
+                ? <TypographyRoleEditor locale={locale} item={selectedTextItem}>
+                    {activeTextCategory !== 'copy' && renderSelectedProfileControl()}
+                    {selectedTextItem?.supportsTextOverride && (
+                      <CardTextOverrideInput
+                        key={selectedTextItem.id}
+                        item={selectedTextItem}
+                        copy={copy}
+                        overriddenValue={textOverrides?.[selectedTextItem.id]}
+                      />
+                    )}
+                  </TypographyRoleEditor>
+                : <>
+                    {activeTextCategory !== 'copy' && renderSelectedProfileControl()}
+                    {!supportsPerItemTextEditing && (
+                      <p className={styles.globalTypographyNotice} role="note">{copy.textEditor.globalTypographyOnly}</p>
+                    )}
+                  </>}
 
               {textCategory === 'information' && (hasUnrepresentedProfileFields || FFXIV_OFFICIAL_ASSETS_ENABLED) && (
                 <details className={`${styles.disclosure} ${styles.editorGroup}`}>
@@ -1014,17 +1031,6 @@ function EditorInspector({
                 </details>
               )}
 
-              {supportsPerItemTextEditing && selectedTextItem?.supportsTextOverride && (
-                <CardTextOverrideInput
-                  key={selectedTextItem.id}
-                  item={selectedTextItem}
-                  copy={copy}
-                  overriddenValue={textOverrides?.[selectedTextItem.id]}
-                />
-              )}
-              {supportsPerItemTextEditing
-                ? <TypographyRoleEditor locale={locale} item={selectedTextItem} />
-                : null}
               <details className={`${styles.disclosure} ${styles.editorGroup}`}>
                 <summary>{copy.textEditor.additionalSettings}</summary>
                 <div className={styles.additionalInformation}>
@@ -1238,7 +1244,7 @@ function EditorCanvas({
   contentTextEditing: boolean;
   textCategory: CardTextCategory;
   selectedTextId: string | null;
-  onSelectTextTarget: (item: CardTextItem) => void;
+  onSelectTextTarget: (item: CardTextItem, focusInput: boolean) => void;
   panMode: boolean;
   onTogglePan: () => void;
   onRequestScreenshot: () => void;
@@ -1739,9 +1745,9 @@ export function EditorWorkspace() {
     editorStore.getState().setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true });
   }, []);
 
-  const selectTextTarget = useCallback((item: CardTextItem) => {
+  const selectTextTarget = useCallback((item: CardTextItem, focusInput = false) => {
     selectTextItemFromList(item);
-    setPendingTextFocusId(item.id);
+    setPendingTextFocusId(focusInput ? item.id : null);
     openTask('information');
   }, [openTask, selectTextItemFromList]);
 

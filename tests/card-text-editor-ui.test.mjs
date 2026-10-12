@@ -86,7 +86,8 @@ test('the overlay is rendered through a body portal outside the card/export subt
 
   assert.match(overlay, /createPortal\([\s\S]*?document\.body/u);
   assert.match(overlay, /data-card-text-target=\{target\.id\}/u);
-  assert.match(overlay, /target\.compact && isSelected \? target\.expandedBounds/u);
+  assert.match(overlay, /data-compact=\{target\.compact \? 'true' : 'false'\}/u);
+  assert.doesNotMatch(overlay, /target\.expandedBounds/u);
   assert.match(overlay, /!target\.compact \|\| isSelected/u);
   assert.doesNotMatch(preview, /CardTextOverlay/u);
 });

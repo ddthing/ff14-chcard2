@@ -1,6 +1,6 @@
 'use client';
 
-import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import { useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from 'react';
 import type { CardTypographyOverride } from '@/components/cards/types';
 import type { CardTextItem } from '@/lib/card-text-editing';
 import {
@@ -21,37 +21,47 @@ import styles from './typography-role-editor.module.css';
 const COPY = {
   ko: {
     title: '텍스트 스타일', font: '글꼴', size: '크기', weight: '굵기', tracking: '자간', advanced: '세부 조정',
+    searchFonts: '글꼴 검색', noMatchingFonts: '일치하는 글꼴이 없습니다.',
     reset: '이 항목 스타일 초기화', defaultFont: '기본 글꼴', inheritedFont: '저장된 기본 글꼴', unavailableFont: '저장된 글꼴 (사용할 수 없음)',
     resetInheritedRole: (role: string) => `${role} 그룹의 저장 스타일 초기화`,
-    sizeHelp: '카드 기본 크기', supports: '지원 문자',
+    supports: '지원 문자',
     fallback: '이 글꼴은 선택한 문자를 지원하지 않아 카드 기본 글꼴로 표시됩니다.',
     missing: '저장된 글꼴을 찾을 수 없어 카드 기본 글꼴로 표시됩니다.',
+    hidden: '저장된 글꼴은 새 선택 목록에서 숨겨져 있으며, 바꾸기 전까지 유지됩니다.',
     scripts: { latin: '영문', korean: '한글', japanese: '일본어' },
     roles: { display: '이름', secondaryDisplay: '소개', job: '직업', information: '정보 값', label: '레이블', caption: '캡션', micro: '짧은 문구' },
   },
   en: {
     title: 'Text style', font: 'Font family', size: 'Size', weight: 'Weight', tracking: 'Letter spacing', advanced: 'Advanced',
+    searchFonts: 'Search fonts', noMatchingFonts: 'No matching fonts.',
     reset: 'Reset item style', defaultFont: 'Default font', inheritedFont: 'Saved default font', unavailableFont: 'Saved font (unavailable)',
     resetInheritedRole: (role: string) => `Reset saved ${role.toLowerCase()} group style`,
-    sizeHelp: 'Card default', supports: 'Supports',
+    supports: 'Supports',
     fallback: 'This font does not support the selected script; the card uses its fallback font.',
     missing: 'The saved font is unavailable; the card uses its fallback font.',
+    hidden: 'This saved font is hidden from new choices and remains saved until replaced.',
     scripts: { latin: 'Latin', korean: 'Korean', japanese: 'Japanese' },
     roles: { display: 'Name', secondaryDisplay: 'Bio', job: 'Job', information: 'Information', label: 'Label', caption: 'Caption', micro: 'Short phrase' },
   },
   ja: {
     title: 'テキストスタイル', font: 'フォント', size: 'サイズ', weight: '太さ', tracking: '文字間隔', advanced: '詳細設定',
+    searchFonts: 'フォントを検索', noMatchingFonts: '一致するフォントはありません。',
     reset: 'この項目のスタイルをリセット', defaultFont: '標準フォント', inheritedFont: '保存済み標準フォント', unavailableFont: '保存済みフォント（利用不可）',
     resetInheritedRole: (role: string) => `保存済みの${role}グループスタイルをリセット`,
-    sizeHelp: 'カードの標準', supports: '対応文字',
+    supports: '対応文字',
     fallback: 'このフォントは選択した文字に対応していません。カードの代替フォントを使います。',
     missing: '保存済みのフォントが見つからないため、カードの代替フォントを使います。',
+    hidden: '保存済みフォントは新しい選択肢に表示されず、置き換えるまで保存されます。',
     scripts: { latin: 'ラテン', korean: '韓国語', japanese: '日本語' },
     roles: { display: '名前', secondaryDisplay: '紹介文', job: 'ジョブ', information: '情報', label: 'ラベル', caption: 'キャプション', micro: '短い文言' },
   },
 } as const;
 
 type EditableField = 'fontFamily' | 'sizePercent' | 'weight' | 'trackingEm';
+
+function getFontLabel(family: string): string {
+  return family.replace(/\s+Variable$/u, '');
+}
 
 function copyOverride(current: CardTypographyOverride | undefined, patch: Partial<CardTypographyOverride>): CardTypographyOverride {
   const next = { ...(current ?? {}), ...patch };
@@ -96,7 +106,8 @@ function rangeGroupHandlers(item: CardTextItem, field: EditableField) {
   };
 }
 
-export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: CardTextItem | null }) {
+export function TypographyRoleEditor({ locale, item, children }: { locale: Locale; item: CardTextItem | null; children?: ReactNode }) {
+  const [fontSearch, setFontSearch] = useState({ itemId: '', value: '' });
   const copy = COPY[locale];
   const template = useEditorStore((state) => state.design.template);
   const itemOverride = useEditorStore((state) => item ? state.design.textTypography?.[item.id] : undefined);
@@ -112,8 +123,17 @@ export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: C
   const treatment = getMasterTypographyTreatment(family, item.role, script);
   const defaultFontId = getTypographyFontIdForStack(treatment.fontFamily, script);
   const selectedFontId = itemOverride?.fontFamily ?? inheritedOverride?.fontFamily ?? '';
-  const selectedEntry = selectedFontId ? getTypographyFontEntry(selectedFontId) : undefined;
   const defaultEntry = defaultFontId ? getTypographyFontEntry(defaultFontId) : undefined;
+  const selectableOptions = options.filter((font) => font.id !== defaultFontId && font.supportedScripts.includes(script));
+  const fontSearchValue = fontSearch.itemId === item.id ? fontSearch.value : '';
+  const normalizedFontSearch = fontSearchValue.trim().toLowerCase();
+  const hasMatchingFontOption = selectableOptions.some((font) => getFontLabel(font.family).toLowerCase().includes(normalizedFontSearch))
+    || Boolean(defaultEntry?.family && getFontLabel(defaultEntry.family).toLowerCase().includes(normalizedFontSearch));
+  const visibleFontOptions = normalizedFontSearch
+    ? selectableOptions.filter((font) => getFontLabel(font.family).toLowerCase().includes(normalizedFontSearch) || font.id === selectedFontId)
+    : selectableOptions;
+  const showFontSearch = selectableOptions.length + 1 > 6;
+  const selectedEntry = selectedFontId ? getTypographyFontEntry(selectedFontId) : undefined;
   const effectiveEntry = selectedEntry ?? defaultEntry;
   const selectedFontSupportsScript = selectedEntry?.supportedScripts.includes(script) ?? false;
   const effectiveWeightRange = effectiveEntry?.axes.weight ?? [100, 900] as const;
@@ -133,7 +153,13 @@ export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: C
   const hasItemOverride = Boolean(itemOverride && Object.values(itemOverride).some((value) => value !== undefined));
   const hasInheritedOverride = Boolean(inheritedOverride && Object.values(inheritedOverride).some((value) => value !== undefined));
   const selectedEntryIsSelectable = selectedEntry ? isSelectableTypographyFontId(selectedEntry.id) : true;
-  const showCurrentFontOption = Boolean(selectedEntry && (!selectedEntryIsSelectable || !selectedFontSupportsScript));
+  const inheritedFontIsSelected = Boolean(!itemOverride?.fontFamily && inheritedOverride?.fontFamily === selectedEntry?.id);
+  const selectedFontIsLegacyUnavailable = Boolean(selectedFontId && selectedFontId !== defaultFontId
+    && (!selectedEntry || !selectedEntryIsSelectable || !selectedFontSupportsScript));
+  const defaultFontIsSelected = (!selectedFontId || selectedFontId === defaultFontId) && !selectedFontIsLegacyUnavailable;
+  const focusFontChoiceId = selectedEntry && selectedFontId !== defaultFontId && selectedEntryIsSelectable && selectedFontSupportsScript
+    ? selectedEntry.id
+    : undefined;
 
   function storeField(field: EditableField, patch: Partial<CardTypographyOverride>) {
     updateItemOverride(selectedItem, itemOverride, patch, `text-typography:${selectedItem.id}:${field}`);
@@ -144,51 +170,97 @@ export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: C
     storeField('sizePercent', { sizePercent: nextEffectiveSize / safeInherited * 100 });
   }
 
+  function chooseFont(fontFamily: string | undefined) {
+    const shouldOverrideInherited = !fontFamily
+      && inheritedOverride?.fontFamily
+      && inheritedOverride.fontFamily !== defaultFontId;
+    const nextFontFamily = fontFamily ?? (shouldOverrideInherited ? defaultFontId : undefined);
+    if ((nextFontFamily ?? '') === selectedFontId) return;
+
+    if (!nextFontFamily) {
+      storeField('fontFamily', { fontFamily: undefined });
+      return;
+    }
+
+    const nextEntry = getTypographyFontEntry(nextFontFamily) ?? defaultEntry;
+    const nextWeight = getTypographySupportedWeight(nextEntry?.id, requestedWeight);
+    storeField('fontFamily', { fontFamily: nextFontFamily, weight: nextWeight });
+  }
+
   return (
     <section className={styles.panel} data-text-typography-editor={item.id} aria-label={`${copy.title}: ${item.label} · ${copy.roles[item.role]}`}>
       <div className={styles.primaryControls}>
-        <label className={styles.field}>
-          <span>{copy.font}</span>
-          <select
-            data-text-font-family={item.id}
-            aria-label={copy.font}
-            value={selectedFontId}
-            onFocus={() => beginGroup(item.id, 'fontFamily')}
-            onBlur={() => endGroup(item.id, 'fontFamily')}
-            onChange={(event) => {
-              const fontFamily = event.currentTarget.value || undefined;
-              if (!fontFamily) {
-                storeField('fontFamily', { fontFamily: undefined });
-                return;
-              }
-              const nextEntry = getTypographyFontEntry(fontFamily) ?? defaultEntry;
-              const nextWeight = getTypographySupportedWeight(nextEntry?.id, requestedWeight);
-              storeField('fontFamily', { fontFamily, weight: nextWeight });
-            }}
-          >
-            <option value="">{copy.defaultFont}</option>
-            {selectedFontId && !selectedEntry && <option value={selectedFontId} disabled>{copy.unavailableFont}</option>}
-            {showCurrentFontOption && selectedEntry && (
-              <option value={selectedEntry.id} disabled>
-                {selectedEntry.family} · {!itemOverride?.fontFamily && inheritedOverride?.fontFamily ? `${copy.inheritedFont} · ` : ''}{selectedEntry.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}
-              </option>
+        <div className={styles.field}>
+          <span className={styles.fieldLabel}>{copy.font}</span>
+          {showFontSearch && (
+            <label className={styles.fontSearch}>
+              <span>{copy.searchFonts}</span>
+              <input
+                className={styles.fontSearchInput}
+                type="search"
+                value={fontSearchValue}
+                aria-label={`${item.label}: ${copy.searchFonts}`}
+                onChange={(event) => setFontSearch({ itemId: item.id, value: event.currentTarget.value })}
+              />
+            </label>
+          )}
+          <div className={styles.fontOptions} role="group" aria-label={`${copy.font}: ${item.label}`}>
+            {selectedFontIsLegacyUnavailable && (
+              <button type="button" className={styles.fontChoice} aria-pressed="true" disabled>
+                <span className={styles.fontChoiceText}>{selectedEntry ? getFontLabel(selectedEntry.family) : copy.unavailableFont}</span>
+                <span className={styles.fontSelected} aria-hidden="true">✓</span>
+              </button>
             )}
-            {options.filter((font) => !showCurrentFontOption || font.id !== selectedFontId).map((font) => (
-              <option key={font.id} value={font.id} disabled={!font.supportedScripts.includes(script)}>
-                {font.family} · {!itemOverride?.fontFamily && inheritedOverride?.fontFamily === font.id ? `${copy.inheritedFont} · ` : ''}{font.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}
-              </option>
-            ))}
-          </select>
+            <button
+              type="button"
+              className={styles.fontChoice}
+              data-text-font-family={!focusFontChoiceId ? item.id : undefined}
+              aria-pressed={defaultFontIsSelected}
+              onFocus={() => beginGroup(item.id, 'fontFamily')}
+              onBlur={() => endGroup(item.id, 'fontFamily')}
+              onClick={() => chooseFont(undefined)}
+            >
+              <span className={styles.fontChoiceText}>
+                <span>{copy.defaultFont}</span>
+                {defaultEntry && <small className={styles.fontChoiceDetail}>{getFontLabel(defaultEntry.family)}</small>}
+              </span>
+              {defaultFontIsSelected && <span className={styles.fontSelected} aria-hidden="true">✓</span>}
+            </button>
+            {visibleFontOptions.map((font) => {
+              const isSelected = selectedFontId === font.id;
+              return (
+                <button
+                  key={font.id}
+                  type="button"
+                  className={styles.fontChoice}
+                  data-text-font-family={focusFontChoiceId === font.id ? item.id : undefined}
+                  aria-pressed={isSelected}
+                  onFocus={() => beginGroup(item.id, 'fontFamily')}
+                  onBlur={() => endGroup(item.id, 'fontFamily')}
+                  onClick={() => chooseFont(font.id)}
+                >
+                  <span className={styles.fontChoiceText}>{getFontLabel(font.family)}</span>
+                  {isSelected && <span className={styles.fontSelected} aria-hidden="true">✓</span>}
+                </button>
+              );
+            })}
+            {showFontSearch && normalizedFontSearch && !hasMatchingFontOption && (
+              <small className={styles.noFontResults}>{copy.noMatchingFonts}</small>
+            )}
+          </div>
           {selectedEntry && (
-            <small className={styles.fontSupport}>{copy.supports}: {selectedEntry.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}</small>
+            <small className={styles.fontSupport}>
+              {copy.supports}: {selectedEntry.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}
+              {inheritedFontIsSelected && ` · ${copy.inheritedFont}`}
+            </small>
           )}
           {selectedFontId && !selectedEntry && <small className={styles.fontNotice} role="status">{copy.missing}</small>}
+          {selectedFontId && selectedEntry && !selectedEntryIsSelectable && <small className={styles.fontNotice} role="status">{copy.hidden}</small>}
           {selectedFontId && selectedEntry && !selectedFontSupportsScript && <small className={styles.fontNotice} role="status">{copy.fallback}</small>}
-        </label>
+        </div>
 
-        <label className={styles.rangeField}>
+        <label className={`${styles.rangeField} ${styles.sizeField}`}>
           <span>{copy.size} <output>{sizePercent}%</output></span>
-          <small>{copy.sizeHelp}</small>
           <input
             type="range"
             min={minimumSizePercent}
@@ -202,6 +274,8 @@ export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: C
           />
         </label>
       </div>
+
+      {children}
 
       <details className={styles.advanced}>
         <summary>{copy.advanced}</summary>

@@ -5,7 +5,7 @@ import { createPortal } from 'react-dom';
 import type { CardTextCategory, CardTextItem } from '@/lib/card-text-editing';
 import { getCardTextItemOrdinal, getEditorTextCategory } from './card-text-model';
 import styles from './card-text-overlay.module.css';
-import { placeTextTargets, type TextTargetBounds } from './text-target-geometry';
+import { placeTextTargets } from './text-target-geometry';
 
 const subscribeToMount = () => () => {};
 const getClientMountSnapshot = () => true;
@@ -16,7 +16,6 @@ interface PositionedTextTarget {
   label: string;
   ordinal: number;
   compact: boolean;
-  expandedBounds: TextTargetBounds;
   left: number;
   top: number;
   width: number;
@@ -30,7 +29,7 @@ interface CardTextOverlayProps {
   selectedId: string | null;
   measurementKey: string | number;
   targetLabel: (label: string, ordinal: number) => string;
-  onSelect: (item: CardTextItem) => void;
+  onSelect: (item: CardTextItem, focusInput: boolean) => void;
 }
 
 function stopPointerPropagation(event: ReactPointerEvent<HTMLButtonElement>) {
@@ -43,17 +42,14 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
   const frameRef = useRef<number | null>(null);
   const itemsById = useMemo<Map<string, CardTextItem>>(() => new Map(items.map((item) => [item.id, item])), [items]);
   const itemsRef = useRef(items);
-  const categoryRef = useRef(activeCategory);
-  const visibleIdsKey = items.filter((item) => item.visible && getEditorTextCategory(item) === activeCategory).map((item) => item.id).join('\u0000');
+  const visibleIdsKey = items.filter((item) => item.visible).map((item) => item.id).join('\u0000');
 
   const scheduleMeasurement = useCallback(() => {
     if (frameRef.current !== null) return;
     frameRef.current = requestAnimationFrame(() => {
       frameRef.current = null;
       const currentItems = itemsRef.current;
-      const currentCategory = categoryRef.current;
-      const categoryItems = currentItems.filter((item) => getEditorTextCategory(item) === currentCategory);
-      const activeItems = categoryItems.filter((item) => item.visible);
+      const activeItems = currentItems.filter((item) => item.visible);
       const surface = document.querySelector<HTMLElement>('#editor-canvas-stage [data-card-surface]');
       const stage = document.getElementById('editor-canvas-stage');
       if (!surface || !stage) {
@@ -100,9 +96,8 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
         nextTargets.push({
           id: item.id,
           label: item.label,
-          ordinal: getCardTextItemOrdinal(categoryItems, item.id),
+          ordinal: getCardTextItemOrdinal(currentItems.filter((candidate) => getEditorTextCategory(candidate) === getEditorTextCategory(item)), item.id),
           compact: placement.compact,
-          expandedBounds: placement.expandedBounds,
           left: placement.targetBounds.left,
           top: placement.targetBounds.top,
           width: placement.targetBounds.width,
@@ -115,7 +110,6 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
 
   useLayoutEffect(() => {
     itemsRef.current = items;
-    categoryRef.current = activeCategory;
     if (enabled && hasMounted) scheduleMeasurement();
   }, [activeCategory, enabled, hasMounted, items, scheduleMeasurement]);
 
@@ -156,14 +150,11 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
 
   return createPortal(
     <div className={styles.layer}>
-      {targets.filter((target) => {
-        const item = itemsById.get(target.id);
-        return item && getEditorTextCategory(item) === activeCategory;
-      }).map((target) => {
+      {targets.map((target) => {
         const item = itemsById.get(target.id);
         if (!item) return null;
         const isSelected = selectedId === target.id;
-        const bounds = target.compact && isSelected ? target.expandedBounds : target;
+        const bounds = target;
         const label = targetLabel(target.label, target.ordinal);
         return (
           <button
@@ -171,7 +162,7 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
             type="button"
             className={styles.target}
             data-card-text-target={target.id}
-            data-compact={target.compact && !isSelected ? 'true' : 'false'}
+            data-compact={target.compact ? 'true' : 'false'}
             data-selected={isSelected ? 'true' : 'false'}
             aria-label={label}
             aria-pressed={isSelected}
@@ -181,9 +172,9 @@ export function CardTextOverlay({ enabled, items, activeCategory, selectedId, me
             onPointerUp={stopPointerPropagation}
             onClick={(event) => {
               event.stopPropagation();
-              onSelect(item);
+              onSelect(item, event.detail === 0);
             }}
-          >{(!target.compact || isSelected) && <span className={styles.badge} aria-hidden="true">{target.ordinal}</span>}</button>
+          >{getEditorTextCategory(item) === activeCategory && (!target.compact || isSelected) && <span className={styles.badge} aria-hidden="true">{target.ordinal}</span>}</button>
         );
       })}
     </div>,
