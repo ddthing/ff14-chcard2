@@ -21,14 +21,19 @@ import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
 import { CARD_LEGACY_COPY, CARD_UI_LABELS, getCardDisplayBio, getCardPhotoAlt } from '@/lib/card-copy';
 import { getMasterArtProperties } from '@/lib/card-art-tokens';
 import { getCardMaterialAssets } from '@/lib/card-materials';
+import { getPhotoPrintPaperContext } from '@/lib/photo-print-browser';
 import { getCraftMaterialProperties } from '@/lib/card-graphics/materials';
 import { MASTER_CARD_CONFIG, MASTER_DESIGN_VERSION, MASTER_VISUAL_VERSION } from '@/lib/master-card-config';
 import { CinematicMaster } from './masters/cinematic-master';
 import { EditorialMaster } from './masters/editorial-master';
 import { IdentityMaster } from './masters/identity-master';
+import { PhotoPrintImage } from './PhotoPrintImage';
+import { CardTypographyOverrideScaler } from './card-typography-override-scaler';
 import styles from './Cards.module.css';
 import renderScopeStyles from './card-render-scope.module.css';
+import typographyStyles from './card-typography-overrides.module.css';
 import type { AdventurerCardCharacter, AdventurerCardData, CardRatio } from './types';
+import type { CardTypographyOverrides } from './types';
 
 type CardCustomProperties = CSSProperties & Record<string, string | number>;
 
@@ -104,15 +109,20 @@ const MASTER_TYPOGRAPHY_ROLES: readonly MasterTypographyRole[] = [
 function getMasterTypographyProperties(
   template: AdventurerCardData['design']['template'],
   scriptByRole: Readonly<Record<MasterTypographyRole, TypographyScript>>,
+  typography?: CardTypographyOverrides,
 ): CardCustomProperties {
   const family = getMasterTypographyFamily(template);
   const properties: CardCustomProperties = {};
 
   for (const role of MASTER_TYPOGRAPHY_ROLES) {
     const script = scriptByRole[role];
-    const treatment = getMasterTypographyTreatment(family, role, script);
+    const override = typography?.[role];
+    const treatment = getMasterTypographyTreatment(family, role, script, override);
     const cssRole = role.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`);
     properties[`--master-font-${cssRole}`] = treatment.fontFamily;
+    if (override?.weight !== undefined) properties[`--master-${cssRole}-weight-override`] = override.weight;
+    if (override?.sizePercent !== undefined) properties[`--master-${cssRole}-size-scale`] = override.sizePercent / 100;
+    if (override?.trackingEm !== undefined) properties[`--master-${cssRole}-tracking-adjustment`] = `${override.trackingEm}em`;
 
     // Preserve approved Latin display-role metrics; information metrics stay
     // explicit so their cross-script weight remains consistent.
@@ -259,7 +269,7 @@ function getCardProperties(
         localeScript,
       ),
       micro: localeScript,
-    })
+    }, design.typography)
     : {};
 
   return {
@@ -314,15 +324,13 @@ function CardImage({ data, locale, className }: { data: AdventurerCardData; loca
   return (
     <div className={className}>
       {imageUrl ? (
-        <Image
-          fill
-          src={imageUrl}
+        <PhotoPrintImage
+          source={imageUrl}
           alt={getCardPhotoAlt(character.name, locale)}
-          sizes="(max-width: 640px) 90vw, (max-width: 1200px) 42vw, 560px"
-          loading="eager"
-          decoding="async"
-          unoptimized={imageUrl.startsWith('/images/') || imageUrl.startsWith('data:') || imageUrl.startsWith('blob:')}
-          draggable={false}
+          effects={data.design.effects}
+          effectIntensity={data.design.effectIntensity}
+          paperColor={data.design.palette.light}
+          paperContext={getPhotoPrintPaperContext(data.design, data.character.jobId ?? data.character.job)}
         />
       ) : (
         <div className={styles.imageFallback} aria-hidden="true" />
@@ -352,7 +360,7 @@ function CardRoot({
 }) {
   const resolvedRatio = ratio ?? data.design.ratio ?? '4:5';
   const effects = data.design.effects.join(' ');
-  const rootClass = [styles.card, renderScopeStyles.root, className].filter(Boolean).join(' ');
+  const rootClass = [styles.card, renderScopeStyles.root, typographyStyles.root, className].filter(Boolean).join(' ');
   const extendedDesign = data.design as ExtendedDesign;
   const job = getJobVisuals(data.character);
   const layoutVariant = extendedDesign.layoutVariant ?? 'a';
@@ -391,6 +399,7 @@ function CardRoot({
       lang={resolvedLocale}
       aria-label={`${data.character.name}, ${getLocalizedCharacterFields(data.character, resolvedLocale).job} ${CARD_UI_LABELS[resolvedLocale].cardAltSuffix}`}
     >
+      <CardTypographyOverrideScaler overrides={layoutVariant === 'a' ? data.design.typography : undefined} />
       {children}
       {layoutVariant === 'a' && <MasterMaterial family={data.design.template} />}
     </article>

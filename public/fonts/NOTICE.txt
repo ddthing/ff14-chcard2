@@ -1,0 +1,23 @@
+Font notices for FF14 Adventurer Card
+
+The listed font files are served from /fonts/. Full license and copyright text for these families is available under /fonts/licenses/.
+
+Estonia
+Copyright 2010-2021 The Estonia Project Authors.
+Licensed under the SIL Open Font License, Version 1.1. The bundled files cover Latin, Latin Extended, and Vietnamese. Source: https://github.com/googlefonts/estonia
+Full license: /fonts/licenses/Estonia-OFL.txt
+
+Bricolage Grotesque
+Copyright 2022 The Bricolage Grotesque Project Authors.
+Licensed under the SIL Open Font License, Version 1.1. The bundled files cover Latin, Latin Extended, and Vietnamese; variable weights are 200-800. Source: https://github.com/ateliertriay/bricolage
+Full license: /fonts/licenses/Bricolage-Grotesque-OFL.txt
+
+Valley Sans
+Copyright 2026 The Valley Sans Project Authors.
+Licensed under the SIL Open Font License, Version 1.1. The bundled files cover Latin and Latin Extended; variable weights are 100-900. Source: https://github.com/HelsinkiTypeStudio/valley-sans
+Full license: /fonts/licenses/Valley-Sans-OFL.txt
+
+Gmarket Sans
+Copyright 2019 eBay Korea Co., Ltd., with Reserved Font Name "Gmarket Sans Font".
+The embedded license identifies the font as licensed under the SIL Open Font License, Version 1.1, and includes an additional clause 6. That clause says production images made with the font may be used by eBay Korea to promote the font unless the user explicitly rejects that use to the rightsholder with specific terms. The bundled faces are Light 300, Medium 500, and Bold 700 and cover Latin and Korean. Source: https://corp.gmarket.com/fonts/
+Full license: /fonts/licenses/Gmarket-Sans-OFL.txt

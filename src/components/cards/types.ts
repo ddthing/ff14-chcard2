@@ -10,6 +10,31 @@ export type CardTypographyPreset = 'editorial' | 'modern' | 'condensed' | 'class
 export type CardColorMode = 'auto' | 'job' | 'custom';
 export type CardDecorativeCopy = 'none' | 'default' | 'adventure' | 'companions';
 
+export const CARD_TYPOGRAPHY_ROLES = [
+  'display',
+  'secondaryDisplay',
+  'job',
+  'information',
+  'label',
+  'caption',
+  'micro',
+] as const;
+
+export type CardTypographyRole = (typeof CARD_TYPOGRAPHY_ROLES)[number];
+
+/** Optional per-role overrides layered over the selected card typography preset. */
+export interface CardTypographyOverride {
+  /** Stable ID from the local font registry. */
+  fontFamily?: string;
+  /** Relative size in percent; 100 keeps the master’s designed size. */
+  sizePercent?: number;
+  weight?: number;
+  /** Spacing adjustment in em, added to the master’s designed tracking. */
+  trackingEm?: number;
+}
+
+export type CardTypographyOverrides = Partial<Record<CardTypographyRole, CardTypographyOverride>>;
+
 export function isCardDecorativeCopy(value: unknown): value is CardDecorativeCopy {
   return value === 'none' || value === 'default' || value === 'adventure' || value === 'companions';
 }
@@ -72,11 +97,15 @@ export interface AdventurerCardDesign {
   palette: CardPalette;
   accentColor: string;
   typographyPreset: CardTypographyPreset;
+  /** Optional editable typography overrides; older cards continue using typographyPreset. */
+  typography?: CardTypographyOverrides;
   /** Kept for older card renderers and saved drafts. */
   imagePosition: string;
   /** Kept for older card renderers and saved drafts. */
   imageScale: number;
   effects: string[];
+  /** Per-effect strength values, keyed by registered card texture effect ID. */
+  effectIntensity?: Record<string, number>;
 }
 
 export interface AdventurerCardData {
@@ -98,7 +127,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     typographyPreset: 'editorial',
     imagePosition: '50% 50%',
     imageScale: 1,
-    effects: ['vignette', 'grain'],
+    effects: ['vignette', 'grain', 'xerox', 'halftone', 'distressed'],
   },
   editorial: {
     template: 'editorial',
@@ -111,7 +140,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     typographyPreset: 'editorial',
     imagePosition: '50% 50%',
     imageScale: 1,
-    effects: ['grain'],
+    effects: ['grain', 'xerox', 'halftone', 'distressed'],
   },
   'id-card': {
     template: 'id-card',
@@ -124,7 +153,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     typographyPreset: 'condensed',
     imagePosition: '50% 50%',
     imageScale: 1,
-    effects: [],
+    effects: ['xerox', 'halftone', 'distressed'],
   },
 };
 

@@ -11,9 +11,13 @@ import {
   type CardLayoutVariant,
   type CardRatio,
   type CardTypographyPreset,
+  type CardTypographyRole,
+  type CardTypographyOverride,
   isCardDecorativeCopy,
 } from '@/components/cards/types';
 import type { CardPalette } from '@/lib/palette';
+import { getTypographySupportedWeight, isSelectableTypographyFontId } from '@/lib/typography-presets';
+import { CARD_TEXTURE_EFFECTS } from '@/lib/card-texture-effects';
 import { createEmptyUserCharacter } from '@/lib/new-user-card';
 import {
   DATA_CENTERS,
@@ -42,6 +46,10 @@ export const EDITOR_STORAGE_VERSION = 3;
 
 const MIN_IMAGE_SCALE = 0.75;
 const MAX_IMAGE_SCALE = 2.5;
+const TYPOGRAPHY_ROLES: readonly CardTypographyRole[] = [
+  'display', 'secondaryDisplay', 'job', 'information', 'label', 'caption', 'micro',
+];
+const EFFECT_INTENSITY_KEYS = new Set<string>(CARD_TEXTURE_EFFECTS);
 
 type UnknownRecord = Record<string, unknown>;
 type StorageSlot = 'current' | 'previous' | 'legacy' | 'recovery';
@@ -109,6 +117,47 @@ function normalizeTypographyPreset(value: unknown): CardTypographyPreset | null 
   if (value === 'serif') return 'editorial';
   if (value === 'sans') return 'modern';
   return null;
+}
+
+function normalizeTypographyOverrides(value: unknown): AdventurerCardDesign['typography'] {
+  const input = record(value);
+  const result: Partial<Record<CardTypographyRole, CardTypographyOverride>> = {};
+
+  for (const role of TYPOGRAPHY_ROLES) {
+    const raw = record(input[role]);
+    const override: CardTypographyOverride = {};
+    const fontFamily = typeof raw.fontFamily === 'string' && isSelectableTypographyFontId(raw.fontFamily)
+      ? raw.fontFamily
+      : undefined;
+    if (fontFamily) override.fontFamily = fontFamily;
+    if (typeof raw.sizePercent === 'number' && Number.isFinite(raw.sizePercent)) {
+      override.sizePercent = clamp(raw.sizePercent, 100, 75, 125);
+    }
+    if (typeof raw.weight === 'number' && Number.isFinite(raw.weight)) {
+      const boundedWeight = clamp(raw.weight, 500, 100, 900);
+      override.weight = fontFamily
+        ? getTypographySupportedWeight(fontFamily, boundedWeight)
+        : boundedWeight;
+    }
+    if (typeof raw.trackingEm === 'number' && Number.isFinite(raw.trackingEm)) {
+      override.trackingEm = clamp(raw.trackingEm, 0, -0.12, 0.2);
+    }
+    if (Object.keys(override).length > 0) result[role] = override;
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function normalizeEffectIntensity(value: unknown): Record<string, number> | undefined {
+  const input = record(value);
+  const result: Record<string, number> = {};
+
+  for (const [key, intensity] of Object.entries(input).slice(0, 32)) {
+    if (!EFFECT_INTENSITY_KEYS.has(key) || typeof intensity !== 'number' || !Number.isFinite(intensity)) continue;
+    result[key] = clamp(intensity, 0, 0, 100);
+  }
+
+  return Object.keys(result).length > 0 ? result : undefined;
 }
 
 function isColorMode(value: unknown): value is CardColorMode {
@@ -501,6 +550,8 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     designInput.imageScale,
     base.imageAdjustments,
   );
+  const typography = normalizeTypographyOverrides(designInput.typography);
+  const effectIntensity = normalizeEffectIntensity(designInput.effectIntensity);
   const characterInput = record(input.character);
   const characterFallback = characterInput.profileOrigin === 'user'
     ? createEmptyUserCharacter()
@@ -518,6 +569,8 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     palette,
     accentColor: palette.accent,
     typographyPreset: normalizeTypographyPreset(designInput.typographyPreset) ?? base.design.typographyPreset,
+    ...(typography ? { typography } : {}),
+    ...(effectIntensity ? { effectIntensity } : {}),
     imagePosition: `${adjustments.x}% ${adjustments.y}%`,
     imageScale: adjustments.scale,
     effects: Array.isArray(designInput.effects)

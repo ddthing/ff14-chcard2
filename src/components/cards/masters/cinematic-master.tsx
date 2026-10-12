@@ -61,6 +61,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           lines={nameLines}
           script={nameLayout.script}
           typographyPreset={data.design.typographyPreset}
+          typography={data.design.typography?.display}
           className={styles.name}
           lineClassName={styles.nameLine}
           {...masterFieldProps('cinematic', 'name')}

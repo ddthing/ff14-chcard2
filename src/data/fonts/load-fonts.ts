@@ -9,6 +9,8 @@ import {
   detectTypographyScript,
   getTypographyPreset,
   getTypographyScriptsForText,
+  getTypographyFontEntry,
+  getTypographySupportedWeight,
   TYPOGRAPHY_SPECIMENS,
   type MasterTypographyFamily,
   type TypographyScript,
@@ -21,6 +23,8 @@ export interface TypographyFontLoadOptions {
   /** Master cards use the registered Cormorant/Noto Serif display pairing in every preset. */
   masterFamily?: MasterTypographyFamily;
   serifWeightByScript?: Partial<Record<TypographyScript, number>>;
+  /** Additional registered families selected by card typography overrides. */
+  fontRequests?: readonly { fontId: string; weight: number }[];
   timeoutMs?: number;
   signal?: AbortSignal;
   profileSource?: 'preview' | 'export' | 'optical' | 'other';
@@ -210,8 +214,26 @@ export async function loadTypographyFonts(
       return faces;
     });
 
+    const overrideFontLoads = (options.fontRequests ?? []).flatMap(({ fontId, weight }) => {
+      const entry = getTypographyFontEntry(fontId);
+      if (!entry || !entry.supportedScripts.some((script) => scriptList.includes(script))) return [];
+      const boundedWeight = getTypographySupportedWeight(fontId, Number.isFinite(weight) ? weight : 400);
+      return scriptList.flatMap((script) => {
+        if (!entry.supportedScripts.includes(script)) return [];
+        const text = textByScript[script] || TYPOGRAPHY_SPECIMENS[script];
+        if (!text.trim()) return [];
+        return [loadProfiledFontFace(`${boundedWeight} 16px "${entry.family}"`, text, {
+          source: profileSource,
+          face: entry.id,
+          script,
+          weight: boundedWeight,
+          glyphCount: Array.from(text).length,
+        })];
+      });
+    });
+
     await withCardExportTimeout(
-      () => Promise.all(fontLoads),
+      () => Promise.all([...fontLoads, ...overrideFontLoads]),
       timeoutMs,
       'font-timeout',
       options.signal,

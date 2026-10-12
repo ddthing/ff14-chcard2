@@ -8,8 +8,10 @@ import { resolveCardMaterial } from '@/lib/card-materials';
 import { JobIcon } from '@/components/ffxiv/job-icon';
 import { OpticalName } from '@/components/cards/craft/optical-name';
 import { FitFactValue } from '@/components/cards/craft/fit-fact-value';
+import type { CardTypographyOverride } from '@/components/cards/types';
 import { CARD_STOCK_COPY, getCardMasterCopy } from '@/lib/card-copy';
 import { detectTypographyScript } from '@/lib/typography-presets';
+import type { Locale } from '@/lib/types';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './editorial-master.module.css';
 
@@ -26,6 +28,34 @@ type EditorialFactPart = {
 
 const EDITORIAL_PAPER_SURFACE = resolveCardMaterial('editorial', 'editorial-paper-surface').src;
 const EDITORIAL_INK_DENSITY = resolveCardMaterial('editorial', 'editorial-ink-density').src;
+
+export function getEditorialInformationFontContextKey({
+  name,
+  locale,
+  job,
+  world,
+  dataCenter,
+  grandCompany,
+  typography,
+}: {
+  name: string;
+  locale: Locale;
+  job: string;
+  world: string;
+  dataCenter: string;
+  grandCompany: string;
+  typography?: CardTypographyOverride;
+}): string {
+  const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
+  return JSON.stringify([
+    detectTypographyScript(name, localeScript),
+    job,
+    world,
+    dataCenter,
+    grandCompany,
+    typography,
+  ]);
+}
 
 export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
@@ -51,14 +81,15 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const lineageLabel = labels.race && labels.clan
     ? `${ui.race} / ${ui.clan}`
     : labels.race ? ui.race : ui.clan;
-  const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
-  const informationFontContext = JSON.stringify([
-    detectTypographyScript(character.name, localeScript),
-    labels.job,
-    labels.world,
-    labels.dataCenter,
-    labels.grandCompany,
-  ]);
+  const informationFontContext = getEditorialInformationFontContextKey({
+    name: character.name,
+    locale,
+    job: labels.job,
+    world: labels.world,
+    dataCenter: labels.dataCenter,
+    grandCompany: labels.grandCompany,
+    typography: data.design.typography?.information,
+  });
 
   const facts: Array<{ id: string; label: string; parts: EditorialFactPart[] }> = [
     {
@@ -121,6 +152,18 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
         aria-hidden="true"
         data-material-layer="editorial-ink-density"
       />
+      {data.imageUrl && (
+        <div className={styles.photoWashBackdrop} data-photo-atmosphere aria-hidden="true">
+          <div className={styles.photoWashImage}>
+            <ArtPhoto
+              data={data}
+              className={styles.photoArt}
+              locale={locale}
+              decorative
+            />
+          </div>
+        </div>
+      )}
       <svg className={styles.clipDefinitions} aria-hidden="true" focusable="false">
         <defs>
           <clipPath id={brushClipId} clipPathUnits="objectBoundingBox">
@@ -151,6 +194,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
           lines={nameLines}
           script={nameLayout.script}
           typographyPreset={data.design.typographyPreset}
+          typography={data.design.typography?.display}
           className={styles.name}
           {...masterFieldProps('editorial', 'name')}
           lineClassName={styles.nameLine}
@@ -183,6 +227,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
                       locale={locale}
                       ratio={resolvedRatio}
                       typographyPreset={data.design.typographyPreset}
+                      sizePercent={data.design.typography?.information?.sizePercent}
                       data-master-typography-role={part.role}
                       {...masterFieldProps('editorial', part.field)}
                     >

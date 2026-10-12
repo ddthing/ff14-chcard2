@@ -1,0 +1,15 @@
+.root :global([data-card-typography-ready='true'][data-card-font-override='true']) {
+  font-family: var(--card-typography-font) !important;
+}
+
+.root :global([data-card-typography-ready='true'][data-card-size-override='true']:not([data-optical-name])) {
+  font-size: calc(var(--card-typography-base-size) * var(--card-typography-size-scale)) !important;
+}
+
+.root :global([data-card-typography-ready='true'][data-card-weight-override='true']) {
+  font-weight: var(--card-typography-weight) !important;
+}
+
+.root :global([data-card-typography-ready='true'][data-card-tracking-override='true']) {
+  letter-spacing: calc(var(--card-typography-base-tracking) + var(--card-typography-tracking)) !important;
+}

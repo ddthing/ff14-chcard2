@@ -71,7 +71,7 @@ registerHooks({
   },
 });
 
-const [{ CinematicMaster }, { EditorialMaster }, { IdentityMaster }, { getConerSample }] = await Promise.all([
+const [{ CinematicMaster }, { EditorialMaster, getEditorialInformationFontContextKey }, { IdentityMaster }, { getConerSample }] = await Promise.all([
   import('../src/components/cards/masters/cinematic-master.tsx'),
   import('../src/components/cards/masters/editorial-master.tsx'),
   import('../src/components/cards/masters/identity-master.tsx'),
@@ -85,6 +85,9 @@ const [{ CinematicCard, EditorialCard, AdventurerIdCard }, { getCardFontRequest,
   import('../src/components/cards/AdventurerCards.tsx'),
   import('../src/components/editor/card-preview.tsx'),
 ]);
+const { loadTypographyFonts } = await import('../src/data/fonts/load-fonts.ts');
+const { getFitFactMeasurementKey } = await import('../src/components/cards/craft/fit-fact-value.tsx');
+const { observeCardTypographyChanges } = await import('../src/components/cards/card-typography-override-scaler.tsx');
 
 const masters = [CinematicMaster, EditorialMaster, IdentityMaster];
 const stockEnglish = [
@@ -167,6 +170,22 @@ test('unknown level is omitted across all card families, layouts and ratios', ()
   }
 });
 
+test('legacy B/C card photos use the same processed-image readiness path and keep their photo alt', () => {
+  const cards = [CinematicCard, EditorialCard, AdventurerIdCard];
+  const templates = ['cinematic', 'editorial', 'id-card'];
+  for (let index = 0; index < cards.length; index += 1) {
+    for (const layoutVariant of ['b', 'c']) {
+      const data = makeData(templates[index]);
+      data.design.layoutVariant = layoutVariant;
+      const markup = renderToStaticMarkup(createElement(cards[index], { data, locale: 'ko' }));
+      assert.match(markup, /data-photo-print-ready="false"/);
+      assert.match(markup, /data-photo-print-state="processing"/);
+      assert.match(markup, /data-photo-print-fallback="true"/);
+      assert.equal((markup.match(/alt="Coner 모험가 초상"/g) ?? []).length, 1);
+    }
+  }
+});
+
 test('record and editorial facts use localized service, region, language, race, clan, and play-style names', () => {
   const editorial = textContent(renderToStaticMarkup(createElement(EditorialMaster, {
     data: makeData('editorial'),
@@ -187,6 +206,26 @@ test('record and editorial facts use localized service, region, language, race, 
     assert.ok(record.includes(visible), `record should print ${visible}`);
   }
   assert.ok(record.includes('불멸대'));
+});
+
+test('Editorial photo wash reuses the live image decoratively and stays absent without a photo', () => {
+  const data = makeData('editorial');
+  data.imageUrl = '/uploads/player-photo.webp';
+  const markup = renderToStaticMarkup(createElement(EditorialMaster, { data, locale: 'ko' }));
+  const imageTags = markup.match(/<img\b[^>]*>/g) ?? [];
+  const photoImageTags = imageTags.filter(tag => tag.includes('src="/uploads/player-photo.webp"'));
+
+  assert.equal(photoImageTags.length, 2, 'one decorative wash accompanies the original sharp photo');
+  assert.ok(photoImageTags.every(tag => tag.includes('src="/uploads/player-photo.webp"')), 'all layers use the same live image source');
+  assert.equal(photoImageTags.filter(tag => tag.includes('alt=""')).length, 1, 'the decorative wash has empty alt text');
+  assert.match(markup, /data-photo-atmosphere=/);
+  assert.equal((markup.match(/class="photoWashBackdrop"[^>]*><div class="photoWashImage"><div class="photo photoArt" aria-hidden="true">/g) ?? []).length, 1);
+  assert.match(markup, /<div class="photo photoArt"><span class="imageSet"[^>]*data-photo-print-state="processing"[^>]*><img[^>]*src="\/uploads\/player-photo\.webp"[^>]*alt="Coner 모험가 초상"[^>]*data-photo-print-fallback="true"/);
+
+  const withoutPhoto = { ...data, imageUrl: '' };
+  const noPhotoMarkup = renderToStaticMarkup(createElement(EditorialMaster, { data: withoutPhoto, locale: 'ko' }));
+  assert.doesNotMatch(noPhotoMarkup, /data-photo-atmosphere/);
+  assert.doesNotMatch(noPhotoMarkup, /src="\/uploads\/player-photo\.webp"/);
 });
 
 test('complete Japanese Editorial lineage keeps both canonical segments intact at compact ratios', () => {
@@ -478,6 +517,55 @@ test('Editorial free-company fitter retains complete text and joins export optic
   }
 });
 
+test('Editorial free-company measurement key changes when its selected information typography changes', () => {
+  const fields = { name: 'Coner', locale: 'en', job: 'Sage', world: 'Tonberry', dataCenter: 'Elemental', grandCompany: 'Maelstrom' };
+  const defaultContext = getEditorialInformationFontContextKey(fields);
+  const customContext = getEditorialInformationFontContextKey({
+    ...fields,
+    typography: { fontFamily: 'gmarket-sans', sizePercent: 110, weight: 500, trackingEm: 0.02 },
+  });
+  const measureDefault = getFitFactMeasurementKey(defaultContext, 'en', '4:5', 'editorial', 1, 'Ember Bloom');
+  const measureCustom = getFitFactMeasurementKey(customContext, 'en', '4:5', 'editorial', 1.1, 'Ember Bloom');
+
+  assert.notEqual(customContext, defaultContext);
+  assert.notEqual(measureCustom, measureDefault);
+});
+
+test('typography scaler observes text and card context without watching its own inline style writes', () => {
+  const previous = {
+    MutationObserver: globalThis.MutationObserver,
+    ResizeObserver: globalThis.ResizeObserver,
+  };
+  const observed = [];
+  let disconnects = 0;
+  class MutationObserverMock {
+    observe(...args) { observed.push(args[1]); }
+    disconnect() { disconnects += 1; }
+  }
+  class ResizeObserverMock {
+    observe() {}
+    disconnect() { disconnects += 1; }
+  }
+  globalThis.MutationObserver = MutationObserverMock;
+  globalThis.ResizeObserver = ResizeObserverMock;
+
+  try {
+    const disconnect = observeCardTypographyChanges({}, () => {});
+    assert.deepEqual(observed[0], {
+      attributes: true,
+      attributeFilter: ['lang', 'data-locale', 'data-ratio', 'data-layout', 'data-typography', 'style'],
+    });
+    assert.deepEqual(observed[1], { characterData: true, childList: true, subtree: true });
+    disconnect();
+    assert.equal(disconnects, 3);
+  } finally {
+    if (previous.MutationObserver === undefined) delete globalThis.MutationObserver;
+    else globalThis.MutationObserver = previous.MutationObserver;
+    if (previous.ResizeObserver === undefined) delete globalThis.ResizeObserver;
+    else globalThis.ResizeObserver = previous.ResizeObserver;
+  }
+});
+
 test('known Korean Global world labels preserve canonical IDs and English search names', () => {
   const knownWorlds = [
     ['global.chaos.moogle', 'Moogle', '모그리'],
@@ -638,6 +726,47 @@ test('preview font requests include the selected locale’s fixed card glyphs', 
   }
 });
 
+test('registered typography overrides add selected families to preview font requests and load supported weights', async () => {
+  const data = makeData('editorial');
+  const typography = {
+    display: { fontFamily: 'estonia', weight: 800 },
+    information: { fontFamily: 'gmarket-sans', weight: 690 },
+  };
+  const request = getCardFontRequest(
+    data.character,
+    'en',
+    data.design.template,
+    data.imageUrl,
+    data.design.decorativeCopy,
+    'a',
+    typography,
+  );
+
+  assert.deepEqual(request.fontRequests, [
+    { fontId: 'estonia', weight: 800 },
+    { fontId: 'gmarket-sans', weight: 690 },
+  ]);
+
+  const originalDocument = globalThis.document;
+  const loaded = [];
+  globalThis.document = {
+    fonts: {
+      load: async (font, text) => { loaded.push([font, text]); return [{}]; },
+    },
+  };
+  try {
+    await loadTypographyFonts('editorial', ['latin'], { latin: 'Coner' }, {
+      fontRequests: request.fontRequests,
+      profileSource: 'preview',
+    });
+    assert.deepEqual(loaded.map(([font]) => font), ['400 16px "Estonia"', '700 16px "Gmarket Sans"']);
+    assert.ok(loaded.every(([, text]) => text.includes('Coner')));
+  } finally {
+    if (originalDocument === undefined) delete globalThis.document;
+    else globalThis.document = originalDocument;
+  }
+});
+
 test('preview font key tracks rendered text and font choices while ignoring unrelated character fields', () => {
   const data = makeData('editorial');
   data.character.bio = '';
@@ -662,6 +791,10 @@ test('preview font key tracks rendered text and font choices while ignoring unre
     character: { ...fontData.character, name: '다른 이름' },
   }, 'ko'), key);
   assert.notEqual(getCardPreviewFontRequestKey(fontData, 'ja'), key);
+  assert.notEqual(getCardPreviewFontRequestKey({
+    ...fontData,
+    design: { ...fontData.design, typography: { display: { fontFamily: 'valley-sans' } } },
+  }, 'ko'), key);
   assert.ok(key.includes('이야기는 계속됩니다.'));
   assert.notEqual(getCardPreviewFontRequestKey({
     ...fontData,

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef } from 'react';
 import { AdventurerIdCard, CinematicCard, EditorialCard } from '@/components/cards';
-import type { AdventurerCardCharacter, AdventurerCardData, CardDecorativeCopy, CardLayoutVariant } from '@/components/cards/types';
+import type { AdventurerCardCharacter, AdventurerCardData, CardDecorativeCopy, CardLayoutVariant, CardTypographyOverrides } from '@/components/cards/types';
 import { getJob, JOB_CATEGORIES, localizeFfxivLabel } from '@/data/ffxiv';
 import { loadTypographyFonts, loadProfiledFontFace, getTypographyScriptsForCardText } from '@/data/fonts/load-fonts';
 import { CARD_EXPORT_FONT_TIMEOUT_MS, CardExportError, withCardExportTimeout } from '@/lib/card-export';
@@ -14,6 +14,7 @@ import type { Locale } from '@/lib/types';
 import {
   getMasterTypographyFamily,
   getMasterTypographyTreatment,
+  getTypographyOverrideFontRequests,
   type MasterTypographyFamily,
   type TypographyScript,
 } from '@/lib/typography-presets';
@@ -25,6 +26,7 @@ export function getCardFontRequest(
   imageUrl = '',
   decorativeCopy?: CardDecorativeCopy,
   layoutVariant: CardLayoutVariant = 'a',
+  typography?: CardTypographyOverrides,
 ) {
   const scriptFallback: TypographyScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
   const job = getJob(character.jobId ?? character.job);
@@ -61,7 +63,11 @@ export function getCardFontRequest(
     }
   }
 
-  return { scripts: Object.keys(textByScript) as TypographyScript[], textByScript };
+  return {
+    scripts: Object.keys(textByScript) as TypographyScript[],
+    textByScript,
+    fontRequests: getTypographyOverrideFontRequests(typography),
+  };
 }
 
 export interface CardPreviewFontData {
@@ -72,6 +78,7 @@ export interface CardPreviewFontData {
     template?: 'cinematic' | 'editorial' | 'id-card';
     layoutVariant?: CardLayoutVariant;
     decorativeCopy?: CardDecorativeCopy;
+    typography?: CardTypographyOverrides;
   };
 }
 
@@ -90,6 +97,7 @@ export function getCardPreviewFontRequestKey(data: CardPreviewFontData, locale: 
       data.imageUrl,
       data.design.decorativeCopy,
       data.design.layoutVariant,
+      data.design.typography,
     ),
   ]);
 }
@@ -103,7 +111,9 @@ export async function loadCardPreviewFonts(
   if (typeof document === 'undefined') return;
   const decorativeCopy = data.design.decorativeCopy ?? 'default';
   const layoutVariant = data.design.layoutVariant ?? 'a';
-  const fontRequest = getCardFontRequest(data.character, locale, data.design.template, data.imageUrl, decorativeCopy, layoutVariant);
+  const fontRequest = getCardFontRequest(
+    data.character, locale, data.design.template, data.imageUrl, decorativeCopy, layoutVariant, data.design.typography,
+  );
   const source = options.source ?? 'preview';
   profileCount(`preview.fontLoads.calls.${source}`);
   const finishProfile = profileStart('preview.fontLoads.total', {
@@ -119,7 +129,7 @@ export async function loadCardPreviewFonts(
   const serifWeightByScript = masterFamily
     ? Object.fromEntries(fontRequest.scripts.map((script) => [
       script,
-      getMasterTypographyTreatment(masterFamily, 'display', script).weight,
+      getMasterTypographyTreatment(masterFamily, 'display', script, data.design.typography?.display).weight,
     ])) as Partial<Record<TypographyScript, number>>
     : undefined;
   const timeoutMs = options.timeoutMs ?? CARD_EXPORT_FONT_TIMEOUT_MS;
@@ -133,6 +143,7 @@ export async function loadCardPreviewFonts(
         timeoutMs,
         signal: options.signal,
         profileSource: source,
+        fontRequests: fontRequest.fontRequests,
       },
     );
     const finishReady = profileStart('preview.fonts.ready', { source, locale });
@@ -205,12 +216,13 @@ export function CardPreview({ data, className, highlightField, locale: localeOve
   const template = data.design.template;
   const layoutVariant = data.design.layoutVariant;
   const decorativeCopy = data.design.decorativeCopy ?? 'default';
+  const typography = data.design.typography;
   const imageUrl = data.imageUrl;
   const fontData = useMemo<CardPreviewFontData>(() => ({
     character,
     imageUrl,
-    design: { typographyPreset, template, layoutVariant, decorativeCopy },
-  }), [character, decorativeCopy, imageUrl, layoutVariant, template, typographyPreset]);
+    design: { typographyPreset, template, layoutVariant, decorativeCopy, typography },
+  }), [character, decorativeCopy, imageUrl, layoutVariant, template, typography, typographyPreset]);
   const fontRequestKey = useMemo(
     () => getCardPreviewFontRequestKey(fontData, locale),
     [fontData, locale],

@@ -1,10 +1,12 @@
-export type RegisteredFontSubset = 'latin' | 'latin-ext' | 'vietnamese' | 'unicode-range';
+export type RegisteredFontSubset = 'latin' | 'latin-ext' | 'vietnamese' | 'full' | 'unicode-range';
 
 export interface LocalFontAsset {
   readonly subset: Exclude<RegisteredFontSubset, 'unicode-range'>;
   readonly publicPath: `/fonts/${string}`;
   readonly filePath: `public/fonts/${string}`;
   readonly bytes: number;
+  /** Fixed face weight when this file represents a static face in a family. */
+  readonly weight?: number;
 }
 
 export interface FontRegistryEntry {
@@ -14,6 +16,8 @@ export interface FontRegistryEntry {
   readonly licenseFile: `licenses/fonts/${string}`;
   readonly sourceUrl: `https://${string}`;
   readonly axes: Readonly<{ weight: readonly [number, number] }>;
+  /** Exact discrete weights for static families; variable families use the axis range. */
+  readonly weights?: readonly number[];
   readonly supportedScripts: readonly ('latin' | 'korean' | 'japanese')[];
   readonly localAssets?: readonly LocalFontAsset[];
   readonly package?: Readonly<{
@@ -106,6 +110,63 @@ export const FONT_REGISTRY = {
         filePath: 'public/fonts/dm-sans-latin-ext-wght-normal.woff2',
         bytes: 18_228,
       },
+    ],
+  },
+  estonia: {
+    id: 'estonia',
+    family: 'Estonia',
+    license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Estonia-OFL.txt',
+    sourceUrl: 'https://github.com/googlefonts/estonia',
+    axes: { weight: [400, 400] },
+    weights: [400],
+    supportedScripts: ['latin'],
+    localAssets: [
+      { subset: 'latin', publicPath: '/fonts/estonia-latin-normal.woff2', filePath: 'public/fonts/estonia-latin-normal.woff2', bytes: 81_924 },
+      { subset: 'latin-ext', publicPath: '/fonts/estonia-latin-ext-normal.woff2', filePath: 'public/fonts/estonia-latin-ext-normal.woff2', bytes: 62_776 },
+      { subset: 'vietnamese', publicPath: '/fonts/estonia-vietnamese-normal.woff2', filePath: 'public/fonts/estonia-vietnamese-normal.woff2', bytes: 19_596 },
+    ],
+  },
+  bricolageGrotesque: {
+    id: 'bricolage-grotesque',
+    family: 'Bricolage Grotesque',
+    license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Bricolage-Grotesque-OFL.txt',
+    sourceUrl: 'https://github.com/ateliertriay/bricolage',
+    axes: { weight: [200, 800] },
+    supportedScripts: ['latin'],
+    localAssets: [
+      { subset: 'latin', publicPath: '/fonts/bricolage-grotesque-latin-wght-normal.woff2', filePath: 'public/fonts/bricolage-grotesque-latin-wght-normal.woff2', bytes: 76_888 },
+      { subset: 'latin-ext', publicPath: '/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2', filePath: 'public/fonts/bricolage-grotesque-latin-ext-wght-normal.woff2', bytes: 30_736 },
+      { subset: 'vietnamese', publicPath: '/fonts/bricolage-grotesque-vietnamese-wght-normal.woff2', filePath: 'public/fonts/bricolage-grotesque-vietnamese-wght-normal.woff2', bytes: 12_984 },
+    ],
+  },
+  valleySans: {
+    id: 'valley-sans',
+    family: 'Valley Sans',
+    license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Valley-Sans-OFL.txt',
+    sourceUrl: 'https://github.com/HelsinkiTypeStudio/valley-sans',
+    axes: { weight: [100, 900] },
+    supportedScripts: ['latin'],
+    localAssets: [
+      { subset: 'latin', publicPath: '/fonts/valley-sans-latin-wght-normal.woff2', filePath: 'public/fonts/valley-sans-latin-wght-normal.woff2', bytes: 47_444 },
+      { subset: 'latin-ext', publicPath: '/fonts/valley-sans-latin-ext-wght-normal.woff2', filePath: 'public/fonts/valley-sans-latin-ext-wght-normal.woff2', bytes: 19_056 },
+    ],
+  },
+  gmarketSans: {
+    id: 'gmarket-sans',
+    family: 'Gmarket Sans',
+    license: 'SIL Open Font License 1.1',
+    licenseFile: 'licenses/fonts/Gmarket-Sans-OFL.txt',
+    sourceUrl: 'https://corp.gmarket.com/fonts/',
+    axes: { weight: [300, 700] },
+    weights: [300, 500, 700],
+    supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', weight: 300, publicPath: '/fonts/gmarket-sans-light.woff2', filePath: 'public/fonts/gmarket-sans-light.woff2', bytes: 374_600 },
+      { subset: 'full', weight: 500, publicPath: '/fonts/gmarket-sans-medium.woff2', filePath: 'public/fonts/gmarket-sans-medium.woff2', bytes: 411_932 },
+      { subset: 'full', weight: 700, publicPath: '/fonts/gmarket-sans-bold.woff2', filePath: 'public/fonts/gmarket-sans-bold.woff2', bytes: 422_344 },
     ],
   },
   notoSansKr: {

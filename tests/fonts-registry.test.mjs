@@ -94,6 +94,57 @@ test('Latin font registry files and OFL notices match the stylesheet', () => {
   assert.doesNotMatch(css, /@fontsource-variable\/noto-(?:sans|serif)-(?:kr|jp)/);
 });
 
+test('editable Latin and Korean families ship local fonts and their verified licenses', () => {
+  const css = readFileSync(resolve(projectRoot, 'src/app/fonts.css'), 'utf8');
+  const expected = [
+    { key: 'estonia', id: 'estonia', family: 'Estonia', range: [400, 400], weights: [400], scripts: ['latin'] },
+    { key: 'bricolageGrotesque', id: 'bricolage-grotesque', family: 'Bricolage Grotesque', range: [200, 800], scripts: ['latin'] },
+    { key: 'valleySans', id: 'valley-sans', family: 'Valley Sans', range: [100, 900], scripts: ['latin'] },
+    { key: 'gmarketSans', id: 'gmarket-sans', family: 'Gmarket Sans', range: [300, 700], weights: [300, 500, 700], scripts: ['latin', 'korean'] },
+  ];
+
+  for (const item of expected) {
+    const entry = FONT_REGISTRY[item.key];
+    assert.equal(entry.id, item.id);
+    assert.equal(entry.family, item.family);
+    assert.deepEqual(entry.axes.weight, item.range);
+    assert.deepEqual(entry.weights, item.weights);
+    assert.deepEqual(entry.supportedScripts, item.scripts);
+
+    const license = readFileSync(resolve(projectRoot, entry.licenseFile), 'utf8');
+    assert.match(license, /SIL Open Font License, Version 1\.1/);
+    assert.match(license, /Copyright/);
+    const licenseName = entry.licenseFile.slice(entry.licenseFile.lastIndexOf('/') + 1);
+    assert.equal(
+      readFileSync(resolve(projectRoot, 'public/fonts/licenses', licenseName), 'utf8'),
+      license,
+      `${licenseName} must be available with the public font assets`,
+    );
+    for (const asset of entry.localAssets) {
+      const assetPath = resolve(projectRoot, asset.filePath);
+      assert.equal(statSync(assetPath).size, asset.bytes, `${asset.filePath} byte count`);
+      assert.equal(readFileSync(assetPath).subarray(0, 4).toString('ascii'), 'wOF2', `${asset.filePath} WOFF2 signature`);
+      assert.ok(css.includes(`url("${asset.publicPath}")`), `${asset.publicPath} must be loaded locally`);
+    }
+  }
+
+  const gmarket = FONT_REGISTRY.gmarketSans;
+  assert.deepEqual(gmarket.localAssets.map(({ weight }) => weight), [300, 500, 700]);
+  assert.match(readFileSync(resolve(projectRoot, gmarket.licenseFile), 'utf8'), /images of the production/);
+  assert.match(readFileSync(resolve(projectRoot, gmarket.licenseFile), 'utf8'), /specific terms/);
+  const notice = readFileSync(resolve(projectRoot, 'public/fonts/NOTICE.txt'), 'utf8');
+  assert.ok(notice.includes('Gmarket Sans'));
+  assert.ok(notice.includes('/fonts/licenses/Gmarket-Sans-OFL.txt'));
+  const gmarketCssWeights = [...css.matchAll(/@font-face\s*\{([^}]+)\}/g)]
+    .map(([, body]) => ({
+      family: body.match(/font-family:\s*"([^"]+)"/)?.[1],
+      weight: Number(body.match(/font-weight:\s*(\d+)/)?.[1]),
+    }))
+    .filter(({ family }) => family === gmarket.family)
+    .map(({ weight }) => weight);
+  assert.deepEqual(gmarketCssWeights, [300, 500, 700]);
+});
+
 test('V3 handwritten faces are local WOFF2 assets with source licenses and export readiness', () => {
   const css = readFileSync(resolve(projectRoot, 'src/app/fonts.css'), 'utf8');
   const preview = readFileSync(resolve(projectRoot, 'src/components/editor/card-preview.tsx'), 'utf8');

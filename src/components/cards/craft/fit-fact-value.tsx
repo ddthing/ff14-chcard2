@@ -10,6 +10,7 @@ interface FitFactValueProps extends HTMLAttributes<HTMLSpanElement> {
   locale: Locale;
   ratio: CardRatio;
   typographyPreset: string;
+  sizePercent?: number;
 }
 
 interface MeasuredFactValue {
@@ -18,18 +19,29 @@ interface MeasuredFactValue {
   ready: boolean;
 }
 
+export function getFitFactMeasurementKey(
+  fontContextKey: string,
+  locale: Locale,
+  ratio: CardRatio,
+  typographyPreset: string,
+  sizeScale: number,
+  text: string,
+): string {
+  return JSON.stringify([fontContextKey, locale, ratio, typographyPreset, sizeScale, text]);
+}
+
 function pixels(value: string): number {
   const parsed = Number.parseFloat(value);
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function largestFontThatFits(value: HTMLSpanElement, row: HTMLElement): number {
+function largestFontThatFits(value: HTMLSpanElement, row: HTMLElement, sizeScale: number): number {
   const authoredSize = value.style.fontSize;
   try {
     value.style.fontSize = '';
-    const maximum = pixels(getComputedStyle(value).fontSize);
+    const maximum = pixels(getComputedStyle(value).fontSize) * sizeScale;
     value.style.fontSize = 'var(--master-micro-min, .84cqi)';
-    const minimum = Math.min(maximum, pixels(getComputedStyle(value).fontSize));
+    const minimum = Math.min(maximum, pixels(getComputedStyle(value).fontSize) * sizeScale);
     value.style.fontSize = authoredSize;
 
     const rowStyle = getComputedStyle(row);
@@ -58,10 +70,11 @@ function largestFontThatFits(value: HTMLSpanElement, row: HTMLElement): number {
   }
 }
 
-export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, children, style, ...attributes }: FitFactValueProps) {
+export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, sizePercent = 100, children, style, ...attributes }: FitFactValueProps) {
   const valueRef = useRef<HTMLSpanElement>(null);
   const text = typeof children === 'string' ? children : '';
-  const measurementKey = JSON.stringify([fontContextKey, locale, ratio, typographyPreset, text]);
+  const sizeScale = Math.min(1.25, Math.max(.75, sizePercent / 100));
+  const measurementKey = getFitFactMeasurementKey(fontContextKey, locale, ratio, typographyPreset, sizeScale, text);
   const [measurement, setMeasurement] = useState<MeasuredFactValue | null>(null);
   const current = measurement?.key === measurementKey ? measurement : null;
 
@@ -109,13 +122,13 @@ export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, 
           // Keep the full value visible with the active CSS fallback face.
         }
         if (!active) break;
-        const fontSize = largestFontThatFits(value, row);
+        const fontSize = largestFontThatFits(value, row, sizeScale);
         setMeasurement({ key: measurementKey, fontSize, ready: true });
       } while (measureAgain && active);
       measuring = false;
     };
 
-    setMeasurement({ key: measurementKey, fontSize: largestFontThatFits(value, row), ready: false });
+    setMeasurement({ key: measurementKey, fontSize: largestFontThatFits(value, row, sizeScale), ready: false });
     void recalculate();
 
     const observer = new ResizeObserver(() => {
@@ -134,7 +147,7 @@ export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, 
       observer.disconnect();
       documentFonts.removeEventListener('loadingdone', fontsChanged);
     };
-  }, [fontContextKey, locale, measurementKey, ratio, text, typographyPreset]);
+  }, [fontContextKey, locale, measurementKey, ratio, sizeScale, text, typographyPreset]);
 
   const script = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
   return (

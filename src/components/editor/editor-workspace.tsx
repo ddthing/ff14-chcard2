@@ -43,6 +43,9 @@ import {
 } from '@/lib/typography-presets';
 import { loadTypographyFonts } from '@/data/fonts/load-fonts';
 import { CardPreview } from '@/components/editor/card-preview';
+import { TypographyRoleEditor } from '@/components/editor/typography-role-editor';
+import { TextureEffects } from './TextureEffects';
+import { toggleCardTextureEffect, type CardTextureEffect } from '@/lib/card-texture-effects';
 import { getEditorCopy, type EditorCopy } from '@/components/editor/copy';
 import { formatAccessibleImageControlValue, formatAccessiblePercent } from '@/components/editor/editor-accessibility';
 import { EditorIcon, type EditorIconName } from '@/components/editor/editor-icon';
@@ -492,12 +495,14 @@ function EditorInspector({
   const decorativeCopy = useEditorStore((state) => state.design.decorativeCopy);
   const ratio = useEditorStore((state) => state.design.ratio);
   const typographyPreset = useEditorStore((state) => state.design.typographyPreset);
+  const typography = useEditorStore((state) => state.design.typography);
+  const effectIntensity = useEditorStore((state) => state.design.effectIntensity);
   const colorMode = useEditorStore((state) => state.design.colorMode);
   const palette = useEditorStore((state) => state.design.palette);
   const jobMotifVisible = useEditorStore((state) => state.design.jobMotifVisible);
   const jobIconColor = useEditorStore((state) => state.design.jobIconColor);
   const effects = useEditorStore((state) => state.design.effects);
-  const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects };
+  const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, typography, colorMode, palette, jobMotifVisible, jobIconColor, effects, effectIntensity };
   const imageSource = useEditorStore((state) => state.image.src);
   const imageFileName = useEditorStore((state) => state.image.fileName);
   const image = useEditorStore((state) => activeTask === 'photo' ? state.image : null);
@@ -1128,6 +1133,7 @@ function EditorInspector({
               specimenName={specimenName}
               nameScript={nameScript}
             />
+            <TypographyRoleEditor locale={locale} />
 
             <section className={styles.editorGroup} aria-label={copy.colors}>
               <div className={styles.sectionHeading}><h3>{copy.colors}</h3></div>
@@ -1240,6 +1246,26 @@ function EditorInspector({
                   </button>
                 );
               })}
+              <TextureEffects
+                locale={locale}
+                effects={design.effects}
+                effectIntensity={design.effectIntensity}
+                onToggle={(effect: CardTextureEffect) => {
+                  const currentEffects = editorStore.getState().design.effects;
+                  editorStore.getState().updateDesign('effects', toggleCardTextureEffect(currentEffects, effect));
+                }}
+                onIntensityChange={(effect, intensity) => {
+                  const current = editorStore.getState().design.effectIntensity ?? {};
+                  editorStore.getState().setDesign({ effectIntensity: { ...current, [effect]: intensity } });
+                }}
+                onInteractionStart={(effect) => {
+                  editorStore.getState().beginHistoryGroup(`texture-intensity-${effect}`, 'design');
+                }}
+                onInteractionEnd={(effect) => {
+                  const groupId = `texture-intensity-${effect}`;
+                  if (editorStore.getState().history.groupId === groupId) editorStore.getState().endHistoryGroup();
+                }}
+              />
             </details>
           </div>
         )}

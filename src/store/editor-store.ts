@@ -125,7 +125,13 @@ function captureSnapshot(state: Pick<EditorStoreState, 'character' | 'design' | 
   const finish = profileStart('history.snapshot.capture', { srcUrlLength: state.image.src.length });
   const snapshot = {
     character: { ...state.character, languages: [...state.character.languages], playStyles: [...state.character.playStyles] },
-    design: { ...state.design, palette: { ...state.design.palette }, effects: [...state.design.effects] },
+    design: {
+      ...state.design,
+      palette: { ...state.design.palette },
+      effects: [...state.design.effects],
+      ...(state.design.typography ? { typography: cloneTypography(state.design.typography) } : {}),
+      ...(state.design.effectIntensity ? { effectIntensity: cloneEffectIntensity(state.design.effectIntensity) } : {}),
+    },
     image: { ...state.image },
   };
   finish();
@@ -155,6 +161,19 @@ function clamp(value: number, fallback: number, min: number, max: number): numbe
   return Math.min(max, Math.max(min, value));
 }
 
+function cloneTypography(
+  typography: AdventurerCardDesign['typography'],
+): AdventurerCardDesign['typography'] {
+  if (!typography) return undefined;
+  return Object.fromEntries(Object.entries(typography).map(([role, override]) => [role, { ...override }]));
+}
+
+function cloneEffectIntensity(
+  effectIntensity: AdventurerCardDesign['effectIntensity'],
+): AdventurerCardDesign['effectIntensity'] {
+  return effectIntensity ? { ...effectIntensity } : undefined;
+}
+
 function normalizeImagePatch(current: EditorImageState, partial: Partial<EditorImageState>): EditorImageState {
   return {
     ...current,
@@ -181,6 +200,28 @@ function sameStringArray(a: readonly string[], b: readonly string[]): boolean {
   return a.length === b.length && a.every((value, index) => value === b[index]);
 }
 
+function sameRecord(a: Readonly<Record<string, number>> = {}, b: Readonly<Record<string, number>> = {}): boolean {
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
+}
+
+function sameTypography(
+  a: AdventurerCardDesign['typography'],
+  b: AdventurerCardDesign['typography'],
+): boolean {
+  const left = a ?? {};
+  const right = b ?? {};
+  const roles = Object.keys(left);
+  return roles.length === Object.keys(right).length && roles.every((role) => {
+    const first = left[role as keyof typeof left];
+    const second = right[role as keyof typeof right];
+    return first?.fontFamily === second?.fontFamily &&
+      first?.sizePercent === second?.sizePercent &&
+      first?.weight === second?.weight &&
+      first?.trackingEm === second?.trackingEm;
+  });
+}
+
 function sameCharacter(a: AdventurerCardCharacter, b: AdventurerCardCharacter): boolean {
   const scalarKeys: (keyof AdventurerCardCharacter)[] = [
     'name', 'world', 'dataCenter', 'freeCompany', 'job', 'level', 'race', 'clan', 'grandCompany', 'bio', 'profileOrigin',
@@ -195,6 +236,8 @@ function sameDesign(a: AdventurerCardDesign, b: AdventurerCardDesign): boolean {
     a.colorMode === b.colorMode && a.jobMotifVisible === b.jobMotifVisible && a.jobIconColor === b.jobIconColor &&
     (a.decorativeCopy ?? 'default') === (b.decorativeCopy ?? 'default') &&
     a.accentColor === b.accentColor && a.typographyPreset === b.typographyPreset &&
+    sameTypography(a.typography, b.typography) &&
+    sameRecord(a.effectIntensity, b.effectIntensity) &&
     a.imagePosition === b.imagePosition && a.imageScale === b.imageScale &&
     a.palette.primary === b.palette.primary && a.palette.accent === b.palette.accent &&
     a.palette.light === b.palette.light && a.palette.dark === b.palette.dark &&
@@ -243,6 +286,8 @@ function mergeDesign(current: AdventurerCardDesign, partial: Partial<AdventurerC
     next.palette = { ...current.palette, accent: partial.accentColor };
   }
   if (partial.effects) next.effects = [...partial.effects];
+  if (Object.hasOwn(partial, 'typography')) next.typography = cloneTypography(partial.typography);
+  if (Object.hasOwn(partial, 'effectIntensity')) next.effectIntensity = cloneEffectIntensity(partial.effectIntensity);
   return next;
 }
 
@@ -476,6 +521,8 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           ...state.design,
           palette: { ...state.design.palette },
           effects: [...state.design.effects],
+          ...(state.design.typography ? { typography: cloneTypography(state.design.typography) } : {}),
+          ...(state.design.effectIntensity ? { effectIntensity: cloneEffectIntensity(state.design.effectIntensity) } : {}),
           accentColor: state.design.palette.accent,
           imagePosition: `${state.image.x}% ${state.image.y}%`,
           imageScale: state.image.scale,

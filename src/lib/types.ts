@@ -7,5 +7,8 @@ export type {
   AdventurerCardData,
   AdventurerCardDesign,
   AdventurerCardTemplate,
+  CardTypographyOverride,
+  CardTypographyOverrides,
+  CardTypographyRole,
   CardRatio,
 } from "@/components/cards/types";

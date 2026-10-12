@@ -11,6 +11,8 @@ export type CardExportErrorCode =
   | 'font-load-failed'
   | 'image-timeout'
   | 'image-failed'
+  | 'photo-print-timeout'
+  | 'photo-print-failed'
   | 'optical-timeout'
   | 'asset-timeout'
   | 'renderer-timeout'
@@ -149,6 +151,10 @@ export function createCardExportSnapshot(
           ...data.design,
           palette: { ...data.design.palette },
           effects: [...data.design.effects],
+          ...(data.design.typography ? {
+            typography: Object.fromEntries(Object.entries(data.design.typography).map(([role, override]) => [role, { ...override }])),
+          } : {}),
+          ...(data.design.effectIntensity ? { effectIntensity: { ...data.design.effectIntensity } } : {}),
         },
         imageAdjustments: { ...data.imageAdjustments },
       },
@@ -253,6 +259,7 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
     const maxStablePasses = 4;
     for (let pass = 0; pass < maxStablePasses; pass += 1) {
       const sourcesBeforePaint = getCardImageSourceSignature(node);
+      const photoPrintBeforePaint = getCardPhotoPrintSignature(node);
       const imageCount = node.querySelectorAll('img').length;
       profileCount('export.assets.images.count', imageCount);
       const finishImagesTiming = profileStart('export.assets.images.decode', { imageCount });
@@ -262,11 +269,16 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
           options.imageTimeoutMs ?? CARD_EXPORT_IMAGE_TIMEOUT_MS,
           readinessController.signal,
         );
+        const photoPrintReady = waitForPhotoPrint(
+          node,
+          options.imageTimeoutMs ?? CARD_EXPORT_IMAGE_TIMEOUT_MS,
+          readinessController.signal,
+        );
         try {
           // Font fetching and image decoding have no dependency on each other.
           // Start both together so a slow CJK font shard does not hold up the
           // material/photo decodes the renderer needs next.
-          await Promise.all([fontsReady, imagesReady]);
+          await Promise.all([fontsReady, imagesReady, photoPrintReady]);
         } catch (error) {
           readinessController.abort();
           throw error;
@@ -291,7 +303,10 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
         finishPaintTiming();
       }
 
-      if (getCardImageSourceSignature(node) === sourcesBeforePaint) return;
+      if (
+        getCardImageSourceSignature(node) === sourcesBeforePaint &&
+        getCardPhotoPrintSignature(node) === photoPrintBeforePaint
+      ) return;
     }
     throw new CardExportError('image-failed');
   } finally {
@@ -315,6 +330,14 @@ function getImageSourceKey(image: HTMLImageElement): string {
 
 function getCardImageSourceSignature(node: HTMLElement): string {
   return Array.from(node.querySelectorAll('img'), getImageSourceKey).sort().join('\u0000');
+}
+
+function getCardPhotoPrintSignature(node: HTMLElement): string {
+  return Array.from(node.querySelectorAll<HTMLElement>('[data-photo-print-ready]'), (photo) => [
+    photo.getAttribute('data-photo-print-key') ?? '',
+    photo.getAttribute('data-photo-print-ready') ?? '',
+    photo.getAttribute('data-photo-print-state') ?? '',
+  ].join(':')).sort().join('\u0000');
 }
 
 function isImageWaitFailure(value: unknown): value is ImageWaitFailure {
@@ -508,6 +531,37 @@ async function waitForOpticalNames(node: HTMLElement, timeoutMs: number, signal?
       return () => observer.disconnect();
     } : undefined,
   );
+}
+
+async function waitForPhotoPrint(node: HTMLElement, timeoutMs: number, signal?: AbortSignal): Promise<void> {
+  const Observer = node.ownerDocument?.defaultView?.MutationObserver
+    ?? (typeof MutationObserver === 'function' ? MutationObserver : undefined);
+  const getPhotoPrintMarkers = () => Array.from(
+    node.querySelectorAll<HTMLElement>('[data-photo-print-ready]'),
+  );
+
+  await waitForPredicate(
+    () => getPhotoPrintMarkers().every((photo) => (
+      photo.getAttribute('data-photo-print-ready') === 'true' ||
+      photo.getAttribute('data-photo-print-state') === 'error'
+    )),
+    timeoutMs,
+    'photo-print-timeout',
+    signal,
+    Observer ? (check) => {
+      const observer = new Observer(() => check());
+      observer.observe(node, {
+        attributes: true,
+        attributeFilter: ['data-photo-print-ready', 'data-photo-print-state', 'data-photo-print-key'],
+        subtree: true,
+      });
+      return () => observer.disconnect();
+    } : undefined,
+  );
+
+  if (getPhotoPrintMarkers().some((photo) => photo.getAttribute('data-photo-print-state') === 'error')) {
+    throw new CardExportError('photo-print-failed');
+  }
 }
 
 type PredicateSubscription = (check: () => void) => () => void;

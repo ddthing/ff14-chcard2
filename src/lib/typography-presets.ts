@@ -1,24 +1,89 @@
-import { FONT_FAMILIES } from '@/data/fonts/registry';
+import { FONT_FAMILIES, FONT_REGISTRY, type FontRegistryEntry } from '@/data/fonts/registry';
+import type { CardTypographyOverride, CardTypographyRole } from '@/components/cards/types';
 
 export type TypographyPresetId = 'editorial' | 'modern' | 'condensed' | 'classic' | 'clean';
 export type TypographyFontGroup = 'serif' | 'sans';
 export type TypographyScript = 'latin' | 'korean' | 'japanese';
 export type TypographyRole = 'display' | 'body' | 'metadata';
 export type MasterTypographyFamily = 'cinematic' | 'editorial' | 'identity';
-export type MasterTypographyRole =
-  | 'display'
-  | 'secondaryDisplay'
-  | 'job'
-  | 'information'
-  | 'label'
-  | 'caption'
-  | 'micro';
+export type MasterTypographyRole = CardTypographyRole;
+
+export interface TypographyFontOption {
+  id: string;
+  family: string;
+  supportedScripts: FontRegistryEntry['supportedScripts'];
+  weightRange: FontRegistryEntry['axes']['weight'];
+  weights?: readonly number[];
+}
 
 export interface MasterTypographyTreatment {
   readonly fontFamily: string;
   readonly weight: number;
   readonly tracking: string;
   readonly lineHeight: number;
+}
+
+const fontRegistryEntries = Object.values(FONT_REGISTRY) as readonly FontRegistryEntry[];
+const selectableFonts = fontRegistryEntries.filter((entry) => entry.id !== 'pinyon-script' && entry.id !== 'whisper');
+
+export function getTypographyFontOptions(): readonly TypographyFontOption[] {
+  return selectableFonts
+    .map(({ id, family, supportedScripts, axes }) => ({
+      id,
+      family,
+      supportedScripts,
+      weightRange: axes.weight,
+      weights: (getTypographyFontEntry(id) as (FontRegistryEntry & { weights?: readonly number[] }) | undefined)?.weights,
+    }))
+    .sort((first, second) => first.family.localeCompare(second.family));
+}
+
+export function getTypographyFontEntry(fontId: string): FontRegistryEntry | undefined {
+  return selectableFonts.find((entry) => entry.id === fontId);
+}
+
+export function isSelectableTypographyFontId(fontId: string): boolean {
+  return getTypographyFontEntry(fontId) !== undefined;
+}
+
+export function getTypographySupportedWeight(fontId: string | undefined, requested: number): number {
+  const entry = fontId ? getTypographyFontEntry(fontId) : undefined;
+  if (!entry) return Math.min(900, Math.max(100, requested));
+  const [minimum, maximum] = entry.axes.weight;
+  const clamped = Math.min(maximum, Math.max(minimum, requested));
+  const weights = (entry as FontRegistryEntry & { weights?: readonly number[] }).weights;
+  if (!weights?.length) return clamped;
+  return weights.reduce((nearest, candidate) => (
+    Math.abs(candidate - clamped) < Math.abs(nearest - clamped) ? candidate : nearest
+  ), weights[0]);
+}
+
+export function getTypographyFontIdForStack(stack: string, script: TypographyScript): string | undefined {
+  return selectableFonts.find((entry) => entry.supportedScripts.includes(script) && stack.includes(entry.family))?.id;
+}
+
+export function getTypographyFontStackForId(
+  fontId: string | undefined,
+  script: TypographyScript,
+  fallbackStack: string,
+): string {
+  if (!fontId) return fallbackStack;
+  const entry = getTypographyFontEntry(fontId);
+  if (!entry || !entry.supportedScripts.includes(script)) return fallbackStack;
+  return `"${entry.family}", ${fallbackStack}`;
+}
+
+export function getTypographyOverrideFontRequests(
+  overrides: Partial<Record<MasterTypographyRole, CardTypographyOverride>> | undefined,
+): Array<{ fontId: string; weight: number }> {
+  if (!overrides) return [];
+  const requests = new Map<string, number>();
+  for (const override of Object.values(overrides)) {
+    if (override?.fontFamily && isSelectableTypographyFontId(override.fontFamily)) {
+      requests.set(override.fontFamily, override.weight ?? 400);
+    }
+  }
+  return Array.from(requests, ([fontId, weight]) => ({ fontId, weight }));
 }
 
 export type TypographyScriptStacks = Readonly<Record<TypographyScript, string>>;
@@ -189,8 +254,22 @@ export function getMasterTypographyTreatment(
   family: MasterTypographyFamily,
   role: MasterTypographyRole,
   script: TypographyScript,
+  override?: CardTypographyOverride,
 ): MasterTypographyTreatment {
-  return MASTER_TYPOGRAPHY_MAP[family][script][role];
+  const base = MASTER_TYPOGRAPHY_MAP[family][script][role];
+  return {
+    ...base,
+    fontFamily: getTypographyFontStackForId(override?.fontFamily, script, base.fontFamily),
+    weight: override?.weight === undefined
+      ? base.weight
+      : getTypographySupportedWeight(
+        override.fontFamily && getTypographyFontEntry(override.fontFamily)?.supportedScripts.includes(script)
+          ? override.fontFamily
+          : getTypographyFontIdForStack(base.fontFamily, script),
+        override.weight,
+      ),
+    tracking: base.tracking,
+  };
 }
 
 const sharedFonts: TypographyFontPairing = {

@@ -63,6 +63,34 @@
   pointer-events: none;
 }
 
+.photoWashBackdrop {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.photoWashImage {
+  position: absolute;
+  inset: 0;
+  opacity: .16;
+  filter: saturate(.84) contrast(1.03) blur(.22cqi);
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.photoWashBackdrop::after {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  content: '';
+  background:
+    radial-gradient(ellipse at 50% 46%, transparent 28%, color-mix(in srgb, var(--editorial-paper) 28%, transparent) 100%),
+    color-mix(in srgb, var(--editorial-paper) 16%, transparent);
+  pointer-events: none;
+}
+
 .brushUnderlay {
   position: absolute;
   z-index: 3;
@@ -407,7 +435,6 @@
 .canvas[data-ratio='9:16'] .jobInsignia { top: 83%; right: 6%; width: 30%; grid-template-columns: 10cqi minmax(0, 1fr); justify-items: start; gap: .6cqi 1.1cqi; text-align: left; }
 .canvas[data-ratio='9:16'] .jobGlyph { width: 10cqi !important; height: 10cqi !important; flex-basis: 10cqi !important; grid-row: span 3; }
 .canvas[data-ratio='9:16'] .insigniaCaption { display: none; }
-
 /* Landscape uses a complete image panel beside the seven compact print rows. */
 .canvas[data-ratio='16:9'] {
   --editorial-photo-left: -2%;

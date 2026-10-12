@@ -169,6 +169,7 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
                 lines={nameLines}
                 script={nameLayout.script}
                 typographyPreset={data.design.typographyPreset}
+                typography={data.design.typography?.display}
                 className={styles.name}
                 lineClassName={styles.nameLine}
                 {...masterFieldProps('id-card', 'name')}

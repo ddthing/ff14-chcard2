@@ -1,10 +1,11 @@
-import Image from 'next/image';
 import type { AdventurerCardData, CardRatio } from './types';
 import type { Locale } from '@/lib/types';
 import { CARD_UI_LABELS, getCardDisplayBio, getCardMasterCopy, getCardPhotoAlt } from '@/lib/card-copy';
 import { localizeFfxivLabel } from '@/data/ffxiv';
 import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
 import { getCardNameLayout } from '@/lib/card-name-layout';
+import { getPhotoPrintPaperContext } from '@/lib/photo-print-browser';
+import { PhotoPrintImage } from './PhotoPrintImage';
 import styles from './CardPhoto.module.css';
 
 export type MasterArtProps = { data: AdventurerCardData; locale: Locale; ratio?: CardRatio };
@@ -43,8 +44,15 @@ export function getArtContext(data: AdventurerCardData, locale: Locale) {
 
 /** Existing transform variables include the live editor override; no transform
  * is read or reset here. The production export waits for this same image. */
-export function ArtPhoto({ data, locale, className }: { data: AdventurerCardData; locale: Locale; className: string }) {
-  return <div className={`${styles.photo} ${className}`}>
-    {data.imageUrl && <Image src={data.imageUrl} alt={getCardPhotoAlt(data.character.name, locale)} fill sizes="560px" loading="eager" unoptimized draggable={false} />}
+export function ArtPhoto({ data, locale, className, decorative = false }: { data: AdventurerCardData; locale: Locale; className: string; decorative?: boolean }) {
+  return <div className={`${styles.photo} ${className}`} aria-hidden={decorative ? true : undefined}>
+    {data.imageUrl && <PhotoPrintImage
+      source={data.imageUrl}
+      alt={decorative ? '' : getCardPhotoAlt(data.character.name, locale)}
+      effects={data.design.effects}
+      effectIntensity={data.design.effectIntensity}
+      paperColor={data.design.palette.light}
+      paperContext={getPhotoPrintPaperContext(data.design, data.character.jobId ?? data.character.job)}
+    />}
   </div>;
 }

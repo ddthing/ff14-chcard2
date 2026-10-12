@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import test from 'node:test';
 import { register } from 'node:module';
+import postcss from 'postcss';
 
 register('./ts-alias-loader.mjs', import.meta.url);
 
@@ -17,12 +18,22 @@ const root = process.cwd();
 const assetDir = resolve(root, 'public/assets/card-materials/v3');
 const editorialTsx = readFileSync(resolve(root, 'src/components/cards/masters/editorial-master.tsx'), 'utf8');
 const editorialCss = readFileSync(resolve(root, 'src/components/cards/masters/editorial-master.module.css'), 'utf8');
+const editorialCssAst = postcss.parse(editorialCss);
 const identityTsx = readFileSync(resolve(root, 'src/components/cards/masters/identity-master.tsx'), 'utf8');
 const identityCss = readFileSync(resolve(root, 'src/components/cards/masters/identity-master.module.css'), 'utf8');
 const cinematicTsx = readFileSync(resolve(root, 'src/components/cards/masters/cinematic-master.tsx'), 'utf8');
 const adventurerCards = readFileSync(resolve(root, 'src/components/cards/AdventurerCards.tsx'), 'utf8');
 const attribution = readFileSync(resolve(root, 'src/components/ffxiv/ffxiv-attribution.tsx'), 'utf8');
 const cardCss = readFileSync(resolve(root, 'src/components/cards/Cards.module.css'), 'utf8');
+
+function declarationsFor(selector) {
+  let result;
+  editorialCssAst.walkRules(selector, (rule) => {
+    result = {};
+    rule.walkDecls((declaration) => { result[declaration.prop] = declaration.value; });
+  });
+  return result;
+}
 
 test('V3 advances only the visual version while keeping the stable masters and field registry', () => {
   assert.equal(MASTER_DESIGN_VERSION, '2.6.4');
@@ -55,7 +66,29 @@ test('editorial embeds the exact supplied brush path as a unique local SVG clip'
   assert.match(editorialCss, /\.brushUnderlay\s*\{[^}]*clip-path:\s*var\(--editorial-brush-clip\)/s);
   assert.match(editorialCss, /data-brush-composition='side-panel'[\s\S]*?max-width:\s*calc\(var\(--editorial-copy-left\) - var\(--editorial-photo-left\) - 1\.8%\)/);
   assert.match(editorialCss, /data-brush-composition='stacked'[\s\S]*?max-width:\s*none/);
-  assert.doesNotMatch(editorialCss, /mask-image|editorial-brush-mask/);
+  assert.doesNotMatch(editorialCss, /editorial-brush-mask/);
+  const washBackdrop = declarationsFor('.photoWashBackdrop');
+  const washPhoto = declarationsFor('.photoWashImage');
+  const washArt = declarationsFor('.photoArt');
+  const copyScrim = declarationsFor('.photoWashBackdrop::after');
+  assert.equal(washBackdrop.inset, '0', 'the wash backdrop fills the card');
+  assert.equal(washArt.inset, '0');
+  assert.equal(washArt.width, '100%');
+  assert.equal(washArt.height, '100%');
+  assert.equal(Number(washPhoto.opacity), 0.16, 'the processed image stays visible beneath copy');
+  assert.match(washPhoto.filter, /blur\(\.22cqi\)/u, 'the wash keeps print shapes legible');
+  assert.equal(washPhoto['mask-image'], undefined, 'the photo no longer fades at a panel boundary');
+  assert.equal(copyScrim.inset, '0', 'the paper scrim covers the full card');
+  assert.match(copyScrim.background, /radial-gradient/u);
+  assert.doesNotMatch(copyScrim.background, /linear-gradient/u, 'copy readability has no horizontal or vertical cutoff');
+  const ratioSpecificWashRules = [];
+  editorialCssAst.walkRules((rule) => {
+    if (rule.selector.includes('[data-ratio') && rule.selector.includes('photoWash')) {
+      ratioSpecificWashRules.push(rule.selector);
+    }
+  });
+  assert.deepEqual(ratioSpecificWashRules, [], 'every ratio uses the same full-card processed background');
+  assert.doesNotMatch(editorialCss, /photoHalftone|photoAuraClip|photoAtmosphereFade/);
   const glyphRule = editorialCss.match(/\.jobGlyph\s*\{([^}]+)\}/s)?.[1] ?? '';
   assert.doesNotMatch(glyphRule, /mask-image|clip-path|brush-clip/);
   assert.match(editorialTsx, /<JobIcon[\s\S]*?usage="cardDisplay"/);
@@ -64,6 +97,8 @@ test('editorial embeds the exact supplied brush path as a unique local SVG clip'
   assert.match(editorialTsx, /clipPathUnits="objectBoundingBox"/);
   assert.match(editorialTsx, /transform="scale\(0\.0009765625 0\.0006510416666666666\)"/);
   assert.equal([...editorialTsx.matchAll(/data-card-local-clip=\{brushClipId\}/g)].length, 2);
+  assert.match(editorialTsx, /data-photo-atmosphere aria-hidden="true"/);
+  assert.match(editorialTsx, /className=\{styles\.photoArt\}/);
   assert.match(editorialTsx, /url\(#\$\{brushClipId\}\)/);
   assert.doesNotMatch(editorialTsx, /editorial-brush-clip\.svg#|editorial-brush-mask\.png/);
   assert.equal(CARD_STOCK_COPY.editorial.en.warriorOfLight, 'Warrior of Light');

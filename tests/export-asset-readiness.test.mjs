@@ -31,6 +31,64 @@ function createFontSet(ready = Promise.resolve(), faces = []) {
   return fontSet;
 }
 
+function createPhotoPrintReadinessNode(initialState = 'processing') {
+  const events = [];
+  let notifyMutation;
+  let observedOptions;
+  const attributes = {
+    'data-photo-print-key': 'source-1|xerox:22|paper:255,248,235',
+    'data-photo-print-state': initialState,
+    'data-photo-print-ready': initialState === 'ready' ? 'true' : 'false',
+  };
+  const fallbackImage = {
+    src: 'blob:original-photo',
+    currentSrc: 'blob:original-photo',
+    complete: true,
+    naturalWidth: 640,
+    decode() { events.push('original-decode'); return Promise.resolve(); },
+  };
+  const processedImage = {
+    src: 'blob:processed-photo',
+    currentSrc: 'blob:processed-photo',
+    complete: true,
+    naturalWidth: 640,
+    decode() { events.push('processed-decode'); return Promise.resolve(); },
+  };
+  const marker = {
+    getAttribute(name) { return attributes[name] ?? null; },
+  };
+
+  class FakeMutationObserver {
+    constructor(callback) { notifyMutation = () => callback([], this); }
+    observe(_target, options) { observedOptions = options; }
+    disconnect() {}
+  }
+
+  const node = {
+    ownerDocument: { defaultView: { MutationObserver: FakeMutationObserver } },
+    querySelectorAll(selector) {
+      if (selector === 'img') {
+        return attributes['data-photo-print-ready'] === 'true'
+          ? [fallbackImage, processedImage]
+          : [fallbackImage];
+      }
+      if (selector === '[data-photo-print-ready]') return [marker];
+      return [];
+    },
+  };
+
+  return {
+    node,
+    events,
+    observedOptions: () => observedOptions,
+    setState(state) {
+      attributes['data-photo-print-state'] = state;
+      attributes['data-photo-print-ready'] = state === 'ready' ? 'true' : 'false';
+      notifyMutation?.();
+    },
+  };
+}
+
 test('capped 4x output matches rasterizer integer dimensions', () => {
   const size = getCardExportSize('4:5', 4);
   assert.deepEqual([size.width, size.height], [4195, 5243]);
@@ -71,6 +129,8 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
       template: 'cinematic', ratio: '4:5', layoutVariant: 'a', colorMode: 'auto', jobMotifVisible: true,
       palette: { primary: '#112233', accent: '#aabbcc', light: '#ffffff', dark: '#000000' },
       accentColor: '#aabbcc', typographyPreset: 'editorial', imagePosition: '50% 50%', imageScale: 1, effects: ['grain'],
+      typography: { display: { fontFamily: 'estonia', sizePercent: 112, weight: 400, trackingEm: 0.01 } },
+      effectIntensity: { xerox: 45, halftone: 28 },
     },
     imageUrl: 'blob:export-snapshot',
     imageAdjustments: { x: 50, y: 50, scale: 1, rotation: 0, brightness: 1, contrast: 1, saturation: 1, exposure: 0 },
@@ -81,6 +141,8 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
   source.character.languages[0] = 'ja';
   source.design.ratio = '16:9';
   source.design.effects.push('blur');
+  source.design.typography.display.sizePercent = 75;
+  source.design.effectIntensity.xerox = 95;
   source.design.palette.primary = '#ffffff';
   source.imageAdjustments.x = 12;
 
@@ -93,6 +155,10 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
     snapshot.data.design.palette.primary,
     snapshot.data.imageAdjustments.x,
   ], ['Coner', 'en', '4:5', 1, '#112233', 50]);
+  assert.equal(snapshot.data.design.typography.display.sizePercent, 112);
+  assert.equal(snapshot.data.design.effectIntensity.xerox, 45);
+  assert.notEqual(snapshot.data.design.typography, source.design.typography);
+  assert.notEqual(snapshot.data.design.effectIntensity, source.design.effectIntensity);
 });
 
 test('export waits for fonts and decoded mask images before its two paint frames', async () => {
@@ -122,6 +188,66 @@ test('export waits for fonts and decoded mask images before its two paint frames
     releaseMask();
     await ready;
     assert.deepEqual(events, ['mask-decode', 'paint', 'paint']);
+  } finally {
+    if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
+    if (previous.raf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previous.raf;
+  }
+});
+
+test('export waits for the processed photo even after the original fallback has decoded', async () => {
+  const previous = { document: globalThis.document, raf: globalThis.requestAnimationFrame };
+  const photo = createPhotoPrintReadinessNode();
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+
+  try {
+    let completed = false;
+    const ready = waitForCardAssets(photo.node, { imageTimeoutMs: 250 }).then(() => { completed = true; });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(completed, false, 'a decoded original fallback does not satisfy print readiness');
+    assert.deepEqual(photo.observedOptions(), {
+      attributes: true,
+      attributeFilter: ['data-photo-print-ready', 'data-photo-print-state', 'data-photo-print-key'],
+      subtree: true,
+    });
+
+    photo.setState('ready');
+    await ready;
+    assert.ok(photo.events.includes('processed-decode'), 'export decodes the generated photo before capture');
+  } finally {
+    if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
+    if (previous.raf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previous.raf;
+  }
+});
+
+test('export rejects a failed photo print render instead of accepting its original fallback', async () => {
+  const previous = { document: globalThis.document, raf: globalThis.requestAnimationFrame };
+  const photo = createPhotoPrintReadinessNode('error');
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+
+  try {
+    await assert.rejects(
+      waitForCardAssets(photo.node, { imageTimeoutMs: 100 }),
+      error => error instanceof CardExportError && error.code === 'photo-print-failed',
+    );
+  } finally {
+    if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
+    if (previous.raf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previous.raf;
+  }
+});
+
+test('export times out when photo print processing never reaches a terminal state', async () => {
+  const previous = { document: globalThis.document, raf: globalThis.requestAnimationFrame };
+  const photo = createPhotoPrintReadinessNode();
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+
+  try {
+    await assert.rejects(
+      waitForCardAssets(photo.node, { imageTimeoutMs: 8 }),
+      error => error instanceof CardExportError && error.code === 'photo-print-timeout',
+    );
   } finally {
     if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
     if (previous.raf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previous.raf;

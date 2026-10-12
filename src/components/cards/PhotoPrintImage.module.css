@@ -1,0 +1,22 @@
+.imageSet {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  color: var(--craft-paper, var(--card-light, #fff8eb));
+}
+
+.processedImage {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--card-image-position);
+}
+
+.imageSet[data-photo-print-state='ready'] [data-photo-print-fallback] {
+  visibility: hidden;
+}

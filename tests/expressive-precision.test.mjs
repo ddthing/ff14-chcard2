@@ -45,6 +45,26 @@ test('optical envelopes have script caps and measured dense glyphs shrink withou
  }
 });
 
+test('relative name sizing changes measured font size while preserving optical width and height bounds',()=>{
+ const box=CARD_NAME_ENVELOPES.cinematic['4:5'];
+ const inputs={
+  family:'cinematic',ratio:'4:5',script:'latin',
+  metrics:{width:100,height:40,ink:10000,lines:1},
+  reference:{width:100,height:40,ink:1000,lines:1},
+  lineHeight:1,availableWidth:box.width,
+ };
+ const base=fitOpticalName(inputs);
+ const smaller=fitOpticalName({...inputs,sizeScale:.75});
+ const larger=fitOpticalName({...inputs,sizeScale:1.25});
+
+ assert.ok(smaller.size<base.size);
+ assert.ok(larger.size>base.size);
+ for(const fit of [smaller,base,larger]){
+  assert.ok(fit.width<=box.width+.01);
+  assert.ok(fit.height<=box.height+.01);
+ }
+});
+
 test('Editorial ratios reuse the authored dry-brush silhouette and select a readable card composition',()=>{
  const ids=new Set();
  for(const ratio of ['1:1','4:5','3:4','9:16','16:9']){

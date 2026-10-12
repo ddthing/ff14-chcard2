@@ -1,8 +1,8 @@
 'use client';
 
 import {memo,useLayoutEffect,useRef,useState,type HTMLAttributes} from 'react';
-import type { AdventurerCardTemplate, CardRatio } from '../types';
-import {getMasterTypographyFamily,getMasterTypographyTreatment,getTypographyFontFamily,getTypographyPreset,type TypographyScript} from '@/lib/typography-presets';
+import type { AdventurerCardTemplate, CardRatio, CardTypographyOverride } from '../types';
+import {getMasterTypographyFamily,getMasterTypographyTreatment,getTypographyFontFamily,getTypographyFontStackForId,getTypographyOverrideFontRequests,getTypographyPreset,type TypographyScript} from '@/lib/typography-presets';
 import {getTypographyScriptsForCardText,loadProfiledFontFace,loadTypographyFonts} from '@/data/fonts/load-fonts';
 import {profileCount,profileRender,profileStart} from '@/lib/performance-profile';
 import {CARD_NAME_ENVELOPES,fitOpticalName,type NameInkMetrics,type OpticalNameFit} from '@/lib/card-name-envelope';
@@ -14,6 +14,7 @@ export interface OpticalNameProps extends HTMLAttributes<HTMLHeadingElement> {
   lines: readonly string[];
   script: TypographyScript;
   typographyPreset: string;
+  typography?: CardTypographyOverride;
   lineClassName?: string;
 }
 
@@ -82,16 +83,18 @@ function measureInk(
 
 type MeasuredFit={key:string;fit:OpticalNameFit;metrics:NameInkMetrics;reference:NameInkMetrics};
 
-export const OpticalName=memo(function OpticalName({family,ratio,name,lines,script,typographyPreset,lineClassName,style,...props}:OpticalNameProps){
+export const OpticalName=memo(function OpticalName({family,ratio,name,lines,script,typographyPreset,typography,lineClassName,style,...props}:OpticalNameProps){
  profileRender('OpticalName');
- const selectedFontFamily=getTypographyFontFamily(typographyPreset,'display',script);
+ const selectedFontFamily=getTypographyFontStackForId(typography?.fontFamily,script,getTypographyFontFamily(typographyPreset,'display',script));
+ const sizeScale=Math.min(1.25,Math.max(.75,(typography?.sizePercent??100)/100));
  const heading=useRef<HTMLHeadingElement>(null);
  const [measured,setMeasured]=useState<MeasuredFit|null>(null);
  const textKey=lines.join('\n');
- const key=JSON.stringify([family,ratio,name,textKey,script,typographyPreset]);
+ const key=JSON.stringify([family,ratio,name,textKey,script,typographyPreset,typography]);
  const box=CARD_NAME_ENVELOPES[family][ratio];
  const current=measured?.key===key?measured:null;
- const fallback=Math.min(box.caps[script],box.height/Math.max(1,lines.length*1.05));
+ const fallbackBase=Math.min(box.caps[script],box.height/Math.max(1,lines.length*1.05));
+ const fallback=Math.min(box.caps[script],box.height/Math.max(1,lines.length*1.05),fallbackBase*sizeScale);
 
  useLayoutEffect(()=>{
   const node=heading.current!;if(!node)return;
@@ -116,7 +119,7 @@ export const OpticalName=memo(function OpticalName({family,ratio,name,lines,scri
    // Computed CSS widths are unaffected by the canvas zoom/pan transform.
    const available=(parseFloat(computed.width)||cardWidth)/cardWidth*100*.96;
    const lineHeight=(parseFloat(computed.lineHeight)||size*1.03)/size;
-   const fit=fitOpticalName({family,ratio,script,metrics,reference,lineHeight,availableWidth:available});
+   const fit=fitOpticalName({family,ratio,script,metrics,reference,lineHeight,availableWidth:available,sizeScale});
    setMeasured(previous=>previous?.key===key&&Math.abs(previous.fit.size-fit.size)<.001?previous:{key,fit,metrics,reference});
    }finally{
     finishCalculate();
@@ -132,10 +135,10 @@ export const OpticalName=memo(function OpticalName({family,ratio,name,lines,scri
     const textByScript=Object.fromEntries(scripts.map(activeScript=>[activeScript,name])) as Partial<Record<TypographyScript,string>>;
     const serifWeightByScript=Object.fromEntries(scripts.map(activeScript=>[
      activeScript,
-     getMasterTypographyTreatment(masterFamily,'display',activeScript).weight,
+     getMasterTypographyTreatment(masterFamily,'display',activeScript,typography).weight,
     ])) as Partial<Record<TypographyScript,number>>;
     await Promise.all([
-     loadTypographyFonts(typographyPreset,scripts,textByScript,{masterFamily,serifWeightByScript,profileSource:'optical'}),
+     loadTypographyFonts(typographyPreset,scripts,textByScript,{masterFamily,serifWeightByScript,fontRequests:getTypographyOverrideFontRequests(typography?{display:typography}:undefined),profileSource:'optical'}),
      loadProfiledFontFace(`${referenceWeight} ${MEASURE_SIZE}px ${referenceFamily}`,'Coner',{
       source:'optical-reference',face:`${masterFamily}-display-latin`,script:'latin',weight:referenceWeight,glyphCount:5,
      }),
@@ -155,7 +158,7 @@ export const OpticalName=memo(function OpticalName({family,ratio,name,lines,scri
   const observer=new ResizeObserver(()=>{if(!disposed&&metricsReady&&document.fonts.status==='loaded'){profileCount('optical.resizeObserver.callbacks');calculate();}});
   const card=node.closest('article');if(card)observer.observe(card);
   return()=>{disposed=true;observer.disconnect();document.fonts.removeEventListener('loadingdone',fontsChanged);};
- },[family,ratio,name,textKey,script,typographyPreset,key]);
+ },[family,ratio,name,textKey,script,typographyPreset,typography,sizeScale,key]);
 
  return <h2 {...props} ref={heading} style={{...style,fontFamily:selectedFontFamily,fontSize:`${current?.fit.size??fallback}cqi`}} aria-label={name} data-master-typography-role="display"
   data-optical-name={family} data-optical-ratio={ratio} data-optical-script={script} data-optical-preset={typographyPreset}

@@ -758,3 +758,69 @@ test('replacing a card with the same image URL prefers supplied image metadata a
     restoreDemoCard();
   }
 });
+
+test('editable typography and texture strengths round-trip, stay immutable, and undo as one design change', () => {
+  restoreDemoCard();
+  try {
+    const typography = {
+      display: { fontFamily: 'valley-sans', sizePercent: 115, weight: 680, trackingEm: -0.015 },
+      information: { fontFamily: 'gmarket-sans', sizePercent: 96, weight: 700, trackingEm: 0.02 },
+    };
+    const effectIntensity = { xerox: 64, halftone: 31 };
+    editorStore.getState().setDesign({ typography, effectIntensity });
+
+    const exportedCard = editorStore.getState().toCardData();
+    assert.deepEqual(exportedCard.design.typography, typography);
+    assert.deepEqual(exportedCard.design.effectIntensity, effectIntensity);
+
+    const storage = new MemoryStorage();
+    assert.equal(persistEditorDraft(exportedCard, storage), true);
+    const loaded = loadEditorDraft(storage);
+    assert.equal(loaded.migrated, false);
+    assert.deepEqual(loaded.card.design.typography, typography);
+    assert.deepEqual(loaded.card.design.effectIntensity, effectIntensity);
+
+    exportedCard.design.typography.display.sizePercent = 75;
+    exportedCard.design.effectIntensity.xerox = 0;
+    assert.equal(editorStore.getState().design.typography.display.sizePercent, 115);
+    assert.equal(editorStore.getState().design.effectIntensity.xerox, 64);
+
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().design.typography, undefined);
+    assert.equal(editorStore.getState().design.effectIntensity, undefined);
+    editorStore.getState().redo();
+    assert.deepEqual(editorStore.getState().design.typography, typography);
+    assert.deepEqual(editorStore.getState().design.effectIntensity, effectIntensity);
+  } finally {
+    restoreDemoCard();
+  }
+});
+
+test('draft normalization allowlists typography roles and fonts and clamps typography and texture values', () => {
+  const normalized = normalizeCardData({
+    ...demoAdventurerData,
+    design: {
+      ...demoAdventurerData.design,
+      typography: {
+        display: { fontFamily: 'unregistered-font', sizePercent: 999, weight: 1400, trackingEm: -1 },
+        information: { fontFamily: 'gmarket-sans', sizePercent: 50, weight: 690, trackingEm: 1 },
+        unsupported: { fontFamily: 'estonia', sizePercent: 100 },
+      },
+      effectIntensity: {
+        xerox: -12,
+        halftone: 101,
+        distressed: 44,
+        constructor: 99,
+        unregistered: 78,
+        'unsafe key': 55,
+        invalid: Number.NaN,
+      },
+    },
+  });
+
+  assert.deepEqual(normalized.design.typography, {
+    display: { sizePercent: 125, weight: 900, trackingEm: -0.12 },
+    information: { fontFamily: 'gmarket-sans', sizePercent: 75, weight: 700, trackingEm: 0.2 },
+  });
+  assert.deepEqual(normalized.design.effectIntensity, { xerox: 0, halftone: 100, distressed: 44 });
+});

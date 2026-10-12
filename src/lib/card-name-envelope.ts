@@ -55,7 +55,7 @@ export interface OpticalNameFit {
 }
 
 /** Pure solver; all typeface differences enter as real measured metrics. */
-export function fitOpticalName({family,ratio,script,metrics,reference,lineHeight,availableWidth}:{family:AdventurerCardTemplate;ratio:CardRatio;script:TypographyScript;metrics:NameInkMetrics;reference:NameInkMetrics;lineHeight:number;availableWidth:number}):OpticalNameFit{
+export function fitOpticalName({family,ratio,script,metrics,reference,lineHeight,availableWidth,sizeScale=1}:{family:AdventurerCardTemplate;ratio:CardRatio;script:TypographyScript;metrics:NameInkMetrics;reference:NameInkMetrics;lineHeight:number;availableWidth:number;sizeScale?:number}):OpticalNameFit{
  const box=CARD_NAME_ENVELOPES[family][ratio];
  const width=Math.max(.1,Math.min(box.width,availableWidth));
  const heightUnits=Math.max(.01,metrics.height/100+Math.max(0,metrics.lines-1)*lineHeight);
@@ -63,6 +63,8 @@ export function fitOpticalName({family,ratio,script,metrics,reference,lineHeight
  const inkSize=box.referenceSize*Math.sqrt(Math.max(1,reference.ink)/Math.max(1,metrics.ink));
  const limits={cap:box.caps[script],width:width*100/Math.max(1,metrics.width),height:heightLimit/heightUnits,ink:inkSize};
  const limiting=(Object.keys(limits) as Array<keyof typeof limits>).reduce((a,b)=>limits[a]<=limits[b]?a:b);
- const size=Math.max(.1,Math.floor(limits[limiting]*1000)/1000);
+ const geometryLimit=Math.min(limits.cap,limits.width,limits.height);
+ const scaledSize=Math.min(geometryLimit,limits[limiting]*Math.min(1.25,Math.max(.75,sizeScale)));
+ const size=Math.max(.1,Math.floor(scaledSize*1000)/1000);
  return {size,width:metrics.width*size/100,height:heightUnits*size,ink:metrics.ink*(size/100)**2,limiting};
 }
