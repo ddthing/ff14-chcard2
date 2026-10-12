@@ -110,15 +110,13 @@ function getMasterTypographyProperties(
 
   for (const role of MASTER_TYPOGRAPHY_ROLES) {
     const script = scriptByRole[role];
-    if (script === 'latin' && role !== 'display') continue;
-
     const treatment = getMasterTypographyTreatment(family, role, script);
     const cssRole = role.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`);
     properties[`--master-font-${cssRole}`] = treatment.fontFamily;
 
-    // Master display families are fixed across scripts and presets. Preserve
-    // each approved Latin role's weight, tracking, and leading selectors.
-    if (script === 'latin') continue;
+    // Preserve approved Latin display-role metrics; information metrics stay
+    // explicit so their cross-script weight remains consistent.
+    if (script === 'latin' && role !== 'information') continue;
 
     properties[`--master-${cssRole}-weight`] = treatment.weight;
     properties[`--master-${cssRole}-tracking`] = treatment.tracking;
@@ -227,7 +225,8 @@ function getCardProperties(
   const scale = adjustments.scale ?? data.design.imageScale ?? 1;
   const brightness = (adjustments.brightness ?? 1) * 2 ** exposure;
   const localized = getLocalizedCharacterFields(data.character, locale);
-  const displayBio = getCardDisplayBio(data.character, data.imageUrl, locale);
+  const decorativeCopy = (design.layoutVariant ?? 'a') === 'a' ? design.decorativeCopy : 'default';
+  const displayBio = getCardDisplayBio(data.character, data.imageUrl, locale, decorativeCopy);
   const typography = data.design.typographyPreset as string;
   const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
   const displayScript = detectTypographyScript(data.character.name, localeScript);
@@ -436,8 +435,8 @@ export function CinematicCard({ data, ratio, className, highlightField, imageAdj
             <h2 data-field="name">{character.name}</h2>
             <p className={styles.cinematicJobline}>
               <span data-field="job">{labels.job}</span>
-              <span aria-hidden="true">/</span>
-              <span>{ui.level} <span data-field="level">{character.level}</span></span>
+              {character.level > 0 && <><span aria-hidden="true">/</span>
+              <span>{ui.level} <span data-field="level">{character.level}</span></span></>}
             </p>
             {master && (labels.race || labels.clan) && <p className={styles.cinematicLineage}><span data-field="race">{labels.race}</span>{labels.race && labels.clan && <span aria-hidden="true"> / </span>}<span data-field="clan">{labels.clan}</span></p>}
           </div>
@@ -504,14 +503,14 @@ export function EditorialCard({ data, ratio, className, highlightField, imageAdj
           {(labels.race || labels.clan) && <p className={styles.editorialEyebrow}><span data-field="race">{labels.race}</span>{labels.race && labels.clan && ' · '}<span data-field="clan">{labels.clan}</span></p>}
           <h2 data-field="name" aria-label={master ? nameLayout.normalizedName : undefined}>{master ? nameLayout.lines.map((line,index) => <span className={styles.nameLine} key={index}>{line}</span>) : character.name}</h2>
           {!master && <p className={styles.editorialRole}>
-            <span data-field="job">{labels.job}</span>{!master && <><span aria-hidden="true"> / </span>{ui.level} <span data-field="level">{character.level}</span></>}
+            <span data-field="job">{labels.job}</span>{!master && character.level > 0 && <><span aria-hidden="true"> / </span>{ui.level} <span data-field="level">{character.level}</span></>}
           </p>}
         </div>
 
         {master && <aside className={styles.editorialJobStudy}>
           {microcopy.jobAbbreviation && <strong className={styles.editorialJobCode}>{microcopy.jobAbbreviation}</strong>}
           <p className={styles.editorialRole} data-field="job">{labels.job}</p>
-          <span className={styles.editorialLevel}>{ui.level} <b data-field="level">{character.level}</b></span>
+          {character.level > 0 && <span className={styles.editorialLevel}>{ui.level} <b data-field="level">{character.level}</b></span>}
         </aside>}
 
         <dl className={styles.editorialFacts}>
@@ -576,7 +575,7 @@ export function AdventurerIdCard({ data, ratio, className, highlightField, image
           {master ? microcopy.origin && <p className={styles.idEyebrow}>{microcopy.origin}</p> : <p className={styles.idEyebrow}>{copy.profile}</p>}
           <h2 data-field="name">{character.name}</h2>
           <p className={styles.idRole}>
-            <span data-field="job">{labels.job}</span><span aria-hidden="true"> / </span>{ui.level} <span data-field="level">{character.level}</span>
+            <span data-field="job">{labels.job}</span>{character.level > 0 && <><span aria-hidden="true"> / </span>{ui.level} <span data-field="level">{character.level}</span></>}
           </p>
 
           <dl className={styles.idFacts}>

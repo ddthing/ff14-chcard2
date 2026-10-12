@@ -1,6 +1,6 @@
 <!-- BEGIN:nextjs-agent-rules -->
 
-# This is NOT the Next.js you know
+## This is NOT the Next.js you know
 
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
 
@@ -9,6 +9,11 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 <!-- END:nextjs-agent-rules -->
 
 ## APP UI / CARD DESIGN V3 — IMPLEMENTATION CONTRACT
+
+Read root `DESIGN.md` first. It is the current app UI/UX contract for the
+installed shadcn `bJMSkfGi` Stone theme. Its exact token, component, density,
+and CSS maintenance rules take precedence over historical app UI proposals.
+Card artwork and data/export boundaries remain governed by the V3 contracts.
 
 The user's 2026-10-08 request explicitly authorizes the V3 UI/UX and card redesign.
 Read `docs/design/v3/README.md`, then its master specification, design tokens,

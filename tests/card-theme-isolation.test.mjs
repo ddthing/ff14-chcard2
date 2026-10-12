@@ -25,6 +25,7 @@ function collectSourceFiles(relativeDirectory) {
 test('card render roots freeze only the inherited browser context already used by the artwork', () => {
   const component = readFileSync(new URL('../src/components/cards/AdventurerCards.tsx', import.meta.url), 'utf8');
   const scope = readFileSync(new URL('../src/components/cards/card-render-scope.module.css', import.meta.url), 'utf8');
+  const shadcnTheme = readFileSync(new URL('../src/app/shadcn-theme.css', import.meta.url), 'utf8');
 
   assert.match(component, /renderScopeStyles\.root/u);
   assert.match(component, /data-card-render-scope="true"/u);
@@ -42,6 +43,9 @@ test('card render roots freeze only the inherited browser context already used b
       expectedAmbientProperties.add(match[1]);
     }
   }
+  for (const match of shadcnTheme.matchAll(/^\s*(--[\w-]+)\s*:/gmu)) {
+    expectedAmbientProperties.add(match[1]);
+  }
 
   const resetProperties = new Map([...declarations].filter(([name]) => name.startsWith('--')));
   assert.deepEqual([...resetProperties.keys()].sort(), [...expectedAmbientProperties].sort());
@@ -56,15 +60,20 @@ test('card render roots freeze only the inherited browser context already used b
 });
 
 test('card and bitmap-export source has no direct App Theme token dependency', () => {
+  const shadcnTheme = readFileSync(new URL('../src/app/shadcn-theme.css', import.meta.url), 'utf8');
+  const shadcnThemeTokens = new Set([...shadcnTheme.matchAll(/^\s*(--[\w-]+)\s*:/gmu)]
+    .map((match) => match[1]));
   const files = [
     ...collectSourceFiles('src/components/cards'),
     ...collectSourceFiles('src/lib/card-export'),
   ];
-  const tokenReference = /var\(\s*--(?:app|editor|theme|surface|text|border)-[\w-]+/u;
+  const appThemeToken = /^--(?:app|editor|theme|surface|text|border)-[\w-]+$/u;
   const references = files.flatMap((path) => {
     const source = readFileSync(path, 'utf8');
-    return [...source.matchAll(new RegExp(tokenReference.source, 'gu'))]
-      .map((match) => `${path}: ${match[0]}`);
+    return [...source.matchAll(/var\(\s*(--[\w-]+)/gu)]
+      .map((match) => match[1])
+      .filter((token) => appThemeToken.test(token) || shadcnThemeTokens.has(token))
+      .map((token) => `${path}: var(${token}`);
   });
 
   assert.deepEqual(references, []);

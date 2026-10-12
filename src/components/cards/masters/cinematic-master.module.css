@@ -281,12 +281,6 @@
   text-wrap: pretty;
 }
 
-.metaCell[data-cinema-fact='job'] .metaValue {
-  font-family: var(--master-font-job, var(--card-font-world, var(--card-font-display, Georgia, serif)));
-  font-weight: var(--master-job-weight, 500);
-  line-height: var(--master-job-leading, 1.08);
-}
-
 .jobLockup { display: flex; min-width: 0; align-items: center; gap: .8cqi; margin: 0; }
 
 .jobSeal {
@@ -332,11 +326,7 @@
 
 .levelValue {
   color: var(--craft-gold-light, var(--craft-brass, var(--master-accent, var(--card-accent))));
-  font-family: var(--card-font-display, Georgia, serif);
-  font-size: max(var(--master-micro-min, .84cqi), calc(var(--cinema-meta-value-size) * 1.18));
   font-variant-numeric: lining-nums tabular-nums;
-  letter-spacing: .015em;
-  line-height: 1;
 }
 
 .frame {

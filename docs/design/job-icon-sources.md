@@ -1,8 +1,10 @@
 # FFXIV job icon sources
 
-## Current runtime policy (2026-10-08)
+## Current runtime policy (2026-10-12)
 
-Runtime icons now use only locally pinned XIVAPI originals: 16 reviewed 1000×1000 SVGs and 18 reviewed 256×256 `icons/` PNGs cover all 33 upstream-backed jobs. The raw PNGs are used directly; the browser may read their original alpha for tinting, and the build does not create separate mask files. PNG approval is limited to picker, micro, cardSmall, cardMedium, and export; `cardDisplay` requires an approved SVG. Unsupported jobs and failed sources use the app's generic text or role mark.
+Runtime icons use only locally pinned XIVAPI originals: 16 reviewed 1000×1000 SVGs and 18 reviewed 256×256 `icons/` PNGs cover all 33 upstream-backed jobs. The raw PNGs are used directly; the browser may read their original alpha for tinting, and the build does not create separate mask files. Approved SVGs have priority. Checksum-verified 256px PNGs with explicit `cardDisplay` usage approval also supply large marks when no approved SVG is available. Unsupported jobs and failed sources use the app's generic text or role mark.
+
+Picker-only `pickerScale` compensates for transparent source margins: visible alpha at threshold 128 occupies an 18px longest edge inside the existing 20px frame. Original source bytes, card-size optical scales, and export scales are preserved. The 2026-10-12 review covers 33 source-backed jobs; Beastmaster remains an explicit missing-source fallback in this pinned inventory.
 
 The following 2026-10-07 review records the previous comparison against manually derived 76px Fan Kit masks. Keep it as historical evidence only; the generated mask and SDF PNG assets were removed from the runtime tree and all audited asset copies on 2026-10-08. Comparison records remain available as historical evidence.
 
@@ -63,9 +65,9 @@ In the 2026-10-07 review, four plain `icons/` PNGs passed as small/medium source
 | Pictomancer | Primary, small/medium | 0.857 | 0.557 |
 | Summoner | SVG fallback, small/medium | 0.861 | 0.650 |
 
-These 256px PNGs are not approved for `cardDisplay`. Their optical metadata is recorded per source in the runtime manifest.
+At the time of this historical comparison, these 256px PNGs were not approved for `cardDisplay`. The 2026-10-12 runtime policy above now permits their checksum-verified originals with explicit usage approval. Their card optical metadata remains recorded per source in the runtime manifest.
 
-The historical Fan Kit silhouette gate rejected the following 14 jobs' SVG and raster candidates. Under the current runtime policy above, these jobs now use their original XIVAPI 256px `icons/` PNGs for approved small and medium usages; the older scores remain here only to record the 2026-10-07 comparison result. They do not imply a current Fan Kit fallback.
+The historical Fan Kit silhouette gate rejected the following 14 jobs' SVG and raster candidates. Under the current runtime policy above, these jobs use their original XIVAPI 256px `icons/` PNGs for explicitly approved usages, including large marks; the older scores remain here only to record the 2026-10-07 comparison result. They do not imply a current Fan Kit fallback.
 
 | Job | SVG | Raster |
 | --- | ---: | ---: |

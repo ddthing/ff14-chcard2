@@ -1,51 +1,40 @@
+/* Semantic aliases to the installed shadcn Stone preset.
+ * Keep color values and the radius scale in shadcn-theme.css authoritative.
+ * Card artwork remains isolated from these application tokens.
+ */
+html[data-app-theme='light'],
 html[data-app-theme='dark'] {
-  --app-bg: #191512;
-  --app-surface: #211c18;
-  --app-surface-raised: #2a241e;
-  --app-workspace: #151210;
-  --app-control: #27211b;
-  --app-control-hover: #342b24;
-  --app-border: #51463b;
-  --app-border-strong: #847361;
-  --app-text: #f4eadb;
-  --app-text-muted: #b7a794;
-  --app-text-subtle: #b7a794;
-  --app-accent: #d98279;
-  --app-on-accent: #241715;
-  --app-accent-soft: rgb(217 130 121 / 14%);
-  --app-focus: #f0b3a5;
-  --app-error: #ffaaa1;
-  --app-error-surface: #3d2425;
-  --app-success: #91d3a9;
-  --app-success-surface: #193428;
-  --app-header: #211c18;
-  --app-overlay: rgb(0 0 0 / 58%);
-  --app-shadow-overlay: 0 14px 40px rgb(0 0 0 / 34%);
+  --app-bg: var(--background);
+  --app-surface: var(--card);
+  --app-surface-raised: var(--popover);
+  --app-workspace: var(--muted);
+  --app-control: var(--card);
+  --app-control-hover: var(--accent);
+  --app-border: var(--border);
+  --app-border-strong: var(--input);
+  --app-text: var(--foreground);
+  --app-text-muted: var(--muted-foreground);
+  --app-text-subtle: var(--muted-foreground);
+  --app-accent: var(--primary);
+  --app-on-accent: var(--primary-foreground);
+  --app-accent-soft: var(--accent);
+  --app-focus: var(--ring);
+  --app-header: var(--card);
+  --app-error: var(--destructive);
+  --app-error-surface: var(--muted);
+  --app-success: var(--foreground);
+  --app-success-surface: var(--muted);
   --app-header-height: 56px;
 }
 
 html[data-app-theme='light'] {
-  --app-bg: #eee5d7;
-  --app-surface: #fbf4e8;
-  --app-surface-raised: #fff9ef;
-  --app-workspace: #e6dac8;
-  --app-control: #fbf4e8;
-  --app-control-hover: #eee5d7;
-  --app-border: #d2c0a8;
-  --app-border-strong: #8e8070;
-  --app-text: #27211c;
-  --app-text-muted: #706458;
-  --app-text-subtle: #706458;
-  --app-accent: #863b34;
-  --app-on-accent: #fff6e6;
-  --app-accent-soft: rgb(134 59 52 / 9%);
-  --app-focus: #863b34;
-  --app-error: #a72f27;
-  --app-error-surface: #fbe9e6;
-  --app-success: #276447;
-  --app-success-surface: #e5f2ea;
-  --app-header: #fbf4e8;
-  --app-overlay: rgb(23 27 31 / 32%);
-  --app-shadow-overlay: 0 12px 32px rgb(26 29 32 / 16%);
-  --app-header-height: 56px;
+  color-scheme: light;
+  --app-overlay: rgb(0 0 0 / 32%);
+  --app-shadow-overlay: 0 12px 32px rgb(0 0 0 / 16%);
+}
+
+html[data-app-theme='dark'] {
+  color-scheme: dark;
+  --app-overlay: rgb(0 0 0 / 58%);
+  --app-shadow-overlay: 0 14px 40px rgb(0 0 0 / 34%);
 }

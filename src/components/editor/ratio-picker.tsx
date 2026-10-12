@@ -3,6 +3,7 @@
 import { memo, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { CardRatio } from '@/components/cards/types';
 import styles from '@/app/editor/editor.module.css';
+import inlineStyles from './ratio-picker.module.css';
 import { profileRender } from '@/lib/performance-profile';
 import { useI18n } from '@/lib/i18n';
 import { isImeComposing } from './editor-input';
@@ -13,7 +14,10 @@ type RatioPickerProps = {
   label: string;
   value: CardRatio;
   onChange: (ratio: CardRatio) => void;
+  presentation?: 'menu' | 'inline';
 };
+
+type RatioPickerSelectionProps = Omit<RatioPickerProps, 'presentation'>;
 
 function getMiniatureFrameStyle(ratio: CardRatio): CSSProperties {
   const [rawWidth, rawHeight] = ratio.split(':').map(Number);
@@ -27,7 +31,7 @@ function getMiniatureFrameStyle(ratio: CardRatio): CSSProperties {
   };
 }
 
-export const RatioPicker = memo(function RatioPicker({ label, value, onChange }: RatioPickerProps) {
+const MenuRatioPicker = memo(function MenuRatioPicker({ label, value, onChange }: RatioPickerSelectionProps) {
   profileRender('RatioPicker');
   const { locale } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
@@ -186,4 +190,44 @@ export const RatioPicker = memo(function RatioPicker({ label, value, onChange }:
       )}
     </div>
   );
+});
+
+export const InlineRatioPicker = memo(function InlineRatioPicker({ label, value, onChange }: RatioPickerSelectionProps) {
+  profileRender('RatioPicker');
+  const { locale } = useI18n();
+  const radioGroupName = useId();
+
+  return (
+    <fieldset className={inlineStyles.group}>
+      <legend className={inlineStyles.visuallyHidden}>{label}</legend>
+      <div className={inlineStyles.choices}>
+        {CARD_RATIO_OPTIONS.map((ratio) => (
+          <label className={inlineStyles.choice} key={ratio}>
+            <input
+              className={inlineStyles.radio}
+              type="radio"
+              name={radioGroupName}
+              value={ratio}
+              checked={value === ratio}
+              onChange={() => onChange(ratio)}
+            />
+            <span className={inlineStyles.choiceSurface}>
+              <span className={inlineStyles.silhouetteArea} aria-hidden="true">
+                <span className={inlineStyles.frame} data-ratio={ratio} style={getMiniatureFrameStyle(ratio)} />
+              </span>
+              <span className={inlineStyles.value}>{ratio}</span>
+              <span className={inlineStyles.hint}>{CARD_RATIO_PURPOSES[ratio][locale]}</span>
+              <span className={inlineStyles.selectedMark} aria-hidden="true">✓</span>
+            </span>
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+});
+
+export const RatioPicker = memo(function RatioPicker({ presentation = 'menu', ...props }: RatioPickerProps) {
+  return presentation === 'inline'
+    ? <InlineRatioPicker {...props} />
+    : <MenuRatioPicker {...props} />;
 });

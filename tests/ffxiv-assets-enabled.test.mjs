@@ -77,14 +77,14 @@ test('14 newly adopted raw 256px XIVAPI icons pass integrity, alpha and usage ga
     'goldsmith', 'leatherworker', 'weaver', 'alchemist', 'culinarian', 'miner',
     'botanist', 'fisher',
   ];
-  const requiredUsages = ['picker', 'micro', 'cardSmall', 'cardMedium', 'export'];
+  const requiredUsages = ['picker', 'micro', 'cardSmall', 'cardMedium', 'cardDisplay', 'export'];
 
   for (const jobId of jobs) {
     const source = manifest.entries[jobId].raster;
     assert.equal(source.src, `/assets/ffxiv/jobs/xivapi/icons/${jobId}.png`);
     assert.deepEqual([source.width, source.height, source.provider, source.verified, source.integrityVerified], [256, 256, 'icons', true, true]);
     assert.deepEqual(source.verifiedUsages, requiredUsages);
-    assert.equal(source.verifiedUsages.includes('cardDisplay'), false);
+    assert.equal(source.verifiedUsages.includes('cardDisplay'), true);
 
     const bytes = await readFile(localAssetPath(source.src));
     assert.equal(sha256(bytes), source.sha256, `${jobId} SHA-256`);
@@ -117,6 +117,88 @@ test('14 newly adopted raw 256px XIVAPI icons pass integrity, alpha and usage ga
     assert.ok(nonzero > 1_000, `${jobId} has a complete nonempty glyph`);
     assert.ok(full > 500, `${jobId} includes solid source pixels`);
     assert.ok(minX >= 8 && minY >= 8 && maxX <= 247 && maxY <= 247, `${jobId} glyph is not clipped to the canvas edge`);
+  }
+});
+
+test('cardDisplay prefers reviewed SVGs and uses only approved original rasters as fallback', () => {
+  let rasterDisplayCount = 0;
+
+  for (const job of JOBS) {
+    const entry = manifest.entries[job.id];
+    const resolved = resolveJobIcon({ jobId: job.id, usage: 'cardDisplay' });
+    if (job.id === 'beastmaster') {
+      assert.equal(entry.svg, null);
+      assert.equal(entry.raster, null);
+      assert.equal(resolved, null);
+      continue;
+    }
+
+    assert.ok(resolved, job.id + ' resolves through an approved large source');
+    if (entry.svg?.verified && entry.svg.verifiedUsages.includes('cardDisplay')) {
+      assert.equal(resolved.source, 'xivapi-svg', job.id + ' keeps SVG priority');
+      assert.equal(resolved.src, entry.svg.src);
+    } else {
+      assert.ok(entry.raster?.verified && entry.raster.integrityVerified, job.id + ' has a verified raster source');
+      assert.equal(entry.raster.provider, 'icons');
+      assert.deepEqual([entry.raster.width, entry.raster.height], [256, 256]);
+      assert.ok(entry.raster.verifiedUsages.includes('cardDisplay'));
+      assert.equal(resolved.source, 'xivapi-raster');
+      assert.equal(resolved.src, entry.raster.src);
+      rasterDisplayCount += 1;
+    }
+  }
+
+  assert.equal(rasterDisplayCount, 17);
+  const ninja = resolveJobIcon({ jobId: 'ninja', usage: 'cardDisplay' });
+  assert.deepEqual([ninja?.source, ninja?.src, ninja?.width, ninja?.height], [
+    'xivapi-raster', '/assets/ffxiv/jobs/xivapi/icons/ninja.png', 256, 256,
+  ]);
+  assert.equal(resolveJobIcon({
+    jobId: 'ninja',
+    usage: 'cardDisplay',
+    failedSources: ['/assets/ffxiv/jobs/xivapi/icons/ninja.png'],
+  }), null);
+});
+
+test('picker optical scales normalize source alpha to an 18px mark in a 20px frame only for picker use', async () => {
+  const targetVisibleFraction = 18 / 20;
+
+  for (const job of JOBS) {
+    const resolved = resolveJobIcon({ jobId: job.id, usage: 'picker' });
+    if (job.id === 'beastmaster') {
+      assert.equal(resolved, null);
+      continue;
+    }
+    assert.ok(resolved, job.id + ' resolves for the picker');
+
+    const entry = manifest.entries[job.id];
+    const source = resolved.source === 'xivapi-svg' ? entry.svg : entry.raster;
+    assert.ok(source?.pickerScale, job.id + ' has measured picker optical metadata');
+    const bytes = await readFile(localAssetPath(source.src));
+    const { data, info } = await sharp(bytes).resize(256, 256, { fit: 'fill' }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    let minX = 256;
+    let minY = 256;
+    let maxX = -1;
+    let maxY = -1;
+    for (let y = 0; y < 256; y += 1) {
+      for (let x = 0; x < 256; x += 1) {
+        if (data[(y * 256 + x) * info.channels + 3] < 128) continue;
+        minX = Math.min(minX, x);
+        minY = Math.min(minY, y);
+        maxX = Math.max(maxX, x);
+        maxY = Math.max(maxY, y);
+      }
+    }
+    const visibleLongest = Math.max(maxX - minX + 1, maxY - minY + 1) / 256 * resolved.visualScale;
+    assert.ok(Math.abs(visibleLongest - targetVisibleFraction) < 0.001, job.id + ' picker visible edge is normalized');
+
+    for (const usage of ['micro', 'cardSmall', 'cardMedium', 'cardDisplay', 'export']) {
+      const display = resolveJobIcon({ jobId: job.id, usage });
+      const displaySource = display?.source === 'xivapi-svg' ? entry.svg : display?.source === 'xivapi-raster' ? entry.raster : null;
+      if (displaySource === source) {
+        assert.equal(display.visualScale, source.visualScale ?? entry.visualScale ?? 1, `${job.id} ${usage} keeps its original optical scale`);
+      }
+    }
   }
 });
 

@@ -179,6 +179,28 @@ test('preset font pairings resolve to the loaded family for each script', () => 
   assert.match(TYPOGRAPHY_SPECIMENS.japanese, /[\u3040-\u30FF]/);
 });
 
+test('master A font family groups preserve stable preset IDs and canonicalize only cross-family changes', () => {
+  const { getTypographyFontGroup, getTypographyPresetForFontGroup, resolveTypographyPresetForFontGroup } = typography;
+  const presetGroups = {
+    editorial: 'serif',
+    classic: 'serif',
+    modern: 'sans',
+    condensed: 'sans',
+    clean: 'sans',
+  };
+
+  for (const [preset, group] of Object.entries(presetGroups)) {
+    assert.equal(getTypographyFontGroup(preset), group);
+    assert.equal(resolveTypographyPresetForFontGroup(group, preset), preset, `${preset} stays stable within its family`);
+  }
+
+  assert.equal(getTypographyPresetForFontGroup('serif'), 'editorial');
+  assert.equal(getTypographyPresetForFontGroup('sans'), 'condensed');
+  assert.equal(resolveTypographyPresetForFontGroup('serif', 'modern'), 'editorial');
+  assert.equal(resolveTypographyPresetForFontGroup('sans', 'classic'), 'condensed');
+  assert.equal(getTypographyFontGroup('unknown-preset'), 'serif', 'invalid legacy values follow the existing Editorial fallback');
+});
+
 test('master typography maps all seven roles across three families and scripts', () => {
   const { MASTER_TYPOGRAPHY_MAP, getMasterTypographyTreatment } = typography;
   const families = ['cinematic', 'editorial', 'identity'];
@@ -212,7 +234,7 @@ test('master typography maps all seven roles across three families and scripts',
   assert.match(getMasterTypographyTreatment('identity', 'display', 'japanese').fontFamily, /Noto Serif JP Variable/u);
 });
 
-test('master Latin Display stays Cormorant across editor typography presets', () => {
+test('master role stack stays art-directed while preset title faces remain selectable', () => {
   const { TYPOGRAPHY_PRESETS, getMasterTypographyTreatment, getTypographyFontFamily } = typography;
 
   for (const family of ['cinematic', 'editorial', 'identity']) {
@@ -255,6 +277,11 @@ test('stylesheet plan is limited to active scripts and CJK serif presets', () =>
   assert.deepEqual(getTypographyStylesheetIds('condensed', ['korean', 'japanese'], { masterFamily: 'identity' }), [
     'notoSansKr', 'notoSerifKr', 'notoSansJp', 'notoSerifJp',
   ]);
+
+  const displayedFamilyFaces = [...new Set(['editorial', 'condensed'].flatMap((preset) => (
+    getTypographyStylesheetIds(preset, ['korean', 'japanese'])
+  )))].sort();
+  assert.deepEqual(displayedFamilyFaces, ['notoSansJp', 'notoSansKr', 'notoSerifJp', 'notoSerifKr']);
 });
 
 test('identical font face requests share pending and completed loads', async () => {

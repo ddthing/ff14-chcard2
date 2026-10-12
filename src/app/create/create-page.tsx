@@ -20,9 +20,10 @@ import { FFXIVAttribution } from '@/components/ffxiv';
 import { conerSample } from '@/data/samples/coner';
 import { useI18n } from '@/lib/i18n';
 import { ImageProcessingError, isImageProcessingCancelled, prepareImageFile, type PreparedImage } from '@/lib/image-processing';
+import { createNewUserCardFromUpload } from '@/lib/new-user-card';
 import { normalizeCardData } from '@/store/editor-persistence';
 import { editorStore } from '@/store/editor-store';
-import { getSampleConfirmationFocusTarget, getUploadConfirmationFocusTarget, hasNonSampleDraft, type UploadConfirmationExit } from './create-draft';
+import { canApplyPreparedUpload, getSampleConfirmationFocusTarget, getUploadConfirmationFocusTarget, hasNonSampleDraft, type UploadConfirmationExit } from './create-draft';
 import { createEntryCopy } from './create.copy';
 import styles from './create.module.css';
 
@@ -73,7 +74,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
         design: { ...currentDraftData.design, template: selectedTemplate },
       }
     : samplePreview, [currentDraftData, selectedTemplate, samplePreview]);
-  const previewSummary = `${previewData.character.name} · ${templateNames[selectedTemplate]}`;
+  const previewSummary = [previewData.character.name, templateNames[selectedTemplate]].filter(Boolean).join(' · ');
 
   useEffect(() => {
     const target = getSampleConfirmationFocusTarget(confirmSample, wasConfirmingSample.current);
@@ -134,19 +135,30 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
     };
   }, [cancelUpload, initialTemplate]);
 
-  const applyPreparedUpload = useCallback((prepared: PreparedImage, fromConfirmation = false) => {
+  const applyPreparedUpload = useCallback((
+    prepared: PreparedImage,
+    options: { fromConfirmation?: boolean; initializeUserProfile?: boolean } = {},
+  ) => {
     const store = editorStore.getState();
     if (!store.isHydrated) store.hydrate();
-    if (store.design.template !== selectedTemplate) store.updateDesign('template', selectedTemplate);
-    store.replaceUploadedImage({
-      src: prepared.imageUrl,
-      fileName: prepared.fileName,
-      mimeType: prepared.mimeType,
-    }, prepared.palette);
+    if (options.initializeUserProfile) {
+      store.replaceCardData(
+        createNewUserCardFromUpload(selectedTemplate, prepared.imageUrl, prepared.palette),
+        { imageMetadata: { fileName: prepared.fileName, mimeType: prepared.mimeType } },
+      );
+      store.setUi({ activePanel: 'information' });
+    } else {
+      if (store.design.template !== selectedTemplate) store.updateDesign('template', selectedTemplate);
+      store.replaceUploadedImage({
+        src: prepared.imageUrl,
+        fileName: prepared.fileName,
+        mimeType: prepared.mimeType,
+      }, prepared.palette);
+    }
     store.persistNow();
     setPendingUpload(null);
     setSelectedFileName(prepared.fileName);
-    if (fromConfirmation) uploadConfirmationExit.current = 'accepted';
+    if (options.fromConfirmation) uploadConfirmationExit.current = 'accepted';
     setConfirmUpload(false);
     setConfirmSample(false);
     setUploadState((state) => transitionUploadInteractionState(state, 'success'));
@@ -172,7 +184,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
 
     try {
       const prepared = await prepareImageFile(file, { signal: controller.signal });
-      if (uploadToken.current !== token || !mounted.current) return;
+      if (!canApplyPreparedUpload(token, uploadToken.current, mounted.current)) return;
 
       uploadController.current = null;
       const currentStore = editorStore.getState();
@@ -184,7 +196,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
         setUploadState((state) => transitionUploadInteractionState(state, 'success'));
         return;
       }
-      applyPreparedUpload(prepared);
+      applyPreparedUpload(prepared, { initializeUserProfile: true });
     } catch (error) {
       if (uploadToken.current !== token || !mounted.current || isImageProcessingCancelled(error)) return;
       const code = error instanceof ImageProcessingError ? error.code : 'decode-failed';
@@ -299,10 +311,9 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
 
         <header className={styles.introHeader}>
           <h1 className={styles.title}>{text.title}</h1>
-          <p className={styles.intro}>{text.intro}</p>
         </header>
 
-        <main className={styles.layout}>
+        <div className={styles.layout}>
           <section
             className={styles.uploadPanel}
             aria-labelledby="upload-title"
@@ -320,12 +331,11 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                   ? <span className={styles.uploadSuccessMark}>✓</span>
                   : <EditorIcon name="upload" size={26} />}
             </span>
-            <h2 id="upload-title">{confirmUpload ? text.confirmUploadTitle : photoReady ? text.photoReadyTitle : text.uploadTitle}</h2>
-            <p className={styles.uploadDescription}>{photoReady ? text.photoReadyDescription : text.uploadDescription}</p>
-            {uploadState !== 'processing' && !photoReady && !confirmUpload && (
-              <p className={styles.dropPrompt}>{uploadState === 'drag-over' ? text.dropActive : text.dropIdle}</p>
+            <h2 id="upload-title">{confirmUpload ? text.confirmUploadTitle : text.uploadTitle}</h2>
+            {(uploadState === 'idle' || uploadState === 'error') && !confirmUpload && (
+              <p className={styles.dropPrompt}>{text.dropIdle}</p>
             )}
-            {!photoReady && !confirmUpload && <span className={styles.fileTypes}>{text.fileTypes}</span>}
+            <span className={styles.fileTypes} id="upload-formats">{text.fileTypes}</span>
             {!confirmUpload && (
               <button
                 ref={chooseFileRef}
@@ -333,7 +343,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                 type="button"
                 disabled={uploadState === 'processing'}
                 onClick={openFilePicker}
-                aria-describedby="upload-guidance upload-status"
+                aria-describedby="upload-formats upload-guidance upload-status"
               >{uploadState === 'processing' ? text.processing : photoReady ? text.chooseAnotherPhoto : text.chooseFile}</button>
             )}
             <input
@@ -342,6 +352,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
               type="file"
               accept="image/jpeg,image/png,image/webp"
               aria-label={text.uploadTitle}
+              aria-describedby="upload-formats upload-guidance upload-status"
               tabIndex={-1}
               onChange={handleFileChange}
             />
@@ -366,19 +377,12 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                   </span>
                   <p>{text.confirmUploadMessage}<strong>{pendingUpload.fileName}</strong></p>
                 </div>
-                <button ref={confirmUploadRef} className={styles.confirmAction} type="button" onClick={() => applyPreparedUpload(pendingUpload, true)}>
+                <button ref={confirmUploadRef} className={styles.confirmAction} type="button" onClick={() => applyPreparedUpload(pendingUpload, { fromConfirmation: true })}>
                   {text.confirmUploadAction}<span aria-hidden="true">↗</span>
                 </button>
                 <button className={styles.cancelConfirm} type="button" onClick={cancelPendingUpload}>{text.cancelReplace}</button>
               </div>
             )}
-            <div className={styles.uploadTips}>
-              <p>{text.photoTipsTitle}</p>
-              <ul>
-                <li>{text.photoTipFocus}</li>
-                <li>{text.photoTipLight}</li>
-              </ul>
-            </div>
           </section>
 
           <aside className={styles.previewPanel} aria-labelledby="preview-title" data-has-photo={showCardPreview} data-sample={activeSample}>
@@ -404,15 +408,20 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
             </div>
 
             {photoReady && (
-              <button ref={continueToEditorRef} className={styles.continueButton} type="button" onClick={() => router.push('/editor')}>
-                {text.continueToEditor}<span aria-hidden="true">↗</span>
-              </button>
+              <div className={styles.readyActions}>
+                <button ref={continueToEditorRef} className={styles.continueButton} type="button" onClick={() => router.push('/editor')}>
+                  {text.continueToEditor}<span aria-hidden="true">↗</span>
+                </button>
+                <Link className={styles.comparePhotoLink} href={`/templates?compare=personal&template=${selectedTemplate}`}>
+                  {locale === 'ko' ? '내 사진으로 세 스타일 비교' : locale === 'ja' ? '自分の写真で三つのスタイルを比較' : 'Compare three styles with my photo'}
+                  <span aria-hidden="true">→</span>
+                </Link>
+              </div>
             )}
 
             <section className={styles.sampleSection} aria-labelledby="sample-option-title">
               <header className={styles.sampleHeading}>
                 <h3 id="sample-option-title">{text.sampleTitle}</h3>
-                <p>{text.sampleDescription}</p>
               </header>
               <div className={styles.sampleChoices} role="group" aria-label={text.sampleTitle}>
                 {(['portrait', 'landscape'] as const).map((role) => {
@@ -460,7 +469,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
               </Link>
             )}
           </aside>
-        </main>
+        </div>
 
         <footer className={styles.siteFooter}>
           <FFXIVAttribution locale={locale} officialAssetsUsed service={currentDraftData?.character.service === 'korea' ? 'KOREA' : 'GLOBAL'} />

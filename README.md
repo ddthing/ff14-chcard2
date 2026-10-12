@@ -2,6 +2,8 @@
 
 A screenshot-first character card studio for FINAL FANTASY XIV players. The cinematic home leads into a local editor that turns an uploaded screenshot into a downloadable card.
 
+The current app UI/UX contract is [DESIGN.md](DESIGN.md), based on the installed shadcn `bJMSkfGi` Stone preset. Read it before changing tokens, components, layout, or CSS.
+
 ## Run locally
 
 ```bash
@@ -17,6 +19,10 @@ npm run lint
 npm run test
 npm run build
 ```
+
+`npm test` runs portable source checks and labels historical render checks as skipped.
+To validate the full local render archive, restore `docs/qa/` and run `npm run test:archive`;
+that command fails if a required archive is missing. Archive checks do not replace fresh browser testing.
 
 ## Routes
 

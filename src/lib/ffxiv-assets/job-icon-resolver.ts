@@ -29,6 +29,8 @@ export type XivapiJobIconSource = Readonly<{
   visualReview?: string;
   colorMode?: 'monochrome-mask' | 'source-color-and-alpha-mask' | 'native';
   visualScale?: number;
+  /** Picker-only multiplier that normalizes the visible source mark inside its 20px frame. */
+  pickerScale?: number;
   opticalOffsetX?: number;
   opticalOffsetY?: number;
   verifiedUsages?: readonly CanonicalJobIconUsage[];
@@ -113,6 +115,11 @@ function hasValidDimensions(source: XivapiJobIconSource): boolean {
     source.width <= 16_384 && source.height <= 16_384;
 }
 
+function isApprovedCardDisplayRaster(source: XivapiJobIconSource): boolean {
+  return source.verifiedUsages?.includes('cardDisplay') === true &&
+    source.width >= 256 && source.height >= 256;
+}
+
 function isSupportedXivapiPath(source: XivapiJobIconSource): boolean {
   if (source.provider === 'svg') {
     return isSafeLocalAssetPath(source.src, `${XIVAPI_ASSET_PREFIX}svg/`) && source.src.endsWith('.svg');
@@ -169,6 +176,16 @@ function safeVisualScale(value: number | undefined): number {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 && value <= 4 ? value : 1;
 }
 
+function getVisualScale(
+  source: XivapiJobIconSource,
+  entry: XivapiJobIconEntry | null | undefined,
+  usage: CanonicalJobIconUsage,
+): number {
+  const baseScale = safeVisualScale(source.visualScale ?? entry?.visualScale);
+  const pickerScale = usage === 'picker' ? safeVisualScale(source.pickerScale) : 1;
+  return safeVisualScale(baseScale * pickerScale);
+}
+
 function safeOpticalOffset(value: number | undefined): number {
   return typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 0.5 ? value : 0;
 }
@@ -179,9 +196,8 @@ function getRenderMode(appearance: JobIconAppearance, colorMode?: XivapiJobIconS
 }
 
 /**
- * Pick a reviewed local XIVAPI asset for this presentation size. The display
- * gate accepts SVG only; templates can keep their own typography when no
- * reviewed vector is available.
+ * Prefer the reviewed local XIVAPI SVG at display size. An original PNG can
+ * serve as a display fallback only when its manifest explicitly approves it.
  */
 export function resolveJobIcon({
   jobId,
@@ -228,17 +244,18 @@ export function resolveJobIconFromSources({
       true,
       appearance,
       usage,
-      svg.visualScale ?? entry?.visualScale,
+      getVisualScale(svg, entry, usage),
       svg.opticalOffsetX ?? entry?.opticalOffsetX,
       svg.opticalOffsetY ?? entry?.opticalOffsetY,
       getRenderMode(appearance, svg.colorMode),
     );
   }
 
-  // A large display mark is used only when its verified vector passed review.
-  if (usage === 'cardDisplay') return null;
-
-  const raster = isVerifiedXivapiSource(entry?.raster, usage) ? entry.raster : undefined;
+  const rasterCandidate = entry?.raster;
+  const raster = isVerifiedXivapiSource(rasterCandidate, usage) &&
+    (usage !== 'cardDisplay' || isApprovedCardDisplayRaster(rasterCandidate))
+    ? rasterCandidate
+    : undefined;
   if (raster && !failedSources.includes(raster.src)) {
     return createResolvedIcon(
       raster.src,
@@ -248,13 +265,14 @@ export function resolveJobIconFromSources({
       true,
       appearance,
       usage,
-      raster.visualScale ?? entry?.visualScale,
+      getVisualScale(raster, entry, usage),
       raster.opticalOffsetX ?? entry?.opticalOffsetX,
       raster.opticalOffsetY ?? entry?.opticalOffsetY,
       getRenderMode(appearance, raster.colorMode),
     );
   }
 
+  // Large raster display use is opt-in per original source in verifiedUsages.
   return null;
 }
 

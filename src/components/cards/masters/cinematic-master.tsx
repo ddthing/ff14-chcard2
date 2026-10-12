@@ -6,7 +6,7 @@ import { JobIcon } from '@/components/ffxiv/job-icon';
 import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
-import { CARD_STOCK_COPY } from '@/lib/card-copy';
+import { getCardMasterCopy } from '@/lib/card-copy';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './cinematic-master.module.css';
 
@@ -19,7 +19,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
   const jobMotifVisible = data.design.jobMotifVisible !== false;
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
   const hasBio = bio.trim().length > 0;
-  const copy = CARD_STOCK_COPY.cinematic[locale];
+  const copy = getCardMasterCopy('cinematic', locale, data.design.decorativeCopy);
   const jobGlyphSize = getJobIdentityGlyphLogicalSize(resolvedRatio);
   const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(resolvedRatio, 'cinematicSeal');
   const hasWorldFacts = Boolean(labels.world || labels.dataCenter);
@@ -40,16 +40,16 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
       />
       <div className={styles.veil} aria-hidden="true" />
 
-      <div className={styles.topPromise} aria-hidden="true">
+      {(copy.promise.length > 0 || copy.quote.length > 0) && <div className={styles.topPromise} aria-hidden="true">
         <p data-master-typography-role="micro">{copy.promise.map((line) => <span key={line}>{line}</span>)}</p>
         <span className={styles.promiseRule} />
         <p className={styles.topQuote} data-master-typography-role="caption">{copy.quote.map((line) => <span key={line}>{line}</span>)}</p>
-      </div>
+      </div>}
 
-      <div className={styles.topSignature} aria-hidden="true">
+      {(copy.signature.length > 0 || copy.place) && <div className={styles.topSignature} aria-hidden="true">
         <p data-master-typography-role="caption">{copy.signature.map((line) => <span key={line}>{line}</span>)}</p>
         <span className={styles.signaturePlace} data-master-typography-role="micro">{copy.place}</span>
-      </div>
+      </div>}
 
       {hasBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('cinematic', 'bio')}>{bio}</p>}
 
@@ -91,7 +91,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
                   </span>
                 )}
                 <span className={styles.jobLockupText}>
-                  <span className={styles.metaValue} data-master-typography-role="job" {...masterFieldProps('cinematic', 'job')}>
+                  <span className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'job')}>
                     {labels.job}
                   </span>
                   {microcopy.jobAbbreviation && (

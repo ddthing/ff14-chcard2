@@ -1,25 +1,27 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useI18n } from "@/lib/i18n";
-import { getEditorCopy } from "@/components/editor/copy";
+import { usePathname } from "next/navigation";
 import { AppearanceControl } from "@/components/appearance-control";
-import { useEditorStore } from "@/store/editor-store";
-import { ROUTES } from "@/lib/routes";
 import { EditorIcon } from "@/components/editor/editor-icon";
+import { MobileNavigation, RouteNavigationLinks } from "@/components/route-navigation";
+import { getEditorCopy } from "@/components/editor/copy";
+import { getAppNavigationCopy } from "@/lib/app-navigation";
+import { useI18n } from "@/lib/i18n";
+import { ROUTES } from "@/lib/routes";
+import { useEditorStore } from "@/store/editor-store";
 import styles from "@/components/app-shell.module.css";
 
 function HeaderSaveStatus() {
   const { locale } = useI18n();
   const saveStatus = useEditorStore((state) => state.saveStatus);
   const copy = getEditorCopy(locale);
-  const longLabel = saveStatus === "error" ? copy.saveError : saveStatus === "saving" ? copy.saving : copy.saved;
-  const shortLabel = {
-    ko: { saved: "초안 저장됨", saving: "저장 중", error: "저장 안 됨" },
-    en: { saved: "Draft saved", saving: "Saving", error: "Not saved" },
-    ja: { saved: "下書き保存済み", saving: "保存中", error: "未保存" },
+  const label = {
+    ko: { saved: "저장됨", saving: "저장 중", error: "저장 안 됨" },
+    en: { saved: "Saved", saving: "Saving", error: "Not saved" },
+    ja: { saved: "保存済み", saving: "保存中", error: "未保存" },
   }[locale][saveStatus];
+  const accessibleLabel = saveStatus === "error" ? copy.saveError : saveStatus === "saving" ? copy.saving : copy.saved;
 
   return (
     <span
@@ -28,11 +30,11 @@ function HeaderSaveStatus() {
       role="status"
       aria-live="polite"
       aria-atomic="true"
-      aria-label={longLabel}
-      title={longLabel}
+      aria-label={accessibleLabel}
+      title={accessibleLabel}
     >
-      <span className={styles.saveStatusDot} aria-hidden="true" />
-      <span>{shortLabel}</span>
+      <span className={styles.saveStatusMark} aria-hidden="true">{saveStatus === "saved" ? "✓" : "•"}</span>
+      <span>{label}</span>
     </span>
   );
 }
@@ -44,67 +46,81 @@ const languageLabels = [
 ] as const;
 
 export function AppHeader() {
-  const router = useRouter();
   const pathname = usePathname() ?? ROUTES.editor;
   const { locale, setLocale, t } = useI18n();
+  const copy = getAppNavigationCopy(t, locale);
   const isEditor = pathname === ROUTES.editor || pathname.startsWith(`${ROUTES.editor}/`);
-  const name = useEditorStore((state) => state.character.name);
+  const isExport = pathname === ROUTES.export || pathname.startsWith(`${ROUTES.export}/`);
+  const name = useEditorStore((state) => state.character.name.trim());
   const persistNow = useEditorStore((state) => state.persistNow);
-  const labels = {
-    ko: { home: '홈으로', export: '이미지 저장', settings: '화면 설정', editing: '카드 편집' },
-    en: { home: 'Home', export: 'Save image', settings: 'Display settings', editing: 'Card editor' },
-    ja: { home: 'ホーム', export: '画像を保存', settings: '表示設定', editing: 'カード編集' },
-  }[locale];
-  const section = pathname.startsWith(ROUTES.templates)
-    ? t("nav.templates")
-    : pathname.startsWith(ROUTES.export)
-      ? t("nav.export")
-      : t("nav.editor");
+  const section = isExport ? copy.export : copy.editor;
+  const documentName = name || copy.newCard;
 
   return (
     <header className={styles.appHeader} data-app-header>
       <div className={styles.headerLeft}>
-        <Link className={styles.brand} href={ROUTES.home} aria-label={isEditor ? labels.home : t("header.brand")}>
-          <span className={styles.brandMark} aria-hidden="true"><span className={styles.backArrow}>←</span></span>
-          <span className={styles.brandWordmark} aria-hidden="true"><strong>XIV</strong><small>ATELIER</small></span>
+        <Link className={styles.brand} href={ROUTES.home} aria-label={t("header.brand")}>
+          <span className={styles.brandWordmark} aria-hidden="true">
+            <strong>XIV</strong><small>ATELIER</small>
+          </span>
         </Link>
         <span className={styles.headerDivider} aria-hidden="true" />
-        <div className={styles.documentIdentity}>
-          <span className={styles.documentLabel}>{isEditor ? labels.editing : 'XIV / ATELIER'}</span>
-          <span className={isEditor ? styles.editorName : styles.sectionLabel}>{isEditor ? name || section : section}</span>
+        <div className={styles.documentIdentity} aria-label={`${section}: ${documentName}`} title={documentName}>
+          <span className={styles.documentLabel}>{section}</span>
+          <span className={styles.editorName}>{documentName}</span>
         </div>
       </div>
 
+      <RouteNavigationLinks
+        pathname={pathname}
+        copy={copy}
+        className={styles.desktopNavigation}
+        linkClassName={styles.desktopNavigationLink}
+        exclude={isEditor ? [ROUTES.export] : isExport ? [ROUTES.editor] : undefined}
+      />
+
       <div className={styles.headerRight}>
-        {isEditor && <HeaderSaveStatus />}
-        <span className={styles.actionDivider} aria-hidden="true" />
+        {(isEditor || isExport) && <HeaderSaveStatus />}
         <span className={styles.desktopAppearance}><AppearanceControl /></span>
-        <span className={styles.actionDivider} aria-hidden="true" />
-        <select className={styles.desktopLanguage} aria-label={t("nav.language")} value={locale}
-          onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}>
-          {languageLabels.map(({ value, label }) => <option value={value} key={value}>{label}</option>)}
-        </select>
-        <details className={styles.mobileSettings} onKeyDown={(event) => {
-          if (event.key === 'Escape') {
-            event.preventDefault();
-            event.stopPropagation();
-            event.currentTarget.open = false;
-            event.currentTarget.querySelector('summary')?.focus();
-          }
-        }}>
-          <summary aria-label={labels.settings}>•••</summary>
-          <div className={styles.settingsContent}>
-            <AppearanceControl />
-            <select className={styles.languageSelect} aria-label={t('nav.language')} value={locale}
-              onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}>
-              {languageLabels.map(({ value, label }) => <option value={value} key={value}>{label}</option>)}
-            </select>
-          </div>
-        </details>
-        {isEditor && <button type="button" className={styles.headerExport} onClick={() => {
-          persistNow();
-          router.push(ROUTES.export);
-        }}><span>{labels.export}</span><EditorIcon name="export" size={16} /></button>}
+        <label className={styles.desktopLanguageField}>
+          <span className={styles.visuallyHidden}>{t("nav.language")}</span>
+          <select className={styles.desktopLanguage} aria-label={t("nav.language")} value={locale}
+            onChange={(event) => setLocale(event.currentTarget.value as typeof locale)}>
+            {languageLabels.map(({ value, label }) => <option value={value} key={value}>{label}</option>)}
+          </select>
+        </label>
+        {isEditor && (
+          <Link className={styles.headerExport} href={ROUTES.export} onClick={() => persistNow()}>
+            <span>{copy.saveImage}</span><EditorIcon name="export" size={16} />
+          </Link>
+        )}
+        {isExport && (
+          <Link className={styles.headerReturn} href={ROUTES.editor}>
+            {copy.backToEditor}
+          </Link>
+        )}
+        <MobileNavigation
+          key={pathname}
+          pathname={pathname}
+          copy={{ ...copy, saveImage: copy.export, backToEditor: copy.editor }}
+          languageLabel={t("nav.language")}
+          classes={{
+            root: styles.mobileNavigation,
+            trigger: styles.mobileMenuTrigger,
+            panel: styles.mobileMenuPanel,
+            links: styles.mobileMenuLinks,
+            link: styles.mobileMenuLink,
+            settings: styles.mobileMenuSettings,
+            settingsHeading: styles.mobileMenuSettingsHeading,
+            settingRow: styles.mobileMenuSettingRow,
+            settingLabel: styles.mobileMenuSettingLabel,
+            languageField: styles.mobileMenuLanguageField,
+            languageSelect: styles.mobileMenuLanguageSelect,
+          }}
+          onNavigate={(href) => {
+            if (isEditor && href === ROUTES.export) persistNow();
+          }}
+        />
       </div>
     </header>
   );

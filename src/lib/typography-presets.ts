@@ -1,6 +1,7 @@
 import { FONT_FAMILIES } from '@/data/fonts/registry';
 
 export type TypographyPresetId = 'editorial' | 'modern' | 'condensed' | 'classic' | 'clean';
+export type TypographyFontGroup = 'serif' | 'sans';
 export type TypographyScript = 'latin' | 'korean' | 'japanese';
 export type TypographyRole = 'display' | 'body' | 'metadata';
 export type MasterTypographyFamily = 'cinematic' | 'editorial' | 'identity';
@@ -69,8 +70,8 @@ const masterSerifFonts: Readonly<Record<TypographyScript, string>> = {
 
 const masterSansFonts: Readonly<Record<TypographyScript, string>> = {
   latin: `${FONT_FAMILIES.sans}, Arial, system-ui, ${FONT_FAMILIES.korean}, ${FONT_FAMILIES.japanese}, sans-serif`,
-  korean: `${FONT_FAMILIES.display}, ${FONT_FAMILIES.korean}, ${FONT_FAMILIES.japanese}, ${FONT_FAMILIES.sans}, "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Meiryo", sans-serif`,
-  japanese: `${FONT_FAMILIES.display}, ${FONT_FAMILIES.japanese}, ${FONT_FAMILIES.korean}, ${FONT_FAMILIES.sans}, "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", "Malgun Gothic", sans-serif`,
+  korean: `${FONT_FAMILIES.sans}, ${FONT_FAMILIES.korean}, ${FONT_FAMILIES.japanese}, "Pretendard", Arial, system-ui, "Apple SD Gothic Neo", "Malgun Gothic", "Meiryo", sans-serif`,
+  japanese: `${FONT_FAMILIES.sans}, ${FONT_FAMILIES.japanese}, ${FONT_FAMILIES.korean}, Arial, system-ui, "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", "Malgun Gothic", sans-serif`,
 };
 
 const masterMicroFonts: Readonly<Record<TypographyScript, string>> = {
@@ -107,7 +108,7 @@ export const MASTER_TYPOGRAPHY_MAP = {
       display: treatment(masterSerifFonts.korean, 460, '-0.01em', 1.02),
       secondaryDisplay: treatment(masterSerifFonts.korean, 450, '0', 1.26),
       job: treatment(masterSerifFonts.korean, 500, '0', 1.08),
-      information: treatment(masterSansFonts.korean, 480, '0', 1.12),
+      information: treatment(masterSansFonts.korean, 500, '0', 1.12),
       label: treatment(masterMicroFonts.korean, 500, '0.015em', 1.2),
       caption: treatment(masterSansFonts.korean, 450, '0.005em', 1.3),
       micro: treatment(masterMicroFonts.korean, 500, '0.04em', 1.2),
@@ -116,7 +117,7 @@ export const MASTER_TYPOGRAPHY_MAP = {
       display: treatment(masterSerifFonts.japanese, 470, '-0.006em', 1.04),
       secondaryDisplay: treatment(masterSerifFonts.japanese, 450, '0', 1.27),
       job: treatment(masterSerifFonts.japanese, 500, '0.01em', 1.08),
-      information: treatment(masterSansFonts.japanese, 480, '0', 1.12),
+      information: treatment(masterSansFonts.japanese, 500, '0', 1.12),
       label: treatment(masterMicroFonts.japanese, 500, '0.02em', 1.2),
       caption: treatment(masterSansFonts.japanese, 450, '0.01em', 1.29),
       micro: treatment(masterMicroFonts.japanese, 500, '0.035em', 1.2),
@@ -127,7 +128,7 @@ export const MASTER_TYPOGRAPHY_MAP = {
       display: treatment(masterSerifFonts.latin, 650, '-0.035em', 0.9),
       secondaryDisplay: treatment(masterSerifFonts.latin, 500, '0.01em', 1.3),
       job: treatment(masterSerifFonts.latin, 650, '-0.055em', 0.95),
-      information: treatment(masterSansFonts.latin, 550, '-0.02em', 1.2),
+      information: treatment(masterSansFonts.latin, 500, '-0.02em', 1.2),
       label: treatment(masterSansFonts.latin, 550, '0.08em', 1.2),
       caption: treatment(masterSansFonts.latin, 560, '-0.015em', 1.22),
       micro: treatment(masterMicroFonts.latin, 550, '0.06em', 1.2),
@@ -136,7 +137,7 @@ export const MASTER_TYPOGRAPHY_MAP = {
       display: treatment(masterSerifFonts.korean, 480, '-0.012em', 0.98),
       secondaryDisplay: treatment(masterSerifFonts.korean, 480, '0', 1.3),
       job: treatment(masterSerifFonts.korean, 520, '-0.01em', 1.08),
-      information: treatment(masterSansFonts.korean, 480, '-0.01em', 1.2),
+      information: treatment(masterSansFonts.korean, 500, '-0.01em', 1.2),
       label: treatment(masterSansFonts.korean, 500, '0.01em', 1.24),
       caption: treatment(masterSansFonts.korean, 480, '0', 1.28),
       micro: treatment(masterMicroFonts.korean, 500, '0.025em', 1.2),
@@ -156,7 +157,7 @@ export const MASTER_TYPOGRAPHY_MAP = {
       display: treatment(masterSerifFonts.latin, 600, '-0.028em', 0.92),
       secondaryDisplay: treatment(masterSerifFonts.latin, 500, '0.006em', 1.22),
       job: treatment(masterSerifFonts.latin, 600, '-0.025em', 1.05),
-      information: treatment(masterSerifFonts.latin, 520, '-0.012em', 1.14),
+      information: treatment(masterSerifFonts.latin, 500, '-0.012em', 1.14),
       label: treatment(masterMicroFonts.latin, 680, '0.075em', 1.1),
       caption: treatment(masterSerifFonts.latin, 500, '0.006em', 1.18),
       micro: treatment(masterMicroFonts.latin, 600, '0.10em', 1.05),
@@ -285,6 +286,26 @@ export function getTypographyPreset(preset: string | null | undefined): Typograp
     default:
       return TYPOGRAPHY_PRESETS.editorial;
   }
+}
+
+/** A presentation grouping over the five stable preset IDs; IDs remain persisted as-is. */
+export function getTypographyFontGroup(preset: string | null | undefined): TypographyFontGroup {
+  const resolved = getTypographyPreset(preset).id;
+  return resolved === 'editorial' || resolved === 'classic' ? 'serif' : 'sans';
+}
+
+/** Canonical representative used to preview and enter a family when changing groups. */
+export function getTypographyPresetForFontGroup(group: TypographyFontGroup): TypographyPresetId {
+  return group === 'serif' ? 'editorial' : 'condensed';
+}
+
+/** Keep an existing style ID within its selected family; canonicalize only cross-family changes. */
+export function resolveTypographyPresetForFontGroup(
+  group: TypographyFontGroup,
+  currentPreset: string | null | undefined,
+): TypographyPresetId {
+  const current = getTypographyPreset(currentPreset).id;
+  return getTypographyFontGroup(current) === group ? current : getTypographyPresetForFontGroup(group);
 }
 
 export function getTypographyFontFamily(

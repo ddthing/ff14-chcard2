@@ -1,94 +1,149 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, useState } from 'react';
-import type { AdventurerCardTemplate } from '@/components/cards/types';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import type { AdventurerCardData, AdventurerCardTemplate } from '@/components/cards/types';
+import { demoAdventurerData } from '@/components/cards/types';
+import { CardPreview } from '@/components/editor/card-preview';
 import { getRouteCopy } from '@/components/editor/copy';
 import { useI18n } from '@/lib/i18n';
 import { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER } from '@/lib/master-card-config';
 import { LazyMaster } from '@/components/marketing/lazy-master';
 import { getTemplatePhotoPath } from '@/app/create/create-draft';
+import { getHomeResumeDraft } from '@/components/home/home-draft';
+import { normalizeCardData } from '@/store/editor-persistence';
+import { editorStore } from '@/store/editor-store';
+import {
+  applyTemplateToEditorDraft,
+  createTemplateComparisonData,
+} from './template-comparison';
 import styles from './templates.module.css';
 
-const templateNumbers: Record<AdventurerCardTemplate, string> = {
-  cinematic: '01',
-  editorial: '02',
-  'id-card': '03',
-};
+type CompareMode = 'sample' | 'personal';
 
 const localizedSelection = {
   ko: {
+    navigation: '스타일 선택',
+    title: '카드 스타일',
     selected: '선택한 스타일',
     choose: '스타일 미리보기',
-    home: '홈으로',
+    home: '홈',
     photo: '이 스타일로 시작',
-    progress: '카드 만들기 진행',
-    step: '01 / 04',
-    ratio: '카드 비율',
-    ratioNote: 'SNS 세로형',
-    stylePrefix: '스타일',
-    galleryHint: '세 가지 인쇄 스타일을 살펴보고 어울리는 구성을 골라 보세요.',
-    selectedHint: '사진과 캐릭터 정보는 다음 단계에서 직접 고를 수 있어요.',
+    apply: '내 카드에 적용',
+    newCard: '새 카드',
+    modeLabel: '비교할 카드',
+    sampleMode: '예시',
+    personalMode: '내 카드',
+    sampleStatus: '예시 카드',
+    personalStatus: '내 카드',
+    loading: '초안 확인 중',
+    noDraft: '저장된 카드 없음',
+    draftName: '현재 초안',
+    unnamed: '이름 없음',
   },
   en: {
+    navigation: 'Style selection',
+    title: 'Card styles',
     selected: 'Selected style',
     choose: 'Preview style',
     home: 'Home',
     photo: 'Start with this style',
-    progress: 'Card creation progress',
-    step: '01 / 04',
-    ratio: 'Card format',
-    ratioNote: 'SOCIAL PORTRAIT',
-    stylePrefix: 'STYLE',
-    galleryHint: 'Browse the three print styles and choose the one that fits your moment.',
-    selectedHint: 'Choose your own screenshot and character details in the next step.',
+    apply: 'Apply to my card',
+    newCard: 'New card',
+    modeLabel: 'Compare',
+    sampleMode: 'Sample',
+    personalMode: 'My card',
+    sampleStatus: 'Sample card',
+    personalStatus: 'My card',
+    loading: 'Checking draft',
+    noDraft: 'No saved card',
+    draftName: 'Current draft',
+    unnamed: 'Unnamed',
   },
   ja: {
+    navigation: 'スタイル選択',
+    title: 'カードスタイル',
     selected: '選択中のスタイル',
     choose: 'スタイルをプレビュー',
     home: 'ホーム',
     photo: 'このスタイルで始める',
-    progress: 'カード作成の進行',
-    step: '01 / 04',
-    ratio: 'カード比率',
-    ratioNote: 'SNS縦型',
-    stylePrefix: 'スタイル',
-    galleryHint: '三つの印刷スタイルを見比べて、好みの構成を選びましょう。',
-    selectedHint: '次の画面で写真とキャラクター情報を選べます。',
+    apply: '自分のカードに適用',
+    newCard: '新しいカード',
+    modeLabel: '比較するカード',
+    sampleMode: 'サンプル',
+    personalMode: '自分のカード',
+    sampleStatus: 'サンプルカード',
+    personalStatus: '自分のカード',
+    loading: '下書きを確認中',
+    noDraft: '保存したカードはありません',
+    draftName: '現在の下書き',
+    unnamed: '名前未設定',
   },
 } as const;
 
-function centerGalleryCard(gallery: HTMLElement, card: HTMLElement, behavior: ScrollBehavior) {
+function centerGalleryCard(gallery: HTMLElement, card: HTMLElement, behavior: 'instant' | 'smooth') {
   const galleryBox = gallery.getBoundingClientRect();
   const cardBox = card.getBoundingClientRect();
-  gallery.scrollTo({
-    left: gallery.scrollLeft + cardBox.left - galleryBox.left - (gallery.clientWidth - cardBox.width) / 2,
-    behavior,
-  });
+  const left = gallery.scrollLeft + cardBox.left - galleryBox.left - (gallery.clientWidth - cardBox.width) / 2;
+  if (behavior === 'instant' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    gallery.scrollLeft = left;
+    return;
+  }
+  gallery.scrollTo({ left, behavior: 'smooth' });
 }
 
 export default function TemplatesPage({ initialTemplate }: { initialTemplate: AdventurerCardTemplate }) {
   const { locale } = useI18n();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const requestedPersonalMode = searchParams.get('compare') === 'personal';
   const copy = getRouteCopy(locale);
   const labels = localizedSelection[locale];
-  const [selection, setSelection] = useState({ source: initialTemplate, value: initialTemplate });
-  const selected = selection.source === initialTemplate ? selection.value : initialTemplate;
+  const [selected, setSelected] = useState<AdventurerCardTemplate>(initialTemplate);
+  const [compareMode, setCompareMode] = useState<CompareMode>('sample');
+  const [draft, setDraft] = useState<AdventurerCardData | null>(null);
+  const [draftReady, setDraftReady] = useState(false);
   const galleryRef = useRef<HTMLElement>(null);
+  const selectedRef = useRef<AdventurerCardTemplate>(initialTemplate);
+  const appliedQueryModeRef = useRef(false);
+  const starter = useMemo(() => normalizeCardData(demoAdventurerData), []);
 
   const names: Record<AdventurerCardTemplate, string> = {
     cinematic: copy.cinematic,
     editorial: copy.editorial,
     'id-card': copy.idCard,
   };
-  const descriptions: Record<AdventurerCardTemplate, string> = {
-    cinematic: copy.cinematicDesc,
-    editorial: copy.editorialDesc,
-    'id-card': copy.idCardDesc,
-  };
+
+  useEffect(() => {
+    const syncDraft = () => {
+      const state = editorStore.getState();
+      if (!state.isHydrated) return;
+      const nextDraft = getHomeResumeDraft(state.toCardData(), starter);
+      setDraft(nextDraft);
+      setDraftReady(true);
+      if (!appliedQueryModeRef.current) {
+        appliedQueryModeRef.current = true;
+        if (requestedPersonalMode && nextDraft) setCompareMode('personal');
+      }
+    };
+    const unsubscribe = editorStore.subscribe((state, previous) => {
+      if (!state.isHydrated) return;
+      if (state.isHydrated !== previous.isHydrated ||
+        state.character !== previous.character ||
+        state.design !== previous.design ||
+        state.image !== previous.image) {
+        syncDraft();
+      }
+    });
+    editorStore.getState().hydrate();
+    syncDraft();
+    return unsubscribe;
+  }, [requestedPersonalMode, starter]);
 
   useEffect(() => {
     const gallery = galleryRef.current;
-    if (!gallery || typeof IntersectionObserver === 'undefined') return;
+    if (!gallery) return;
 
     const media = window.matchMedia('(max-width: 760px)');
     let observer: IntersectionObserver | null = null;
@@ -96,6 +151,10 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
       observer?.disconnect();
       observer = null;
       if (!media.matches) return;
+
+      const selectedCard = gallery.querySelector<HTMLElement>(`:scope > article[data-template="${selectedRef.current}"]`);
+      if (selectedCard) centerGalleryCard(gallery, selectedCard, 'instant');
+      if (typeof IntersectionObserver === 'undefined') return;
 
       observer = new IntersectionObserver(() => {
         const galleryBox = gallery.getBoundingClientRect();
@@ -110,15 +169,15 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
           .sort((a, b) => a.distance - b.distance)[0];
         const template = active?.card.getAttribute('data-template');
         if (template && MASTER_TEMPLATE_ORDER.includes(template as AdventurerCardTemplate)) {
-          setSelection((current) => current.source === initialTemplate && current.value === template
-            ? current
-            : { source: initialTemplate, value: template as AdventurerCardTemplate });
+          const next = template as AdventurerCardTemplate;
+          if (selectedRef.current !== next) {
+            selectedRef.current = next;
+            setSelected(next);
+          }
         }
       }, { root: gallery, threshold: [0.55, 0.7, 0.85, 1] });
 
       gallery.querySelectorAll<HTMLElement>(':scope > article[data-template]').forEach((card) => observer?.observe(card));
-      const initialCard = gallery.querySelector<HTMLElement>(`:scope > article[data-template="${initialTemplate}"]`);
-      if (initialCard) centerGalleryCard(gallery, initialCard, 'auto');
     };
 
     observeCards();
@@ -127,44 +186,85 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
       observer?.disconnect();
       media.removeEventListener('change', observeCards);
     };
-  }, [initialTemplate]);
+  }, []);
+
+  const personalData = compareMode === 'personal' ? draft : null;
+  const personalPreviews = useMemo(() => {
+    if (!personalData) return null;
+    return Object.fromEntries(MASTER_TEMPLATE_ORDER.map((template) => [
+      template,
+      createTemplateComparisonData(personalData, template),
+    ])) as Record<AdventurerCardTemplate, AdventurerCardData>;
+  }, [personalData]);
+  const status = !draftReady
+    ? labels.loading
+    : draft
+      ? compareMode === 'personal' ? labels.personalStatus : labels.sampleStatus
+      : '';
 
   const chooseTemplate = (template: AdventurerCardTemplate) => {
-    setSelection({ source: initialTemplate, value: template });
+    selectedRef.current = template;
+    setSelected(template);
     const gallery = galleryRef.current;
     if (gallery && window.matchMedia('(max-width: 760px)').matches) {
       const card = gallery.querySelector<HTMLElement>(`:scope > article[data-template="${template}"]`);
-      if (card) centerGalleryCard(gallery, card, 'auto');
+      if (card) centerGalleryCard(gallery, card, 'smooth');
     }
+  };
+
+  const editSelectedTemplate = () => {
+    if (applyTemplateToEditorDraft(selected)) router.push('/editor');
   };
 
   return (
     <div className={styles.page} lang={locale} data-page-transition="templates">
       <div className={styles.wrap}>
-        <nav className={styles.stepNav} aria-label={labels.progress}>
+        <nav className={styles.stepNav} aria-label={labels.navigation}>
           <Link href="/" className={styles.backLink}><span aria-hidden="true">←</span>{labels.home}</Link>
-          <span className={styles.stepCount}>{labels.step}</span>
-          <span className={styles.stepLabel}>{copy.templatesEyebrow}</span>
         </nav>
 
         <header className={styles.heading}>
           <div className={styles.headingCopy}>
-            <p className={styles.eyebrow}>{copy.templatesEyebrow}</p>
-            <h1>{copy.templatesTitle}</h1>
-            <p className={styles.intro}>{copy.templatesIntro}</p>
-            <p className={styles.galleryHint}>{labels.galleryHint}</p>
-          </div>
-          <div className={styles.ratioNote}>
-            <span>{labels.ratio}</span>
-            <strong>4:5</strong>
-            <small>{labels.ratioNote}</small>
+            <h1>{labels.title}</h1>
           </div>
         </header>
 
-        <section className={styles.gallery} ref={galleryRef} data-active={selected} role="group" aria-label={copy.templatesEyebrow}>
+        <section className={styles.compareTools} aria-label={labels.modeLabel}>
+          <span className={styles.compareLabel}>{labels.modeLabel}</span>
+          <div className={styles.compareModes} role="group" aria-label={labels.modeLabel} aria-describedby="comparison-status">
+            <button
+              type="button"
+              aria-pressed={compareMode === 'sample'}
+              onClick={() => setCompareMode('sample')}
+            >
+              {labels.sampleMode}
+            </button>
+            <button
+              type="button"
+              aria-pressed={compareMode === 'personal'}
+              aria-describedby="comparison-status"
+              disabled={!draftReady || !draft}
+              onClick={() => setCompareMode('personal')}
+            >
+              {labels.personalMode}
+            </button>
+          </div>
+          <span className={styles.srOnly} id="comparison-status" role="status" aria-live="polite" aria-atomic="true">{status}</span>
+        </section>
+
+        <section
+          className={styles.gallery}
+          ref={galleryRef}
+          data-active={selected}
+          data-mode={compareMode}
+          role="group"
+          aria-label={labels.title}
+        >
           {MASTER_TEMPLATE_ORDER.map((template) => {
             const active = selected === template;
             const master = MASTER_CARD_CONFIG[template];
+            const comparisonData = personalPreviews?.[template];
+            const ratio = personalData?.design.ratio ?? '4:5';
             return (
               <article
                 className={styles.galleryCard}
@@ -174,31 +274,29 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
                 data-master-id={master.id}
                 key={template}
               >
-                <div className={styles.cardMeta}>
-                  <span>{labels.stylePrefix} {templateNumbers[template]}</span>
-                  <span>{active ? labels.selected : '4:5'}</span>
-                </div>
                 <button
                   className={styles.cardChoice}
                   type="button"
                   aria-pressed={active}
                   aria-label={`${names[template]}${active ? ` · ${labels.selected}` : ` · ${labels.choose}`}`}
-                  aria-describedby={`style-${template}-description`}
                   onClick={() => chooseTemplate(template)}
                 >
                   <span className={styles.visualStage} aria-hidden="true">
-                    <LazyMaster
-                      template={template}
-                      ratio="4:5"
-                      locale={locale}
-                      eager={active}
-                      className={styles.masterCard}
-                    />
+                    {comparisonData ? (
+                      <CardPreview data={comparisonData} locale={locale} className={styles.liveMaster} />
+                    ) : (
+                      <LazyMaster
+                        template={template}
+                        ratio={ratio}
+                        locale={locale}
+                        eager={active}
+                        className={styles.masterCard}
+                      />
+                    )}
                   </span>
                   <span className={styles.masterCopy}>
-                    <span className={styles.cardIndex}>{templateNumbers[template]} <span aria-hidden="true">/</span> 03</span>
                     <strong>{names[template]}</strong>
-                    <span id={`style-${template}-description`}>{descriptions[template]}</span>
+                    <span className={styles.choiceMark} aria-hidden="true">{active ? '✓' : ''}</span>
                   </span>
                 </button>
               </article>
@@ -206,21 +304,28 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
           })}
         </section>
 
-        <section className={styles.selectionBar} aria-live="polite" aria-atomic="true">
+        <section className={styles.selectionBar}>
           <div className={styles.selectionCopy}>
             <span>{labels.selected}</span>
-            <strong>{names[selected]}</strong>
-            <p>{labels.selectedHint}</p>
+            <strong key={selected} aria-live="polite" aria-atomic="true">{names[selected]}</strong>
+            {draft && <small>{labels.draftName}: {draft.character.name.trim() || labels.unnamed}</small>}
+            {draftReady && !draft && <small className={styles.emptyState}>{labels.noDraft}</small>}
           </div>
-          <Link className={styles.primaryAction} href={getTemplatePhotoPath(selected)}>
-            <span>{labels.photo}</span><span aria-hidden="true">↗</span>
-          </Link>
+          <div className={styles.actions}>
+            {draft ? (
+              <>
+                <button className={styles.primaryAction} type="button" onClick={editSelectedTemplate}>
+                  <span>{labels.apply}</span><span aria-hidden="true">↗</span>
+                </button>
+                <Link className={styles.secondaryAction} href={getTemplatePhotoPath(selected)}>{labels.newCard}</Link>
+              </>
+            ) : (
+              <Link className={styles.primaryAction} href={getTemplatePhotoPath(selected)}>
+                <span>{labels.photo}</span><span aria-hidden="true">↗</span>
+              </Link>
+            )}
+          </div>
         </section>
-
-        <footer className={styles.footer}>
-          <span>XIV / ATELIER</span>
-          <span>{locale === 'ko' ? '스타일은 편집 중에도 바꿀 수 있습니다.' : locale === 'ja' ? 'スタイルは編集中でも変更できます。' : 'You can change your style in the editor.'}</span>
-        </footer>
       </div>
     </div>
   );

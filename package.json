@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "node tools/run-tests.mjs"
+    "test": "node tools/run-tests.mjs",
+    "test:archive": "node tools/run-tests.mjs --archive"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans-jp": "^5.3.0",

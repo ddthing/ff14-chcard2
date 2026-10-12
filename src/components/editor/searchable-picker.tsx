@@ -1,6 +1,6 @@
 'use client';
 
-import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent, type ReactNode, type RefObject } from 'react';
+import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from 'react';
 import styles from '@/app/editor/editor.module.css';
 import { isImeComposing } from './editor-input';
 import { getNextComboboxOptionIndex } from './editor-interaction';
@@ -41,13 +41,16 @@ interface SearchablePickerProps {
   options: SearchablePickerOption[];
   disabled?: boolean;
   clearable?: boolean;
-  maxResults?: number;
   filterGroups?: SearchablePickerFilterGroup[];
   activeFilter?: string;
   onSelect: (option: SearchablePickerOption | null) => void;
   onFocusField?: () => void;
   onBlurField?: () => void;
 }
+
+type PickerListRow =
+  | { kind: 'unset'; domId: string }
+  | { kind: 'option'; option: SearchablePickerOption; domId: string };
 
 function normalizeSearch(value: string): string {
   return value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLocaleLowerCase().trim();
@@ -65,7 +68,6 @@ export function SearchablePicker({
   options,
   disabled = false,
   clearable = true,
-  maxResults = 12,
   filterGroups,
   activeFilter = 'all',
   onSelect,
@@ -76,27 +78,32 @@ export function SearchablePicker({
   const inputId = `${generatedId}-input`;
   const mobileTriggerValueId = `${generatedId}-mobile-value`;
   const listId = `${generatedId}-list`;
+  const unsetOptionDomId = `${listId}-unset`;
   const labelId = `${generatedId}-label`;
+  const mobileLabelId = `${generatedId}-mobile-label`;
+  const mobileSearchLabelId = `${generatedId}-mobile-search-label`;
   const panelId = `${generatedId}-panel`;
   const [open, setOpen] = useState(false);
   const [isMobileViewport, setIsMobileViewport] = useState(() =>
     typeof window !== 'undefined' && window.matchMedia('(max-width: 900px)').matches,
   );
   const [query, setQuery] = useState('');
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeRowIndex, setActiveRowIndex] = useState<number | null>(null);
   const focusMobileSearchOnOpen = useRef(false);
   const openStateRef = useRef(false);
   const mobileViewportRef = useRef(false);
+  const optionPointerPositionRef = useRef<{ x: number; y: number } | null>(null);
   const pickerRef = useRef<HTMLDivElement>(null);
   const mobileSearchRef = useRef<HTMLInputElement>(null);
   const mobileTriggerRef = useRef<HTMLButtonElement>(null);
   const desktopSearchRef = useRef<HTMLInputElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
+  const mobileDialogRef = useRef<HTMLDialogElement>(null);
   const openedFromMobile = useRef(false);
   const suppressDesktopFocusOpen = useRef(false);
   const onFocusFieldRef = useRef(onFocusField);
   const onBlurFieldRef = useRef(onBlurField);
-  const optionRefs = useRef(new Map<string, HTMLLIElement>());
+  const rowRefs = useRef(new Map<string, HTMLLIElement>());
   const selectedOption = value ? options.find((option) => option.id === value) : undefined;
   const displayValue = selectedOption?.label ?? selectedLabel ?? '';
 
@@ -116,10 +123,11 @@ export function SearchablePicker({
     });
   }, []);
 
-  function setPickerOpen(nextOpen: boolean) {
+  const setPickerOpen = useCallback((nextOpen: boolean) => {
     openStateRef.current = nextOpen;
+    if (!nextOpen && mobileDialogRef.current?.open) mobileDialogRef.current.close();
     setOpen(nextOpen);
-  }
+  }, []);
 
   const filteredOptions = useMemo(() => {
     const normalizedQuery = normalizeSearch(query);
@@ -128,13 +136,30 @@ export function SearchablePicker({
       .filter((option) => {
         if (!normalizedQuery) return true;
         return normalizeSearch(`${option.abbreviation ?? ''} ${option.label} ${option.detail ?? ''} ${option.groupLabel ?? ''} ${option.searchText ?? ''}`).includes(normalizedQuery);
-      })
-      .slice(0, maxResults);
-  }, [activeFilter, maxResults, options, query]);
+      });
+  }, [activeFilter, options, query]);
 
-  const activeOptionId = filteredOptions.some((option) => option.id === activeId)
-    ? activeId
-    : null;
+  const pickerRows = useMemo<PickerListRow[]>(() => {
+    const rows: PickerListRow[] = filteredOptions.map((option) => ({
+      kind: 'option',
+      option,
+      domId: `${listId}-option-${encodeURIComponent(option.id)}`,
+    }));
+    if (clearable) rows.unshift({ kind: 'unset', domId: unsetOptionDomId });
+    return rows;
+  }, [clearable, filteredOptions, listId, unsetOptionDomId]);
+  const activeRow = activeRowIndex === null ? null : pickerRows[activeRowIndex] ?? null;
+  const activeRowId = activeRow?.domId ?? null;
+
+  function handleRowPointerMove(event: ReactPointerEvent<HTMLLIElement>, rowIndex: number) {
+    if (event.pointerType === 'touch') return;
+    const previousPosition = optionPointerPositionRef.current;
+    const moved = event.movementX !== 0
+      || event.movementY !== 0
+      || (previousPosition !== null && (event.clientX !== previousPosition.x || event.clientY !== previousPosition.y));
+    optionPointerPositionRef.current = { x: event.clientX, y: event.clientY };
+    if (moved) setActiveRowIndex(rowIndex);
+  }
 
   useEffect(() => {
     onFocusFieldRef.current = onFocusField;
@@ -148,17 +173,44 @@ export function SearchablePicker({
     if (!open) return;
     function handleOutsidePointerDown(event: PointerEvent) {
       if (pickerRef.current?.contains(event.target as Node)) return;
-      openStateRef.current = false;
-      setOpen(false);
+      setPickerOpen(false);
       setQuery('');
-      setActiveId(null);
+      setActiveRowIndex(null);
       onBlurFieldRef.current?.();
       restoreTriggerFocus(true);
     }
 
     document.addEventListener('pointerdown', handleOutsidePointerDown);
     return () => document.removeEventListener('pointerdown', handleOutsidePointerDown);
-  }, [open, restoreTriggerFocus]);
+  }, [open, restoreTriggerFocus, setPickerOpen]);
+
+  useEffect(() => {
+    const dialog = mobileDialogRef.current;
+    if (!dialog || !open || !isMobileViewport) return;
+
+    const updateVisualViewport = () => {
+      const viewport = window.visualViewport;
+      dialog.style.setProperty('--picker-visual-height', `${Math.max(1, viewport?.height ?? window.innerHeight)}px`);
+      dialog.style.setProperty('--picker-visual-top', `${Math.max(0, viewport?.offsetTop ?? 0)}px`);
+    };
+
+    updateVisualViewport();
+    const viewport = window.visualViewport;
+    window.addEventListener('resize', updateVisualViewport);
+    viewport?.addEventListener('resize', updateVisualViewport);
+    viewport?.addEventListener('scroll', updateVisualViewport);
+    return () => {
+      window.removeEventListener('resize', updateVisualViewport);
+      viewport?.removeEventListener('resize', updateVisualViewport);
+      viewport?.removeEventListener('scroll', updateVisualViewport);
+    };
+  }, [isMobileViewport, open]);
+
+  useEffect(() => {
+    const dialog = mobileDialogRef.current;
+    if (!dialog || !open || !isMobileViewport || dialog.open) return;
+    dialog.showModal();
+  }, [isMobileViewport, open]);
 
   useEffect(() => {
     if (open && focusMobileSearchOnOpen.current) {
@@ -168,9 +220,9 @@ export function SearchablePicker({
   }, [open]);
 
   useEffect(() => {
-    if (!open || !activeOptionId) return;
-    optionRefs.current.get(activeOptionId)?.scrollIntoView({ block: 'nearest' });
-  }, [activeOptionId, open]);
+    if (!open || !activeRowId) return;
+    rowRefs.current.get(activeRowId)?.scrollIntoView({ block: 'nearest' });
+  }, [activeRowId, open]);
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 900px)');
@@ -184,10 +236,9 @@ export function SearchablePicker({
       openedFromMobile.current = isMobile;
       if (!openStateRef.current) return;
 
-      openStateRef.current = false;
-      setOpen(false);
+      setPickerOpen(false);
       setQuery('');
-      setActiveId(null);
+      setActiveRowIndex(null);
       focusMobileSearchOnOpen.current = false;
       requestAnimationFrame(() => {
         if (isMobile) {
@@ -203,21 +254,21 @@ export function SearchablePicker({
 
     mediaQuery.addEventListener('change', handleViewportChange);
     return () => mediaQuery.removeEventListener('change', handleViewportChange);
-  }, []);
+  }, [setPickerOpen]);
 
   function choose(option: SearchablePickerOption | null, returnFocus = false) {
     const shouldRestoreFocus = open || returnFocus;
     onSelect(option);
     setPickerOpen(false);
     setQuery('');
-    setActiveId(null);
+    setActiveRowIndex(null);
     if (shouldRestoreFocus) restoreTriggerFocus();
   }
 
   function closePicker(returnFocus = false) {
     setPickerOpen(false);
     setQuery('');
-    setActiveId(null);
+    setActiveRowIndex(null);
     if (returnFocus) restoreTriggerFocus();
   }
 
@@ -228,7 +279,7 @@ export function SearchablePicker({
       return;
     }
     setQuery('');
-    setActiveId(null);
+    setActiveRowIndex(null);
     openedFromMobile.current = true;
     focusMobileSearchOnOpen.current = true;
     setPickerOpen(true);
@@ -238,7 +289,7 @@ export function SearchablePicker({
     if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
     setPickerOpen(false);
     setQuery('');
-    setActiveId(null);
+    setActiveRowIndex(null);
     onBlurField?.();
   }
 
@@ -246,21 +297,23 @@ export function SearchablePicker({
     if (isImeComposing(event.nativeEvent)) return;
     if (event.key === 'ArrowDown') {
       event.preventDefault();
-      const currentIndex = open ? filteredOptions.findIndex((option) => option.id === activeOptionId) : -1;
-      const nextIndex = getNextComboboxOptionIndex(currentIndex, filteredOptions.length, event.key);
+      const currentIndex = open ? activeRowIndex ?? -1 : -1;
+      const nextIndex = getNextComboboxOptionIndex(currentIndex, pickerRows.length, event.key);
       setPickerOpen(true);
-      setActiveId(nextIndex === null ? null : filteredOptions[nextIndex]?.id ?? null);
+      setActiveRowIndex(nextIndex);
     } else if (event.key === 'ArrowUp') {
       event.preventDefault();
-      const currentIndex = open ? filteredOptions.findIndex((option) => option.id === activeOptionId) : -1;
-      const nextIndex = getNextComboboxOptionIndex(currentIndex, filteredOptions.length, event.key);
+      const currentIndex = open ? activeRowIndex ?? -1 : -1;
+      const nextIndex = getNextComboboxOptionIndex(currentIndex, pickerRows.length, event.key);
       setPickerOpen(true);
-      setActiveId(nextIndex === null ? null : filteredOptions[nextIndex]?.id ?? null);
+      setActiveRowIndex(nextIndex);
     } else if (event.key === 'Enter' && open) {
-      const candidate = filteredOptions.find((option) => option.id === activeOptionId);
-      if (candidate) {
+      if (activeRow?.kind === 'unset') {
         event.preventDefault();
-        choose(candidate);
+        choose(null);
+      } else if (activeRow?.kind === 'option') {
+        event.preventDefault();
+        choose(activeRow.option);
       }
     } else if (event.key === 'Escape' && open) {
       event.preventDefault();
@@ -280,7 +333,7 @@ export function SearchablePicker({
     }
     if (event.key !== 'Tab' || !openedFromMobile.current) return;
 
-    const panel = panelRef.current;
+    const panel = openedFromMobile.current ? mobileDialogRef.current : panelRef.current;
     if (!panel) return;
     const focusableElements = Array.from(panel.querySelectorAll<HTMLElement>(
       'button:not(:disabled), input:not(:disabled), select:not(:disabled), [tabindex]:not([tabindex="-1"])',
@@ -303,7 +356,16 @@ export function SearchablePicker({
     }
   }
 
-  function renderSearchInput(id: string, inputRef?: RefObject<HTMLInputElement | null>) {
+  function openDesktopPicker() {
+    if (openStateRef.current) return;
+    openedFromMobile.current = false;
+    setPickerOpen(true);
+    setQuery('');
+    setActiveRowIndex(null);
+    onFocusField?.();
+  }
+
+  function renderSearchInput(id: string, inputRef?: RefObject<HTMLInputElement | null>, labelledBy = labelId) {
     return (
       <input
         id={id}
@@ -317,45 +379,140 @@ export function SearchablePicker({
         value={open ? query : displayValue}
         placeholder={placeholder}
         title={searchLabel}
-        aria-labelledby={labelId}
+        aria-labelledby={labelledBy}
         aria-autocomplete="list"
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open ? listId : undefined}
-        aria-activedescendant={open && activeOptionId ? `${listId}-${encodeURIComponent(activeOptionId)}` : undefined}
+        aria-activedescendant={open ? activeRowId ?? undefined : undefined}
         onFocus={() => {
           if (id === inputId && suppressDesktopFocusOpen.current) {
             suppressDesktopFocusOpen.current = false;
             return;
           }
-          if (open) return;
-          openedFromMobile.current = false;
-          setPickerOpen(true);
-          setQuery('');
-          onFocusField?.();
+          if (id === inputId) openDesktopPicker();
         }}
-        onChange={(event) => { setQuery(event.currentTarget.value); setActiveId(null); setPickerOpen(true); }}
+        onClick={() => { if (id === inputId) openDesktopPicker(); }}
+        onChange={(event) => { setQuery(event.currentTarget.value); setActiveRowIndex(null); setPickerOpen(true); }}
         onKeyDown={handleKeyDown}
       />
+    );
+  }
+
+  function renderPickerPanelContents(isMobilePanel: boolean) {
+    const pickerLabelId = isMobilePanel ? mobileLabelId : labelId;
+    const searchInputLabelledBy = isMobilePanel ? `${mobileLabelId} ${mobileSearchLabelId}` : labelId;
+
+    return (
+      <>
+        <div className={styles.pickerSheetHead}>
+          <span id={isMobilePanel ? mobileLabelId : undefined} className={styles.pickerLabel}>{label}</span>
+          {isMobilePanel && <span id={mobileSearchLabelId} className={styles.srOnly}>{searchLabel}</span>}
+          <button
+            className={styles.pickerClose}
+            type="button"
+            aria-label={closeLabel}
+            onClick={() => closePicker(true)}
+          >×</button>
+        </div>
+        <div className={styles.pickerSearchWrap}>
+          {renderSearchInput(`${generatedId}-mobile-input`, mobileSearchRef, searchInputLabelledBy)}
+        </div>
+        {filterGroups?.map((group) => (
+          <div className={styles.pickerFilterGroup} key={group.id} role="group" aria-label={group.label}>
+            <span className={styles.pickerFilterLabel}>{group.label}</span>
+            <div className={styles.pickerFilters}>
+              {group.filters.map((filter) => (
+                <button
+                  className={styles.pickerFilter}
+                  key={filter.id}
+                  type="button"
+                  aria-label={`${group.label}: ${filter.label}`}
+                  aria-pressed={group.activeFilter === filter.id}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={() => { group.onChange(filter.id); setActiveRowIndex(null); }}
+                >{filter.label}</button>
+              ))}
+            </div>
+          </div>
+        ))}
+        <ul id={listId} className={styles.pickerList} role="listbox" aria-labelledby={pickerLabelId}>
+          {pickerRows.map((row, rowIndex) => {
+            if (row.kind === 'unset') {
+              const active = activeRowIndex === rowIndex;
+              return (
+                <li
+                  id={row.domId}
+                  ref={(element) => {
+                    if (element) rowRefs.current.set(row.domId, element);
+                    else rowRefs.current.delete(row.domId);
+                  }}
+                  key="row:unset"
+                  className={`${styles.pickerOption} ${active ? styles.pickerOptionActive : ''}`}
+                  role="option"
+                  aria-label={clearLabel}
+                  aria-selected={active || (activeRowIndex === null && value === null)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onPointerMove={(event) => handleRowPointerMove(event, rowIndex)}
+                  onClick={() => choose(null)}
+                >
+                  <span className={styles.pickerOptionText}><span>{clearLabel}</span></span>
+                  {value === null && <span className={styles.pickerOptionCheck} aria-hidden="true">✓</span>}
+                </li>
+              );
+            }
+
+            const option = row.option;
+            const active = activeRowIndex === rowIndex;
+            const optionIndex = rowIndex - (clearable ? 1 : 0);
+            const previousGroup = filteredOptions[optionIndex - 1]?.groupLabel;
+            const needsGroupHeading = option.groupLabel && option.groupLabel !== previousGroup;
+            return (
+              <Fragment key={`row:option:${option.id}`}>
+                {needsGroupHeading && <li className={styles.pickerGroupHeading} role="presentation" aria-hidden="true">{option.groupLabel}</li>}
+                <li
+                  id={row.domId}
+                  ref={(element) => {
+                    if (element) rowRefs.current.set(row.domId, element);
+                    else rowRefs.current.delete(row.domId);
+                  }}
+                  className={`${styles.pickerOption} ${active ? styles.pickerOptionActive : ''}`}
+                  role="option"
+                  aria-label={[option.groupLabel, option.abbreviation, option.label, option.detail].filter(Boolean).join(', ')}
+                  aria-selected={active || (activeRowIndex === null && option.id === value)}
+                  onMouseDown={(event) => event.preventDefault()}
+                  onPointerMove={(event) => handleRowPointerMove(event, rowIndex)}
+                  onClick={() => choose(option)}
+                >
+                  {option.icon && <span className={styles.pickerOptionIcon}>{option.icon}</span>}
+                  {option.abbreviation && <span className={styles.pickerAbbreviation}>{option.abbreviation}</span>}
+                  <span className={styles.pickerOptionText}>
+                    <span>{option.label}</span>
+                    {option.detail && <small>{option.detail}</small>}
+                  </span>
+                  {option.id === value && <span className={styles.pickerOptionCheck} aria-hidden="true">✓</span>}
+                </li>
+              </Fragment>
+            );
+          })}
+        </ul>
+        {filteredOptions.length === 0 && <div className={styles.pickerEmpty} role="status" aria-live="polite">{noResultsLabel}</div>}
+      </>
     );
   }
 
   return (
     <div ref={pickerRef} className={styles.picker} onBlur={handleBlur} onKeyDown={handlePickerKeyDown}>
       <span id={labelId} className={styles.pickerLabel}>{label}</span>
-      <div className={`${styles.pickerInputWrap} ${styles.pickerTriggerDesktop} ${open ? styles.pickerInputOpen : ''}`}>
+      <div
+        className={`${styles.pickerInputWrap} ${styles.pickerTriggerDesktop} ${open ? styles.pickerInputOpen : ''}`}
+      >
         {renderSearchInput(inputId, desktopSearchRef)}
-        {clearable && value && !disabled && (
-          <button
-            className={styles.pickerClear}
-            type="button"
-            aria-label={`${label}: ${clearLabel}`}
-            onClick={() => { openedFromMobile.current = false; choose(null, true); }}
-          >×</button>
-        )}
-        <span className={styles.pickerChevron} aria-hidden="true">⌄</span>
+        <span className={styles.pickerChevron} aria-hidden="true" />
       </div>
-      <div className={`${styles.pickerInputWrap} ${styles.pickerTriggerMobile}`}>
+      <div
+        className={`${styles.pickerInputWrap} ${styles.pickerTriggerMobile}`}
+      >
         <button
           ref={mobileTriggerRef}
           className={styles.pickerTriggerButton}
@@ -368,89 +525,31 @@ export function SearchablePicker({
           onFocus={() => { if (!open) onFocusField?.(); }}
           onClick={openPickerFromMobile}
         ><span id={mobileTriggerValueId}>{displayValue || placeholder}</span></button>
-        {clearable && value && !disabled && (
-          <button
-            className={styles.pickerClear}
-            type="button"
-            aria-label={`${label}: ${clearLabel}`}
-            onClick={() => { openedFromMobile.current = true; choose(null, true); }}
-          >×</button>
-        )}
-        <span className={styles.pickerChevron} aria-hidden="true">⌄</span>
+        <span className={styles.pickerChevron} aria-hidden="true" />
       </div>
 
-      {open && (
+      {open && !isMobileViewport && (
         <>
           <div className={styles.pickerBackdrop} aria-hidden="true" onClick={() => closePicker(true)} />
-          <div ref={panelRef} id={panelId} className={styles.pickerPopover} data-state={open ? 'open' : 'closed'} role="dialog" aria-labelledby={labelId} aria-modal={isMobileViewport ? true : undefined} tabIndex={-1}>
-            <div className={styles.pickerSheetHead}>
-              <span className={styles.pickerLabel}>{label}</span>
-              <button
-                className={styles.pickerClose}
-                type="button"
-                aria-label={closeLabel}
-                onClick={() => closePicker(true)}
-              >×</button>
-            </div>
-            <div className={styles.pickerSearchWrap}>
-              {renderSearchInput(`${generatedId}-mobile-input`, mobileSearchRef)}
-            </div>
-            {filterGroups?.map((group) => (
-              <div className={styles.pickerFilterGroup} key={group.id} role="group" aria-label={group.label}>
-                <span className={styles.pickerFilterLabel}>{group.label}</span>
-                <div className={styles.pickerFilters}>
-                  {group.filters.map((filter) => (
-                    <button
-                      className={styles.pickerFilter}
-                      key={filter.id}
-                      type="button"
-                      aria-label={`${group.label}: ${filter.label}`}
-                      aria-pressed={group.activeFilter === filter.id}
-                      onMouseDown={(event) => event.preventDefault()}
-                      onClick={() => { group.onChange(filter.id); setActiveId(null); }}
-                    >{filter.label}</button>
-                  ))}
-                </div>
-              </div>
-            ))}
-            <ul id={listId} className={styles.pickerList} role="listbox" aria-labelledby={labelId}>
-            {filteredOptions.map((option, index) => {
-              const optionId = `${listId}-${encodeURIComponent(option.id)}`;
-              const active = option.id === activeOptionId;
-              const previousGroup = filteredOptions[index - 1]?.groupLabel;
-              const needsGroupHeading = option.groupLabel && option.groupLabel !== previousGroup;
-              return (
-                <Fragment key={option.id}>
-                  {needsGroupHeading && <li className={styles.pickerGroupHeading} role="presentation" aria-hidden="true">{option.groupLabel}</li>}
-                  <li
-                    id={optionId}
-                    ref={(element) => {
-                      if (element) optionRefs.current.set(option.id, element);
-                      else optionRefs.current.delete(option.id);
-                    }}
-                    className={`${styles.pickerOption} ${active ? styles.pickerOptionActive : ''}`}
-                    role="option"
-                    aria-label={[option.groupLabel, option.abbreviation, option.label, option.detail].filter(Boolean).join(', ')}
-                    aria-selected={option.id === (activeOptionId ?? value)}
-                    onMouseDown={(event) => event.preventDefault()}
-                    onMouseEnter={() => setActiveId(option.id)}
-                    onClick={() => choose(option)}
-                  >
-                    {option.icon && <span className={styles.pickerOptionIcon}>{option.icon}</span>}
-                    {option.abbreviation && <span className={styles.pickerAbbreviation}>{option.abbreviation}</span>}
-                    <span className={styles.pickerOptionText}>
-                      <span>{option.label}</span>
-                      {option.detail && <small>{option.detail}</small>}
-                    </span>
-                    {option.id === value && <span className={styles.pickerOptionCheck} aria-hidden="true">✓</span>}
-                  </li>
-                </Fragment>
-              );
-            })}
-            </ul>
-            {filteredOptions.length === 0 && <div className={styles.pickerEmpty} role="status" aria-live="polite">{noResultsLabel}</div>}
+          <div ref={panelRef} id={panelId} className={styles.pickerPopover} data-state="open" role="dialog" aria-labelledby={labelId} tabIndex={-1}>
+            {renderPickerPanelContents(false)}
           </div>
         </>
+      )}
+      {open && isMobileViewport && (
+        <dialog
+          ref={mobileDialogRef}
+          id={panelId}
+          className={`${styles.pickerPopover} ${styles.pickerMobileDialog}`}
+          data-state="open"
+          aria-labelledby={mobileLabelId}
+          aria-modal="true"
+          tabIndex={-1}
+          onCancel={(event) => { event.preventDefault(); closePicker(true); }}
+          onClick={(event) => { if (event.target === event.currentTarget) closePicker(true); }}
+        >
+          <div className={styles.pickerMobileDialogContent}>{renderPickerPanelContents(true)}</div>
+        </dialog>
       )}
     </div>
   );

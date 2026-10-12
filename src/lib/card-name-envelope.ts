@@ -25,7 +25,10 @@ export const CARD_NAME_ENVELOPES:Readonly<Record<AdventurerCardTemplate,Readonly
   '1:1':envelope(42,18,15.4,11.1,12),
   '3:4':envelope(29,18,12.2,8.8,9.5),
   '9:16':envelope(84,20,19,13.6,14.8),
-  '16:9':envelope(58,14,12.3,8.9,9.7),
+  // The 9%-to-35% name/facts interval is 14.625cqi. Four CJK line boxes also
+  // add .08em bottom padding per line and three .25cqi grid gaps; reserve about
+  // 1cqi for separation by limiting the measured ink/leading envelope to 11.7cqi.
+  '16:9':envelope(58,11.7,12.3,8.9,9.7),
  },
  'id-card':{
   '4:5':envelope(48,13,15,8.6,9.3),

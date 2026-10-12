@@ -9,6 +9,7 @@
   --identity-paper-right: 0%;
   --identity-paper-bottom: 0%;
   --identity-paper-padding: 4.5cqi 6.1cqi 6.6cqi;
+  --identity-ribbon-safe-bottom: 7.5cqi;
   --identity-ribbon-top: 0%;
   --identity-ribbon-left: 8.8%;
   --identity-ribbon-width: 13%;
@@ -148,15 +149,15 @@
   z-index: 11;
   top: var(--identity-ribbon-top);
   left: var(--identity-ribbon-left);
-  display: flex;
+  display: grid;
   width: var(--identity-ribbon-width);
   height: var(--identity-ribbon-height);
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 1.6cqi;
+  grid-template-rows: min-content minmax(0, 1fr) min-content;
+  align-items: stretch;
+  justify-items: stretch;
+  row-gap: .5cqi;
   overflow: hidden;
-  padding: 2.3cqi .8cqi 2.6cqi;
+  padding: 2.3cqi .8cqi var(--identity-ribbon-safe-bottom);
   background: linear-gradient(155deg, color-mix(in srgb, var(--craft-red) 88%, var(--craft-ink)), color-mix(in srgb, var(--craft-red) 74%, var(--craft-ink)));
   color: var(--craft-ivory);
   clip-path: polygon(0 0, 100% 0, 100% 87%, 50% 100%, 0 87%);
@@ -198,31 +199,44 @@
 }
 
 .mastheadTitle {
+  width: 100%;
   max-width: 100%;
   color: var(--craft-gold-light, var(--craft-ivory));
   font-family: var(--master-font-display, var(--card-font-display, Georgia, serif));
-  font-size: 5.1cqi;
+  font-size: 4.4cqi;
   font-weight: 600;
-  letter-spacing: .05em;
-  line-height: .95;
+  letter-spacing: .02em;
+  line-height: 1.1;
+  white-space: nowrap;
 }
 
 .mastheadNote {
-  flex-direction: column;
+  display: grid;
+  width: 100%;
+  min-height: 0;
+  grid-auto-rows: min-content;
+  align-content: center;
+  justify-items: center;
+  row-gap: .35cqi;
   color: color-mix(in srgb, var(--craft-ivory) 92%, transparent);
+  font-family: var(--master-font-caption, var(--card-font-caption, var(--card-font-metadata, sans-serif)));
   font-size: max(var(--master-micro-min, .84cqi), 1.27cqi);
-  font-weight: 550;
-  letter-spacing: .19em;
-  line-height: 1.23;
+  font-weight: var(--master-caption-weight, 550);
+  letter-spacing: var(--master-caption-tracking, .006em);
+  line-height: var(--master-caption-leading, 1.18);
 }
 
 .mastheadLocation {
-  margin-top: auto;
+  width: 100%;
+  margin-top: 0;
   color: color-mix(in srgb, var(--craft-gold-light, var(--craft-ivory)) 90%, transparent);
-  font-size: max(var(--master-micro-min, .84cqi), 1.26cqi);
-  font-weight: 600;
-  letter-spacing: .2em;
-  line-height: 1;
+  font-family: var(--master-font-micro, var(--card-font-metadata, sans-serif));
+  font-size: max(var(--master-micro-min, .84cqi), 1.1cqi);
+  font-weight: var(--master-micro-weight, 600);
+  letter-spacing: var(--master-micro-tracking, .1em);
+  line-height: var(--master-micro-leading, 1.05);
+  text-wrap: balance;
+  overflow-wrap: anywhere;
 }
 
 .paper {
@@ -599,6 +613,7 @@
   --identity-paper-right: 2.2%;
   --identity-paper-bottom: 2.2%;
   --identity-paper-padding: 7cqi 4.5cqi 5cqi;
+  --identity-ribbon-safe-bottom: 4.5cqi;
   --identity-ribbon-left: 5%;
   --identity-ribbon-width: 9%;
   --identity-ribbon-height: 26%;
@@ -608,6 +623,9 @@
   --identity-column-gap: 2.2cqi;
 }
 
+.canvas[data-ratio='16:9'] .masthead { padding-top: 1.2cqi; row-gap: .05cqi; }
+.canvas[data-ratio='16:9'] .mastheadTitle { font-size: 3cqi; }
+.canvas[data-ratio='16:9'] .mastheadNote { font-size: 1cqi; row-gap: .1cqi; }
 .canvas[data-ratio='16:9'] .photoCopy { top: 5.8%; right: auto; left: 19%; width: 20%; }
 .canvas[data-ratio='16:9'] .photoQuote { font-size: 1.45cqi; }
 .canvas[data-ratio='16:9'] .photoStamp { font-size: .72cqi; }

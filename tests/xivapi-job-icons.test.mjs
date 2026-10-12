@@ -261,6 +261,36 @@ test('display marks require a reviewed SVG and per-usage approvals stay scoped',
   assert.equal(nativeSourceAppearance?.renderAs, 'image');
 });
 
+test('cardDisplay raster fallback requires explicit approval and at least 256px on both edges', () => {
+  const raster = {
+    src: '/assets/ffxiv/jobs/xivapi/icons/warrior.png',
+    width: 256,
+    height: 256,
+    provider: 'icons',
+    sha256: 'f'.repeat(64),
+    integrityVerified: true,
+    verified: true,
+  };
+  const base = { jobId: 'warrior', usage: 'cardDisplay', officialAssetsEnabled: true };
+
+  assert.equal(resolveJobIconFromSources({ ...base, entry: { raster } }), null, 'missing usage approval is rejected');
+  assert.equal(resolveJobIconFromSources({
+    ...base,
+    entry: { raster: { ...raster, verifiedUsages: ['picker', 'cardSmall'] } },
+  }), null, 'approval for other usages does not authorize cardDisplay');
+
+  const approved = resolveJobIconFromSources({
+    ...base,
+    entry: { raster: { ...raster, verifiedUsages: ['cardDisplay'] } },
+  });
+  assert.deepEqual(approved && [approved.source, approved.width, approved.height], ['xivapi-raster', 256, 256]);
+
+  assert.equal(resolveJobIconFromSources({
+    ...base,
+    entry: { raster: { ...raster, width: 255, verifiedUsages: ['cardDisplay'] } },
+  }), null, 'an approved raster below 256px on one edge is rejected');
+});
+
 test('the feature flag leaves generic fallback available and unknown IDs never resolve', () => {
   assert.equal(resolveJobIcon({ jobId: 'paladin', usage: 'picker', officialAssetsEnabled: false }), null);
   for (const jobId of ['beastmaster', '../paladin', 'unknown-job', 'constructor', '__proto__']) {
@@ -295,7 +325,10 @@ test('previously mask-backed jobs now use the inspected 256px XIVAPI originals',
     assert.deepEqual(small && [small.source, small.src, small.width, small.height], [
       'xivapi-raster', `/assets/ffxiv/jobs/xivapi/icons/${jobId}.png`, 256, 256,
     ]);
-    assert.equal(resolveJobIcon({ jobId, usage: 'cardDisplay' }), null, `${jobId} stays off the large raster path`);
+    const display = resolveJobIcon({ jobId, usage: 'cardDisplay' });
+    assert.deepEqual(display && [display.source, display.src, display.width, display.height], [
+      'xivapi-raster', `/assets/ffxiv/jobs/xivapi/icons/${jobId}.png`, 256, 256,
+    ], `${jobId} uses its manifest-approved display raster`);
   }
 });
 

@@ -7,11 +7,14 @@ import {
   type AdventurerCardImageAdjustments,
   type AdventurerCardTemplate,
   type CardColorMode,
+  type CardDecorativeCopy,
   type CardLayoutVariant,
   type CardRatio,
   type CardTypographyPreset,
+  isCardDecorativeCopy,
 } from '@/components/cards/types';
 import type { CardPalette } from '@/lib/palette';
+import { createEmptyUserCharacter } from '@/lib/new-user-card';
 import {
   DATA_CENTERS,
   SERVICES,
@@ -158,12 +161,15 @@ function normalizeCharacter(
   changedKeys?: ReadonlySet<string>,
 ): AdventurerCardCharacter {
   const input = record(value);
+  const isUserProfile = input.profileOrigin === 'user';
   const strings = ['name', 'world', 'dataCenter', 'freeCompany', 'job', 'race', 'clan', 'grandCompany', 'bio'] as const;
   const character: AdventurerCardCharacter = {
     ...fallback,
     languages: [...fallback.languages],
     playStyles: [...fallback.playStyles],
   };
+  if (isUserProfile) character.profileOrigin = 'user';
+  else delete character.profileOrigin;
   for (const key of strings) {
     if (typeof input[key] === 'string') character[key] = input[key] as never;
   }
@@ -177,7 +183,7 @@ function normalizeCharacter(
   const centerForService = requestedCenter && (!requestedService || requestedCenter.service === requestedService)
     ? requestedCenter
     : undefined;
-  let service = requestedService ?? centerForService?.service ?? fallbackService ?? 'global';
+  let service = requestedService ?? centerForService?.service ?? fallbackService ?? (isUserProfile ? null : 'global');
   const inputRegion = typeof input.physicalRegionId === 'string'
     ? getPhysicalRegion(input.physicalRegionId)?.id ?? null
     : null;
@@ -195,12 +201,12 @@ function normalizeCharacter(
   const rawWorldId = typeof input.worldId === 'string' ? input.worldId : null;
   const worldById = getWorld(rawWorldId);
   const worldContext = {
-    service: requestedService ?? dataCenter?.service ?? service,
+    service: requestedService ?? dataCenter?.service ?? service ?? undefined,
     physicalRegionId,
     dataCenterId: dataCenter?.id ?? null,
   };
   const worldByLabel = findWorld(character.world, worldContext) ?? findWorld(character.world, {
-    service: requestedService ?? dataCenter?.service ?? service,
+    service: requestedService ?? dataCenter?.service ?? service ?? undefined,
   }) ?? findWorld(character.world);
   const selectedWorld = worldById ?? worldByLabel;
   if (selectedWorld) {
@@ -244,7 +250,9 @@ function normalizeCharacter(
   let race = getRace(rawRaceId) ?? getRace(character.race) ??
     (!changed('race', 'raceId') ? getRace(fallback.raceId ?? fallback.race) : undefined);
   const rawClanId = typeof input.clanId === 'string' ? input.clanId : null;
-  let clan = getClan(rawClanId) ?? getClan(character.clan) ??
+  // Only an explicitly stored blank/null pair overrides the legacy demo fallback.
+  const explicitlyClearedClan = hasField('clan') && input.clan === '' && hasField('clanId') && input.clanId === null;
+  let clan = explicitlyClearedClan ? undefined : getClan(rawClanId) ?? getClan(character.clan) ??
     (!changed('clan', 'clanId') ? getClan(fallback.clanId ?? fallback.clan) : undefined);
   if (clan && !hasField('race') && !hasField('raceId')) race = getRace(clan.raceId);
   let clanClearedForRace = false;
@@ -260,7 +268,7 @@ function normalizeCharacter(
   character.clanId = clan?.id ?? null;
   character.clan = clan
     ? localizedOrEnglish(character.clan, clan, (label) => getClan(label), character.clan)
-    : clanClearedForRace || changed('race', 'raceId') ? '' : character.clan;
+    : explicitlyClearedClan || clanClearedForRace || changed('race', 'raceId') ? '' : character.clan;
 
   const rawGrandCompanyId = typeof input.grandCompanyId === 'string' ? input.grandCompanyId : null;
   const grandCompany = getGrandCompany(rawGrandCompanyId) ?? getGrandCompany(character.grandCompany) ??
@@ -268,7 +276,9 @@ function normalizeCharacter(
   character.grandCompanyId = grandCompany?.id ?? null;
   character.grandCompany = localizedOrEnglish(character.grandCompany, grandCompany, (label) => getGrandCompany(label), character.grandCompany);
 
-  character.level = Math.round(clamp(input.level, fallback.level, 1, 100));
+  character.level = isUserProfile && input.level === 0
+    ? 0
+    : Math.round(clamp(input.level, fallback.level, 1, 100));
   character.languages = Array.isArray(input.languages)
     ? [...new Set(input.languages.filter((entry): entry is string => typeof entry === 'string').map(normalizeLanguageId))]
     : [...fallback.languages];
@@ -351,8 +361,10 @@ export function normalizeCharacterUpdate(
     } else if (patch.dataCenterId === null) {
       merged.dataCenterId = null;
       merged.dataCenter = typeof patch.dataCenter === 'string' ? patch.dataCenter : '';
-      merged.worldId = null;
-      merged.world = '';
+      if (!explicitWorld) {
+        merged.worldId = null;
+        merged.world = '';
+      }
     } else {
       merged.dataCenterId = null;
       merged.dataCenter = typeof patch.dataCenter === 'string' ? patch.dataCenter : '';
@@ -422,7 +434,10 @@ function hasCanonicalCharacterIds(value: unknown): boolean {
   const input = record(value);
   const ids = ['service', 'physicalRegionId', 'dataCenterId', 'worldId', 'jobId', 'raceId', 'clanId', 'grandCompanyId'] as const;
   if (ids.some((key) => !Object.hasOwn(input, key))) return false;
-  const normalized = normalizeCharacter(value, demoAdventurerData.character);
+  const fallback = input.profileOrigin === 'user'
+    ? createEmptyUserCharacter()
+    : demoAdventurerData.character;
+  const normalized = normalizeCharacter(value, fallback);
   if (ids.some((key) => input[key] !== normalized[key])) return false;
   const strings = (key: 'languages' | 'playStyles') => {
     if (!Array.isArray(input[key])) return false;
@@ -486,6 +501,10 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     designInput.imageScale,
     base.imageAdjustments,
   );
+  const characterInput = record(input.character);
+  const characterFallback = characterInput.profileOrigin === 'user'
+    ? createEmptyUserCharacter()
+    : base.character;
   const design: AdventurerCardDesign = {
     template,
     ratio: isRatio(designInput.ratio) ? designInput.ratio : base.design.ratio,
@@ -493,6 +512,9 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     colorMode: isColorMode(designInput.colorMode) ? designInput.colorMode : 'auto',
     jobMotifVisible: typeof designInput.jobMotifVisible === 'boolean' ? designInput.jobMotifVisible : true,
     jobIconColor: safeColor(designInput.jobIconColor, '') || null,
+    decorativeCopy: isCardDecorativeCopy(designInput.decorativeCopy)
+      ? designInput.decorativeCopy as CardDecorativeCopy
+      : 'default',
     palette,
     accentColor: palette.accent,
     typographyPreset: normalizeTypographyPreset(designInput.typographyPreset) ?? base.design.typographyPreset,
@@ -504,7 +526,7 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
   };
 
   return {
-    character: normalizeCharacter(input.character, base.character),
+    character: normalizeCharacter(characterInput, characterFallback),
     design,
     imageUrl: safeImageUrl(input.imageUrl, base.imageUrl),
     imageAdjustments: adjustments,

@@ -7,6 +7,7 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useId,
   useMemo,
   useRef,
   useState,
@@ -16,6 +17,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
+import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 import { useI18n } from '@/lib/i18n';
 import { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER } from '@/lib/master-card-config';
 import { getJobTheme } from '@/lib/job-themes';
@@ -23,23 +25,34 @@ import { localizeCardWorld } from '@/lib/card-microcopy';
 import { getJob, LANGUAGES, PLAY_STYLES } from '@/data/ffxiv';
 import { prepareImageFile, ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
 import { EditorBoundary } from './editor-boundary';
-import { EDITOR_TASK_FOR_PANEL as TASK_FOR_PANEL, EDITOR_TASK_IDS as TASK_IDS, EDITOR_TASK_PANEL as TASK_PANEL, type EditorTaskId } from './editor-navigation';
+import { EDITOR_TASK_FOR_PANEL as TASK_FOR_PANEL, EDITOR_TASK_IDS as TASK_IDS, EDITOR_TASK_PANEL as TASK_PANEL, getEditorEntryPanel, getEditorTaskActivation, type EditorTaskId } from './editor-navigation';
 import { getUploadErrorMessage } from './editor-errors';
 import { committedLevel, isImeComposing, validLevelInput } from './editor-input';
 import { cancelPendingEditorUploads, registerUploadCancellation } from './upload-session';
 import { PERFORMANCE_PROFILING_ENABLED, profileCommit, profileRender, profileTiming } from '@/lib/performance-profile';
-import { detectTypographyScript, getTypographyFontFamily, TYPOGRAPHY_SPECIMENS, type TypographyPresetId, type TypographyScript } from '@/lib/typography-presets';
+import {
+  detectTypographyScript,
+  getTypographyFontFamily,
+  getTypographyFontGroup,
+  getTypographyPresetForFontGroup,
+  resolveTypographyPresetForFontGroup,
+  TYPOGRAPHY_SPECIMENS,
+  type TypographyFontGroup,
+  type TypographyPresetId,
+  type TypographyScript,
+} from '@/lib/typography-presets';
 import { loadTypographyFonts } from '@/data/fonts/load-fonts';
 import { CardPreview } from '@/components/editor/card-preview';
 import { getEditorCopy, type EditorCopy } from '@/components/editor/copy';
 import { formatAccessibleImageControlValue, formatAccessiblePercent } from '@/components/editor/editor-accessibility';
 import { EditorIcon, type EditorIconName } from '@/components/editor/editor-icon';
 import { ToolbarTooltipButton } from '@/components/editor/toolbar-tooltip-button';
+import { ProjectLibraryDialogTrigger } from '@/components/library/local-project-library';
 import { InlineConfirm } from '@/components/editor/inline-confirm';
 import { resolveEditorKeyboardAction } from '@/components/editor/editor-keyboard';
 import { FFXIVAttribution } from '@/components/ffxiv/ffxiv-attribution';
 import { GrandCompanyPicker, JobPicker, RaceClanPicker, WorldPicker } from '@/components/editor/ffxiv-pickers';
-import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate } from '@/components/cards/types';
+import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate, type CardDecorativeCopy, type CardLayoutVariant } from '@/components/cards/types';
 import { RatioPicker } from '@/components/editor/ratio-picker';
 import {
   isSampleArtworkSource,
@@ -75,12 +88,17 @@ const SAMPLE_ARTWORK_SOURCES = new Set([
   ...Object.values(demoAdventurerCards).map((card) => card.imageUrl),
 ]);
 const TYPOGRAPHY_IDS: TypographyPresetId[] = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
+const TYPOGRAPHY_FONT_GROUPS: TypographyFontGroup[] = ['serif', 'sans'];
+const TYPOGRAPHY_SPECIMEN_SCRIPTS = [
+  ['EN', 'latin'],
+  ['KO', 'korean'],
+  ['JA', 'japanese'],
+] as const;
 const COLOR_KEYS = ['primary', 'accent', 'light', 'dark'] as const;
 const BASIC_IMAGE_CONTROL_KEYS = ['x', 'y', 'scale'] as const;
 const ADVANCED_IMAGE_CONTROL_KEYS = ['rotation', 'brightness', 'contrast', 'saturation', 'exposure'] as const;
 const IMAGE_DRAG_HINT_DURATION_MS = 3200;
 const SCREENSHOT_INPUT_ID = 'editor-screenshot-file';
-const SCREENSHOT_HELP_ID = 'editor-screenshot-help';
 const SCREENSHOT_TYPES_ID = 'editor-screenshot-types';
 const SCREENSHOT_STATUS_ID = 'editor-screenshot-status';
 const SCREENSHOT_ERROR_ID = 'editor-screenshot-error';
@@ -112,6 +130,24 @@ function getTemplateLabel(copy: EditorCopy, template: AdventurerCardTemplate): s
   return copy.templates[template];
 }
 
+function getTemplateChoiceActionLabel(
+  copy: EditorCopy,
+  template: AdventurerCardTemplate,
+  selected: boolean,
+  layoutVariant: CardLayoutVariant,
+  locale: Locale,
+): string {
+  const templateName = getTemplateLabel(copy, template);
+  const masterLabel = copy.variationNames.a;
+
+  if (!selected || layoutVariant === 'a') return `${copy.template}: ${templateName} · ${masterLabel}`;
+
+  const variantLabel = copy.variationNames[layoutVariant];
+  if (locale === 'ko') return `${copy.template}: ${templateName} · ${variantLabel} 선택됨. 누르면 ${masterLabel}로 돌아갑니다.`;
+  if (locale === 'ja') return `${copy.template}: ${templateName} · ${variantLabel}を選択中。押すと${masterLabel}に戻ります。`;
+  return `${copy.template}: ${templateName} · ${variantLabel} selected. Activate to return to ${masterLabel}.`;
+}
+
 function moreCanvasControlsLabel(locale: Locale): string {
   if (locale === 'ko') return '추가 도구';
   if (locale === 'ja') return 'その他';
@@ -122,6 +158,17 @@ function compactMoreCanvasControlsLabel(locale: Locale): string {
   if (locale === 'ko') return '더보기';
   if (locale === 'ja') return 'その他';
   return 'More';
+}
+
+function getFocusedFieldLabel(copy: EditorCopy, field: string): string {
+  if (!field || !Object.prototype.hasOwnProperty.call(copy.fields, field)) return '';
+  return copy.fields[field as keyof EditorCopy['fields']];
+}
+
+function formatFocusedFieldHint(locale: Locale, label: string): string {
+  if (locale === 'ko') return `편집 중 · ${label}`;
+  if (locale === 'ja') return `編集中 · ${label}`;
+  return `Editing · ${label}`;
 }
 
 function photoAdjustmentsLabel(locale: Locale): string {
@@ -144,24 +191,28 @@ const MasterTemplateProof = memo(function MasterTemplateProof({ template, locale
   );
 });
 
-function CharacterInput({
+const CharacterInput = memo(function CharacterInput({
   field,
   value,
   copy,
   onUpdate,
   onFocusField,
+  allowEmptyLevel = false,
 }: {
   field: TextFieldKey;
   value: string | number;
   copy: EditorCopy;
   onUpdate: (field: TextFieldKey, value: string) => void;
   onFocusField: (field: string) => void;
+  allowEmptyLevel?: boolean;
 }) {
   const label = copy.fields[field];
   profileRender(`CharacterInput.${field}`);
   const placeholder = field === 'level' ? undefined : copy.placeholders[field];
   const isLevel = field === 'level';
+  const displayValue = allowEmptyLevel && isLevel && value === 0 ? '' : String(value);
   const [editingValue, setEditingValue] = useState<string | null>(null);
+  const currentValue = editingValue ?? displayValue;
   const composing = useRef(false);
   const latestComposition = useRef<string | null>(null);
   const groupTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -193,7 +244,8 @@ function CharacterInput({
   const handlers = {
     onFocus: () => onFocusField(field),
     onBlur: () => {
-      if (isLevel) commit(String(committedLevel(editingValue ?? String(value), editorStore.getState().character.level)));
+      if (isLevel && allowEmptyLevel && currentValue.trim() === '') commit('');
+      else if (isLevel) commit(String(committedLevel(currentValue, editorStore.getState().character.level)));
       else if (latestComposition.current !== null) commit(latestComposition.current);
       composing.current = false;
       latestComposition.current = null;
@@ -204,8 +256,8 @@ function CharacterInput({
     },
     onCompositionStart: () => {
       composing.current = true;
-      latestComposition.current = String(value);
-      setEditingValue(String(value));
+      latestComposition.current = currentValue;
+      setEditingValue(currentValue);
       if (groupTimer.current) clearTimeout(groupTimer.current);
     },
     onCompositionEnd: (event: React.CompositionEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -230,10 +282,10 @@ function CharacterInput({
   };
 
   return (
-    <label className={`${styles.field} ${field === 'bio' ? styles.bioField : ''}`}>
+    <label className={`${styles.field} ${field === 'bio' ? styles.bioField : ''} ${field === 'name' || field === 'freeCompany' || field === 'bio' ? styles.fieldWide : ''}`}>
       <span>{label}</span>
-      {field === 'bio' ? <><textarea data-editor-field={field} rows={4} maxLength={120} value={editingValue ?? value}
-        placeholder={placeholder} aria-label={label} {...handlers}/><small>{String(editingValue ?? value).length} / 120</small></> : <input
+      {field === 'bio' ? <><textarea data-editor-field={field} rows={4} maxLength={120} value={currentValue}
+        placeholder={placeholder} aria-label={label} {...handlers}/><small>{currentValue.length} / 120</small></> : <input
         type={isLevel ? 'number' : 'text'}
         data-editor-field={field}
         min={isLevel ? 1 : undefined}
@@ -241,31 +293,79 @@ function CharacterInput({
         maxLength={isLevel ? undefined : 48}
         inputMode={isLevel ? 'numeric' : undefined}
         autoComplete="off"
-        value={editingValue ?? value}
+        spellCheck={field !== 'name' && field !== 'freeCompany'}
+        value={currentValue}
         placeholder={placeholder}
         aria-label={label}
         {...handlers}
       />}
     </label>
   );
+});
+
+function FieldGrid({ children, className }: { children: ReactNode; className?: string }) {
+  return <div className={`${styles.fieldGrid} ${className ?? ''}`}>{children}</div>;
 }
 
-function FieldGrid({ children }: { children: ReactNode }) {
-  return <div className={styles.fieldGrid}>{children}</div>;
-}
+const MemoJobPicker = memo(JobPicker, (previous, next) =>
+  previous.copy === next.copy &&
+  previous.locale === next.locale &&
+  previous.character.jobId === next.character.jobId &&
+  previous.character.job === next.character.job &&
+  previous.onFocusField === next.onFocusField &&
+  previous.onBlurField === next.onBlurField,
+);
+
+const MemoWorldPicker = memo(WorldPicker, (previous, next) =>
+  previous.copy === next.copy &&
+  previous.locale === next.locale &&
+  previous.character.service === next.character.service &&
+  previous.character.physicalRegionId === next.character.physicalRegionId &&
+  previous.character.dataCenterId === next.character.dataCenterId &&
+  previous.character.worldId === next.character.worldId &&
+  previous.character.world === next.character.world &&
+  previous.onFocusField === next.onFocusField &&
+  previous.onBlurField === next.onBlurField,
+);
+
+const MemoRaceClanPicker = memo(RaceClanPicker, (previous, next) =>
+  previous.copy === next.copy &&
+  previous.locale === next.locale &&
+  previous.character.raceId === next.character.raceId &&
+  previous.character.race === next.character.race &&
+  previous.character.clanId === next.character.clanId &&
+  previous.character.clan === next.character.clan &&
+  previous.onFocusField === next.onFocusField &&
+  previous.onBlurField === next.onBlurField,
+);
+
+const MemoGrandCompanyPicker = memo(GrandCompanyPicker, (previous, next) =>
+  previous.copy === next.copy &&
+  previous.locale === next.locale &&
+  previous.character.grandCompanyId === next.character.grandCompanyId &&
+  previous.character.grandCompany === next.character.grandCompany &&
+  previous.onFocusField === next.onFocusField &&
+  previous.onBlurField === next.onBlurField,
+);
 
 function TypographyPresetPicker({
   copy,
+  layoutVariant,
   selectedPreset,
   specimenName,
   nameScript,
 }: {
   copy: EditorCopy;
+  layoutVariant: CardLayoutVariant;
   selectedPreset: TypographyPresetId;
   specimenName: string;
   nameScript: TypographyScript;
 }) {
   const [isOpen, setIsOpen] = useState(false);
+  const selectedGroup = getTypographyFontGroup(selectedPreset);
+  const selectedLabel = layoutVariant === 'a'
+    ? copy.typographyFamilyNames[selectedGroup]
+    : copy.typographyNames[selectedPreset];
 
   return (
     <details
@@ -276,51 +376,90 @@ function TypographyPresetPicker({
       <summary className={styles.typeSummary}>
         <span className={styles.typeSummaryText}>
           <span className={styles.typeSummaryLabel}>{copy.typography}</span>
-          <strong className={styles.typeSummaryValue}>{copy.typographyNames[selectedPreset]}</strong>
+          <strong className={styles.typeSummaryValue}>{selectedLabel}</strong>
         </span>
-        <span className={styles.typeSummaryIndicator} aria-hidden="true" />
       </summary>
       {isOpen && (
         <>
-          <div className={styles.typeChoices}>
-            {TYPOGRAPHY_IDS.map((preset) => (
-              <button
-                type="button"
-                key={preset}
-                className={styles.typeChoice}
-                aria-label={`${copy.typographyNames[preset]} · ${specimenName}`}
-                aria-pressed={selectedPreset === preset}
-                onClick={() => editorStore.getState().updateDesign('typographyPreset', preset)}
-              >
-                <span className={styles.typeChoiceHead}>
-                  <span className={styles.typeSample} aria-hidden="true">Aa</span>
-                  <strong>{copy.typographyNames[preset]}</strong>
-                  {selectedPreset === preset && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
-                </span>
-                <span className={styles.typeCurrentName} style={{ fontFamily: getTypographyFontFamily(preset, 'display', nameScript) }}>{specimenName}</span>
-              </button>
-            ))}
-          </div>
-          <details className={styles.typeSpecimenDisclosure}>
-            <summary>{copy.typographySpecimens}</summary>
-            <div className={styles.typeSpecimenList}>
-              {TYPOGRAPHY_IDS.map((preset) => (
-                <div className={styles.typeSpecimenGroup} key={preset}>
-                  <strong>{copy.typographyNames[preset]}</strong>
-                  {([
-                    ['EN', 'latin'],
-                    ['KO', 'korean'],
-                    ['JA', 'japanese'],
-                  ] as const).map(([label, script]) => (
-                    <span className={styles.typeSpecimenRow} key={script}>
-                      <i>{label}</i>
-                      <span style={{ fontFamily: getTypographyFontFamily(preset, 'display', script) }}>{TYPOGRAPHY_SPECIMENS[script]}</span>
+          {layoutVariant === 'a' ? (
+            <div className={styles.typeChoices}>
+              {TYPOGRAPHY_FONT_GROUPS.map((group) => {
+                const representativePreset = getTypographyPresetForFontGroup(group);
+                const selected = selectedGroup === group;
+                return (
+                  <button
+                    type="button"
+                    key={group}
+                    className={styles.typeChoice}
+                    aria-label={`${copy.typographyFamilyNames[group]} · ${copy.typographySpecimens}`}
+                    aria-pressed={selected}
+                    onClick={() => editorStore.getState().updateDesign(
+                      'typographyPreset',
+                      resolveTypographyPresetForFontGroup(group, selectedPreset),
+                    )}
+                  >
+                    <span className={styles.typeChoiceHead}>
+                      <span
+                        className={styles.typeSample}
+                        style={{ fontFamily: getTypographyFontFamily(representativePreset, 'display', nameScript) }}
+                        aria-hidden="true"
+                      >Aa</span>
+                      <strong>{copy.typographyFamilyNames[group]}</strong>
+                      {selected && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
                     </span>
+                    <span className={styles.typeSpecimenList}>
+                      {TYPOGRAPHY_SPECIMEN_SCRIPTS.map(([label, script]) => (
+                        <span className={styles.typeSpecimenRow} key={script}>
+                          <i>{label}</i>
+                          <span style={{ fontFamily: getTypographyFontFamily(representativePreset, 'display', script) }}>
+                            {TYPOGRAPHY_SPECIMENS[script]}
+                          </span>
+                        </span>
+                      ))}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <>
+              <div className={styles.typeChoices}>
+                {TYPOGRAPHY_IDS.map((preset) => (
+                  <button
+                    type="button"
+                    key={preset}
+                    className={styles.typeChoice}
+                    aria-label={`${copy.typographyNames[preset]} · ${specimenName}`}
+                    aria-pressed={selectedPreset === preset}
+                    onClick={() => editorStore.getState().updateDesign('typographyPreset', preset)}
+                  >
+                    <span className={styles.typeChoiceHead}>
+                      <span className={styles.typeSample} aria-hidden="true">Aa</span>
+                      <strong>{copy.typographyNames[preset]}</strong>
+                      {selectedPreset === preset && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
+                    </span>
+                    <span className={styles.typeCurrentName} style={{ fontFamily: getTypographyFontFamily(preset, 'display', nameScript) }}>{specimenName}</span>
+                  </button>
+                ))}
+              </div>
+              <details className={styles.typeSpecimenDisclosure}>
+                <summary>{copy.typographySpecimens}</summary>
+                <div className={styles.typeSpecimenList}>
+                  {TYPOGRAPHY_IDS.map((preset) => (
+                    <div className={styles.typeSpecimenGroup} key={preset}>
+                      <strong>{copy.typographyNames[preset]}</strong>
+                      {TYPOGRAPHY_SPECIMEN_SCRIPTS.map(([label, script]) => (
+                        <span className={styles.typeSpecimenRow} key={script}>
+                          <i>{label}</i>
+                          <span style={{ fontFamily: getTypographyFontFamily(preset, 'display', script) }}>{TYPOGRAPHY_SPECIMENS[script]}</span>
+                        </span>
+                      ))}
+                    </div>
                   ))}
                 </div>
-              ))}
-            </div>
-          </details>
+              </details>
+            </>
+          )}
         </>
       )}
     </details>
@@ -346,9 +485,11 @@ function EditorInspector({
   locale: Locale;
   isOpen: boolean;
 }) {
+  const switchIdPrefix = useId();
   const character = useEditorStore((state) => state.character);
   const designTemplate = useEditorStore((state) => state.design.template);
   const layoutVariant = useEditorStore((state) => state.design.layoutVariant);
+  const decorativeCopy = useEditorStore((state) => state.design.decorativeCopy);
   const ratio = useEditorStore((state) => state.design.ratio);
   const typographyPreset = useEditorStore((state) => state.design.typographyPreset);
   const colorMode = useEditorStore((state) => state.design.colorMode);
@@ -356,7 +497,7 @@ function EditorInspector({
   const jobMotifVisible = useEditorStore((state) => state.design.jobMotifVisible);
   const jobIconColor = useEditorStore((state) => state.design.jobIconColor);
   const effects = useEditorStore((state) => state.design.effects);
-  const design = { template: designTemplate, layoutVariant, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects };
+  const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects };
   const imageSource = useEditorStore((state) => state.image.src);
   const imageFileName = useEditorStore((state) => state.image.fileName);
   const image = useEditorStore((state) => activeTask === 'photo' ? state.image : null);
@@ -371,8 +512,76 @@ function EditorInspector({
   const uploadSuccessTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const inspectorRef = useRef<HTMLElement>(null);
   const inspectorBodyRef = useRef<HTMLDivElement>(null);
+  const sheetHandlePointer = useRef<{ pointerId: number; startX: number; startY: number } | null>(null);
+  const suppressSheetHandleClick = useRef(false);
+  const sheetHandlePointerFallbackCleanup = useRef<(() => void) | null>(null);
   const previousTaskRef = useRef(activeTask);
+  const previousInspectorOpenRef = useRef(isOpen);
   const copyForPanel = copy.tasks[activeTask];
+  const clearHighlightedField = useCallback(() => onFocusField(''), [onFocusField]);
+
+  function finishSheetHandlePointer(pointerId: number, clientX: number, clientY: number) {
+    const drag = sheetHandlePointer.current;
+    sheetHandlePointer.current = null;
+    if (!drag || drag.pointerId !== pointerId) return;
+    const deltaX = clientX - drag.startX;
+    const deltaY = clientY - drag.startY;
+    const moved = Math.abs(deltaX) >= 8 || Math.abs(deltaY) >= 8;
+    if (moved) {
+      suppressSheetHandleClick.current = true;
+      requestAnimationFrame(() => { suppressSheetHandleClick.current = false; });
+    }
+    if (deltaY >= 44) onClose();
+  }
+
+  function handleSheetHandlePointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    if (!event.isPrimary || event.button !== 0) return;
+    sheetHandlePointer.current = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY };
+    const captured = trySetPointerCapture(event.currentTarget, event.pointerId);
+    if (captured) return;
+
+    const pointerId = event.pointerId;
+    const cleanup = () => {
+      window.removeEventListener('pointerup', onWindowPointerUp);
+      window.removeEventListener('pointercancel', onWindowPointerCancel);
+      sheetHandlePointerFallbackCleanup.current = null;
+    };
+    const onWindowPointerUp = (pointerEvent: PointerEvent) => {
+      if (pointerEvent.pointerId !== pointerId) return;
+      finishSheetHandlePointer(pointerEvent.pointerId, pointerEvent.clientX, pointerEvent.clientY);
+      cleanup();
+    };
+    const onWindowPointerCancel = (pointerEvent: PointerEvent) => {
+      if (pointerEvent.pointerId !== pointerId) return;
+      sheetHandlePointer.current = null;
+      cleanup();
+    };
+    sheetHandlePointerFallbackCleanup.current = cleanup;
+    window.addEventListener('pointerup', onWindowPointerUp);
+    window.addEventListener('pointercancel', onWindowPointerCancel);
+  }
+
+  function handleSheetHandlePointerUp(event: React.PointerEvent<HTMLButtonElement>) {
+    finishSheetHandlePointer(event.pointerId, event.clientX, event.clientY);
+    tryReleasePointerCapture(event.currentTarget, event.pointerId);
+    sheetHandlePointerFallbackCleanup.current?.();
+  }
+
+  function cancelSheetHandlePointer(event: React.PointerEvent<HTMLButtonElement>) {
+    const drag = sheetHandlePointer.current;
+    sheetHandlePointer.current = null;
+    if (drag?.pointerId === event.pointerId) tryReleasePointerCapture(event.currentTarget, event.pointerId);
+    sheetHandlePointerFallbackCleanup.current?.();
+  }
+
+  function handleSheetHandleClick() {
+    if (suppressSheetHandleClick.current) {
+      suppressSheetHandleClick.current = false;
+      return;
+    }
+    onClose();
+  }
+
   profileRender('EditorInspector');
   if (activeTask === 'design') {
     profileRender('TemplatePicker.subtree');
@@ -381,23 +590,30 @@ function EditorInspector({
 
   useLayoutEffect(() => {
     const previousTask = previousTaskRef.current;
-    if (previousTask === activeTask) return;
+    const inspectorWasOpen = previousInspectorOpenRef.current;
     previousTaskRef.current = activeTask;
+    previousInspectorOpenRef.current = isOpen;
+    if (previousTask === activeTask) return;
 
     const body = inspectorBodyRef.current;
     if (!body) return;
-    if (!isMobileViewport) body.scrollTop = 0;
+    body.scrollTop = 0;
+    if (!inspectorWasOpen || !isOpen) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
     const animation = body.animate(
       [
-        { opacity: 0.84, transform: 'translate3d(0, 6px, 0)' },
+        { opacity: 0.94, transform: 'translate3d(0, 4px, 0)' },
         { opacity: 1, transform: 'translate3d(0, 0, 0)' },
       ],
-      { duration: 160, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)', fill: 'both' },
+      {
+        duration: MOTION_DURATION.ui * 1000,
+        easing: `cubic-bezier(${MOTION_EASE.editorial.join(', ')})`,
+        fill: 'both',
+      },
     );
     return () => animation.cancel();
-  }, [activeTask, isMobileViewport]);
+  }, [activeTask, isMobileViewport, isOpen]);
 
   useEffect(() => {
     let frame = 0;
@@ -435,6 +651,10 @@ function EditorInspector({
   const updateText = useCallback((field: TextFieldKey, value: string) => {
     const state = editorStore.getState();
     if (field === 'level') {
+      if (state.character.profileOrigin === 'user' && value.trim() === '') {
+        state.updateCharacter('level', 0, { groupId: `text-${field}` });
+        return;
+      }
       const level = Math.min(100, Math.max(1, Number(value) || 1));
       state.updateCharacter('level', level, { groupId: `text-${field}` });
       return;
@@ -598,7 +818,6 @@ function EditorInspector({
   }
 
   const screenshotDescriptionIds = [
-    SCREENSHOT_HELP_ID,
     SCREENSHOT_TYPES_ID,
     SCREENSHOT_STATUS_ID,
     ...(uploadError ? [SCREENSHOT_ERROR_ID] : []),
@@ -661,18 +880,36 @@ function EditorInspector({
       korean: `${TYPOGRAPHY_SPECIMENS.korean} ${nameScript === 'korean' ? character.name : ''}`,
       japanese: `${TYPOGRAPHY_SPECIMENS.japanese} ${nameScript === 'japanese' ? character.name : ''}`,
     };
-    void loadTypographyFonts(typographyPreset, ['korean', 'japanese'], textByScript).catch(() => undefined);
-  }, [activeTask, character.name, typographyPreset, nameScript]);
+    const visibleGroups = layoutVariant === 'a'
+      ? TYPOGRAPHY_FONT_GROUPS
+      : [...new Set(TYPOGRAPHY_IDS.map(getTypographyFontGroup))];
+    const representativePresets = visibleGroups.map(getTypographyPresetForFontGroup);
+    void Promise.all(representativePresets.map((preset) => (
+      loadTypographyFonts(preset, ['korean', 'japanese'], textByScript)
+    ))).catch(() => undefined);
+  }, [activeTask, character.name, layoutVariant, nameScript]);
 
   return (
-    <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector} role="tabpanel"
-      aria-labelledby={`editor-task-tab-${isMobileViewport ? 'mobile' : 'desktop'}-${activeTask}`}
+    <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector}
+      role={isMobileViewport ? 'region' : 'tabpanel'}
+      aria-labelledby={isMobileViewport ? 'editor-inspector-title' : `editor-task-tab-desktop-${activeTask}`}
       data-state={isOpen ? 'open' : 'closing'} aria-hidden={!isOpen} inert={!isOpen}>
-      <div className={styles.sheetHandle} aria-hidden="true"><span /></div>
+      <button
+        className={styles.sheetHandle}
+        type="button"
+        aria-label={copy.closeInspector}
+        onPointerDown={handleSheetHandlePointerDown}
+        onPointerUp={handleSheetHandlePointerUp}
+        onPointerCancel={cancelSheetHandlePointer}
+        onLostPointerCapture={cancelSheetHandlePointer}
+        onClick={handleSheetHandleClick}
+      >
+        <span aria-hidden="true" />
+      </button>
       <div className={styles.inspectorHead}>
         <div className={styles.inspectorTitle}>
           <span className={styles.inspectorIcon}><EditorIcon name={TASK_ICONS[activeTask]} /></span>
-          <div><span className={styles.panelIndex}>{String(TASK_IDS.indexOf(activeTask) + 1).padStart(2, '0')} / 03</span><h2>{copyForPanel}</h2></div>
+          <h2 id="editor-inspector-title">{copyForPanel}</h2>
         </div>
         <button className={styles.closeInspector} type="button" onClick={onClose} aria-label={copy.closeInspector}><EditorIcon name="close" size={16} /></button>
       </div>
@@ -742,7 +979,6 @@ function EditorInspector({
                 </div>
               )}
               <span className={styles.fileTypes} id={SCREENSHOT_TYPES_ID}>{copy.fileTypes}</span>
-              <span className={styles.uploadSubcopy} id={SCREENSHOT_HELP_ID}>{copy.uploadDescription}</span>
               <span id={SCREENSHOT_STATUS_ID} className={styles.uploadStatus ?? ''} role="status" aria-live="polite" aria-atomic="true">
                 {uploadState === 'processing' ? copy.uploading : uploadState === 'success' ? copy.uploadSuccess : ''}
               </span>
@@ -761,37 +997,29 @@ function EditorInspector({
                 disabled={uploadState === 'processing'}
               />
             </div>
-            {isSampleArtwork && (
-              <div className={styles.sampleNotice}>
-                <span className={styles.sampleDot} aria-hidden="true" />
-                <div><strong>{copy.sampleArtwork}</strong><p>{copy.sampleArtworkHint}</p></div>
-              </div>
-            )}
-            <p className={styles.privacyNote}>{copy.privacy}</p>
             {uploadError && <p className={styles.errorMessage} id={SCREENSHOT_ERROR_ID} role="alert" aria-atomic="true">{getUploadErrorMessage(uploadError, locale)}</p>}
           </div>
         )}
 
         {activeTask === 'information' && (
           <div className={styles.formSection}>
-            <p className={styles.panelIntro}>{copy.informationIntro}</p>
             <section className={styles.editorGroup} aria-label={copy.sections.character}>
               <div className={styles.sectionHeading}><h3>{copy.sections.character}</h3></div>
               <CharacterInput field="name" value={character.name} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-              <FieldGrid>
-                <JobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
-                <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
+              <FieldGrid className={styles.jobLevelGrid}>
+                <MemoJobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
+                <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} allowEmptyLevel={character.profileOrigin === 'user'} />
               </FieldGrid>
-              <WorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+              <MemoWorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
               <FieldGrid>
-                <RaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+                <MemoRaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
               </FieldGrid>
               <CharacterInput field="freeCompany" value={character.freeCompany} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
             </section>
             <details className={`${styles.disclosure} ${styles.editorGroup}`}>
               <summary>{copy.additionalCharacterDetails}</summary>
               <div className={styles.additionalInformation}>
-                <GrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={() => onFocusField('')} />
+                <MemoGrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
                 <div className={styles.chipField}>
                   <span className={styles.controlLabel}>{copy.fields.languages}<small className={styles.chipCount}>{copy.picker.selectedCount(character.languages.length, copy.picker.maxLanguages)}</small></span>
                   <div className={styles.choiceChips}>
@@ -846,16 +1074,16 @@ function EditorInspector({
               <div className={styles.sectionHeading}><h3>{copy.template}</h3></div>
               <div className={styles.templateChoices}>
                 {CARD_TEMPLATES.map((template) => {
-                  const selected = template === designTemplate && layoutVariant === MASTER_CARD_CONFIG[template].layout;
+                  const selected = template === designTemplate;
+                  const experimentalVariant = selected && layoutVariant !== 'a' ? layoutVariant : null;
                   return (
                     <div key={template} className={styles.templateChoice} data-selected={selected}>
                       <MasterTemplateProof template={template} locale={locale} />
-                      <button type="button" className={styles.templateChoiceAction} aria-label={`${copy.template}: ${getTemplateLabel(copy, template)}`} aria-pressed={selected} onClick={() => {
+                      <button type="button" className={styles.templateChoiceAction} aria-label={getTemplateChoiceActionLabel(copy, template, selected, layoutVariant, locale)} aria-pressed={selected} onClick={() => {
                         selectMasterTemplate(template);
                       }}>
                         <span className={styles.templateChoiceName}>{getTemplateLabel(copy, template)}</span>
-                        <span className={styles.templateIntent}>{copy.templateIntents[template]}</span>
-                        <span className={styles.masterTemplateBadge}>{copy.masterLabel}</span>
+                        {experimentalVariant && <span className={styles.templateVariantBadge}>{copy.variationNames[experimentalVariant]}</span>}
                         <span className={styles.selectedMark} aria-hidden="true">{selected ? '✓' : ''}</span>
                       </button>
                     </div>
@@ -869,29 +1097,33 @@ function EditorInspector({
               <RatioPicker
                 label={copy.ratio}
                 value={design.ratio}
+                presentation="inline"
                 onChange={(nextRatio) => editorStore.getState().updateDesign('ratio', nextRatio)}
               />
             </section>
 
-            <details className={`${styles.disclosure} ${styles.experimentalDisclosure}`}>
-              <summary>{copy.experimentalLabel}</summary>
-              <p className={styles.panelIntro}>{copy.experimentalHint}</p>
-              <div className={styles.variationChoices} aria-label={copy.templateVariation}>
-                {(['b', 'c'] as const).map((variant) => (
-                  <button type="button" key={variant} className={styles.variationChoice} aria-pressed={layoutVariant === variant} onClick={() => editorStore.getState().updateDesign('layoutVariant', variant)}>
-                    <span>{copy.variationNames[variant]}</span>
-                  </button>
-                ))}
-              </div>
-            </details>
+            {layoutVariant === 'a' && <section className={styles.editorGroup} aria-label={copy.decorativeCopy}>
+              <label className={styles.decorativeCopyControl}>
+                <span>{copy.decorativeCopy}</span>
+                <select
+                  value={decorativeCopy ?? 'default'}
+                  onChange={(event) => editorStore.getState().updateDesign('decorativeCopy', event.currentTarget.value as CardDecorativeCopy)}
+                >
+                  {(['none', 'default', 'adventure', 'companions'] as const).map((mode) => (
+                    <option key={mode} value={mode}>{copy.decorativeCopyNames[mode]}</option>
+                  ))}
+                </select>
+              </label>
+            </section>}
+
           </div>
         )}
 
         {activeTask === 'design' && (
           <div className={styles.formSection}>
-            <p className={styles.panelIntro}>{copy.styleIntro}</p>
             <TypographyPresetPicker
               copy={copy}
+              layoutVariant={layoutVariant}
               selectedPreset={typographyPreset}
               specimenName={specimenName}
               nameScript={nameScript}
@@ -904,7 +1136,6 @@ function EditorInspector({
                   <button type="button" key={mode} aria-pressed={colorMode === mode} onClick={() => editorStore.getState().updateDesign('colorMode', mode)}>{copy.colorModes[mode]}</button>
                 ))}
               </div>
-              <p className={styles.panelIntro}>{copy.colorModesHint}</p>
               {colorMode === 'auto' && (
                 <div className={styles.autoPalette}>
                   <div className={styles.paletteSwatches}>
@@ -944,11 +1175,17 @@ function EditorInspector({
               <button
                 type="button"
                 className={styles.effectRow}
-                aria-pressed={jobMotifVisible !== false}
+                role="switch"
+                aria-checked={jobMotifVisible !== false}
+                aria-labelledby={`${switchIdPrefix}-job-motif-label`}
+                aria-describedby={`${switchIdPrefix}-job-motif-description`}
                 onClick={() => editorStore.getState().updateDesign('jobMotifVisible', jobMotifVisible === false)}
               >
                 <span className={styles.effectIcon} aria-hidden="true">✦</span>
-                <span><strong>{copy.jobMotif}</strong><small>{copy.jobMotifHint}</small></span>
+                <span>
+                  <strong id={`${switchIdPrefix}-job-motif-label`}>{copy.jobMotif}</strong>
+                  <small id={`${switchIdPrefix}-job-motif-description`}>{copy.jobMotifHint}</small>
+                </span>
                 <i className={styles.switchTrack} aria-hidden="true"><b /></i>
               </button>
               <div className={styles.paletteControls}>
@@ -979,19 +1216,26 @@ function EditorInspector({
           <div className={styles.formSection}>
             <details className={`${styles.editorGroup} ${styles.disclosure}`}>
               <summary className={styles.sectionHeading}><h3>{copy.sections.effects}</h3></summary>
-              <p className={styles.panelIntro}>{copy.effectsHint}</p>
               {(['grain', 'holographic'] as const).map((effect) => {
                 const selected = design.effects.includes(effect);
+                const labelId = `${switchIdPrefix}-${effect}-label`;
+                const descriptionId = `${switchIdPrefix}-${effect}-description`;
                 return (
                   <button
                     type="button"
                     className={styles.effectRow}
                     key={effect}
-                    aria-pressed={selected}
+                    role="switch"
+                    aria-checked={selected}
+                    aria-labelledby={labelId}
+                    aria-describedby={descriptionId}
                     onClick={() => editorStore.getState().updateDesign('effects', selected ? design.effects.filter((item) => item !== effect) : [...design.effects, effect])}
                   >
                     <span className={styles.effectIcon} aria-hidden="true">{effect === 'grain' ? '∴' : '✧'}</span>
-                    <span><strong>{effect === 'grain' ? copy.grain : copy.holographic}</strong><small>{effect === 'grain' ? copy.grainDescription : copy.holographicDescription}</small></span>
+                    <span>
+                      <strong id={labelId}>{effect === 'grain' ? copy.grain : copy.holographic}</strong>
+                      <small id={descriptionId}>{effect === 'grain' ? copy.grainDescription : copy.holographicDescription}</small>
+                    </span>
                     <i className={styles.switchTrack} aria-hidden="true"><b /></i>
                   </button>
                 );
@@ -1010,7 +1254,7 @@ const MemoEditorInspector = memo(EditorInspector);
 function EditorCanvas({
   copy,
   locale,
-  highlightField,
+  focusedField,
   panMode,
   onTogglePan,
   onRequestScreenshot,
@@ -1020,7 +1264,7 @@ function EditorCanvas({
 }: {
   copy: EditorCopy;
   locale: Locale;
-  highlightField: string;
+  focusedField: string;
   panMode: boolean;
   onTogglePan: () => void;
   onRequestScreenshot: () => void;
@@ -1033,6 +1277,7 @@ function EditorCanvas({
   const design = useEditorStore((state) => state.design);
   const image = useEditorStore((state) => state.image);
   const isSampleArtwork = isSampleArtworkSource(image.src, SAMPLE_ARTWORK_SOURCES);
+  const focusedFieldLabel = getFocusedFieldLabel(copy, focusedField);
   const zoom = useEditorStore((state) => state.ui.zoom);
   const safeAreaVisible = useEditorStore((state) => state.ui.safeAreaVisible);
   const previewOpen = useEditorStore((state) => state.ui.previewOpen);
@@ -1102,7 +1347,7 @@ function EditorCanvas({
       const target = event.target as HTMLElement | null;
       if (isEditorShortcutSuppressed(target)) return;
       const isTyping = target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target?.tagName ?? '') || target?.getAttribute('role') === 'combobox';
-      if (event.code === 'Space' && !isTyping) {
+      if (event.code === 'Space' && !isTyping && !target?.closest('summary')) {
         event.preventDefault();
         spaceHeld.current = true;
       }
@@ -1287,29 +1532,24 @@ function EditorCanvas({
   }, [onWheel]);
 
   return (
-    <section className={`${styles.canvasColumn} ${previewOpen ? styles.canvasPreviewMode : ''}`} aria-label={`${copy.canvasLabel}: ${copy.cardPreviewSummary(character.name, summaryJob, localizeCardWorld(character, locale))}`}>
-      <div className={styles.canvasHeading}>
-        <div>
-          <span className={styles.canvasEyebrow}>{copy.canvasLabel}</span>
-          <span className={styles.canvasTitle}>
-            {character.name || copy.sections.character}<i aria-hidden="true">·</i>{getTemplateLabel(copy, design.template)}
-          </span>
+    <section
+      className={`${styles.canvasColumn} ${previewOpen ? styles.canvasPreviewMode : ''}`}
+      data-has-heading={isSampleArtwork ? 'true' : 'false'}
+      aria-label={`${copy.canvasLabel}: ${copy.cardPreviewSummary(character.name, summaryJob, localizeCardWorld(character, locale))}`}
+    >
+      <span className={styles.srOnly} role="status" aria-live="polite" aria-atomic="true">
+        {focusedFieldLabel ? formatFocusedFieldHint(locale, focusedFieldLabel) : ''}
+      </span>
+      {isSampleArtwork && (
+        <div className={styles.canvasHeading}>
+          <div className={styles.canvasHeadingActions}>
+            <span className={styles.stageSampleBadge}>{copy.sampleBadge}</span>
+            <button type="button" className={styles.stageUpload} onClick={onRequestScreenshot} aria-label={copy.uploadScreenshot}>
+              <EditorIcon name="upload" size={15} /><span>{copy.uploadScreenshot}</span>
+            </button>
+          </div>
         </div>
-        <div className={styles.canvasHeadingActions}>
-          {isSampleArtwork && (
-            <>
-              <span className={styles.stageSampleBadge}>{copy.sampleBadge}</span>
-              <button type="button" className={styles.stageUpload} onClick={onRequestScreenshot} aria-label={copy.uploadScreenshot}>
-                <EditorIcon name="upload" size={15} /><span>{copy.uploadScreenshot}</span>
-              </button>
-            </>
-          )}
-          <button type="button" className={`${styles.canvasTool} ${safeAreaVisible ? styles.canvasToolActive : ''}`} aria-label={copy.safeArea} aria-pressed={safeAreaVisible} onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}>
-            <EditorIcon name="safe-area" size={15} /><span>{copy.safeArea}</span>
-          </button>
-          <span className={styles.canvasStatus}><i aria-hidden="true" />{copy.preview}</span>
-        </div>
-      </div>
+      )}
       <div
         ref={stageRef}
         id="editor-canvas-stage"
@@ -1324,12 +1564,15 @@ function EditorCanvas({
         <div className={styles.stageGrid} aria-hidden="true" />
         <div className={styles.stageGlow} aria-hidden="true" />
         <div ref={cardFrameRef} className={styles.cardFrame} style={frameStyle} data-card-surface aria-hidden="true">
-          <MemoCardPreview data={cardData} className={styles.canvasCard} highlightField={highlightField} />
+          <MemoCardPreview data={cardData} className={styles.canvasCard} />
           {safeAreaVisible && <div className={styles.safeAreaGuide} aria-hidden="true" />}
         </div>
         {showImageDragHint && <span className={styles.stageDragHint} role="status" aria-live="polite">{copy.dragToReposition}</span>}
         <span className={styles.stageLabel}>{design.ratio} · {Math.round(zoom * 100)}%</span>
         <span className={styles.stageTip} aria-hidden="true">{copy.panHint}</span>
+        {isSampleArtwork && (
+          <span className={`${styles.stageSampleBadge} ${styles.mobileStageSampleBadge}`}>{copy.sampleBadge}</span>
+        )}
       </div>
 
       <div className={styles.bottomTools} role="toolbar" aria-label={copy.title}>
@@ -1359,6 +1602,7 @@ function EditorCanvas({
           className={styles.toolbarMore}
           onKeyDown={(event) => {
             if (event.key !== 'Escape' || isImeComposing(event.nativeEvent) || !moreControlsRef.current?.open) return;
+            if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
             event.preventDefault();
             event.stopPropagation();
             moreControlsRef.current.open = false;
@@ -1377,7 +1621,16 @@ function EditorCanvas({
               <output aria-live="off" aria-hidden="true">{Math.round(zoom * 100)}%</output>
             </div>
             <div className={styles.toolbarMoreActions}>
+              <div className={styles.libraryAction}><ProjectLibraryDialogTrigger /></div>
               <ToolbarTooltipButton type="button" className={`${styles.panToggle} ${panMode ? styles.panToggleActive : ''}`} aria-pressed={panMode} onClick={onTogglePan} aria-label={copy.panMode} tooltip={copy.panHint}><EditorIcon name="pan" size={16} /><span>{copy.panMode}</span></ToolbarTooltipButton>
+              <button
+                type="button"
+                className={styles.safeAreaToggle}
+                aria-pressed={safeAreaVisible}
+                onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}
+              >
+                <EditorIcon name="safe-area" size={16} /><span>{copy.safeArea}</span>
+              </button>
               <InlineConfirm
                 triggerLabel={copy.reset}
                 triggerClassName={styles.resetButton}
@@ -1417,12 +1670,18 @@ export function EditorWorkspace() {
   const previewOpen = useEditorStore((state) => state.ui.previewOpen);
   const saveStatus = useEditorStore((state) => state.saveStatus);
   const imageSource = useEditorStore((state) => state.image.src);
-  const [highlightField, setHighlightField] = useState('');
+  const [focusedField, setFocusedField] = useState('');
   const [panMode, setPanMode] = useState(false);
   const [imageDragHintPhase, setImageDragHintPhase] = useState<ImageDragHintPhase>('idle');
   const imageDragHintPhaseRef = useRef<ImageDragHintPhase>('idle');
   const imageDragHintTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+  const [compactViewport, setCompactViewport] = useState(false);
+  const [inputCompactMode, setInputCompactMode] = useState(false);
+  const [mobileFocusTask, setMobileFocusTask] = useState<EditorTaskId | null>(null);
+  const pageRef = useRef<HTMLDivElement>(null);
+  const pendingMobileFocusTask = useRef<EditorTaskId | null>(null);
 
   const dispatchImageDragHint = useCallback((event: ImageDragHintEvent) => {
     const currentPhase = imageDragHintPhaseRef.current;
@@ -1469,13 +1728,21 @@ export function EditorWorkspace() {
     const state = editorStore.getState();
     state.setUi({ inspectorOpen: false });
     const task = TASK_FOR_PANEL[state.ui.activePanel];
-    requestAnimationFrame(() => {
-      const nav = isMobileViewport ? 'mobile' : 'desktop';
-      document.getElementById(`editor-task-tab-${nav}-${task}`)?.focus();
-    });
+    setMobileFocusTask(task);
+    if (isMobileViewport) {
+      setKeyboardOpen(false);
+      setInputCompactMode(false);
+    }
+    const inspector = document.getElementById('editor-inspector');
+    if (document.activeElement instanceof HTMLElement && inspector?.contains(document.activeElement)) {
+      document.activeElement.blur();
+    }
+    if (isMobileViewport) pendingMobileFocusTask.current = task;
+    else requestAnimationFrame(() => document.getElementById(`editor-task-tab-desktop-${task}`)?.focus());
   }, [isMobileViewport]);
 
   const openTask = useCallback((task: EditorTaskId) => {
+    setMobileFocusTask(task);
     editorStore.getState().setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true });
   }, []);
 
@@ -1488,10 +1755,13 @@ export function EditorWorkspace() {
   useEffect(() => {
     const state = editorStore.getState();
     state.hydrate();
+    const hydrated = editorStore.getState();
+    const entryPanel = getEditorEntryPanel(hydrated.character, hydrated.ui.activePanel);
+    if (entryPanel !== hydrated.ui.activePanel) hydrated.setUi({ activePanel: entryPanel });
     const mobileViewport = window.matchMedia('(max-width: 900px)');
     const applyViewport = (matches: boolean) => {
       setIsMobileViewport(matches);
-      editorStore.getState().setUi({ inspectorOpen: true });
+      editorStore.getState().setUi({ inspectorOpen: !matches });
     };
     applyViewport(mobileViewport.matches);
     const handleViewportChange = (event: MediaQueryListEvent) => {
@@ -1512,6 +1782,89 @@ export function EditorWorkspace() {
     };
   }, []);
 
+  useEffect(() => {
+    const page = pageRef.current;
+    if (!page) return;
+
+    if (!isMobileViewport) {
+      page.style.removeProperty('--editor-viewport-bottom');
+      page.style.removeProperty('--editor-mobile-sheet-height');
+      page.style.removeProperty('--editor-mobile-dock-height');
+      return;
+    }
+
+    const viewport = window.visualViewport;
+    let viewportStateFrame = 0;
+    const syncViewport = () => {
+      const viewportHeight = viewport?.height ?? window.innerHeight;
+      const viewportBottom = (viewport?.offsetTop ?? 0) + viewportHeight;
+      const viewportReducedForKeyboard = Boolean(viewport && window.innerHeight - viewportHeight > 140);
+      const compactHeight = viewportReducedForKeyboard || viewportHeight < 600;
+      const workspace = page.querySelector<HTMLElement>(`.${styles.workspace}`);
+      const inspector = page.querySelector<HTMLElement>(`.${styles.inspector}`);
+      const focusedElement = document.activeElement;
+      const focusedEditorField = Boolean(
+        inspector
+          && focusedElement instanceof HTMLElement
+          && inspector.contains(focusedElement)
+          && focusedElement.matches('input, textarea, select'),
+      );
+      const hasKeyboard = viewportReducedForKeyboard && focusedEditorField;
+      const useInputCompactMode = hasKeyboard || (viewportHeight < 600 && focusedEditorField);
+      const workspaceStyle = workspace ? window.getComputedStyle(workspace) : null;
+      const verticalPadding = workspaceStyle
+        ? (Number.parseFloat(workspaceStyle.paddingTop) || 0) + (Number.parseFloat(workspaceStyle.paddingBottom) || 0)
+        : 16;
+      const appHeaderHeight = Number.parseFloat(window.getComputedStyle(page).getPropertyValue('--app-header-height')) || 56;
+      const workspaceOffset = workspace
+        ? workspace.getBoundingClientRect().top - page.getBoundingClientRect().top
+        : 0;
+      const visibleWorkspaceHeight = Math.max(0, viewportBottom - appHeaderHeight - workspaceOffset);
+      const workspaceContentHeight = Math.max(0, visibleWorkspaceHeight - verticalPadding);
+      const dockHeight = useInputCompactMode ? 0 : 60;
+      const toolbarHeight = compactHeight ? 0 : 48;
+      const minimumStageHeight = useInputCompactMode ? 0 : compactHeight ? 48 : 150;
+      const sheetGap = 8;
+      const maxSheetHeight = Math.max(76, workspaceContentHeight - dockHeight - toolbarHeight - minimumStageHeight - sheetGap - 6);
+      const preferredSheetHeight = Math.round(viewportHeight * (useInputCompactMode ? 0.54 : compactHeight ? 0.46 : 0.48));
+      const sheetHeight = Math.min(preferredSheetHeight, maxSheetHeight);
+
+      page.style.setProperty('--editor-viewport-bottom', `${Math.round(viewportBottom)}px`);
+      page.style.setProperty('--editor-mobile-sheet-height', `${sheetHeight}px`);
+      page.style.setProperty('--editor-mobile-dock-height', `${dockHeight}px`);
+      // Keep the sheet inside the visual viewport and reserve card space outside compact input mode.
+      if (viewportStateFrame) cancelAnimationFrame(viewportStateFrame);
+      viewportStateFrame = requestAnimationFrame(() => {
+        viewportStateFrame = 0;
+        setKeyboardOpen(hasKeyboard);
+        setCompactViewport(compactHeight);
+        setInputCompactMode(useInputCompactMode);
+      });
+    };
+
+    syncViewport();
+    window.addEventListener('resize', syncViewport);
+    viewport?.addEventListener('resize', syncViewport);
+    viewport?.addEventListener('scroll', syncViewport);
+    page.addEventListener('focusin', syncViewport);
+    page.addEventListener('focusout', syncViewport);
+    return () => {
+      if (viewportStateFrame) cancelAnimationFrame(viewportStateFrame);
+      window.removeEventListener('resize', syncViewport);
+      viewport?.removeEventListener('resize', syncViewport);
+      viewport?.removeEventListener('scroll', syncViewport);
+      page.removeEventListener('focusin', syncViewport);
+      page.removeEventListener('focusout', syncViewport);
+    };
+  }, [activeTask, isMobileViewport]);
+
+  useEffect(() => {
+    const task = pendingMobileFocusTask.current;
+    if (!task || inspectorOpen || inputCompactMode) return;
+    pendingMobileFocusTask.current = null;
+    requestAnimationFrame(() => document.getElementById(`editor-task-tab-mobile-${task}`)?.focus());
+  }, [inputCompactMode, inspectorOpen]);
+
   const exportCard = useCallback(() => {
     editorStore.getState().persistNow();
     router.push('/export');
@@ -1529,45 +1882,79 @@ export function EditorWorkspace() {
     if (nextIndex < 0) return;
     event.preventDefault();
     const nextTask = TASK_IDS[nextIndex];
+    if (nav === 'mobile') {
+      setMobileFocusTask(nextTask);
+      requestAnimationFrame(() => document.getElementById(`editor-task-tab-mobile-${nextTask}`)?.focus());
+      return;
+    }
     openTask(nextTask);
     requestAnimationFrame(() => document.getElementById(`editor-task-tab-${nav}-${nextTask}`)?.focus());
   }
 
+  function activateTaskTab(task: EditorTaskId, nav: 'desktop' | 'mobile') {
+    if (nav === 'mobile') {
+      setMobileFocusTask(task);
+      const state = editorStore.getState();
+      const activation = getEditorTaskActivation(task, state.ui.activePanel, state.ui.inspectorOpen, true);
+      if (!activation.inspectorOpen) {
+        closeInspector();
+        return;
+      }
+      state.setUi(activation);
+      return;
+    }
+    openTask(task);
+  }
+
   function renderTaskTabs(nav: 'desktop' | 'mobile') {
+    const isMobileDock = nav === 'mobile';
     return (
       <nav
-        className={nav === 'mobile' ? styles.mobileTaskTabs : styles.toolNav}
-        role="tablist"
+        className={isMobileDock ? styles.mobileTaskTabs : styles.toolNav}
+        role={isMobileDock ? 'toolbar' : 'tablist'}
         aria-label={copy.workspaceLabel}
-        aria-orientation={nav === 'mobile' ? 'horizontal' : 'vertical'}
+        aria-orientation={isMobileDock ? 'horizontal' : 'vertical'}
         data-active-task={activeTask}
         data-inspector-open={inspectorOpen}
       >
-        {TASK_IDS.map((task, index) => (
-          <button
-            type="button"
-            key={task}
-            id={`editor-task-tab-${nav}-${task}`}
-            role="tab"
-            className={`${styles.toolButton} ${activeTask === task ? styles.toolButtonActive : ''}`}
-            aria-controls={!previewOpen ? 'editor-inspector' : undefined}
-            aria-selected={activeTask === task}
-            aria-label={copy.tasks[task]}
-            tabIndex={activeTask === task ? 0 : -1}
-            onKeyDown={(event) => handleTaskTabKeyDown(event, task, nav)}
-            onClick={() => openTask(task)}
-          >
-            <span className={styles.toolButtonIcon} aria-hidden="true"><EditorIcon name={TASK_ICONS[task]} /></span>
-            <span className={styles.toolButtonLabel}>{copy.tasks[task]}</span>
-            <small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small>
-          </button>
-        ))}
+        {TASK_IDS.map((task, index) => {
+          const isSelected = activeTask === task && (!isMobileDock || inspectorOpen);
+          return (
+            <button
+              type="button"
+              key={task}
+              id={`editor-task-tab-${nav}-${task}`}
+              role={isMobileDock ? undefined : 'tab'}
+              className={`${styles.toolButton} ${isSelected ? styles.toolButtonActive : ''}`}
+              aria-controls="editor-inspector"
+              aria-selected={isMobileDock ? undefined : isSelected}
+              aria-expanded={isMobileDock ? isSelected : undefined}
+              aria-label={copy.tasks[task]}
+              tabIndex={isMobileDock
+                ? ((mobileFocusTask ?? activeTask) === task ? 0 : -1)
+                : (activeTask === task ? 0 : -1)}
+              onKeyDown={(event) => handleTaskTabKeyDown(event, task, nav)}
+              onClick={() => activateTaskTab(task, nav)}
+            >
+              <span className={styles.toolButtonIcon} aria-hidden="true"><EditorIcon name={TASK_ICONS[task]} /></span>
+              <span className={styles.toolButtonLabel}>{copy.tasks[task]}</span>
+              <small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small>
+            </button>
+          );
+        })}
       </nav>
     );
   }
 
   return (
-    <div className={`${styles.page} ${previewOpen ? styles.previewMode : ''} ${!inspectorOpen && !previewOpen ? styles.inspectorClosed : ''}`}>
+    <div
+      ref={pageRef}
+      className={`${styles.page} ${previewOpen ? styles.previewMode : ''} ${!inspectorOpen && !previewOpen ? styles.inspectorClosed : ''}`}
+      data-active-task={activeTask}
+      data-keyboard-open={keyboardOpen ? 'true' : 'false'}
+      data-compact-viewport={compactViewport ? 'true' : 'false'}
+      data-input-compact-mode={inputCompactMode ? 'true' : 'false'}
+    >
       <h1 className={styles.srOnly}>{copy.title}</h1>
 
       {saveStatus === 'error' && (
@@ -1590,7 +1977,7 @@ export function EditorWorkspace() {
         <Profiler id="EditorCanvas" onRender={profileCommit}><MemoEditorCanvas
           copy={copy}
           locale={locale}
-          highlightField={highlightField}
+          focusedField={focusedField}
           panMode={panMode}
           onTogglePan={togglePan}
           onRequestScreenshot={requestScreenshotUpload}
@@ -1608,7 +1995,7 @@ export function EditorWorkspace() {
             activeTask={activeTask}
             isMobileViewport={isMobileViewport}
             isOpen={inspectorOpen}
-            onFocusField={setHighlightField}
+            onFocusField={setFocusedField}
             onClose={closeInspector}
             onSuccessfulUpload={onSuccessfulUpload}
           /></EditorBoundary>

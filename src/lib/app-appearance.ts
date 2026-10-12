@@ -1,6 +1,8 @@
 export const APP_APPEARANCE_STORAGE_KEY = "ff14-adventurer-card:appearance";
 export const APP_APPEARANCE_CHANGE_EVENT = "ff14-adventurer-card:appearance-change";
 export const APP_COLOR_SCHEME_QUERY = "(prefers-color-scheme: dark)";
+// Browser chrome needs sRGB colors; these match the applied Stone backgrounds.
+export const APP_BROWSER_THEME_COLORS = { light: "#ffffff", dark: "#0c0a09" } as const;
 
 export const APP_APPEARANCES = ["system", "light", "dark"] as const;
 
@@ -68,7 +70,8 @@ export function syncAppAppearanceFromStorageEvent(
 export function createAppAppearanceBootstrapScript(): string {
   const storageKey = JSON.stringify(APP_APPEARANCE_STORAGE_KEY);
   const query = JSON.stringify(APP_COLOR_SCHEME_QUERY);
+  const browserColors = JSON.stringify(APP_BROWSER_THEME_COLORS);
 
-  return `(function(){var r=document.documentElement,p='system',m=false;try{var v=localStorage.getItem(${storageKey});if(v==='light'||v==='dark')p=v}catch(e){}try{m=window.matchMedia?window.matchMedia(${query}).matches:false}catch(e){}var t=p==='system'?(m?'dark':'light'):p;r.setAttribute('data-app-appearance',p);r.setAttribute('data-app-theme',t)})()`;
+  return `(function(){var r=document.documentElement,p='system',m=false;try{var v=localStorage.getItem(${storageKey});if(v==='light'||v==='dark')p=v}catch(e){}try{m=window.matchMedia?window.matchMedia(${query}).matches:false}catch(e){}var t=p==='system'?(m?'dark':'light'):p;r.setAttribute('data-app-appearance',p);r.setAttribute('data-app-theme',t);r.classList.toggle('dark',t==='dark');var c=${browserColors},a=document.querySelectorAll('meta[name="theme-color"]');for(var i=0;i<a.length;i++){a[i].setAttribute('content',c[t]);a[i].removeAttribute('media')}})()`;
 }
 

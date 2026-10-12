@@ -153,15 +153,10 @@ function ResultBitmapPreview({
 
 const copy = {
   ko: {
-    eyebrow: '내보내기',
-    title: '완성 카드를 확인하세요.',
-    intro: '카드 비율과 파일 형식, 출력 크기를 선택하세요.',
-    resultEyebrow: '완성된 카드',
-    resultTitle: '다운로드를 요청했어요.',
-    downloadNotice: '브라우저에 다운로드를 요청했어요. 파일은 브라우저의 다운로드 목록에서 확인하세요.',
+    title: '카드 내보내기',
+    resultTitle: '다운로드 요청 완료',
     resultPreviewLoading: '완성된 카드 이미지를 표시하고 있어요…',
     resultPreviewFailed: '이미지 미리보기를 표시하지 못했어요. 파일을 다시 다운로드할 수 있어요.',
-    exportLabel: '카드 저장',
     resolution: '해상도',
     format: '파일 형식',
     ratioLabel: '카드 비율',
@@ -175,12 +170,11 @@ const copy = {
     cancelExport: '내보내기 취소',
     cancelled: '내보내기를 취소했어요. 편집 내용은 그대로 있어요.',
     preview: '완성 카드 미리보기',
-    sample: 'Coner 예시 스크린샷 · 미리보기 이미지입니다.',
-    local: '내 스크린샷 · 이 기기에만 저장됩니다.',
-    quality: '카드만 내보내며 편집 도구는 이미지에 포함되지 않습니다.',
+    sample: '예시 스크린샷',
+    local: '내 스크린샷',
     capped: '메모리 사용을 줄이기 위해 출력 크기를 제한했습니다.',
     pdf: '브라우저에서 인쇄',
-    pdfHint: '브라우저 인쇄 창에서 PDF로 저장을 선택할 수 있어요.',
+    pdfHint: '인쇄 창에서 PDF로 저장을 선택하세요.',
     printPreparing: '인쇄용 카드와 글꼴을 준비하고 있어요…',
     printFailed: '인쇄 미리보기를 준비하지 못했어요. 다시 시도해 주세요.',
     edit: '계속 편집',
@@ -203,7 +197,7 @@ const copy = {
     render: '고해상도 카드를 만들고 있어요…',
     downloadStatus: '다운로드를 준비했어요.',
     exportProgress: '내보내기 진행 상황',
-    success: '{format} 다운로드를 브라우저에 요청했어요 · {width} × {height} px',
+    success: '다운로드 요청 완료',
     failed: '내보내기에 실패했어요. 다시 시도해 주세요.',
     fontTimeout: '글꼴을 준비하는 데 시간이 오래 걸려요. 연결을 확인하고 다시 시도해 주세요.',
     fontFailed: '일부 글꼴을 불러오지 못했어요. 다시 시도해 주세요.',
@@ -225,15 +219,10 @@ const copy = {
     previewLabel: '미리보기',
   },
   en: {
-    eyebrow: 'Export',
-    title: 'Review your finished card.',
-    intro: 'Choose a card ratio, file type, and output size.',
-    resultEyebrow: 'Finished card',
-    resultTitle: 'Download requested.',
-    downloadNotice: 'Your browser was asked to download this file. Check your browser’s download list for its status.',
+    title: 'Export card',
+    resultTitle: 'Download request complete',
     resultPreviewLoading: 'Preparing the exported image preview…',
     resultPreviewFailed: 'The image preview could not be displayed. You can still download the file again.',
-    exportLabel: 'Save your card',
     resolution: 'Resolution',
     format: 'File format',
     ratioLabel: 'Card ratio',
@@ -247,12 +236,11 @@ const copy = {
     cancelExport: 'Cancel export',
     cancelled: 'Export cancelled. Your draft is still here.',
     preview: 'Finished card preview',
-    sample: 'Coner sample screenshot · shown for preview.',
-    local: 'Your screenshot · stored on this device.',
-    quality: 'Only the card is exported. Editor controls are left out.',
+    sample: 'Sample screenshot',
+    local: 'Your screenshot',
     capped: 'Output dimensions were capped to reduce memory use.',
     pdf: 'Print from browser',
-    pdfHint: 'In the browser print dialog, choose Save as PDF if you need a PDF.',
+    pdfHint: 'Choose Save as PDF in the print dialog.',
     printPreparing: 'Preparing the card and type for printing…',
     printFailed: 'The print preview could not be prepared. Please try again.',
     edit: 'Continue editing',
@@ -275,7 +263,7 @@ const copy = {
     render: 'Rendering your high resolution card…',
     downloadStatus: 'Preparing your download…',
     exportProgress: 'Export progress',
-    success: '{format} download requested by your browser · {width} × {height} px',
+    success: 'Download request complete',
     failed: 'Export failed. Please try again.',
     fontTimeout: 'Fonts took too long to load. Check your connection and try again.',
     fontFailed: 'Some card fonts could not be loaded. Please try again.',
@@ -297,15 +285,10 @@ const copy = {
     previewLabel: 'PREVIEW',
   },
   ja: {
-    eyebrow: '書き出し',
-    title: '完成したカードを確認しましょう。',
-    intro: 'カードの比率、ファイル形式、出力サイズを選択してください。',
-    resultEyebrow: '完成したカード',
+    title: 'カードを書き出す',
     resultTitle: 'ダウンロードをリクエストしました。',
-    downloadNotice: 'ブラウザーにファイルのダウンロードをリクエストしました。状態はダウンロード一覧で確認できます。',
     resultPreviewLoading: '書き出したカード画像を表示しています…',
     resultPreviewFailed: '画像プレビューを表示できませんでした。ファイルは再ダウンロードできます。',
-    exportLabel: 'カードを保存',
     resolution: '解像度',
     format: 'ファイル形式',
     ratioLabel: 'カードの比率',
@@ -319,12 +302,11 @@ const copy = {
     cancelExport: '書き出しをキャンセル',
     cancelled: '書き出しをキャンセルしました。編集内容は保持されています。',
     preview: '完成カードのプレビュー',
-    sample: 'Conerのサンプルスクリーンショット · プレビュー用の画像です。',
-    local: 'あなたのスクリーンショット · この端末に保存されます。',
-    quality: 'カードのみを書き出します。エディターの操作画面は含まれません。',
+    sample: 'サンプルスクリーンショット',
+    local: 'あなたのスクリーンショット',
     capped: 'メモリ使用量を抑えるため出力サイズを制限しました。',
     pdf: 'ブラウザーで印刷',
-    pdfHint: 'ブラウザーの印刷画面で「PDFに保存」を選べます。',
+    pdfHint: '印刷画面でPDFに保存を選んでください。',
     printPreparing: '印刷用のカードと文字を準備しています…',
     printFailed: '印刷プレビューを準備できませんでした。もう一度お試しください。',
     edit: '編集を続ける',
@@ -347,7 +329,7 @@ const copy = {
     render: '高解像度カードを作成しています…',
     downloadStatus: 'ダウンロードを準備しました。',
     exportProgress: '書き出しの進行状況',
-    success: 'ブラウザーに{format}のダウンロードをリクエストしました · {width} × {height} px',
+    success: 'ダウンロードをリクエストしました。',
     failed: '書き出しに失敗しました。もう一度お試しください。',
     fontTimeout: 'フォントの読み込みに時間がかかっています。接続を確認して再試行してください。',
     fontFailed: '一部のフォントを読み込めませんでした。もう一度お試しください。',
@@ -804,7 +786,6 @@ export default function ExportPage() {
       <div className={styles.content}>
         {result ? (
           <header className={`${styles.hero} ${styles.resultHero}`}>
-            <p className={styles.eyebrow}><span />{text.resultEyebrow}</p>
             <div className={styles.resultHeading}>
               <span className={styles.successMark} aria-hidden="true">✓</span>
               <div>
@@ -816,9 +797,7 @@ export default function ExportPage() {
           </header>
         ) : (
           <header className={styles.hero}>
-            <p className={styles.eyebrow}><span />{text.eyebrow}</p>
             <h1 className={styles.title}>{text.title}</h1>
-            <p className={styles.intro}>{text.intro}</p>
           </header>
         )}
 
@@ -850,13 +829,7 @@ export default function ExportPage() {
                 </div>
               )}
             </div>
-            {result ? (
-              <div className={styles.resultSummary}>
-                <strong>{viewFormat.toUpperCase()} · {dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)} {text.pixel} · {viewData.design.ratio}</strong>
-                <span>{formatBlobSize(result.blob.size, viewLocale)}</span>
-                <p>{text.downloadNotice}</p>
-              </div>
-            ) : (
+            {!result && (
               <div className={styles.previewFooter}>
                 <div className={styles.previewIdentity}>
                   <strong>{viewData.character.name}</strong>
@@ -873,7 +846,6 @@ export default function ExportPage() {
 
           {result ? (
             <aside className={`${styles.exportPanel} ${styles.resultPanel}`} aria-labelledby="export-result-title">
-              <p className={styles.sectionLabel}>{text.resultEyebrow}</p>
               <h2 className={styles.resultName} id="export-result-title">{viewData.character.name}</h2>
               <dl className={styles.resultDetails}>
                 <div><dt>{text.resultFormat}</dt><dd>{viewFormat.toUpperCase()}</dd></div>
@@ -889,22 +861,20 @@ export default function ExportPage() {
                   <span aria-hidden="true">↓</span>
                 </button>
               </div>
-              <p className={styles.note}>{text.downloadNotice}</p>
               <div className={styles.resultActions}>
                 <Link className={styles.resultAction} href="/editor">{text.edit}</Link>
                 <Link className={styles.resultAction} href="/create">{text.createNew}</Link>
               </div>
               <div className={styles.printActions}>
-                <button type="button" className={styles.pdfButton} onClick={requestPrint} disabled={printPreparing} aria-busy={printPreparing}>{text.pdf}</button>
+                <button type="button" className={styles.pdfButton} onClick={requestPrint} disabled={printPreparing} aria-busy={printPreparing} aria-describedby="result-pdf-hint">{text.pdf}</button>
                 {printPreparing && <p className={styles.printStatus} role="status" aria-live="polite">{printStatus}</p>}
                 {printError && <p className={`${styles.statusText} ${styles.errorText}`} role="alert">{printError}</p>}
-                <p className={styles.note}>{text.pdfHint}</p>
+                <p id="result-pdf-hint" className={styles.actionHint}>{text.pdfHint}</p>
               </div>
               <FFXIVAttribution locale={viewLocale} className={styles.rightsNote} officialAssetsUsed={officialAssetsUsed} service={viewData.character.service === 'korea' ? 'KOREA' : 'GLOBAL'} />
             </aside>
           ) : (
-            <aside className={styles.exportPanel} aria-labelledby="export-settings-label" aria-busy={exporting}>
-              <p className={styles.sectionLabel} id="export-settings-label">{text.exportLabel}</p>
+            <aside className={styles.exportPanel} aria-labelledby="export-settings-title" aria-busy={exporting}>
               <h2 className={styles.characterName} id="export-settings-title">{viewData.character.name}</h2>
               <p className={styles.identity}>{activeTemplate}<span>·</span>{viewData.design.ratio}</p>
 
@@ -947,7 +917,7 @@ export default function ExportPage() {
                     </label>
                   ))}
                 </div>
-                <p className={styles.ratioHint} id="export-ratio-hint">{text.otherRatiosHint}</p>
+                <span id="export-ratio-hint" className={styles.visuallyHidden}>{text.otherRatiosHint}</span>
               </fieldset>
 
               <details className={styles.metadataDetails}>
@@ -973,13 +943,14 @@ export default function ExportPage() {
                 {exporting && <button className={styles.cancelButton} type="button" onClick={cancelExport} disabled={status === text.cancelled}>{text.cancelExport}</button>}
               </div>
               <div className={styles.smallActions}>
-                <button type="button" className={styles.pdfButton} onClick={requestPrint} disabled={exporting || printPreparing} aria-busy={printPreparing}>{text.pdf}</button>
+                <div className={styles.printAction}>
+                  <button type="button" className={styles.pdfButton} onClick={requestPrint} disabled={exporting || printPreparing} aria-busy={printPreparing} aria-describedby="export-pdf-hint">{text.pdf}</button>
+                  <span id="export-pdf-hint" className={styles.actionHint}>{text.pdfHint}</span>
+                </div>
                 <Link className={styles.editLink} href="/editor">← {text.edit}</Link>
               </div>
               {printPreparing && <p className={styles.printStatus} role="status" aria-live="polite">{printStatus}</p>}
               {printError && <p className={`${styles.statusText} ${styles.errorText}`} role="alert">{printError}</p>}
-              <p className={styles.note}>{text.pdfHint}</p>
-              <p className={styles.note}>{text.quality}</p>
               <FFXIVAttribution locale={viewLocale} className={styles.rightsNote} officialAssetsUsed={officialAssetsUsed} service={viewData.character.service === 'korea' ? 'KOREA' : 'GLOBAL'} />
             </aside>
           )}

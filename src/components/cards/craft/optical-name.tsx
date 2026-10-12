@@ -2,7 +2,7 @@
 
 import {memo,useLayoutEffect,useRef,useState,type HTMLAttributes} from 'react';
 import type { AdventurerCardTemplate, CardRatio } from '../types';
-import {getMasterTypographyFamily,getMasterTypographyTreatment,getTypographyPreset,type TypographyScript} from '@/lib/typography-presets';
+import {getMasterTypographyFamily,getMasterTypographyTreatment,getTypographyFontFamily,getTypographyPreset,type TypographyScript} from '@/lib/typography-presets';
 import {getTypographyScriptsForCardText,loadProfiledFontFace,loadTypographyFonts} from '@/data/fonts/load-fonts';
 import {profileCount,profileRender,profileStart} from '@/lib/performance-profile';
 import {CARD_NAME_ENVELOPES,fitOpticalName,type NameInkMetrics,type OpticalNameFit} from '@/lib/card-name-envelope';
@@ -84,6 +84,7 @@ type MeasuredFit={key:string;fit:OpticalNameFit;metrics:NameInkMetrics;reference
 
 export const OpticalName=memo(function OpticalName({family,ratio,name,lines,script,typographyPreset,lineClassName,style,...props}:OpticalNameProps){
  profileRender('OpticalName');
+ const selectedFontFamily=getTypographyFontFamily(typographyPreset,'display',script);
  const heading=useRef<HTMLHeadingElement>(null);
  const [measured,setMeasured]=useState<MeasuredFit|null>(null);
  const textKey=lines.join('\n');
@@ -156,7 +157,7 @@ export const OpticalName=memo(function OpticalName({family,ratio,name,lines,scri
   return()=>{disposed=true;observer.disconnect();document.fonts.removeEventListener('loadingdone',fontsChanged);};
  },[family,ratio,name,textKey,script,typographyPreset,key]);
 
- return <h2 {...props} ref={heading} style={{...style,fontSize:`${current?.fit.size??fallback}cqi`}} aria-label={name} data-master-typography-role="display"
+ return <h2 {...props} ref={heading} style={{...style,fontFamily:selectedFontFamily,fontSize:`${current?.fit.size??fallback}cqi`}} aria-label={name} data-master-typography-role="display"
   data-optical-name={family} data-optical-ratio={ratio} data-optical-script={script} data-optical-preset={typographyPreset}
   data-optical-ready={current?'true':'false'} data-optical-size={current?.fit.size??fallback}
   data-optical-width={current?.fit.width} data-optical-height={current?.fit.height} data-optical-ink={current?.fit.ink}

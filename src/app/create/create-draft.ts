@@ -21,6 +21,11 @@ export function hasNonSampleDraft(data: AdventurerCardData, sample: AdventurerCa
     !sameValue(data.imageAdjustments, sample.imageAdjustments);
 }
 
+/** A decode result may commit only while its upload still owns the mounted create screen. */
+export function canApplyPreparedUpload(token: number, currentToken: number, isMounted: boolean): boolean {
+  return isMounted && token === currentToken;
+}
+
 export type SampleConfirmationFocusTarget = 'confirmation' | 'trigger' | null;
 
 /** Carry the chosen master to photo selection without touching the saved draft. */

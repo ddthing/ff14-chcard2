@@ -8,7 +8,7 @@ import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
-import { CARD_STOCK_COPY, CARD_UI_LABELS } from '@/lib/card-copy';
+import { CARD_STOCK_COPY, CARD_UI_LABELS, getCardMasterCopy } from '@/lib/card-copy';
 import type { CardPictogramKind } from '@/lib/card-graphics/pictograms';
 import styles from './identity-master.module.css';
 
@@ -55,7 +55,7 @@ function RecordColumn({ title, facts }: { title: string; facts: RecordFact[] }) 
 
 export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = CARD_STOCK_COPY.identity[locale];
+  const copy = getCardMasterCopy('identity', locale, data.design.decorativeCopy);
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const fitNameTight = nameLayout.category === 'long' || nameLines.length >= 3;
   const isCjkName = nameLayout.script === 'korean' || nameLayout.script === 'japanese';
@@ -98,10 +98,10 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   return (
     <div className={styles.canvas} data-ratio={ratio ?? data.design.ratio} data-locale={locale} lang={locale}>
       <ArtPhoto data={data} locale={locale} className={styles.photo} />
-      <div className={styles.photoCopy} lang={locale}>
-        <p className={styles.photoQuote}>{copy.photoQuote.map((line) => <span key={line}>{line}</span>)}</p>
-        <p className={styles.photoStamp}>{copy.photoStamp.map((line) => <span key={line}>{line}</span>)}</p>
-      </div>
+      {(copy.photoQuote.length > 0 || copy.photoStamp.length > 0) && <div className={styles.photoCopy} lang={locale}>
+        {copy.photoQuote.length > 0 && <p className={styles.photoQuote}>{copy.photoQuote.map((line) => <span key={line}>{line}</span>)}</p>}
+        {copy.photoStamp.length > 0 && <p className={styles.photoStamp}>{copy.photoStamp.map((line) => <span key={line}>{line}</span>)}</p>}
+      </div>}
       <div className={styles.stock} aria-hidden="true">
         <Image
           className={styles.stockMaterial}
@@ -150,10 +150,10 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
           <path d="M6 5H94V80L50 90 6 80Z" strokeWidth=".28" opacity=".58" />
         </svg>
         <span className={styles.mastheadTitle} data-master-typography-role="micro">{CARD_STOCK_COPY.brand.recordMark}</span>
-        <span className={styles.mastheadNote} data-master-typography-role="caption">
+        {copy.banner.length > 0 && <span className={styles.mastheadNote} data-master-typography-role="caption">
           {copy.banner.map((word) => <span key={word}>{word}</span>)}
-        </span>
-        <span className={styles.mastheadLocation} data-master-typography-role="micro">{copy.location}</span>
+        </span>}
+        {copy.location && <span className={styles.mastheadLocation} data-master-typography-role="micro">{copy.location}</span>}
       </header>
 
       <EngravingMark kind="divider" className={styles.seamDivider} />

@@ -11,10 +11,16 @@ build/
 !.env.example
 .dev.vars*
 .wrangler/
+.openai/
+.asset-archive/
 
 # Temporary worktrees, browsers and generated QA evidence.
 tmp/
+docs.tmp/
+_workspace/
 docs/qa/
+docs/releases/phase303-job-lock/remote-test-run.log
+docs/releases/phase303-job-lock/dependency-audit.json
 
 # Third-party texture sources and derivatives are local-only, never publish.
 .local-assets/resourceboy/

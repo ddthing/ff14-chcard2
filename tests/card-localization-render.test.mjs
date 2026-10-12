@@ -77,9 +77,10 @@ const [{ CinematicMaster }, { EditorialMaster }, { IdentityMaster }, { getConerS
   import('../src/components/cards/masters/identity-master.tsx'),
   import('../src/components/cards/types.ts'),
 ]);
-const { GLOBAL_WORLDS, getDataCenter, getWorld, findWorld, localizeFfxivLabel } = await import('../src/data/ffxiv/index.ts');
+const { GLOBAL_WORLDS, RACES, CLANS, getDataCenter, getWorld, findWorld, localizeFfxivLabel } = await import('../src/data/ffxiv/index.ts');
 const { localizeCardWorld } = await import('../src/lib/card-microcopy.ts');
-const { getCardDisplayBio } = await import('../src/lib/card-copy.ts');
+const { CARD_STOCK_COPY, getCardDisplayBio, getCardMasterCopy } = await import('../src/lib/card-copy.ts');
+const { MASTER_TYPOGRAPHY_MAP, getTypographyFontFamily } = await import('../src/lib/typography-presets.ts');
 const [{ CinematicCard, EditorialCard, AdventurerIdCard }, { getCardFontRequest, getCardPreviewFontRequestKey, loadCardPreviewFonts }] = await Promise.all([
   import('../src/components/cards/AdventurerCards.tsx'),
   import('../src/components/editor/card-preview.tsx'),
@@ -91,6 +92,7 @@ const stockEnglish = [
   'EORZEA', 'ADVENTURER CARD', 'More stories ahead.', 'Warrior of Light', 'PEOPLE', 'PLACES',
   'STORIES', 'Small steps lead to', 'grand journeys.', 'ANOTHER DAY', 'IN EORZEA',
 ];
+const editorialStyles = readFileSync(resolve(process.cwd(), 'src/components/cards/masters/editorial-master.module.css'), 'utf8');
 
 function makeData(template) {
   const data = getConerSample(template, '4:5');
@@ -105,6 +107,26 @@ function makeData(template) {
 
 function textContent(markup) {
   return markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+}
+
+function cardStyleProperties(markup) {
+  const rootTag = markup.match(/<article\b[^>]*>/s)?.[0];
+  const style = rootTag?.match(/\bstyle="([\s\S]*)"\s+data-template=/)?.[1];
+  assert.ok(style, 'card root exposes its resolved typography properties');
+  return Object.fromEntries(style.replaceAll('&quot;', '"').split(';').filter(Boolean).map((declaration) => {
+    const separator = declaration.indexOf(':');
+    return [declaration.slice(0, separator), declaration.slice(separator + 1)];
+  }));
+}
+
+function opticalNameStyleProperties(markup, family) {
+  const heading = markup.match(new RegExp(`<h2\\b(?=[^>]*data-optical-name="${family}")[^>]*>`, 'u'))?.[0];
+  const style = heading?.match(/\bstyle="([\s\S]*)"\s+aria-label=/u)?.[1];
+  assert.ok(style, `${family} title exposes its selected font family`);
+  return Object.fromEntries(style.replaceAll('&quot;', '"').split(';').filter(Boolean).map((declaration) => {
+    const separator = declaration.indexOf(':');
+    return [declaration.slice(0, separator), declaration.slice(separator + 1)];
+  }));
 }
 
 test('all three Korean card masters localize profile metadata and stock copy while preserving custom fields', () => {
@@ -128,6 +150,23 @@ test('all three Korean card masters localize profile metadata and stock copy whi
   }
 });
 
+test('unknown level is omitted across all card families, layouts and ratios', () => {
+  const cards = [CinematicCard, EditorialCard, AdventurerIdCard];
+  const templates = ['cinematic', 'editorial', 'id-card'];
+  for (let index = 0; index < cards.length; index += 1) {
+    for (const layoutVariant of ['a', 'b', 'c']) {
+      for (const ratio of ['1:1', '4:5', '3:4', '9:16', '16:9']) {
+        const data = makeData(templates[index]);
+        data.character.level = 0;
+        data.design.layoutVariant = layoutVariant;
+        data.design.ratio = ratio;
+        const markup = renderToStaticMarkup(createElement(cards[index], { data, ratio, locale: 'ko' }));
+        assert.ok(!markup.includes('data-field="level"'), `${templates[index]} ${layoutVariant} ${ratio} must omit unknown level`);
+      }
+    }
+  }
+});
+
 test('record and editorial facts use localized service, region, language, race, clan, and play-style names', () => {
   const editorial = textContent(renderToStaticMarkup(createElement(EditorialMaster, {
     data: makeData('editorial'),
@@ -148,6 +187,295 @@ test('record and editorial facts use localized service, region, language, race, 
     assert.ok(record.includes(visible), `record should print ${visible}`);
   }
   assert.ok(record.includes('불멸대'));
+});
+
+test('complete Japanese Editorial lineage keeps both canonical segments intact at compact ratios', () => {
+  const segmenter = new Intl.Segmenter('ja', { granularity: 'grapheme' });
+  const combinations = RACES.flatMap((race) => CLANS
+    .filter((clan) => clan.raceId === race.id)
+    .map((clan) => ({ race, clan, length: [...segmenter.segment(race.localizedName.ja + clan.localizedName.ja)].length })));
+  const longest = Math.max(...combinations.map(({ length }) => length));
+  const longestPairs = combinations.filter(({ length }) => length === longest);
+
+  assert.equal(longest, 13);
+  assert.deepEqual(longestPairs.map(({ race, clan }) => `${race.id}/${clan.id}`).sort(), [
+    'lalafell/dunesfolk',
+    'lalafell/plainsfolk',
+  ]);
+
+  for (const ratio of ['4:5', '3:4', '1:1']) {
+    for (const { race, clan } of longestPairs) {
+      const data = makeData('editorial');
+      data.character.raceId = race.id;
+      data.character.race = race.localizedName.en;
+      data.character.clanId = clan.id;
+      data.character.clan = clan.localizedName.en;
+      data.design.ratio = ratio;
+      const markup = renderToStaticMarkup(createElement(EditorialMaster, { data, locale: 'ja', ratio }));
+      const lineageStart = markup.indexOf('class="factValue completeLineage"');
+      const lineageEnd = markup.indexOf('</dd>', lineageStart);
+      const lineage = markup.slice(lineageStart, lineageEnd);
+
+      assert.ok(lineageStart >= 0 && lineageEnd > lineageStart, `${ratio} renders compact full lineage`);
+      assert.match(lineage, /data-field="race"[^>]*>ララフェル</);
+      assert.ok(lineage.includes(clan.localizedName.ja), `${ratio} preserves ${clan.localizedName.ja}`);
+      assert.match(lineage, /data-field="clan"/);
+    }
+  }
+
+  const sparse = makeData('editorial');
+  sparse.character.clanId = null;
+  sparse.character.clan = '';
+  assert.doesNotMatch(renderToStaticMarkup(createElement(EditorialMaster, { data: sparse, locale: 'ja' })), /class="factValue completeLineage"/);
+  assert.match(editorialStyles, /\.canvas:lang\(ja\)\[data-ratio='4:5'\] \.completeLineage > span,[\s\S]*?\.canvas:lang\(ja\)\[data-ratio='3:4'\] \.completeLineage > span,[\s\S]*?\.canvas:lang\(ja\)\[data-ratio='1:1'\] \.completeLineage > span\s*\{[^}]*white-space:\s*nowrap;[^}]*overflow-wrap:\s*normal/s);
+});
+
+test('decorative copy modes localize only fixed master text and preserve personal bios and required labels', () => {
+  const cards = [
+    { Card: CinematicCard, template: 'cinematic', family: 'cinematic' },
+    { Card: EditorialCard, template: 'editorial', family: 'editorial' },
+    { Card: AdventurerIdCard, template: 'id-card', family: 'identity' },
+  ];
+  const modes = ['none', 'default', 'adventure', 'companions'];
+  const locales = ['ko', 'en', 'ja'];
+  const alternateBio = {
+    adventure: { ko: '새로운 여정이 시작됩니다.', en: 'A new journey begins.', ja: '新たな旅路が始まる。' },
+    companions: { ko: '동료와 함께라면 더 멀리.', en: 'Better journeys together.', ja: '仲間と進む、遠い旅。' },
+  };
+
+  for (const locale of locales) {
+    for (const { Card, template, family } of cards) {
+      const stock = getCardMasterCopy(family, locale, 'default');
+      const stockDecorativeValues = family === 'cinematic'
+        ? [...stock.promise, ...stock.quote, ...stock.signature, stock.place]
+        : family === 'editorial'
+          ? [stock.story, stock.warriorOfLight]
+          : [...stock.banner, stock.location, ...stock.photoQuote, ...stock.photoStamp];
+
+      for (const mode of modes) {
+        const data = getConerSample(template, '4:5');
+        data.design.decorativeCopy = mode;
+        const markup = renderToStaticMarkup(createElement(Card, { data, locale }));
+        const text = textContent(markup);
+        const selected = getCardMasterCopy(family, locale, mode);
+        const selectedDecorativeValues = family === 'cinematic'
+          ? [...selected.promise, ...selected.quote, ...selected.signature, selected.place]
+          : family === 'editorial'
+            ? [selected.story, selected.warriorOfLight]
+            : [...selected.banner, selected.location, ...selected.photoQuote, ...selected.photoStamp];
+        const visibleSelectedValues = family === 'editorial'
+          ? selectedDecorativeValues.filter((value) => value !== selected.story)
+          : selectedDecorativeValues;
+
+        for (const value of visibleSelectedValues.filter(Boolean)) {
+          assert.ok(text.includes(value), `${family} ${locale} ${mode} prints selected copy: ${value}`);
+        }
+
+        if (mode === 'none') {
+          for (const value of stockDecorativeValues.filter(Boolean)) {
+            assert.ok(!text.includes(value), `${family} ${locale} none omits stock copy: ${value}`);
+          }
+          assert.ok(!text.includes(CARD_STOCK_COPY.sample.bio[locale]), `${family} ${locale} none omits the untouched sample bio`);
+        } else {
+          const sampleBio = mode === 'default' ? CARD_STOCK_COPY.sample.bio[locale] : alternateBio[mode][locale];
+          assert.ok(text.includes(sampleBio), `${family} ${locale} ${mode} prints its sample bio`);
+        }
+
+        assert.ok(markup.includes('© SQUARE ENIX'), `${family} ${locale} ${mode} keeps its copyright credit`);
+        if (family === 'cinematic') {
+          assert.ok(markup.includes(`aria-label="${stock.details}"`), `${family} retains the details label`);
+        } else if (family === 'editorial') {
+          assert.ok(markup.includes(CARD_STOCK_COPY.brand.finalFantasy), `${family} retains its FINAL FANTASY XIV masthead`);
+          assert.ok(markup.includes(`aria-label="${stock.details}"`), `${family} retains the details label`);
+        } else {
+          assert.ok(text.includes(CARD_STOCK_COPY.brand.recordMark), `${family} retains the XIV mark`);
+          assert.ok(markup.includes(`aria-label="${stock.record}"`), `${family} retains the record label`);
+        }
+      }
+
+      for (const mode of modes) {
+        const data = getConerSample(template, '4:5');
+        data.character.bio = '';
+        data.design.decorativeCopy = mode;
+        const text = textContent(renderToStaticMarkup(createElement(Card, { data, locale })));
+        const copy = getCardMasterCopy(family, locale, mode);
+        if (family === 'editorial' && mode !== 'none') {
+          assert.ok(text.includes(copy.story), `${family} ${locale} ${mode} uses the selected story when no bio is set`);
+        }
+      }
+
+      for (const mode of modes) {
+        const data = getConerSample(template, '4:5');
+        data.character.profileOrigin = 'user';
+        data.character.bio = 'My own card story.';
+        data.design.decorativeCopy = mode;
+        const text = textContent(renderToStaticMarkup(createElement(Card, { data, locale })));
+        assert.ok(text.includes(data.character.bio), `${family} ${locale} ${mode} preserves the personal bio`);
+      }
+    }
+  }
+});
+
+test('Editorial Adventure bio and story stay distinct in every locale', () => {
+  const sampleBio = {
+    ko: '새로운 여정이 시작됩니다.',
+    en: 'A new journey begins.',
+    ja: '新たな旅路が始まる。',
+  };
+
+  for (const locale of ['ko', 'en', 'ja']) {
+    const data = getConerSample('editorial', '4:5');
+    data.design.decorativeCopy = 'adventure';
+    const copy = getCardMasterCopy('editorial', locale, 'adventure');
+    const text = textContent(renderToStaticMarkup(createElement(EditorialCard, { data, locale })));
+
+    assert.notEqual(copy.story, sampleBio[locale], `${locale} bio and story are distinct`);
+    assert.ok(text.includes(sampleBio[locale]), `${locale} renders the themed sample bio`);
+    assert.ok(text.includes(copy.story), `${locale} renders the separate Editorial story`);
+  }
+});
+
+test('master information typography uses script-aware families consistently across the three card families', () => {
+  const cards = [
+    [CinematicCard, 'cinematic'],
+    [EditorialCard, 'editorial'],
+    [AdventurerIdCard, 'identity'],
+  ];
+  const scripts = [
+    ['en', 'latin', 'Coner', 'Latin Company'],
+    ['ko', 'korean', '가람', '모험가 회사'],
+    ['ja', 'japanese', 'カオル', '冒険者の会社'],
+  ];
+  const roles = ['display', 'secondaryDisplay', 'job', 'information', 'label', 'caption', 'micro'];
+  const presets = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
+
+  for (const [Card, family] of cards) {
+    for (const [locale, script, name, freeCompany] of scripts) {
+      for (const preset of presets) {
+        const data = makeData(family === 'identity' ? 'id-card' : family);
+        data.character.name = name;
+        data.character.freeCompany = freeCompany;
+        data.character.bio = { en: 'A story continues.', ko: '모험 이야기는 계속됩니다.', ja: '冒険の物語は続く。' }[locale];
+        data.design.typographyPreset = preset;
+        const style = cardStyleProperties(renderToStaticMarkup(createElement(Card, { data, locale })));
+
+        for (const role of roles) {
+          const expected = MASTER_TYPOGRAPHY_MAP[family][script][role];
+          const cssRole = role.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`);
+          assert.equal(style[`--master-font-${cssRole}`], expected.fontFamily, `${family} ${locale} ${preset} ${role} family`);
+          if (role === 'information') {
+            assert.equal(expected.weight, 500, `${family} ${script} information weight`);
+            assert.equal(style['--master-information-weight'], '500', `${family} ${locale} information weight is applied`);
+          }
+          if ((family === 'cinematic' || family === 'editorial') && role === 'information') {
+            assert.ok(expected.fontFamily.startsWith('DM Sans Variable'), `${family} ${locale} starts with its sans face`);
+            assert.ok(!/Cormorant|Georgia/u.test(expected.fontFamily), `${family} ${locale} avoids Latin serif fallback before CJK coverage`);
+          }
+          if (family === 'identity' && role === 'information') {
+            assert.ok(expected.fontFamily.startsWith('Cormorant Garamond Variable'), `${family} ${locale} retains its information serif`);
+          }
+        }
+      }
+    }
+
+    const latinNameData = makeData(family === 'identity' ? 'id-card' : family);
+    const cjkNameData = { ...latinNameData, character: { ...latinNameData.character, name: 'カオル' } };
+    const latinStyle = cardStyleProperties(renderToStaticMarkup(createElement(Card, { data: latinNameData, locale: 'en' })));
+    const cjkNameStyle = cardStyleProperties(renderToStaticMarkup(createElement(Card, { data: cjkNameData, locale: 'en' })));
+    for (const role of roles.filter((candidate) => candidate !== 'display')) {
+      const cssRole = role.replace(/[A-Z]/gu, (letter) => `-${letter.toLowerCase()}`);
+      assert.equal(latinStyle[`--master-font-${cssRole}`], cjkNameStyle[`--master-font-${cssRole}`], `${family} ${role} family is independent of the character name script`);
+    }
+    assert.notEqual(latinStyle['--master-font-display'], cjkNameStyle['--master-font-display'], `${family} display family still follows the character name script`);
+  }
+});
+
+test('master A title family follows each persisted preset for EN, KO, and JA', () => {
+  const cards = [
+    [CinematicCard, 'cinematic', 'cinematic'],
+    [EditorialCard, 'editorial', 'editorial'],
+    [AdventurerIdCard, 'id-card', 'id-card'],
+  ];
+  const scripts = [
+    ['en', 'latin', 'Ari Sol'],
+    ['ko', 'korean', '가람'],
+    ['ja', 'japanese', 'カオル'],
+  ];
+  const presets = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
+
+  for (const [Card, template, opticalFamily] of cards) {
+    for (const [locale, script, name] of scripts) {
+      for (const preset of presets) {
+        const data = getConerSample(template, '4:5');
+        data.character.name = name;
+        data.design.typographyPreset = preset;
+        const markup = renderToStaticMarkup(createElement(Card, { data, locale }));
+        const titleStyle = opticalNameStyleProperties(markup, opticalFamily);
+
+        assert.equal(
+          titleStyle['font-family'],
+          getTypographyFontFamily(preset, 'display', script),
+          `${template} ${locale} ${preset} title family matches the selected specimen face`,
+        );
+        assert.equal(cardStyleProperties(markup)['--master-information-weight'], '500', `${template} ${locale} information role stays at 500`);
+      }
+    }
+  }
+});
+
+test('legacy B/C card roots retain all five preset faces for EN, KO, and JA', () => {
+  const cards = [
+    [CinematicCard, 'cinematic'],
+    [EditorialCard, 'editorial'],
+    [AdventurerIdCard, 'id-card'],
+  ];
+  const scripts = [
+    ['en', 'latin', 'Ari Sol'],
+    ['ko', 'korean', '가람'],
+    ['ja', 'japanese', 'カオル'],
+  ];
+  const presets = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
+
+  for (const [Card, template] of cards) {
+    for (const [locale, script, name] of scripts) {
+      for (const layoutVariant of ['b', 'c']) {
+        for (const preset of presets) {
+          const data = getConerSample(template, '4:5');
+          data.character.name = name;
+          data.design.layoutVariant = layoutVariant;
+          data.design.typographyPreset = preset;
+          const markup = renderToStaticMarkup(createElement(Card, { data, locale }));
+          assert.equal(
+            cardStyleProperties(markup)['--card-font-display'],
+            getTypographyFontFamily(preset, 'display', script),
+            `${template} layout ${layoutVariant} ${locale} ${preset} retains its legacy display face`,
+          );
+        }
+      }
+    }
+  }
+});
+
+test('Editorial free-company fitter retains complete text and joins export optical readiness', () => {
+  const values = ['Ember Bloom', '境界検証'.repeat(12)];
+  for (const freeCompany of values) {
+    const data = makeData('editorial');
+    data.character.freeCompany = freeCompany;
+    const markup = renderToStaticMarkup(createElement(EditorialMaster, {
+      data,
+      locale: 'ja',
+      ratio: '4:5',
+    }));
+    const fittedValueStart = markup.indexOf('data-optical-name="editorial-free-company"');
+    const fittedValueEnd = markup.indexOf('</span>', fittedValueStart);
+    const fittedSpanStart = markup.lastIndexOf('<span', fittedValueStart);
+    const fittedValue = markup.slice(fittedSpanStart, fittedValueEnd);
+
+    assert.ok(fittedSpanStart >= 0 && fittedValueEnd > fittedSpanStart, 'free company uses the measured value span');
+    assert.match(fittedValue, /data-optical-ready="false"/);
+    assert.match(fittedValue, /data-field="freeCompany"/);
+    assert.ok(fittedValue.includes(freeCompany), 'full free-company text is preserved');
+  }
 });
 
 test('known Korean Global world labels preserve canonical IDs and English search names', () => {
@@ -254,6 +582,7 @@ test('legacy card layouts localize the built-in sample bio under the same source
 
 test('preview font requests include the selected locale’s fixed card glyphs', () => {
   const data = makeData('editorial');
+  data.character.bio = '';
   const korean = getCardFontRequest(data.character, 'ko', 'editorial');
   const japanese = getCardFontRequest(data.character, 'ja', 'id-card');
 
@@ -268,10 +597,50 @@ test('preview font requests include the selected locale’s fixed card glyphs', 
   const sampleRequest = getCardFontRequest(sample.character, 'ko', 'cinematic', sample.imageUrl);
   assert.ok(sampleRequest.textByScript.korean?.includes('작은 걸음이 모여 긴 여정으로 이어집니다.'));
   assert.ok(!Object.values(sampleRequest.textByScript).some((text) => text.includes('Small steps, long journeys.')));
+
+  const families = [
+    ['cinematic', 'cinematic'],
+    ['editorial', 'editorial'],
+    ['identity', 'id-card'],
+  ];
+  const themedBios = {
+    adventure: { ko: '새로운 여정이 시작됩니다.', en: 'A new journey begins.', ja: '新たな旅路が始まる。' },
+    companions: { ko: '동료와 함께라면 더 멀리.', en: 'Better journeys together.', ja: '仲間と進む、遠い旅。' },
+  };
+  for (const locale of ['ko', 'en', 'ja']) {
+    for (const [family, template] of families) {
+      const source = getConerSample(template, '4:5');
+      const getOptionalValues = (copy) => family === 'cinematic'
+        ? [...copy.promise, ...copy.quote, ...copy.signature, copy.place]
+        : family === 'editorial'
+          ? [copy.story, copy.warriorOfLight]
+          : [...copy.banner, copy.location, ...copy.photoQuote, ...copy.photoStamp];
+      for (const mode of ['none', 'default', 'adventure', 'companions']) {
+        const request = getCardFontRequest(source.character, locale, template, source.imageUrl, mode, 'a');
+        const requested = Object.values(request.textByScript).join(' ');
+        const copy = getCardMasterCopy(family, locale, mode);
+        const requestedCopy = getOptionalValues(copy).filter((value) => value && !(family === 'editorial' && value === copy.story));
+
+        for (const value of requestedCopy) {
+          assert.ok(requested.includes(value), `${family} ${locale} ${mode} waits for selected copy: ${value}`);
+        }
+        if (mode === 'none') {
+          assert.ok(!requested.includes(CARD_STOCK_COPY.sample.bio[locale]), `${family} ${locale} none skips the sample bio font`);
+          for (const value of getOptionalValues(getCardMasterCopy(family, locale, 'default')).filter(Boolean)) {
+            assert.ok(!requested.includes(value), `${family} ${locale} none does not wait for hidden stock copy: ${value}`);
+          }
+        } else {
+          const sampleBio = mode === 'default' ? CARD_STOCK_COPY.sample.bio[locale] : themedBios[mode][locale];
+          assert.ok(requested.includes(sampleBio), `${family} ${locale} ${mode} waits for the rendered sample bio`);
+        }
+      }
+    }
+  }
 });
 
 test('preview font key tracks rendered text and font choices while ignoring unrelated character fields', () => {
   const data = makeData('editorial');
+  data.character.bio = '';
   const fontData = {
     character: data.character,
     imageUrl: data.imageUrl,
@@ -279,6 +648,7 @@ test('preview font key tracks rendered text and font choices while ignoring unre
       typographyPreset: data.design.typographyPreset,
       template: data.design.template,
       layoutVariant: data.design.layoutVariant,
+      decorativeCopy: data.design.decorativeCopy,
     },
   };
   const key = getCardPreviewFontRequestKey(fontData, 'ko');
@@ -293,6 +663,11 @@ test('preview font key tracks rendered text and font choices while ignoring unre
   }, 'ko'), key);
   assert.notEqual(getCardPreviewFontRequestKey(fontData, 'ja'), key);
   assert.ok(key.includes('이야기는 계속됩니다.'));
+  assert.notEqual(getCardPreviewFontRequestKey({
+    ...fontData,
+    design: { ...fontData.design, decorativeCopy: 'none' },
+  }, 'ko'), key);
+  assert.equal(JSON.parse(key)[4], 'default', 'the selected copy mode is part of the readiness key');
 });
 
 test('preview font waits stop when their owning render is cancelled', async () => {

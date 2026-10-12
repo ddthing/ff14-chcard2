@@ -1,0 +1,164 @@
+.group {
+  min-inline-size: 0;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.choices {
+  display: grid;
+  min-inline-size: 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 44px), 1fr));
+  gap: 4px;
+}
+
+.choice {
+  position: relative;
+  display: block;
+  min-inline-size: 44px;
+  min-block-size: 72px;
+  cursor: pointer;
+}
+
+.radio {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.choiceSurface {
+  position: relative;
+  display: grid;
+  width: 100%;
+  min-height: 72px;
+  box-sizing: border-box;
+  justify-items: center;
+  align-content: center;
+  gap: 2px;
+  border: 1px solid var(--editor-line-strong);
+  border-radius: var(--radius-sm);
+  padding: 5px 2px;
+  background: var(--editor-control);
+  color: var(--editor-text);
+  text-align: center;
+  transition: transform var(--editor-motion-micro) var(--editor-ease-snappy);
+}
+
+.radio:hover + .choiceSurface {
+  border-color: var(--editor-accent);
+  background: var(--editor-control-hover);
+}
+
+.radio:hover + .choiceSurface .hint,
+.radio:checked + .choiceSurface .hint {
+  color: var(--editor-text);
+}
+
+.radio:checked + .choiceSurface {
+  border-color: var(--editor-accent);
+  background: var(--editor-accent-soft);
+}
+
+.radio:focus-visible + .choiceSurface {
+  outline: 2px solid var(--editor-focus);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 1px var(--editor-text);
+}
+
+.radio:active + .choiceSurface {
+  transform: scale(0.985);
+}
+
+.silhouetteArea {
+  display: grid;
+  width: 100%;
+  min-height: 24px;
+  place-items: center;
+}
+
+.frame {
+  display: block;
+  max-height: 1.5rem;
+  box-sizing: border-box;
+  border: 1px solid var(--editor-line-strong);
+  border-radius: 1px;
+  background: var(--editor-control-hover);
+}
+
+.radio:checked + .choiceSurface .frame {
+  border-color: var(--editor-accent);
+}
+
+.value {
+  display: block;
+  max-width: 100%;
+  color: var(--editor-text);
+  font-size: 0.75rem;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.15;
+  white-space: nowrap;
+}
+
+.hint {
+  display: block;
+  width: 100%;
+  color: var(--editor-muted);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.selectedMark {
+  position: absolute;
+  inset-block-start: 3px;
+  inset-inline-end: 3px;
+  display: none;
+  width: 11px;
+  height: 11px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--editor-accent);
+  color: var(--editor-on-accent);
+  font-size: 0.5rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.radio:checked + .choiceSurface .selectedMark {
+  display: grid;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .choiceSurface {
+    transition: none;
+  }
+
+  .radio:active + .choiceSurface {
+    transform: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .radio:focus-visible + .choiceSurface {
+    outline-color: Highlight;
+    box-shadow: none;
+  }
+}

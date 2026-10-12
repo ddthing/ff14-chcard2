@@ -3,6 +3,7 @@ import { runInNewContext } from 'node:vm';
 import test from 'node:test';
 import {
   APP_APPEARANCE_STORAGE_KEY,
+  APP_BROWSER_THEME_COLORS,
   createAppAppearanceBootstrapScript,
   getStoredAppAppearance,
   isAppAppearance,
@@ -78,9 +79,17 @@ test('storage events synchronize only the appearance key, with clear resetting t
   assert.equal(getStoredAppAppearance(target), 'system');
 });
 
-function runBootstrap({ stored = null, prefersDark = false, storageThrows = false, mediaThrows = false } = {}) {
+function runBootstrap({ stored = null, prefersDark = false, storageThrows = false, mediaThrows = false, initialDark = false } = {}) {
   const attributes = new Map();
-  const document = { documentElement: { setAttribute: (key, value) => attributes.set(key, value) } };
+  let darkClass = initialDark;
+  const browserChrome = new Map([['media', '(prefers-color-scheme: dark)']]);
+  const document = { documentElement: {
+    setAttribute: (key, value) => attributes.set(key, value),
+    classList: { toggle: (name, enabled) => { assert.equal(name, 'dark'); darkClass = enabled; } },
+  }, querySelectorAll: (selector) => {
+    assert.equal(selector, 'meta[name="theme-color"]');
+    return [{ setAttribute: (key, value) => browserChrome.set(key, value), removeAttribute: (key) => browserChrome.delete(key) }];
+  } };
   const window = { matchMedia: (query) => {
     assert.equal(query, '(prefers-color-scheme: dark)');
     if (mediaThrows) throw new Error('matchMedia unavailable');
@@ -94,6 +103,9 @@ function runBootstrap({ stored = null, prefersDark = false, storageThrows = fals
     },
   };
   runInNewContext(createAppAppearanceBootstrapScript(), { document, window, localStorage });
+  assert.equal(darkClass, attributes.get('data-app-theme') === 'dark', 'shadcn class and resolved app theme agree before paint');
+  assert.equal(browserChrome.get('content'), APP_BROWSER_THEME_COLORS[attributes.get('data-app-theme')], 'browser chrome follows the app override rather than the OS');
+  assert.equal(browserChrome.has('media'), false, 'an OS media query cannot override the saved app appearance');
   return attributes;
 }
 
@@ -106,6 +118,7 @@ test('pre-hydration bootstrap writes a stable preference and resolved theme befo
     ['data-app-appearance', 'light'],
     ['data-app-theme', 'light'],
   ]);
+  assert.equal(runBootstrap({ stored: 'light', prefersDark: true, initialDark: true }).get('data-app-theme'), 'light');
   assert.deepEqual([...runBootstrap({ stored: 'dark', prefersDark: false })], [
     ['data-app-appearance', 'dark'],
     ['data-app-theme', 'dark'],

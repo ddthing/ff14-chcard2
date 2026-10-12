@@ -7,7 +7,9 @@ import { EDITORIAL_BRUSH_PATH } from '@/lib/card-graphics/editorial-brush-path';
 import { resolveCardMaterial } from '@/lib/card-materials';
 import { JobIcon } from '@/components/ffxiv/job-icon';
 import { OpticalName } from '@/components/cards/craft/optical-name';
-import { CARD_STOCK_COPY } from '@/lib/card-copy';
+import { FitFactValue } from '@/components/cards/craft/fit-fact-value';
+import { CARD_STOCK_COPY, getCardMasterCopy } from '@/lib/card-copy';
+import { detectTypographyScript } from '@/lib/typography-presets';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './editorial-master.module.css';
 
@@ -27,7 +29,7 @@ const EDITORIAL_INK_DENSITY = resolveCardMaterial('editorial', 'editorial-ink-de
 
 export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = CARD_STOCK_COPY.editorial[locale];
+  const copy = getCardMasterCopy('editorial', locale, data.design.decorativeCopy);
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const resolvedRatio = ratio ?? data.design.ratio;
   const brushShape = getEditorialBrushShape(resolvedRatio);
@@ -49,13 +51,21 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const lineageLabel = labels.race && labels.clan
     ? `${ui.race} / ${ui.clan}`
     : labels.race ? ui.race : ui.clan;
+  const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
+  const informationFontContext = JSON.stringify([
+    detectTypographyScript(character.name, localeScript),
+    labels.job,
+    labels.world,
+    labels.dataCenter,
+    labels.grandCompany,
+  ]);
 
   const facts: Array<{ id: string; label: string; parts: EditorialFactPart[] }> = [
     {
       id: 'job',
       label: copy.job,
       parts: [
-        ...(labels.job ? [{ field: 'job' as const, value: labels.job, role: 'job' as const }] : []),
+        ...(labels.job ? [{ field: 'job' as const, value: labels.job, role: 'information' as const }] : []),
         ...(microcopy.jobAbbreviation ? [{ field: 'jobAbbreviation' as const, value: microcopy.jobAbbreviation, role: 'micro' as const, separator: ' / ' }] : []),
       ],
     },
@@ -71,7 +81,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
       ],
     },
     { id: 'free-company', label: ui.freeCompany, parts: character.freeCompany.trim() ? [{ field: 'freeCompany', value: character.freeCompany, role: 'information' }] : [] },
-    { id: 'service', label: copy.service, parts: microcopy.origin ? [{ field: 'origin', value: microcopy.origin, role: 'caption' }] : [] },
+    { id: 'service', label: copy.service, parts: microcopy.origin ? [{ field: 'origin', value: microcopy.origin, role: 'information' }] : [] },
   ];
 
   return (
@@ -150,26 +160,39 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
         {paperBio && <p className={styles.quote} data-master-typography-role="secondaryDisplay" {...masterFieldProps('editorial', 'bio')}>{bio}</p>}
       </div>
 
-      <div
+      {(photoBio || copy.story) && <div
         className={styles.photoStory}
         data-photo-story={photoBio ? 'bio' : 'copy'}
         data-master-typography-role={photoBio ? 'secondaryDisplay' : 'caption'}
         {...(photoBio ? masterFieldProps('editorial', 'bio') : {})}
       >
         {photoBio ? bio : copy.story}
-      </div>
+      </div>}
 
       <dl className={styles.facts} aria-label={copy.details}>
         {facts.filter((fact) => fact.parts.length > 0).map((fact) => (
           <div className={styles.fact} data-editorial-row={fact.id} key={fact.id}>
             <dt className={styles.factLabel} data-master-typography-role="label">{fact.label}</dt>
-            <dd className={styles.factValue}>
+            <dd className={fact.id === 'lineage' && fact.parts.length === 2 ? `${styles.factValue} ${styles.completeLineage}` : styles.factValue}>
               {fact.parts.map((part) => (
                 <Fragment key={part.field}>
                   {part.separator && <span className={styles.factSeparator} aria-hidden="true">{part.separator}</span>}
-                  <span data-master-typography-role={part.role} {...masterFieldProps('editorial', part.field)}>
-                    {part.value}
-                  </span>
+                  {part.field === 'freeCompany' ? (
+                    <FitFactValue
+                      fontContextKey={informationFontContext}
+                      locale={locale}
+                      ratio={resolvedRatio}
+                      typographyPreset={data.design.typographyPreset}
+                      data-master-typography-role={part.role}
+                      {...masterFieldProps('editorial', part.field)}
+                    >
+                      {part.value}
+                    </FitFactValue>
+                  ) : (
+                    <span data-master-typography-role={part.role} {...masterFieldProps('editorial', part.field)}>
+                      {part.value}
+                    </span>
+                  )}
                 </Fragment>
               ))}
             </dd>
@@ -195,7 +218,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
               {[jobRoleLabel, microcopy.jobAbbreviation].filter(Boolean).join(' · ')}
             </span>
           )}
-          <span className={styles.insigniaCaption} data-master-typography-role="caption">{copy.warriorOfLight}</span>
+          {copy.warriorOfLight && <span className={styles.insigniaCaption} data-master-typography-role="caption">{copy.warriorOfLight}</span>}
         </section>
       )}
 

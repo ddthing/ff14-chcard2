@@ -11,6 +11,7 @@ import {
 } from "react";
 import {
   APP_APPEARANCE_CHANGE_EVENT,
+  APP_BROWSER_THEME_COLORS,
   APP_COLOR_SCHEME_QUERY,
   getStoredAppAppearance,
   resolveAppAppearance,
@@ -52,6 +53,11 @@ function applyAppearance(preference: AppAppearancePreference): AppResolvedAppear
   const root = document.documentElement;
   root.setAttribute("data-app-appearance", preference);
   root.setAttribute("data-app-theme", resolved);
+  root.classList.toggle("dark", resolved === "dark");
+  document.querySelectorAll('meta[name="theme-color"]').forEach((meta) => {
+    meta.setAttribute("content", APP_BROWSER_THEME_COLORS[resolved]);
+    meta.removeAttribute("media");
+  });
   return resolved;
 }
 

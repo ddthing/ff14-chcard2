@@ -3,7 +3,7 @@ import { preload } from "react-dom";
 import { LocaleProvider } from "@/lib/i18n";
 import { AppShell } from "@/components/app-shell";
 import { ThemeProvider } from "@/components/theme-provider";
-import { createAppAppearanceBootstrapScript } from "@/lib/app-appearance";
+import { APP_BROWSER_THEME_COLORS, createAppAppearanceBootstrapScript } from "@/lib/app-appearance";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   colorScheme: "light dark",
-  themeColor: "#080909",
+  themeColor: APP_BROWSER_THEME_COLORS.dark,
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     crossOrigin: "anonymous",
   });
   return (
-    <html lang="ko" data-scroll-behavior="smooth" data-app-appearance="system" data-app-theme="dark" suppressHydrationWarning>
+    <html lang="ko" className="dark" data-scroll-behavior="smooth" data-app-appearance="system" data-app-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: createAppAppearanceBootstrapScript() }} />
       </head>

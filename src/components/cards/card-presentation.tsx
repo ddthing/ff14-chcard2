@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import type { AdventurerCardData, CardRatio } from './types';
 import type { Locale } from '@/lib/types';
-import { CARD_STOCK_COPY, CARD_UI_LABELS, getCardDisplayBio, getCardPhotoAlt } from '@/lib/card-copy';
+import { CARD_UI_LABELS, getCardDisplayBio, getCardMasterCopy, getCardPhotoAlt } from '@/lib/card-copy';
 import { localizeFfxivLabel } from '@/data/ffxiv';
 import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
 import { getCardNameLayout } from '@/lib/card-name-layout';
@@ -12,6 +12,9 @@ export type MasterArtProps = { data: AdventurerCardData; locale: Locale; ratio?:
 /** Art-direction presentation uses the same canonical data and name resolver. */
 export function getArtContext(data: AdventurerCardData, locale: Locale) {
   const character = data.character;
+  const decorativeCopy = (data.design.layoutVariant ?? 'a') === 'a'
+    ? data.design.decorativeCopy
+    : 'default';
   const labels = {
     job: localizeFfxivLabel('job', character.jobId ?? character.job, locale),
     world: localizeCardWorld(character, locale),
@@ -25,13 +28,13 @@ export function getArtContext(data: AdventurerCardData, locale: Locale) {
   };
   return {
     character,
-    bio: getCardDisplayBio(character, data.imageUrl, locale),
+    bio: getCardDisplayBio(character, data.imageUrl, locale, decorativeCopy),
     labels,
     ui: CARD_UI_LABELS[locale],
     copy: {
-      cinematic: CARD_STOCK_COPY.cinematic[locale],
-      editorial: CARD_STOCK_COPY.editorial[locale],
-      identity: CARD_STOCK_COPY.identity[locale],
+      cinematic: getCardMasterCopy('cinematic', locale, decorativeCopy),
+      editorial: getCardMasterCopy('editorial', locale, decorativeCopy),
+      identity: getCardMasterCopy('identity', locale, decorativeCopy),
     },
     microcopy: getCardMicrocopy(character, locale),
     nameLayout: getCardNameLayout(character.name, locale),

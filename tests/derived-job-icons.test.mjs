@@ -14,3 +14,23 @@ test('large job marks resolve only to approved XIVAPI sources or to the template
   }
   assert.equal(resolveJobIcon({ jobId: 'beastmaster', usage: 'editorialLarge', officialAssetsEnabled: true }), null);
 });
+
+test('large marks prefer original SVGs and allow only manifest-approved original raster fallbacks', () => {
+  const ninja = resolveJobIcon({ jobId: 'ninja', usage: 'cardDisplay', officialAssetsEnabled: true });
+  assert.deepEqual(
+    { source: ninja?.source, src: ninja?.src, width: ninja?.width, height: ninja?.height },
+    {
+      source: 'xivapi-raster',
+      src: '/assets/ffxiv/jobs/xivapi/icons/ninja.png',
+      width: 256,
+      height: 256,
+    },
+  );
+  const reaper = resolveJobIcon({ jobId: 'reaper', usage: 'cardDisplay', officialAssetsEnabled: true });
+  assert.equal(reaper?.source, 'xivapi-raster');
+  assert.equal(reaper?.src, '/assets/ffxiv/jobs/xivapi/icons/reaper.png');
+  const vectorFirst = resolveJobIcon({ jobId: 'summoner', usage: 'cardDisplay', officialAssetsEnabled: true });
+  assert.equal(vectorFirst?.source, 'xivapi-svg');
+  assert.equal(vectorFirst?.src, '/assets/ffxiv/jobs/xivapi/svg/summoner.svg');
+  assert.equal(resolveJobIcon({ jobId: 'beastmaster', usage: 'cardDisplay', officialAssetsEnabled: true }), null);
+});

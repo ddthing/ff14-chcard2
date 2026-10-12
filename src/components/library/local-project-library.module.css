@@ -1,0 +1,787 @@
+.section {
+  width: 100%;
+  padding: clamp(3.5rem, 8vw, 7rem) var(--page-gutter, clamp(1.125rem, 4vw, 4rem));
+  background: var(--app-bg);
+  color: var(--app-text);
+}
+
+.section[data-compact='true'] {
+  border-top: 2px solid var(--app-text);
+  padding: 1rem 0 0;
+  background: transparent;
+}
+
+.section[data-compact='true'] .sectionPanel {
+  display: grid;
+  grid-template-columns: minmax(9rem, 0.18fr) minmax(0, 1fr);
+  column-gap: 1.25rem;
+  width: 100%;
+}
+
+.section[data-compact='true'] .sectionPanel > * { grid-column: 1 / -1; }
+
+.section[data-compact='true'] .header {
+  grid-column: 1;
+  grid-row: 1;
+  align-self: center;
+  margin-bottom: 0.75rem;
+}
+
+.section[data-compact='true'] .title {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.section[data-compact='true'] .saveForm {
+  grid-column: 2;
+  grid-row: 1;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+  border-bottom: 0;
+  border-radius: var(--radius-md);
+  padding: 0.65rem;
+  background: var(--app-workspace);
+}
+
+.section[data-compact='true'] .saveField {
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.section[data-compact='true'] .saveField label {
+  color: var(--app-text);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.section[data-compact='true'] .saveField input::placeholder { opacity: 1; }
+
+.section[data-compact='true'] .saveForm > .primaryButton {
+  border-color: var(--app-border-strong);
+  background: transparent;
+  color: var(--app-text);
+}
+
+.section[data-compact='true'] .saveForm:focus-within > .primaryButton:not(:disabled) {
+  border-color: var(--app-accent);
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+.section[data-compact='true'] [data-action='open-project'] {
+  border-color: var(--app-border-strong);
+  background: transparent;
+  color: var(--app-text);
+}
+
+.section[data-compact='true'] [data-action='open-project']:hover:not(:disabled) {
+  border-color: var(--app-border-strong);
+  background: var(--app-control-hover);
+}
+
+.section[data-compact='true'] .projectActions .textButton {
+  color: var(--app-text-muted);
+  font-weight: 550;
+}
+
+.section[data-compact='true'] [data-action='delete-project'] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--app-error);
+}
+
+.section[data-compact='true'] [data-action='delete-project']:hover:not(:disabled) {
+  border-color: var(--app-error);
+  background: var(--app-error-surface);
+  color: var(--app-text);
+}
+
+.section[data-compact='true'] .projectItem {
+  padding-block: 0.65rem;
+}
+
+.section[data-compact='true'] .projectCopy h3 {
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.section[data-compact='true'] .projectCopy p {
+  font-size: 0.75rem;
+}
+
+.section[data-compact='true'] .projectCopy .projectMeta {
+  color: var(--app-text-muted);
+  font-family: var(--font-mono, monospace);
+  font-size: 0.75rem;
+}
+
+.section[data-compact='true'] .projectActions {
+  gap: 0.2rem;
+}
+
+.section[data-compact='true'] .emptyState {
+  border-block: 1px solid var(--app-border-strong);
+  padding: 0.9rem 0;
+}
+
+.section[data-compact='true'] .emptyTitle {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+}
+
+.section[data-compact='true'] .footerNote {
+  margin-top: 0.5rem;
+}
+
+.section[data-presentation='stage'] {
+  border-top: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.section[data-presentation='stage'] .sectionPanel {
+  display: block;
+  width: 100%;
+  margin: 0;
+}
+
+.section[data-presentation='stage'] .stageWorkspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  padding: 0.5rem 0.75rem;
+  background: var(--app-surface);
+}
+
+.section[data-presentation='stage'] .stageWorkspace[data-has-aside='true'] {
+  grid-template-columns: minmax(0, 0.45fr) minmax(0, 0.55fr);
+  gap: 1.25rem;
+}
+
+.section[data-presentation='stage'] .stageAside {
+  min-width: 0;
+}
+
+.section[data-presentation='stage'] .stageSaveTarget {
+  overflow-wrap: anywhere;
+  margin: 0 0 0.65rem;
+  color: var(--app-text);
+  font-size: 0.75rem;
+  font-weight: 650;
+  line-height: 1.4;
+}
+
+.section[data-presentation='stage'] .savePanel {
+  width: 100%;
+  min-width: 0;
+}
+
+.section[data-presentation='stage'] .header {
+  display: block;
+  margin: 0 0 0.5rem;
+}
+
+.section[data-presentation='stage'] .title {
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.section[data-presentation='stage'] .saveForm {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.75rem;
+  margin: 0;
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.section[data-presentation='stage'] .saveField {
+  min-width: 0;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+}
+
+.section[data-presentation='stage'] .saveField label {
+  color: var(--app-text);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}
+
+.section[data-presentation='stage'] .saveForm > .primaryButton {
+  min-height: 44px;
+  border-color: var(--app-border);
+  background: transparent;
+  color: var(--app-text);
+}
+
+.section[data-presentation='stage'] .saveField input {
+  min-height: 44px;
+  background: var(--app-bg);
+  font-size: 0.875rem;
+}
+
+.section[data-presentation='stage'] .saveForm > .primaryButton:hover:not(:disabled) {
+  border-color: var(--app-border-strong);
+  background: var(--app-control-hover);
+}
+
+.section[data-presentation='stage'] .saveForm:focus-within > .primaryButton:not(:disabled) {
+  border-color: var(--app-accent);
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+.section[data-presentation='stage'] .listHeading {
+  margin-top: 0.5rem;
+}
+
+.sectionPanel,
+.dialogPanel {
+  width: min(100%, 78rem);
+  margin-inline: auto;
+}
+
+.dialogPanel {
+  padding: clamp(1.25rem, 3vw, 2.4rem);
+}
+
+.header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.closeButton,
+.triggerButton,
+.primaryButton,
+.secondaryButton,
+.dangerButton,
+.textButton {
+  display: inline-flex;
+  min-width: 44px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  padding: 0.65rem 0.9rem;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 650;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color var(--motion-fast, 160ms) ease, border-color var(--motion-fast, 160ms) ease, color var(--motion-fast, 160ms) ease, transform var(--motion-fast, 160ms) var(--ease-editorial, ease);
+}
+
+.closeButton {
+  flex: 0 0 44px;
+  padding: 0;
+  background: transparent;
+  border-color: var(--app-border);
+  color: var(--app-text-muted);
+  font-size: 1.5rem;
+}
+
+.closeButton:hover,
+.secondaryButton:hover,
+.textButton:hover {
+  border-color: var(--app-border-strong);
+  background: var(--app-control-hover);
+  color: var(--app-text);
+}
+
+.triggerButton {
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text);
+}
+
+.triggerButton:hover {
+  border-color: var(--app-accent);
+  background: var(--app-accent-soft);
+}
+
+.primaryButton {
+  border-color: var(--app-accent);
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+.primaryButton:hover:not(:disabled) {
+  border-color: var(--app-accent);
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+}
+
+.closeButton:active:not(:disabled),
+.triggerButton:active:not(:disabled),
+.primaryButton:active:not(:disabled),
+.secondaryButton:active:not(:disabled),
+.dangerButton:active:not(:disabled),
+.textButton:active:not(:disabled) {
+  transform: scale(0.985);
+}
+
+.secondaryButton,
+.textButton {
+  border-color: var(--app-border);
+  background: transparent;
+  color: var(--app-text);
+}
+
+.textButton {
+  border-color: transparent;
+  color: var(--app-text-muted);
+}
+
+.dangerButton {
+  border-color: var(--app-error);
+  background: transparent;
+  color: var(--app-error);
+}
+
+.dangerButton:hover:not(:disabled) {
+  background: var(--app-error-surface);
+  color: var(--app-text);
+}
+
+.closeButton:focus-visible,
+.triggerButton:focus-visible,
+.primaryButton:focus-visible,
+.secondaryButton:focus-visible,
+.dangerButton:focus-visible,
+.textButton:focus-visible,
+.saveField input:focus-visible,
+.switchSaveForm input:focus-visible,
+.renameForm input:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.primaryButton:disabled,
+.secondaryButton:disabled,
+.dangerButton:disabled,
+.textButton:disabled {
+  cursor: not-allowed;
+  opacity: 0.56;
+}
+
+.saveForm {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 1px solid var(--app-border);
+  padding-bottom: 1.25rem;
+}
+
+.saveField,
+.switchSaveForm,
+.renameForm {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.saveField label,
+.switchSaveForm label,
+.renameForm label {
+  color: var(--app-text-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.saveField input,
+.switchSaveForm input,
+.renameForm input {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem 0.75rem;
+  background: var(--app-control);
+  color: var(--app-text);
+}
+
+.saveField input::placeholder,
+.switchSaveForm input::placeholder,
+.renameForm input::placeholder {
+  color: var(--app-text-subtle);
+  opacity: 0.8;
+}
+
+.decision {
+  margin: 0 0 1.25rem;
+  border-left: 2px solid var(--app-accent);
+  padding: 0.25rem 0 0.25rem 1rem;
+}
+
+.decision h3 {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.125rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.decision > p {
+  margin: 0.45rem 0 1rem;
+  color: var(--app-text-muted);
+  font-size: 0.85rem;
+}
+
+.switchSaveForm {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  margin-bottom: 0.65rem;
+}
+
+.switchSaveForm label {
+  grid-column: 1 / -1;
+  margin-bottom: -0.4rem;
+}
+
+.decisionActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.error,
+.feedback,
+.warning {
+  margin: 0.75rem 0;
+  padding: 0.7rem 0.85rem;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  font-size: 0.82rem;
+}
+
+.error {
+  border-color: var(--app-error);
+  background: var(--app-error-surface);
+  color: var(--app-text);
+}
+
+.feedback {
+  border-color: var(--app-border);
+  background: var(--app-success-surface);
+  color: var(--app-success);
+}
+
+.warning {
+  background: var(--app-accent-soft);
+  color: var(--app-text);
+}
+
+.listHeading {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.25rem;
+}
+
+.muted {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 0.84rem;
+}
+
+.emptyState {
+  padding: 1.25rem 0;
+}
+
+.emptyTitle {
+  margin: 0 0 0.25rem;
+  font-size: 1rem;
+  font-weight: 650;
+}
+
+.projectList {
+  display: block;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--app-border);
+  border-bottom: 1px solid var(--app-border);
+  list-style: none;
+}
+
+.projectItem {
+  min-width: 0;
+  padding: 1rem 0;
+}
+
+.projectItem + .projectItem {
+  border-top: 1px solid var(--app-border);
+}
+
+.projectInfo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.25rem;
+}
+
+.projectCopy {
+  min-width: 0;
+}
+
+.projectCopy h3 {
+  overflow-wrap: anywhere;
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 0.875rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.projectCopy p {
+  overflow-wrap: anywhere;
+  margin: 0.28rem 0 0;
+  color: var(--app-text-muted);
+  font-size: 0.78rem;
+}
+
+.projectCopy .projectMeta {
+  color: var(--app-text-subtle);
+  font-size: 0.75rem;
+}
+
+.projectActions {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem;
+}
+
+.renameForm {
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: end;
+  margin-top: 0.85rem;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--app-border);
+}
+
+.renameForm label {
+  grid-column: 1 / -1;
+  margin-bottom: -0.4rem;
+}
+
+.preview {
+  width: min(100%, 22rem);
+  margin: 1rem auto 0;
+  overflow: hidden;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-sm);
+  background: var(--app-workspace);
+}
+
+.footerNote {
+  margin-top: 0.8rem;
+  color: var(--app-text-muted);
+}
+
+.footerNote p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+
+.dialog {
+  width: min(96vw, 76rem);
+  max-width: none;
+  max-height: min(92dvh, 58rem);
+  margin: auto;
+  overflow: auto;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-lg);
+  padding: 0;
+  background: var(--app-bg);
+  color: var(--app-text);
+  box-shadow: var(--app-shadow-overlay, 0 24px 80px rgb(0 0 0 / 28%));
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity var(--motion-fast, 160ms) var(--ease-editorial, ease), transform var(--motion-ui, 240ms) var(--ease-editorial, ease);
+}
+
+.dialog[open] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.dialog::backdrop {
+  background-color: var(--app-overlay, rgb(0 0 0 / 45%));
+  backdrop-filter: blur(4px);
+  transition: background-color var(--motion-fast, 160ms) var(--ease-editorial, ease);
+}
+
+@starting-style {
+  .dialog[open] {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+
+  .dialog[open]::backdrop {
+    background-color: transparent;
+  }
+}
+
+@media (max-width: 760px) {
+  .section {
+    padding-block: 3.5rem;
+  }
+
+  .saveForm {
+    grid-template-columns: 1fr;
+  }
+
+  .saveForm > button {
+    width: 100%;
+  }
+
+  .section[data-compact='true'] .saveForm {
+    grid-template-columns: 1fr;
+  }
+
+  .section[data-compact='true'] .sectionPanel { display: block; }
+
+  .section[data-compact='true'] .saveForm > button {
+    width: 100%;
+  }
+
+  .section[data-compact='true'] .saveField {
+    grid-template-columns: 1fr;
+    gap: 0.3rem;
+  }
+
+  .section[data-presentation='stage'] {
+    padding-block: 0;
+  }
+
+  .section[data-presentation='stage'] .saveField {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.35rem;
+  }
+
+  .section[data-presentation='stage'] .saveForm {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .section[data-presentation='stage'] .saveForm > .primaryButton {
+    width: 100%;
+  }
+
+  .section[data-presentation='stage'] .stageWorkspace,
+  .section[data-presentation='stage'] .stageWorkspace[data-has-aside='true'] {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+
+  .projectInfo {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 0.85rem;
+  }
+
+  .section[data-compact='true'] .projectInfo {
+    gap: 0.35rem;
+  }
+
+  .projectActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .projectActions > button {
+    flex: 1 1 auto;
+  }
+
+  .switchSaveForm {
+    grid-template-columns: 1fr;
+  }
+
+  .switchSaveForm label {
+    grid-column: auto;
+    margin-bottom: 0;
+  }
+
+  .switchSaveForm > button {
+    width: 100%;
+  }
+
+  .renameForm {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .renameForm input {
+    grid-column: 1 / -1;
+  }
+
+  .dialog {
+    width: 100%;
+    max-width: none;
+    max-height: 100dvh;
+    height: min(100dvh, 100%);
+    border-radius: 0;
+    border-inline: 0;
+  }
+
+  .dialogPanel {
+    padding: 1.25rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .closeButton,
+  .triggerButton,
+  .primaryButton,
+  .secondaryButton,
+  .dangerButton,
+  .textButton {
+    transition: none;
+  }
+
+  .dialog,
+  .dialog::backdrop {
+    transition: none;
+  }
+
+  .closeButton:active:not(:disabled),
+  .triggerButton:active:not(:disabled),
+  .primaryButton:active:not(:disabled),
+  .secondaryButton:active:not(:disabled),
+  .dangerButton:active:not(:disabled),
+  .textButton:active:not(:disabled) {
+    transform: none;
+  }
+}

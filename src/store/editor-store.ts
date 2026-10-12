@@ -68,7 +68,12 @@ export interface EditorStoreState extends EditorSnapshot {
   endHistoryGroup: () => void;
   beginImageAdjustmentGroup: (groupId: string) => void;
   endImageAdjustmentGroup: () => void;
-  replaceCardData: (data: AdventurerCardData, options?: { persist?: boolean; recordHistory?: boolean; saveStatus?: EditorSaveStatus }) => void;
+  replaceCardData: (data: AdventurerCardData, options?: {
+    persist?: boolean;
+    recordHistory?: boolean;
+    saveStatus?: EditorSaveStatus;
+    imageMetadata?: { fileName: string | null; mimeType: string | null };
+  }) => void;
   toCardData: () => AdventurerCardData;
   hydrate: () => void;
   undo: () => void;
@@ -178,7 +183,7 @@ function sameStringArray(a: readonly string[], b: readonly string[]): boolean {
 
 function sameCharacter(a: AdventurerCardCharacter, b: AdventurerCardCharacter): boolean {
   const scalarKeys: (keyof AdventurerCardCharacter)[] = [
-    'name', 'world', 'dataCenter', 'freeCompany', 'job', 'level', 'race', 'clan', 'grandCompany', 'bio',
+    'name', 'world', 'dataCenter', 'freeCompany', 'job', 'level', 'race', 'clan', 'grandCompany', 'bio', 'profileOrigin',
     'service', 'physicalRegionId', 'dataCenterId', 'worldId', 'jobId', 'raceId', 'clanId', 'grandCompanyId',
   ];
   return scalarKeys.every((key) => a[key] === b[key]) &&
@@ -188,6 +193,7 @@ function sameCharacter(a: AdventurerCardCharacter, b: AdventurerCardCharacter): 
 function sameDesign(a: AdventurerCardDesign, b: AdventurerCardDesign): boolean {
   return a.template === b.template && a.ratio === b.ratio && a.layoutVariant === b.layoutVariant &&
     a.colorMode === b.colorMode && a.jobMotifVisible === b.jobMotifVisible && a.jobIconColor === b.jobIconColor &&
+    (a.decorativeCopy ?? 'default') === (b.decorativeCopy ?? 'default') &&
     a.accentColor === b.accentColor && a.typographyPreset === b.typographyPreset &&
     a.imagePosition === b.imagePosition && a.imageScale === b.imageScale &&
     a.palette.primary === b.palette.primary && a.palette.accent === b.palette.accent &&
@@ -427,9 +433,9 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
       const normalized = normalizeCardData(data);
       let cardChanged = false;
       set((state) => {
-        const metadata = normalized.imageUrl === state.image.src
+        const metadata = options?.imageMetadata ?? (normalized.imageUrl === state.image.src
           ? { fileName: state.image.fileName, mimeType: state.image.mimeType }
-          : undefined;
+          : undefined);
         const next = snapshotFromCardData(normalized, metadata);
         cardChanged = !sameSnapshot(captureSnapshot(state), next);
         const history = options?.recordHistory === false

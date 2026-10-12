@@ -7,6 +7,33 @@ import {CARD_NAME_ENVELOPES,fitOpticalName} from '../src/lib/card-name-envelope.
 import {getEditorialBrushShape} from '../src/lib/card-graphics/editorial-shape.ts';
 const evidenceTest=evidenceTests(test,'expressive-precision');
 
+test('long Japanese Editorial landscape name clears the first facts rule without shrinking short English names',()=>{
+ const japaneseName='エオルゼアを旅する長い名前の冒険者';
+ const lines=['エオルゼ','アを旅す','る長い名','前の冒険者'];
+ assert.equal(lines.length,4);
+ assert.equal(lines.join(''),japaneseName);
+
+ const box=CARD_NAME_ENVELOPES.editorial['16:9'];
+ const reference={width:220,height:66,ink:3000,lines:1};
+ const fit=fitOpticalName({
+  family:'editorial',ratio:'16:9',script:'japanese',
+  metrics:{width:200,height:94,ink:9000,lines:lines.length},
+  reference,lineHeight:1,availableWidth:box.width,
+ });
+ const renderedLineBoxes=lines.length*fit.size*(1+.08)+(lines.length-1)*.25;
+ const nameToFactsSpace=(35-9)*9/16;
+ assert.equal(fit.limiting,'height');
+ assert.ok(renderedLineBoxes<=nameToFactsSpace-1,`name box ${renderedLineBoxes.toFixed(3)}cqi leaves 1cqi before facts`);
+
+ const shortEnglish=fitOpticalName({
+  family:'editorial',ratio:'16:9',script:'latin',
+  metrics:{width:90,height:60,ink:3000,lines:1},
+  reference,lineHeight:1,availableWidth:box.width,
+ });
+ assert.equal(shortEnglish.size,box.referenceSize);
+ assert.equal(shortEnglish.limiting,'cap');
+});
+
 test('optical envelopes have script caps and measured dense glyphs shrink without changing the stored name',()=>{
  const reference={width:220,height:66,ink:3000,lines:1};
  for(const family of ['cinematic','editorial','id-card'])for(const ratio of ['1:1','4:5','3:4','9:16','16:9']){

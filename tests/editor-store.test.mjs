@@ -7,15 +7,18 @@ register('./ts-alias-loader.mjs', import.meta.url);
 const [{ editorStore }, { demoAdventurerData }, {
   loadEditorDraft,
   normalizeCardData,
+  normalizeCharacterUpdate,
   persistEditorDraft,
   LEGACY_DRAFT_STORAGE_KEY,
   PREVIOUS_DRAFT_STORAGE_KEY,
   EDITOR_STORAGE_KEY,
   RECOVERY_DRAFT_STORAGE_KEY,
-}] = await Promise.all([
+}, { createNewUserCardFromUpload }, { getWorldSelectionPatch }] = await Promise.all([
   import('../src/store/editor-store.ts'),
   import('../src/components/cards/types.ts'),
   import('../src/store/editor-persistence.ts'),
+  import('../src/lib/new-user-card.ts'),
+  import('../src/components/editor/world-picker.ts'),
 ]);
 const { subscribeToCardDraft } = await import('../src/components/editor/draft.ts');
 
@@ -287,6 +290,128 @@ test('direct canonical updates keep service, world, data center, race and clan a
   assert.equal(character.clanId, 'highlander');
 });
 
+test('selecting a Korean World retains its canonical value through store normalization', () => {
+  restoreDemoCard();
+  editorStore.getState().setCharacter(getWorldSelectionPatch('korea.carbuncle', 'ko'));
+
+  const character = editorStore.getState().character;
+  assert.equal(character.worldId, 'korea.carbuncle');
+  assert.equal(character.world, '카벙클');
+  assert.equal(character.service, 'korea');
+  assert.equal(character.physicalRegionId, null);
+  assert.equal(character.dataCenterId, null);
+  assert.equal(character.dataCenter, '');
+});
+
+test('explicitly cleared clan stays empty through draft persistence while absent legacy fields keep fallback defaults', () => {
+  restoreDemoCard();
+  const normalizedUpdate = normalizeCharacterUpdate(demoAdventurerData.character, { clan: '', clanId: null });
+  assert.equal(normalizedUpdate.race, 'Lalafell');
+  assert.equal(normalizedUpdate.raceId, 'lalafell');
+  assert.equal(normalizedUpdate.clan, '');
+  assert.equal(normalizedUpdate.clanId, null);
+
+  const explicitClear = normalizeCardData({
+    ...demoAdventurerData,
+    character: normalizedUpdate,
+  }).character;
+  assert.equal(explicitClear.clan, '');
+  assert.equal(explicitClear.clanId, null);
+
+  const legacyWithoutClan = {
+    ...demoAdventurerData,
+    character: { ...demoAdventurerData.character },
+  };
+  delete legacyWithoutClan.character.clan;
+  delete legacyWithoutClan.character.clanId;
+  const legacyNormalized = normalizeCardData(legacyWithoutClan).character;
+  assert.equal(legacyNormalized.clan, 'Dunesfolk');
+  assert.equal(legacyNormalized.clanId, 'dunesfolk');
+
+  const blankLabelWithoutId = { ...demoAdventurerData.character, clan: '' };
+  delete blankLabelWithoutId.clanId;
+  const nullIdWithoutLabel = { ...demoAdventurerData.character, clanId: null };
+  delete nullIdWithoutLabel.clan;
+  for (const [shape, character] of [
+    ['blank label without ID', blankLabelWithoutId],
+    ['null ID without label', nullIdWithoutLabel],
+    ['both clan fields absent', legacyWithoutClan.character],
+  ]) {
+    const normalized = normalizeCardData({ ...demoAdventurerData, character }).character;
+    assert.equal(normalized.clan, 'Dunesfolk', `${shape} keeps the legacy fallback label`);
+    assert.equal(normalized.clanId, 'dunesfolk', `${shape} keeps the legacy fallback ID`);
+  }
+
+  const storage = new MemoryStorage();
+  const originalWindow = globalThis.window;
+  globalThis.window = { localStorage: storage };
+  try {
+    editorStore.getState().replaceCardData(demoAdventurerData, { persist: false, recordHistory: false });
+    editorStore.getState().setCharacter({ clan: '', clanId: null }, { persist: false, recordHistory: false });
+    assert.equal(editorStore.getState().character.clan, '');
+    assert.equal(editorStore.getState().character.clanId, null);
+    assert.equal(editorStore.getState().persistNow(), true);
+
+    const saved = JSON.parse(storage.getItem(EDITOR_STORAGE_KEY));
+    assert.equal(saved.card.character.clan, '');
+    assert.equal(saved.card.character.clanId, null);
+    const loaded = loadEditorDraft(storage);
+    assert.equal(loaded.migrated, false);
+    assert.equal(loaded.card.character.clan, '');
+    assert.equal(loaded.card.character.clanId, null);
+
+    editorStore.setState({ isHydrated: false });
+    editorStore.getState().hydrate();
+    assert.equal(editorStore.getState().character.clan, '');
+    assert.equal(editorStore.getState().character.clanId, null);
+  } finally {
+    restoreDemoCard();
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  }
+});
+
+test('card replacement tracks profile-origin-only changes in equality, history, and persisted drafts', () => {
+  restoreDemoCard();
+  const storage = new MemoryStorage();
+  const originalWindow = globalThis.window;
+  globalThis.window = { localStorage: storage };
+  try {
+    const userMarkedCard = {
+      ...demoAdventurerData,
+      character: { ...demoAdventurerData.character, profileOrigin: 'user' },
+    };
+    editorStore.getState().replaceCardData(userMarkedCard, { persist: false, recordHistory: false });
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+
+    editorStore.getState().replaceCardData(demoAdventurerData, { persist: false });
+    assert.equal(editorStore.getState().character.profileOrigin, undefined);
+    assert.equal(editorStore.getState().history.past.length, 1);
+    assert.equal(editorStore.getState().history.past[0].character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().persistNow(), true);
+
+    let loaded = loadEditorDraft(storage);
+    assert.equal(loaded.migrated, false);
+    assert.equal(loaded.card.character.profileOrigin, undefined);
+
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().persistNow(), true);
+    loaded = loadEditorDraft(storage);
+    assert.equal(loaded.card.character.profileOrigin, 'user');
+
+    editorStore.getState().redo();
+    assert.equal(editorStore.getState().character.profileOrigin, undefined);
+    assert.equal(editorStore.getState().persistNow(), true);
+    loaded = loadEditorDraft(storage);
+    assert.equal(loaded.card.character.profileOrigin, undefined);
+  } finally {
+    restoreDemoCard();
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  }
+});
+
 test('text changes group into one IME-safe undo and history stays bounded', () => {
   restoreDemoCard();
   const initialName = editorStore.getState().character.name;
@@ -357,6 +482,56 @@ test('same-value edits and saves do not add history or rewrite storage', () => {
     assert.equal(editorStore.getState().persistNow(), true);
     assert.equal(storage.writes, writes);
   } finally {
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  }
+});
+
+test('decorative copy is undoable, round-trips with drafts, and defaults safely for legacy or invalid values', () => {
+  restoreDemoCard();
+  const storage = new MemoryStorage();
+  const originalWindow = globalThis.window;
+  globalThis.window = { localStorage: storage };
+  try {
+    assert.equal(demoAdventurerData.design.decorativeCopy, 'default');
+    const legacyDesign = { ...demoAdventurerData.design };
+    delete legacyDesign.decorativeCopy;
+    assert.equal(normalizeCardData({ ...demoAdventurerData, design: legacyDesign }).design.decorativeCopy, 'default');
+    assert.equal(normalizeCardData({
+      ...demoAdventurerData,
+      design: { ...demoAdventurerData.design, decorativeCopy: 'custom' },
+    }).design.decorativeCopy, 'default');
+
+    const newPersonalCard = createNewUserCardFromUpload(
+      demoAdventurerData.design.template,
+      'data:image/png;base64,ZmFrZQ==',
+      demoAdventurerData.design.palette,
+    );
+    assert.equal(newPersonalCard.design.decorativeCopy, 'none');
+
+    const state = editorStore.getState();
+    state.setDesign({ decorativeCopy: 'adventure' });
+    assert.equal(editorStore.getState().design.decorativeCopy, 'adventure');
+    assert.equal(editorStore.getState().history.past.length, 1);
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().design.decorativeCopy, 'default');
+    editorStore.getState().redo();
+    assert.equal(editorStore.getState().design.decorativeCopy, 'adventure');
+    const historyLength = editorStore.getState().history.past.length;
+    editorStore.getState().setDesign({ decorativeCopy: 'adventure' });
+    assert.equal(editorStore.getState().history.past.length, historyLength, 'same-mode selection is a no-op');
+
+    assert.equal(editorStore.getState().persistNow(), true);
+    const saved = JSON.parse(storage.getItem(EDITOR_STORAGE_KEY));
+    assert.equal(saved.version, 3, 'the additive field does not require a schema bump');
+    assert.equal(saved.card.design.decorativeCopy, 'adventure');
+    assert.equal(loadEditorDraft(storage).card.design.decorativeCopy, 'adventure');
+
+    editorStore.getState().reset();
+    assert.equal(editorStore.getState().design.decorativeCopy, 'default', 'sample reset restores default copy');
+    assert.equal(editorStore.getState().persistNow(), true);
+  } finally {
+    restoreDemoCard();
     if (originalWindow === undefined) delete globalThis.window;
     else globalThis.window = originalWindow;
   }
@@ -442,4 +617,144 @@ test('uploaded image and derived palette are one undo step; custom colors surviv
   }, uploadedPalette);
   assert.equal(editorStore.getState().design.colorMode, 'custom');
   assert.deepEqual(editorStore.getState().design.palette, customPalette);
+});
+
+test('new user profile marker and absent level survive history, persistence, and hydration', () => {
+  restoreDemoCard();
+  const storage = new MemoryStorage();
+  const originalWindow = globalThis.window;
+  globalThis.window = { localStorage: storage };
+  try {
+    const palette = { primary: '#123456', accent: '#abcdef', light: '#ffffff', dark: '#000000' };
+    const card = createNewUserCardFromUpload('cinematic', 'data:image/webp;base64,QQ==', palette);
+    editorStore.getState().replaceCardData(card, {
+      imageMetadata: { fileName: 'Player.png', mimeType: 'image/webp' },
+    });
+
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().character.level, 0);
+    assert.equal(editorStore.getState().history.past[0].character.profileOrigin, undefined);
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().character.profileOrigin, undefined);
+    editorStore.getState().redo();
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().persistNow(), true);
+
+    const saved = JSON.parse(storage.getItem(EDITOR_STORAGE_KEY));
+    assert.equal(saved.card.character.profileOrigin, 'user');
+    assert.equal(saved.card.character.level, 0);
+    assert.equal(saved.imageMetadata.fileName, 'Player.png');
+    assert.equal(saved.imageMetadata.mimeType, 'image/webp');
+
+    const loadedDraft = loadEditorDraft(storage);
+    assert.equal(loadedDraft.migrated, false);
+    assert.equal(loadedDraft.card.character.service, null);
+    assert.equal(loadedDraft.card.character.level, 0);
+
+    editorStore.setState({ isHydrated: false });
+    editorStore.getState().hydrate();
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().character.level, 0);
+    assert.equal(editorStore.getState().character.job, '');
+    assert.equal(editorStore.getState().character.bio, '');
+    assert.equal(editorStore.getState().image.fileName, 'Player.png');
+    assert.equal(editorStore.getState().image.mimeType, 'image/webp');
+  } finally {
+    restoreDemoCard();
+    if (originalWindow === undefined) delete globalThis.window;
+    else globalThis.window = originalWindow;
+  }
+});
+
+test('marker-free current drafts retain canonical legacy service defaults', () => {
+  const storage = new MemoryStorage();
+  const canonicalSample = normalizeCardData(demoAdventurerData);
+  assert.equal(canonicalSample.character.profileOrigin, undefined);
+  assert.equal(persistEditorDraft(canonicalSample, storage), true);
+
+  const loaded = loadEditorDraft(storage);
+  assert.equal(loaded.migrated, false);
+  assert.equal(loaded.card.character.profileOrigin, undefined);
+  assert.equal(loaded.card.character.service, 'global');
+});
+
+test('replacing a saved user photo preserves the profile marker and entered character facts', () => {
+  restoreDemoCard();
+  try {
+    const card = createNewUserCardFromUpload('id-card', 'data:image/png;base64,QQ==', {
+      primary: '#123456', accent: '#abcdef', light: '#ffffff', dark: '#000000',
+    });
+    editorStore.getState().replaceCardData(card, { persist: false, recordHistory: false });
+    editorStore.getState().setCharacter({ name: 'My Adventurer', bio: 'My own story.' }, { persist: false, recordHistory: false });
+    const identityBeforeReplacement = { ...editorStore.getState().character };
+
+    editorStore.getState().replaceUploadedImage({
+      src: 'data:image/jpeg;base64,Qg==',
+      fileName: 'Second photo.jpg',
+      mimeType: 'image/jpeg',
+    }, { primary: '#654321', accent: '#fedcba', light: '#eeeeee', dark: '#111111' });
+
+    assert.deepEqual(editorStore.getState().character, identityBeforeReplacement);
+    assert.equal(editorStore.getState().character.profileOrigin, 'user');
+    assert.equal(editorStore.getState().character.name, 'My Adventurer');
+    assert.equal(editorStore.getState().character.bio, 'My own story.');
+    assert.equal(editorStore.getState().character.level, 0);
+
+    restoreDemoCard();
+    editorStore.getState().setCharacter({ name: 'Legacy adventurer', bio: 'Legacy bio.' }, { persist: false, recordHistory: false });
+    const legacyIdentityBeforeReplacement = { ...editorStore.getState().character };
+    editorStore.getState().replaceUploadedImage({
+      src: 'data:image/jpeg;base64,Rg==',
+      fileName: 'Legacy replacement.jpg',
+      mimeType: 'image/jpeg',
+    }, { primary: '#654321', accent: '#fedcba', light: '#eeeeee', dark: '#111111' });
+
+    assert.equal(editorStore.getState().character.profileOrigin, undefined);
+    assert.equal(editorStore.getState().character.name, 'Legacy adventurer');
+    assert.equal(editorStore.getState().character.bio, 'Legacy bio.');
+    assert.deepEqual(editorStore.getState().character, legacyIdentityBeforeReplacement);
+  } finally {
+    restoreDemoCard();
+  }
+});
+
+test('replacing a card with the same image URL prefers supplied image metadata and keeps fallback compatibility', () => {
+  restoreDemoCard();
+  try {
+    const sharedImageUrl = 'data:image/png;base64,QQ==';
+    const firstCard = {
+      ...demoAdventurerData,
+      imageUrl: sharedImageUrl,
+      character: { ...demoAdventurerData.character, name: 'First card' },
+    };
+    const secondCard = {
+      ...demoAdventurerData,
+      imageUrl: sharedImageUrl,
+      character: { ...demoAdventurerData.character, name: 'Second card' },
+    };
+    const thirdCard = {
+      ...demoAdventurerData,
+      imageUrl: sharedImageUrl,
+      character: { ...demoAdventurerData.character, name: 'Third card' },
+    };
+
+    editorStore.getState().replaceCardData(firstCard, {
+      persist: false,
+      recordHistory: false,
+      imageMetadata: { fileName: 'first.png', mimeType: 'image/png' },
+    });
+    editorStore.getState().replaceCardData(secondCard, {
+      persist: false,
+      recordHistory: false,
+      imageMetadata: { fileName: 'second.png', mimeType: 'image/png' },
+    });
+    assert.equal(editorStore.getState().image.fileName, 'second.png');
+    assert.equal(editorStore.getState().image.mimeType, 'image/png');
+
+    editorStore.getState().replaceCardData(thirdCard, { persist: false, recordHistory: false });
+    assert.equal(editorStore.getState().image.fileName, 'second.png');
+    assert.equal(editorStore.getState().image.mimeType, 'image/png');
+  } finally {
+    restoreDemoCard();
+  }
 });

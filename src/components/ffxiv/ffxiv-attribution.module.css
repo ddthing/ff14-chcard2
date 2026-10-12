@@ -10,6 +10,6 @@
   opacity: 0.72;
 }
 
-.separator {
-  opacity: 0.65;
+.attribution[data-attribution-variant='site'] {
+  font-size: 0.75rem;
 }

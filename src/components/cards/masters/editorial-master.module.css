@@ -297,6 +297,7 @@
 }
 
 .factValue > span { min-width: 0; overflow-wrap: anywhere; }
+.factValue [data-field='level'] { font-variant-numeric: lining-nums tabular-nums; }
 .factValue [data-field='jobAbbreviation'] { color: var(--editorial-red); font-size: .82em; letter-spacing: .12em; }
 .factSeparator { white-space: pre; }
 
@@ -366,7 +367,7 @@
   --editorial-facts-bottom: 29%;
 }
 
-.canvas[data-ratio='1:1'] .jobInsignia { top: 68%; width: 31%; }
+.canvas[data-ratio='1:1'] .jobInsignia { top: 72%; width: 31%; }
 .canvas[data-ratio='1:1'] .jobGlyph { width: 16cqi !important; height: 16cqi !important; flex-basis: 16cqi !important; }
 .canvas[data-ratio='1:1'] .insigniaCaption { display: none; }
 
@@ -430,9 +431,43 @@
 .canvas[data-ratio='16:9'] .fact { grid-template-columns: 36% minmax(0, 1fr); gap: .55cqi; padding: .5cqi 0; }
 .canvas[data-ratio='16:9'] .factLabel { font-size: .72cqi; letter-spacing: .07em; }
 .canvas[data-ratio='16:9'] .factValue { font-size: 1.12cqi; }
-.canvas[data-ratio='16:9'] .jobInsignia { top: 69%; right: 4%; width: 32%; }
-.canvas[data-ratio='16:9'] .jobGlyph { width: 12cqi !important; height: 12cqi !important; flex-basis: 12cqi !important; }
+.canvas[data-ratio='16:9'] .jobInsignia { top: 71%; right: 4%; width: 32%; gap: .35cqi; }
+.canvas[data-ratio='16:9'] .jobGlyph { width: 8.5cqi !important; height: 8.5cqi !important; flex-basis: 8.5cqi !important; }
 .canvas[data-ratio='16:9'] .insigniaCaption { display: none; }
+
+/* Keep the same information size; a complete JA lineage uses two intact lines. */
+.canvas:lang(ja)[data-ratio='4:5'] .fact,
+.canvas:lang(ja)[data-ratio='3:4'] .fact,
+.canvas:lang(ja)[data-ratio='1:1'] .fact {
+  padding-block: .45cqi;
+}
+
+.canvas:lang(ja)[data-ratio='4:5'] .fact:has(.completeLineage),
+.canvas:lang(ja)[data-ratio='3:4'] .fact:has(.completeLineage),
+.canvas:lang(ja)[data-ratio='1:1'] .fact:has(.completeLineage) {
+  flex-grow: 2;
+}
+
+.canvas:lang(ja)[data-ratio='4:5'] .completeLineage,
+.canvas:lang(ja)[data-ratio='3:4'] .completeLineage,
+.canvas:lang(ja)[data-ratio='1:1'] .completeLineage {
+  display: grid;
+  gap: .1em;
+  overflow-wrap: normal;
+}
+
+.canvas:lang(ja)[data-ratio='4:5'] .completeLineage .factSeparator,
+.canvas:lang(ja)[data-ratio='3:4'] .completeLineage .factSeparator,
+.canvas:lang(ja)[data-ratio='1:1'] .completeLineage .factSeparator {
+  display: none;
+}
+
+.canvas:lang(ja)[data-ratio='4:5'] .completeLineage > span,
+.canvas:lang(ja)[data-ratio='3:4'] .completeLineage > span,
+.canvas:lang(ja)[data-ratio='1:1'] .completeLineage > span {
+  white-space: nowrap;
+  overflow-wrap: normal;
+}
 
 /* CJK copy uses the registered display faces and word-based line breaks. */
 .canvas:lang(ko) .photoStory[data-photo-story='copy'],

@@ -3,14 +3,14 @@
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 import type { AdventurerCardData, AdventurerCardTemplate } from '@/components/cards/types';
+import { demoAdventurerData } from '@/components/cards/types';
 import { CardPreview } from '@/components/editor/card-preview';
 import { getRouteCopy } from '@/components/editor/copy';
 import { FFXIVAttribution } from '@/components/ffxiv';
+import { LocalProjectLibrary } from '@/components/library/local-project-library';
 import { LazyMaster } from '@/components/marketing/lazy-master';
-
 import { useI18n } from '@/lib/i18n';
 import { MASTER_TEMPLATE_ORDER } from '@/lib/master-card-config';
-import { demoAdventurerData } from '@/components/cards/types';
 import { getTemplatePhotoPath } from '@/app/create/create-draft';
 import { normalizeCardData } from '@/store/editor-persistence';
 import { editorStore } from '@/store/editor-store';
@@ -31,8 +31,7 @@ export default function HomePage() {
     const syncDraft = () => {
       const state = editorStore.getState();
       if (!state.isHydrated) return;
-      const data = state.toCardData();
-      setDraft(getHomeResumeDraft(data, starter));
+      setDraft(getHomeResumeDraft(state.toCardData(), starter));
       setSaveStatus(state.saveStatus);
     };
     const unsubscribe = editorStore.subscribe(syncDraft);
@@ -46,74 +45,115 @@ export default function HomePage() {
     editorial: routeCopy.editorial,
     'id-card': routeCopy.idCard,
   };
-  const styleNumbers: Record<AdventurerCardTemplate, string> = {
-    cinematic: '01',
-    editorial: '02',
-    'id-card': '03',
-  };
+  const activeTemplateIndex = MASTER_TEMPLATE_ORDER.indexOf(activeTemplate);
   const saveLabel = saveStatus === 'saving' ? copy.saving : saveStatus === 'error' ? copy.saveError : copy.saved;
+  const draftName = draft?.character.name || routeCopy.characterName;
+  const compareHref = `/templates?template=${activeTemplate}${draft ? '&compare=personal' : ''}`;
 
   return (
-    <div className={styles.page} lang={locale} data-page-transition="home">
+    <div
+      className={styles.page}
+      lang={locale}
+      data-page-transition="home"
+      data-has-draft={draft ? 'true' : undefined}
+    >
       <div className={styles.content}>
-        {draft && (
-          <section className={styles.draft} aria-label={copy.draftHeading}>
-            <div className={styles.draftArtwork} aria-hidden="true"><CardPreview data={draft} locale={locale} /></div>
-            <div className={styles.draftCopy}>
-              <span>{copy.draftHeading}</span><strong>{draft.character.name || routeCopy.characterName}</strong>
-              <span className={styles.draftDetails}>{copy.draftStyle(styleNames[draft.design.template], draft.design.ratio)}</span>
-              <span data-status={saveStatus}>{saveLabel}</span>
-            </div>
-            <Link className={styles.resumeAction} href="/editor">{copy.resumeDraft}<span aria-hidden="true">↗</span></Link>
-          </section>
-        )}
         <section className={styles.studio} aria-labelledby="home-title">
           <header className={styles.intro}>
-            <p className={styles.eyebrow}>{copy.eyebrow}</p>
             <h1 id="home-title">{copy.title}</h1>
-            <p className={styles.description}>{copy.description}</p>
-            <p className={styles.productNote}>{copy.productNote}</p>
           </header>
-          <div className={styles.artwork}>
-            <div className={styles.artworkStage} data-template={activeTemplate}>
-              <span className={styles.stageMeta} aria-hidden="true">XIV / ATELIER <span>{styleNumbers[activeTemplate]} — 03</span></span>
-              <LazyMaster template={activeTemplate} ratio="4:5" locale={locale} eager className={styles.featuredCard} />
+
+          {draft ? (
+            <section className={styles.draft} aria-label={`${copy.draftHeading}: ${draftName}`}>
+              <div className={styles.draftArtwork} aria-hidden="true"><CardPreview data={draft} locale={locale} /></div>
+              <div className={styles.draftCopy}>
+                <span className={styles.draftLabel}>{copy.draftHeading}</span>
+                <div className={styles.draftIdentity}>
+                  <strong>{draftName}</strong>
+                  <span className={styles.draftDetails}>{copy.draftDetails(draft.character.job, draft.character.world)}</span>
+                </div>
+                <span className={styles.saveStatus} data-status={saveStatus} role="status" aria-live="polite" aria-atomic="true">{saveLabel}</span>
+              </div>
+              <Link className={styles.resumeAction} href="/editor">
+                {copy.resumeDraft}<span aria-hidden="true">↗</span>
+              </Link>
+            </section>
+          ) : null}
+
+          <figure className={styles.artwork}>
+            <div className={styles.cardFan}>
+              {MASTER_TEMPLATE_ORDER.map((template) => {
+                const relativeIndex = (MASTER_TEMPLATE_ORDER.indexOf(template) - activeTemplateIndex + MASTER_TEMPLATE_ORDER.length) % MASTER_TEMPLATE_ORDER.length;
+                const position = relativeIndex === 0 ? 'center' : relativeIndex === 1 ? 'right' : 'left';
+
+                return (
+                  <div
+                    className={styles.cardSlot}
+                    key={template}
+                    data-position={position}
+                    aria-hidden={position !== 'center'}
+                  >
+                    <LazyMaster
+                      template={template}
+                      ratio="4:5"
+                      locale={locale}
+                      eager
+                      className={styles.cardArtwork}
+                    />
+                  </div>
+                );
+              })}
             </div>
-            <div className={styles.artworkCaption} aria-live="polite" aria-atomic="true">
-              <div><span>{copy.stylePrefix} {styleNumbers[activeTemplate]}</span><strong>{styleNames[activeTemplate]}</strong></div>
+            <figcaption className={styles.activeCaption} aria-live="polite" aria-atomic="true">
               <span>{copy.sampleLabel}</span>
+              <span aria-hidden="true">·</span>
+              <strong>{styleNames[activeTemplate]}</strong>
+            </figcaption>
+          </figure>
+
+          <div className={styles.stageDock}>
+            <div className={styles.styleChoices} role="group" aria-label={copy.styleSelector}>
+              {MASTER_TEMPLATE_ORDER.map((template) => {
+                const isActive = activeTemplate === template;
+
+                return (
+                  <button
+                    type="button"
+                    key={template}
+                    className={styles.styleChoice}
+                    aria-pressed={isActive}
+                    aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
+                    onClick={() => setActiveTemplate(template)}
+                  >
+                    <span className={styles.styleLabel}>{styleNames[template]}</span>
+                    <span className={styles.styleCheck} aria-hidden="true">{isActive ? '✓' : ''}</span>
+                  </button>
+                );
+              })}
             </div>
-          </div>
-          <div className={styles.controls}>
-            <div className={styles.selectorHeading}><h2 id="style-choice-title">{copy.styleSelector}</h2><p>{copy.stylePrompt}</p></div>
-            <div className={styles.styleChoices} role="group" aria-labelledby="style-choice-title">
-              {MASTER_TEMPLATE_ORDER.map((template) => (
-                <button type="button" key={template} className={styles.styleChoice}
-                  data-template={template} aria-pressed={activeTemplate === template}
-                  aria-label={`${styleNames[template]}${activeTemplate === template ? ` · ${copy.selected}` : ''}`}
-                  aria-describedby={`home-style-${template}-description`} onClick={() => setActiveTemplate(template)}>
-                  <span className={styles.styleIndex}>{styleNumbers[template]}</span>
-                  <span className={styles.styleThumb} aria-hidden="true"><LazyMaster template={template} ratio="4:5" locale={locale} eager={activeTemplate === template} /></span>
-                  <span className={styles.styleCopy} id={`home-style-${template}-description`}>
-                    <strong>{styleNames[template]}</strong>
-                    <span>{copy.featurePoints[template][0]}</span>
-                    <span>{copy.featurePoints[template][1]}</span>
-                  </span>
-                  <span className={styles.choiceMark} aria-hidden="true">{activeTemplate === template ? '✓' : ''}</span>
-                </button>
-              ))}
-            </div>
-            <Link className={styles.compareLink} href={`/templates?template=${activeTemplate}`}>{copy.explore}<span aria-hidden="true">↗</span></Link>
-            <div className={styles.startArea}>
-              <Link className={styles.primaryAction} href={getTemplatePhotoPath(activeTemplate)}>{copy.create}<span aria-hidden="true">→</span></Link>
-              <p>{copy.privacyNote}</p>
+
+            <div className={styles.stageActions}>
+              <Link className={styles.primaryAction} href={getTemplatePhotoPath(activeTemplate)}>
+                {copy.create}<span aria-hidden="true">→</span>
+              </Link>
+              <Link className={styles.compareAction} href={compareHref}>
+                {draft ? copy.exploreDraft : copy.explore}<span aria-hidden="true">↗</span>
+              </Link>
             </div>
           </div>
         </section>
-        <ol className={styles.workflow} aria-label={copy.create}>
-          {copy.steps.map((step, index) => <li key={step}><span>{index + 1}</span>{step}{index < 2 && <span className={styles.flowArrow} aria-hidden="true">→</span>}</li>)}
-        </ol>
-        <footer className={styles.footer}><span>{copy.footer}</span><FFXIVAttribution locale={locale} officialAssetsUsed /></footer>
+
+        <div className={styles.workspaceShelf}>
+          <LocalProjectLibrary
+            compact
+            presentation="stage"
+            stageSaveTarget={`${draft ? draftName : starter.character.name} · ${styleNames[(draft ?? starter).design.template]}`}
+          />
+        </div>
+
+        <footer className={styles.footer}>
+          <FFXIVAttribution locale={locale} officialAssetsUsed />
+        </footer>
       </div>
     </div>
   );

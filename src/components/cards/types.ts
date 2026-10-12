@@ -8,6 +8,11 @@ export type AdventurerCardTemplate = 'cinematic' | 'editorial' | 'id-card';
 export type CardLayoutVariant = 'a' | 'b' | 'c';
 export type CardTypographyPreset = 'editorial' | 'modern' | 'condensed' | 'classic' | 'clean';
 export type CardColorMode = 'auto' | 'job' | 'custom';
+export type CardDecorativeCopy = 'none' | 'default' | 'adventure' | 'companions';
+
+export function isCardDecorativeCopy(value: unknown): value is CardDecorativeCopy {
+  return value === 'none' || value === 'default' || value === 'adventure' || value === 'companions';
+}
 
 export interface AdventurerCardImageAdjustments {
   /** CSS object-position percentages. 50, 50 is centered. */
@@ -28,6 +33,8 @@ export interface AdventurerCardImageAdjustments {
 }
 
 export interface AdventurerCardCharacter {
+  /** Marks cards created from a user's own photo with intentionally blank profile data. */
+  profileOrigin?: 'user';
   name: string;
   world: string;
   dataCenter: string;
@@ -60,6 +67,8 @@ export interface AdventurerCardDesign {
   jobMotifVisible?: boolean;
   /** Explicit glyph tone; null inherits the card's family accent. */
   jobIconColor?: string | null;
+  /** Optional localized decorative copy set; older data resolves to the default set. */
+  decorativeCopy?: CardDecorativeCopy;
   palette: CardPalette;
   accentColor: string;
   typographyPreset: CardTypographyPreset;
@@ -83,6 +92,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     ratio: '4:5',
     layoutVariant: 'a',
     colorMode: 'auto',
+    decorativeCopy: 'default',
     palette: { primary: '#1d2831', accent: '#c5a474', light: '#eee4d3', dark: '#101519' },
     accentColor: '#c5a474',
     typographyPreset: 'editorial',
@@ -95,6 +105,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     ratio: '4:5',
     layoutVariant: 'a',
     colorMode: 'auto',
+    decorativeCopy: 'default',
     palette: { primary: '#ece0ca', accent: '#9a7652', light: '#fff8eb', dark: '#28211b' },
     accentColor: '#9a7652',
     typographyPreset: 'editorial',
@@ -107,6 +118,7 @@ const conerCardDesigns: Record<AdventurerCardTemplate, AdventurerCardDesign> = {
     ratio: '4:5',
     layoutVariant: 'a',
     colorMode: 'auto',
+    decorativeCopy: 'default',
     palette: { primary: '#ece4d7', accent: '#8a7259', light: '#fffaf0', dark: '#332b23' },
     accentColor: '#8a7259',
     typographyPreset: 'condensed',

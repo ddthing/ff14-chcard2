@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const testsRoot = path.join(root, 'tests');
 const files = [];
+const includeArchive = process.argv.includes('--archive');
 
 async function collect(directory) {
   for (const entry of await readdir(directory, { withFileTypes: true })) {
@@ -25,7 +26,9 @@ const exitCode = await new Promise((resolve, reject) => {
     '--disable-warning=MODULE_TYPELESS_PACKAGE_JSON',
     '--test',
     ...files,
-  ], { cwd: root, stdio: 'inherit', windowsHide: true });
+  ], { cwd: root, stdio: 'inherit', windowsHide: true,
+    env: { ...process.env, CARD_QA_EVIDENCE: includeArchive ? 'archive' : 'runtime' },
+  });
   child.once('error', reject);
   child.once('exit', resolve);
 });

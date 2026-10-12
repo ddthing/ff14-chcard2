@@ -24,6 +24,10 @@ import { editorStore } from '@/store/editor-store';
 import { profileRender } from '@/lib/performance-profile';
 import styles from '@/app/editor/editor.module.css';
 
+const WORLD_PICKER_GUIDANCE_ID = 'editor-world-picker-guidance';
+const WORLD_SETTINGS_RESET_HINT_ID = 'editor-world-settings-reset-hint';
+const KOREA_WORLD_SETTINGS_HINT_ID = 'editor-korea-world-settings-hint';
+
 type LocalizedRecord = { localizedName: Record<Locale, string> };
 
 function localName(record: LocalizedRecord, locale: Locale): string {
@@ -62,22 +66,14 @@ export function JobPicker({
   copy: EditorCopy;
   locale: Locale;
 }) {
-  const [roleId, setRoleId] = useState('all');
   profileRender('JobPicker');
   const [categoryId, setCategoryId] = useState('all');
-  const roles = useMemo(() => ordered(JOB_ROLES), []);
-  const categories = useMemo(() => ordered(JOB_CATEGORIES).filter((category) => roleId === 'all' || category.roleId === roleId), [roleId]);
-  const roleFilters: SearchablePickerFilter[] = useMemo(() => [
-    { id: 'all', label: copy.picker.all },
-    ...roles.map((role) => ({ id: role.id, label: localName(role, locale) })),
-  ], [copy.picker.all, locale, roles]);
+  const categories = useMemo(() => ordered(JOB_CATEGORIES), []);
   const categoryFilters: SearchablePickerFilter[] = useMemo(() => [
     { id: 'all', label: copy.picker.all },
     ...categories.map((category) => ({ id: category.id, label: localName(category, locale) })),
   ], [categories, copy.picker.all, locale]);
-  const selectedCategory = JOB_CATEGORIES.find((category) => category.id === categoryId);
   const options: SearchablePickerOption[] = useMemo(() => ordered(JOBS)
-    .filter((job) => roleId === 'all' || job.role === roleId)
     .filter((job) => categoryId === 'all' || job.category === categoryId)
     .map((job) => {
       const category = JOB_CATEGORIES.find((candidate) => candidate.id === job.category);
@@ -91,12 +87,7 @@ export function JobPicker({
         searchText: [job.abbreviation, job.role, job.category, allNames(job), aliasesOf(job), category && allNames(category), role && allNames(role)].filter(Boolean).join(' '),
         icon: <JobIcon jobId={job.id} role={job.role} label={label} size={20} usage="picker" decorative />,
       };
-    }), [categoryId, locale, roleId]);
-
-  function changeRole(nextRoleId: string) {
-    setRoleId(nextRoleId);
-    if (nextRoleId !== 'all' && selectedCategory && selectedCategory.roleId !== nextRoleId) setCategoryId('all');
-  }
+    }), [categoryId, locale]);
 
   return (
     <SearchablePicker
@@ -109,9 +100,7 @@ export function JobPicker({
       clearLabel={copy.picker.clear}
       closeLabel={copy.picker.close}
       options={options}
-      maxResults={14}
       filterGroups={[
-        { id: 'job-role', label: copy.picker.roleFilter, filters: roleFilters, activeFilter: roleId, onChange: changeRole },
         { id: 'job-category', label: copy.picker.categoryFilter, filters: categoryFilters, activeFilter: categoryId, onChange: setCategoryId },
       ]}
       onFocusField={() => onFocusField('job')}
@@ -152,9 +141,15 @@ export function WorldPicker({
   }), [character.dataCenterId, filtersOpen, locale, regionId, service]);
   const services = useMemo(() => ordered(SERVICES), []);
   const currentWorldId = character.worldId ?? null;
+  const worldSettingsDescription = service === 'korea'
+    ? `${WORLD_SETTINGS_RESET_HINT_ID} ${KOREA_WORLD_SETTINGS_HINT_ID}`
+    : WORLD_SETTINGS_RESET_HINT_ID;
 
   return (
-    <div className={styles.pickerWorldFlow}>
+    <div className={styles.pickerWorldFlow} role="group" aria-label={copy.fields.world} aria-describedby={WORLD_PICKER_GUIDANCE_ID}>
+      <span id={WORLD_PICKER_GUIDANCE_ID} className={styles.srOnly}>
+        {copy.worldSearchHint} {copy.worldLocationAuto}
+      </span>
       <div className={styles.pickerWideField}>
         <SearchablePicker
           label={copy.fields.world}
@@ -166,7 +161,6 @@ export function WorldPicker({
           clearLabel={copy.picker.clear}
           closeLabel={copy.picker.close}
           options={worldOptions}
-          maxResults={16}
           onFocusField={() => onFocusField('world')}
           onBlurField={() => onBlurField('world')}
           onSelect={(option) => {
@@ -174,8 +168,6 @@ export function WorldPicker({
             updateCharacter(selection ?? { worldId: null, world: '' });
           }}
         />
-        <p className={styles.pickerHint}>{copy.worldSearchHint}</p>
-        <p className={styles.pickerHint}>{copy.worldLocationAuto}</p>
       </div>
 
       <details
@@ -184,11 +176,13 @@ export function WorldPicker({
       >
         <summary>{copy.worldFilters}</summary>
         <div className={styles.pickerWorldFlow}>
+          <p id={WORLD_SETTINGS_RESET_HINT_ID} className={`${styles.pickerHint} ${styles.pickerWideField}`}>{copy.worldSettingsResetHint}</p>
           <label className={styles.pickerInlineSelect}>
             <span>{copy.fields.service}</span>
             <select
               value={service}
               aria-label={copy.fields.service}
+              aria-describedby={WORLD_SETTINGS_RESET_HINT_ID}
               onFocus={() => onFocusField('service')}
               onBlur={() => onBlurField('service')}
               onChange={(event) => {
@@ -206,6 +200,7 @@ export function WorldPicker({
               value={regionId}
               disabled={service === 'korea'}
               aria-label={copy.fields.region}
+              aria-describedby={worldSettingsDescription}
               onFocus={() => onFocusField('region')}
               onBlur={() => onBlurField('region')}
               onChange={(event) => {
@@ -224,6 +219,7 @@ export function WorldPicker({
               value={character.dataCenterId ?? ''}
               disabled={service === 'korea'}
               aria-label={copy.fields.dataCenter}
+              aria-describedby={worldSettingsDescription}
               onFocus={() => onFocusField('dataCenter')}
               onBlur={() => onBlurField('dataCenter')}
               onChange={(event) => {
@@ -235,7 +231,7 @@ export function WorldPicker({
               {dataCenters.map((dataCenter) => <option value={dataCenter.id} key={dataCenter.id}>{localName(dataCenter, locale)}</option>)}
             </select>
           </label>
-          {service === 'korea' && <p className={`${styles.pickerHint} ${styles.pickerWideField}`}>{copy.picker.koreaNoDataCenter}</p>}
+          {service === 'korea' && <p id={KOREA_WORLD_SETTINGS_HINT_ID} className={`${styles.pickerHint} ${styles.pickerWideField}`}>{copy.picker.koreaNoDataCenter}</p>}
         </div>
       </details>
     </div>
@@ -278,7 +274,6 @@ export function RaceClanPicker({
         clearLabel={copy.picker.clear}
         closeLabel={copy.picker.close}
         options={raceOptions}
-        maxResults={8}
         onFocusField={() => onFocusField('race')}
         onBlurField={() => onBlurField('race')}
         onSelect={(option) => {
@@ -305,7 +300,6 @@ export function RaceClanPicker({
         closeLabel={copy.picker.close}
         options={clanOptions}
         disabled={!selectedRaceId}
-        maxResults={8}
         onFocusField={() => onFocusField('clan')}
         onBlurField={() => onBlurField('clan')}
         onSelect={(option) => {
@@ -346,7 +340,6 @@ export function GrandCompanyPicker({
       clearLabel={copy.picker.clear}
       closeLabel={copy.picker.close}
       options={options}
-      maxResults={5}
       onFocusField={() => onFocusField('grandCompany')}
       onBlurField={() => onBlurField('grandCompany')}
       onSelect={(option) => {
