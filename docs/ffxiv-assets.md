@@ -8,7 +8,7 @@ The resolver accepts local files under `public/assets/ffxiv/jobs/xivapi/svg/` or
 
 Picker-only optical scaling fits the visible alpha's longest edge to 18px within a 20px frame. Card and export optical scales stay unchanged; source pixels are not cropped or regenerated.
 
-`NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED` defaults to `false` and is embedded at build time. To show the reviewed local assets, build with the flag set to `true` after confirming the applicable regional usage terms and required notices.
+`NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED` is embedded at build time. The site's `npm run build` / `build:cloudflare` release wrapper explicitly opts in to the reviewed local originals, passing `true` to both Next.js and packaging when the process environment does not specify a value. An explicit process value of `false` disables them. Direct Next invocations retain the default `false`. Required notices and the source-policy records below remain applicable.
 
 ## Preserved Fan Kit originals
 

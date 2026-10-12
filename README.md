@@ -76,9 +76,9 @@ The source URLs, exact WOFF2 delivery method, and unmodified copyright/license n
 
 ## Official FFXIV assets
 
-The official [FFXIV Fan Kit](https://na.finalfantasyxiv.com/lodestone/special/fankit/icon/) lists Class & Job Icons, but its download requires agreement to its terms. The Korean operator's [Section 10 policy](https://www.ff14.co.kr/support/policy) permits limited non-commercial internet use of Fan Kit materials with specific attribution; the North American, European, and Japanese policies have separate scopes. Permission to bundle those files in a public card maker and distribute them inside exported PNG/WebP cards was not established for this project. No official icon binary was downloaded or bundled.
+Runtime job marks use the reviewed, locally pinned XIVAPI originals described in [ffxiv-assets.md](docs/ffxiv-assets.md). The current inventory covers 33 source-backed jobs; Beastmaster and failed sources retain text or role fallbacks. Source artwork, required notices, and source-policy records remain preserved.
 
-`NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED` defaults to `false`, and the reviewed icon manifest is empty. Job pickers and cards show neutral role-symbol fallbacks, while editing and export remain fully functional. [ffxiv-assets.md](docs/ffxiv-assets.md) records the source policies, required notices, feature flag, and conditions to review before adding official files. The app does not present itself as an official Square Enix service.
+`npm run build` explicitly enables these reviewed icons through `tools/build.mjs`, which passes the same build-time flag to Next.js and the static packager. A process environment value of `NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED=false` disables them. Direct Next invocations remain opt-in. The app does not present itself as an official Square Enix service.
 
 ## Card Art Direction
 
@@ -92,5 +92,5 @@ See [card art direction](docs/card-art-direction.md) and the
 
 ## Deploying to Cloudflare Pages
 
-This build is configured as a static Next.js export. Use `npm run build:cloudflare` and deploy the generated `out/` directory from Cloudflare Pages. The build leaves the optional official job-icon binaries out unless `NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED=true` is explicitly configured. See the [Cloudflare deployment notes](docs/releases/phase303-job-lock/DEPLOY_CLOUDFLARE.md).
+This build is configured as a static Next.js export. Use `npm run build:cloudflare` (or `npm run build`) and publish `dist/`; Next.js also emits the same files in `out/`. Release builds include the reviewed job icons without depending on a local environment file. An explicit process environment flag of `false` disables and omits them. See the [Cloudflare deployment notes](docs/releases/phase303-job-lock/DEPLOY_CLOUDFLARE.md).
 

@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && node tools/prune-cloudflare-assets.mjs",
+    "build": "node tools/build.mjs",
     "build:cloudflare": "npm run build",
     "start": "next start",
     "lint": "eslint .",
