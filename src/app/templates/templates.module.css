@@ -31,13 +31,11 @@
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
 
 .gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: clamp(1rem, 2.1vw, 1.8rem); padding: 0.9rem 0 1.5rem; }
-.galleryCard { min-width: 0; border-top: 1px solid var(--app-border); padding-top: 0.65rem; opacity: 1; transition: border-color var(--motion-fast, 160ms) var(--ease-editorial, ease); animation: gallery-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
+.galleryCard { min-width: 0; opacity: 1; animation: gallery-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
 .galleryCard:nth-child(2) { animation-delay: 70ms; }
 .galleryCard:nth-child(3) { animation-delay: 140ms; }
-.galleryCard[data-selected='true'] { border-color: var(--app-accent); }
 .cardChoice { display: flex; width: 100%; flex-direction: column; align-items: stretch; gap: 0.85rem; border: 0; padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-.visualStage { display: grid; width: 100%; place-items: center; overflow: hidden; border: 1px solid var(--app-border); padding: clamp(0.45rem, 0.9vw, 0.75rem); background: var(--app-workspace); transition: border-color var(--motion-fast, 160ms) var(--ease-editorial, ease), background-color var(--motion-fast, 160ms) var(--ease-editorial, ease); }
-.galleryCard[data-selected='true'] .visualStage { border-color: var(--app-accent); background: var(--app-surface); }
+.visualStage { display: grid; width: 100%; place-items: center; overflow: hidden; border: 1px solid var(--app-border); padding: clamp(0.45rem, 0.9vw, 0.75rem); background: var(--app-workspace); }
 .masterCard { width: 100%; height: auto; }
 .masterCard article[data-template] { width: 100%; height: auto; }
 .liveMaster { width: 100%; height: auto; animation: artwork-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
@@ -119,8 +117,6 @@
   .liveMaster { animation: none; }
   .backLink span,
   .compareModes button,
-  .galleryCard,
-  .visualStage,
   .primaryAction,
   .primaryAction > span:last-child { transition: none; }
   .backLink:hover span,
@@ -131,5 +127,5 @@
 
 @media (forced-colors: active) {
   .compareModes button[aria-pressed='true'] { outline: 1px solid Highlight; }
-  .galleryCard[data-selected='true'] .visualStage { border: 2px solid Highlight; }
+  .galleryCard[data-selected='true'] .choiceMark { color: Highlight; }
 }
