@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { register } from 'node:module';
 import test from 'node:test';
 import { getEditorCopy } from '../src/components/editor/copy.ts';
 import {
@@ -11,8 +12,17 @@ import {
   getEditorEntryPanel,
 } from '../src/components/editor/editor-navigation.ts';
 
+register('./ts-alias-loader.mjs', import.meta.url);
+const [{ editorStore }, { isCardDecorativeCopy }, { applyDefaultCopySample, applyGlobalTypographyPreset, resetLegacyTypographyRole }] = await Promise.all([
+  import('../src/store/editor-store.ts'),
+  import('../src/components/cards/types.ts'),
+  import('../src/components/editor/text-editor/card-text-actions.ts'),
+]);
+
 const workspaceSource = readFileSync(new URL('../src/components/editor/editor-workspace.tsx', import.meta.url), 'utf8');
 const editorStyles = readFileSync(new URL('../src/app/editor/editor.module.css', import.meta.url), 'utf8');
+const textEditorSource = readFileSync(new URL('../src/components/editor/text-editor/card-text-editor.tsx', import.meta.url), 'utf8');
+const typographyEditorSource = readFileSync(new URL('../src/components/editor/typography-role-editor.tsx', import.meta.url), 'utf8');
 
 test('new unnamed user cards enter identity editing without changing existing task choices', () => {
   assert.equal(getEditorEntryPanel({ profileOrigin: 'user', name: '' }, 'screenshot'), 'information');
@@ -66,29 +76,130 @@ test('mobile task controls toggle their sheet and preserve desktop inspector sel
 });
 
 test('V3 task names stay localized across the supported app languages', () => {
-  assert.deepEqual(getEditorCopy('ko').tasks, { photo: '사진', information: '정보', design: '디자인' });
-  assert.deepEqual(getEditorCopy('en').tasks, { photo: 'Photo', information: 'Information', design: 'Design' });
-  assert.deepEqual(getEditorCopy('ja').tasks, { photo: '写真', information: '情報', design: 'デザイン' });
+  assert.deepEqual(getEditorCopy('ko').tasks, { photo: '사진', information: '내용', design: '디자인' });
+  assert.deepEqual(getEditorCopy('en').tasks, { photo: 'Photo', information: 'Content', design: 'Design' });
+  assert.deepEqual(getEditorCopy('ja').tasks, { photo: '写真', information: 'コンテンツ', design: 'デザイン' });
+  assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.categories), [
+    { identity: '이름 + 소개', information: '캐릭터 정보', copy: '카드 문구' },
+    { identity: 'Name + Bio', information: 'Character information', copy: 'Card phrases' },
+    { identity: '名前・紹介', information: 'キャラクター情報', copy: 'カードの文言' },
+  ]);
   assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).sampleBadge), ['예시', 'Sample', 'サンプル']);
 });
 
-test('decorative copy selector exposes the same four choices with localized labels', () => {
+test('Card Phrases uses one default-sample action and saved copy modes remain valid', () => {
   const locales = ['ko', 'en', 'ja'];
-  const choices = locales.map((locale) => getEditorCopy(locale).decorativeCopyNames);
-  assert.deepEqual(choices.map((labels) => Object.keys(labels).sort()), Array(3).fill(['adventure', 'companions', 'default', 'none']));
-  assert.deepEqual(choices.map((labels) => labels.none), ['없음', 'None', 'なし']);
-  assert.deepEqual(choices.map((labels) => labels.default), ['기본', 'Default', '標準']);
-  assert.deepEqual(choices.map((labels) => labels.adventure), ['모험', 'Adventure', '冒険']);
-  assert.deepEqual(choices.map((labels) => labels.companions), ['동료', 'Companions', '仲間']);
+  assert.deepEqual(locales.map((locale) => getEditorCopy(locale).textEditor.restoreDefaultCopy), ['기본 문구로 복원', 'Restore default phrases', '標準の文言に戻す']);
+  assert.deepEqual(['none', 'default', 'adventure', 'companions'].map((mode) => isCardDecorativeCopy(mode)), [true, true, true, true]);
+  assert.match(textEditorSource, /export function DefaultCopySampleButton/u);
+  assert.match(textEditorSource, /onClick=\{\(\) => applyDefaultCopySample\(copyIds\)\}/u);
+
+  const previousDesign = editorStore.getState().design;
+  const historyLength = editorStore.getState().history.past.length;
+  const priorOverrides = {
+    'cinematic.promise': 'Custom promise',
+    'cinematic.label.job': 'Custom job label',
+    'editorial.story': 'Other master story',
+  };
+  const priorTypography = { ...(previousDesign.textTypography ?? {}), 'cinematic.promise': { sizePercent: 112 } };
+  try {
+    editorStore.getState().setDesign({
+      decorativeCopy: 'adventure',
+      textOverrides: priorOverrides,
+      textTypography: priorTypography,
+    }, { recordHistory: false, persist: false });
+
+    applyDefaultCopySample(['cinematic.promise', 'cinematic.quote']);
+
+    assert.equal(editorStore.getState().design.decorativeCopy, 'default');
+    assert.deepEqual(editorStore.getState().design.textOverrides, {
+      'cinematic.label.job': 'Custom job label',
+      'editorial.story': 'Other master story',
+    });
+    assert.deepEqual(editorStore.getState().design.textTypography, priorTypography);
+    assert.equal(editorStore.getState().history.past.length, historyLength + 1);
+
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().design.decorativeCopy, 'adventure');
+    assert.deepEqual(editorStore.getState().design.textOverrides, priorOverrides);
+    assert.deepEqual(editorStore.getState().design.textTypography, priorTypography);
+  } finally {
+    editorStore.getState().setDesign({
+      decorativeCopy: previousDesign.decorativeCopy,
+      textOverrides: previousDesign.textOverrides,
+      textTypography: previousDesign.textTypography,
+    }, { recordHistory: false, persist: false });
+  }
 });
 
-test('master A font family choices are localized and the five legacy preset labels remain available', () => {
+test('global card typography preset labels remain localized and the picker updates the saved design', () => {
   const copies = ['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale));
-  assert.deepEqual(copies.map((copy) => copy.typographyFamilyNames.serif), ['세리프', 'Serif', 'セリフ']);
-  assert.deepEqual(copies.map((copy) => copy.typographyFamilyNames.sans), ['산세리프', 'Sans serif', 'サンセリフ']);
   for (const copy of copies) {
     assert.deepEqual(Object.keys(copy.typographyNames).sort(), ['classic', 'clean', 'condensed', 'editorial', 'modern']);
   }
+  assert.match(textEditorSource, /export function GlobalTypographyPresetPicker/u);
+  assert.match(textEditorSource, /onChange=\{\(event\) => applyGlobalTypographyPreset\(event\.currentTarget\.value as CardTypographyPreset\)\}/u);
+  assert.match(typographyEditorSource, /setTextTypographyOverride\(item\.id, next/u);
+  assert.match(typographyEditorSource, /resetTextTypographyOverride\(item\.id/u);
+  assert.match(typographyEditorSource, /hasInheritedOverride/u);
+  assert.match(typographyEditorSource, /resetLegacyTypographyRole\(item\.role\)/u);
+  const advancedTypographyControls = typographyEditorSource.match(/<details className=\{styles\.advanced\}>([\s\S]*?)<\/details>/u)?.[1] ?? '';
+  assert.match(advancedTypographyControls, /hasInheritedOverride[\s\S]*?resetLegacyTypographyRole\(item\.role\)/u);
+
+  const priorPreset = editorStore.getState().design.typographyPreset;
+  try {
+    applyGlobalTypographyPreset('modern');
+    assert.equal(editorStore.getState().design.typographyPreset, 'modern');
+  } finally {
+    editorStore.getState().setDesign({ typographyPreset: priorPreset }, { recordHistory: false, persist: false });
+  }
+});
+
+test('a saved role style can be reset from the selected text editor with an undoable store change', () => {
+  const previousTypography = editorStore.getState().design.typography;
+  const historyLength = editorStore.getState().history.past.length;
+  try {
+    editorStore.getState().setDesign({
+      typography: { ...(previousTypography ?? {}), display: { ...(previousTypography?.display ?? {}), sizePercent: 110 } },
+    }, { recordHistory: false, persist: false });
+    assert.equal(editorStore.getState().design.typography?.display?.sizePercent, 110);
+    resetLegacyTypographyRole('display');
+    assert.equal(editorStore.getState().design.typography?.display, undefined);
+    assert.equal(editorStore.getState().history.past.length, historyLength + 1);
+  } finally {
+    editorStore.getState().setDesign({ typography: previousTypography }, { recordHistory: false, persist: false });
+  }
+});
+
+test('experimental layouts keep saved overrides but expose only canonical fields and the global font preset', () => {
+  const previousDesign = editorStore.getState().design;
+  const textOverrides = { 'cinematic.promise': 'Saved phrase' };
+  const textTypography = { 'character.name': { sizePercent: 110 } };
+  try {
+    editorStore.getState().setDesign({ layoutVariant: 'b', textOverrides, textTypography }, { recordHistory: false, persist: false });
+    assert.deepEqual(editorStore.getState().design.textOverrides, textOverrides);
+    assert.deepEqual(editorStore.getState().design.textTypography, textTypography);
+    editorStore.getState().setDesign({ layoutVariant: 'a' }, { recordHistory: false, persist: false });
+    assert.deepEqual(editorStore.getState().design.textOverrides, textOverrides);
+    assert.deepEqual(editorStore.getState().design.textTypography, textTypography);
+  } finally {
+    editorStore.getState().setDesign({
+      layoutVariant: previousDesign.layoutVariant,
+      textOverrides: previousDesign.textOverrides,
+      textTypography: previousDesign.textTypography,
+    }, { recordHistory: false, persist: false });
+  }
+
+  assert.match(workspaceSource, /supportsPerItemTextEditing \? textItems : textItems\.filter\(\(item\) => item\.field !== undefined\)/u);
+  assert.match(workspaceSource, /disabledCategories=\{supportsPerItemTextEditing \? \[\] : \['copy'\]\}/u);
+  assert.match(workspaceSource, /!supportsPerItemTextEditing && \([\s\S]*?copy\.textEditor\.globalTypographyOnly/u);
+  assert.match(workspaceSource, /supportsPerItemTextEditing\s*\?\s*<TypographyRoleEditor/u);
+  assert.match(workspaceSource, /enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.globalTypographyOnly), [
+    '현재 스타일에서는 카드 전체 서체를 조절합니다.',
+    'This style uses one font for the whole card.',
+    '現在のスタイルではカード全体のフォントを調整します。',
+  ]);
 });
 
 test('V3 tabs keep real editor controls connected to the existing store and preview', () => {
@@ -110,7 +221,12 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /changeArrayField\('languages'/u);
   assert.match(workspaceSource, /changeArrayField\('playStyles'/u);
   assert.match(workspaceSource, /<RatioPicker[\s\S]*?value=\{design\.ratio\}/u);
-  assert.match(workspaceSource, /updateDesign\('typographyPreset'/u);
+  assert.match(workspaceSource, /<CardTextEditorNavigation[\s\S]*?items=\{textEditorItems\}[\s\S]*?category=\{activeTextCategory\}[\s\S]*?selectedId=\{selectedTextItem\?\.id/u);
+  assert.match(workspaceSource, /<CardTextOverrideInput[\s\S]*?item=\{selectedTextItem\}/u);
+  assert.match(workspaceSource, /<TypographyRoleEditor locale=\{locale\} item=\{selectedTextItem\}/u);
+  assert.match(workspaceSource, /<CardTextOverlay[\s\S]*?enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.match(textEditorSource, /data-text-editor="true" data-selected-text-id=/u);
+  assert.match(textEditorSource, /categoryItems\.length > 2/u);
   assert.match(workspaceSource, /updateDesign\('colorMode'/u);
   assert.match(workspaceSource, /design\.effects\.includes\(effect\)/u);
   assert.match(workspaceSource, /HistoryButton action="undo"/u);

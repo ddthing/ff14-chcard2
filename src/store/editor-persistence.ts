@@ -13,11 +13,13 @@ import {
   type CardTypographyPreset,
   type CardTypographyRole,
   type CardTypographyOverride,
+  type CardTextTypographyOverrides,
   isCardDecorativeCopy,
 } from '@/components/cards/types';
 import type { CardPalette } from '@/lib/palette';
-import { getTypographySupportedWeight, isSelectableTypographyFontId } from '@/lib/typography-presets';
+import { getTypographySupportedWeight, isRegisteredTypographyFontId } from '@/lib/typography-presets';
 import { CARD_TEXTURE_EFFECTS } from '@/lib/card-texture-effects';
+import { isCardTextOverrideId, isKnownCardTextId, normalizeCardTextOverride } from '@/lib/card-text-editing';
 import { createEmptyUserCharacter } from '@/lib/new-user-card';
 import {
   DATA_CENTERS,
@@ -126,7 +128,7 @@ function normalizeTypographyOverrides(value: unknown): AdventurerCardDesign['typ
   for (const role of TYPOGRAPHY_ROLES) {
     const raw = record(input[role]);
     const override: CardTypographyOverride = {};
-    const fontFamily = typeof raw.fontFamily === 'string' && isSelectableTypographyFontId(raw.fontFamily)
+    const fontFamily = typeof raw.fontFamily === 'string' && isRegisteredTypographyFontId(raw.fontFamily)
       ? raw.fontFamily
       : undefined;
     if (fontFamily) override.fontFamily = fontFamily;
@@ -145,6 +147,48 @@ function normalizeTypographyOverrides(value: unknown): AdventurerCardDesign['typ
     if (Object.keys(override).length > 0) result[role] = override;
   }
 
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+function normalizeTextOverrides(value: unknown): AdventurerCardDesign['textOverrides'] {
+  const input = record(value);
+  const result: Record<string, string> = {};
+  for (const [id, raw] of Object.entries(input).slice(0, 128)) {
+    if (!isCardTextOverrideId(id)) continue;
+    const normalized = normalizeCardTextOverride(raw, id);
+    if (normalized !== undefined) result[id] = normalized;
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+export function normalizeCardTypographyOverride(value: unknown): CardTypographyOverride | undefined {
+  const raw = record(value);
+  const override: CardTypographyOverride = {};
+  const fontFamily = typeof raw.fontFamily === 'string' && isRegisteredTypographyFontId(raw.fontFamily)
+    ? raw.fontFamily
+    : undefined;
+  if (fontFamily) override.fontFamily = fontFamily;
+  if (typeof raw.sizePercent === 'number' && Number.isFinite(raw.sizePercent)) {
+    override.sizePercent = clamp(raw.sizePercent, 100, 75, 125);
+  }
+  if (typeof raw.weight === 'number' && Number.isFinite(raw.weight)) {
+    const boundedWeight = clamp(raw.weight, 500, 100, 900);
+    override.weight = fontFamily ? getTypographySupportedWeight(fontFamily, boundedWeight) : boundedWeight;
+  }
+  if (typeof raw.trackingEm === 'number' && Number.isFinite(raw.trackingEm)) {
+    override.trackingEm = clamp(raw.trackingEm, 0, -0.12, 0.2);
+  }
+  return Object.keys(override).length > 0 ? override : undefined;
+}
+
+function normalizeTextTypographyOverrides(value: unknown): CardTextTypographyOverrides | undefined {
+  const input = record(value);
+  const result: CardTextTypographyOverrides = {};
+  for (const [id, rawValue] of Object.entries(input).slice(0, 128)) {
+    if (!isKnownCardTextId(id)) continue;
+    const override = normalizeCardTypographyOverride(rawValue);
+    if (override) result[id] = override;
+  }
   return Object.keys(result).length > 0 ? result : undefined;
 }
 
@@ -551,6 +595,8 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     base.imageAdjustments,
   );
   const typography = normalizeTypographyOverrides(designInput.typography);
+  const textOverrides = normalizeTextOverrides(designInput.textOverrides);
+  const textTypography = normalizeTextTypographyOverrides(designInput.textTypography);
   const effectIntensity = normalizeEffectIntensity(designInput.effectIntensity);
   const characterInput = record(input.character);
   const characterFallback = characterInput.profileOrigin === 'user'
@@ -570,6 +616,8 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
     accentColor: palette.accent,
     typographyPreset: normalizeTypographyPreset(designInput.typographyPreset) ?? base.design.typographyPreset,
     ...(typography ? { typography } : {}),
+    ...(textOverrides ? { textOverrides } : {}),
+    ...(textTypography ? { textTypography } : {}),
     ...(effectIntensity ? { effectIntensity } : {}),
     imagePosition: `${adjustments.x}% ${adjustments.y}%`,
     imageScale: adjustments.scale,

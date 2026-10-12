@@ -8,7 +8,8 @@ import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
-import { CARD_STOCK_COPY, CARD_UI_LABELS, getCardMasterCopy } from '@/lib/card-copy';
+import { CARD_STOCK_COPY, CARD_UI_LABELS } from '@/lib/card-copy';
+import { getCardMasterCopyForData, getCardTextTypographyOverride, resolveCardText } from '@/lib/card-text-editing';
 import type { CardPictogramKind } from '@/lib/card-graphics/pictograms';
 import styles from './identity-master.module.css';
 
@@ -17,6 +18,7 @@ type RecordFact = {
   value: string;
   field: MasterField;
   pictogram: CardPictogramKind;
+  labelTextId: string;
   ariaLabel?: string;
 };
 
@@ -26,7 +28,7 @@ function nonEmpty(value: string): boolean {
   return value.trim().length > 0;
 }
 
-function RecordEntry({ label, value, field, pictogram, ariaLabel }: RecordFact) {
+function RecordEntry({ label, value, field, pictogram, labelTextId, ariaLabel }: RecordFact) {
   if (!nonEmpty(value)) return null;
 
   return (
@@ -35,7 +37,7 @@ function RecordEntry({ label, value, field, pictogram, ariaLabel }: RecordFact) 
         <CardPictogram kind={pictogram} className={styles.pictogram} />
       </span>
       <dl className={styles.recordCopy}>
-        <dt className={styles.recordLabel} data-typography-role="label" data-master-typography-role="label">{label}</dt>
+        <dt className={styles.recordLabel} data-typography-role="label" data-master-typography-role="label" data-card-text-id={labelTextId}>{label}</dt>
         <dd data-master-typography-role="information" {...masterFieldProps('id-card', field)} aria-label={ariaLabel}>{value}</dd>
       </dl>
     </div>
@@ -55,7 +57,7 @@ function RecordColumn({ title, facts }: { title: string; facts: RecordFact[] }) 
 
 export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = getCardMasterCopy('identity', locale, data.design.decorativeCopy);
+  const copy = getCardMasterCopyForData(data, locale, 'identity');
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const fitNameTight = nameLayout.category === 'long' || nameLines.length >= 3;
   const isCjkName = nameLayout.script === 'korean' || nameLayout.script === 'japanese';
@@ -69,26 +71,28 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
 
   const originFacts: RecordFact[] = [
-    { label: ui.world, value: labels.world, field: 'world', pictogram: 'world' },
-    { label: ui.dataCenter, value: labels.dataCenter, field: 'dataCenter', pictogram: 'dataCenter' },
-    { label: ui.serviceRegion, value: microcopy.origin, field: 'origin', pictogram: 'service' },
+    { label: resolveCardText(data, 'identity.label.world', ui.world), labelTextId: 'identity.label.world', value: labels.world, field: 'world', pictogram: 'world' },
+    { label: resolveCardText(data, 'identity.label.dataCenter', ui.dataCenter), labelTextId: 'identity.label.dataCenter', value: labels.dataCenter, field: 'dataCenter', pictogram: 'dataCenter' },
+    { label: resolveCardText(data, 'identity.label.serviceRegion', ui.serviceRegion), labelTextId: 'identity.label.serviceRegion', value: microcopy.origin, field: 'origin', pictogram: 'service' },
   ];
   const lineageFacts: RecordFact[] = [
-    { label: ui.race, value: labels.race, field: 'race', pictogram: 'race' },
-    { label: ui.clan, value: labels.clan, field: 'clan', pictogram: 'clan' },
-    { label: ui.freeCompany, value: character.freeCompany, field: 'freeCompany', pictogram: 'freeCompany' },
+    { label: resolveCardText(data, 'identity.label.race', ui.race), labelTextId: 'identity.label.race', value: labels.race, field: 'race', pictogram: 'race' },
+    { label: resolveCardText(data, 'identity.label.clan', ui.clan), labelTextId: 'identity.label.clan', value: labels.clan, field: 'clan', pictogram: 'clan' },
+    { label: resolveCardText(data, 'identity.label.freeCompany', ui.freeCompany), labelTextId: 'identity.label.freeCompany', value: character.freeCompany, field: 'freeCompany', pictogram: 'freeCompany' },
   ];
   const affiliationFacts: RecordFact[] = [
-    { label: ui.grandCompany, value: labels.grandCompany, field: 'grandCompany', pictogram: 'grandCompany' },
+    { label: resolveCardText(data, 'identity.label.grandCompany', ui.grandCompany), labelTextId: 'identity.label.grandCompany', value: labels.grandCompany, field: 'grandCompany', pictogram: 'grandCompany' },
     {
-      label: CARD_UI_LABELS[locale].languages,
+      label: resolveCardText(data, 'identity.label.languages', CARD_UI_LABELS[locale].languages),
+      labelTextId: 'identity.label.languages',
       value: labels.languages.join(' / '),
       field: 'languages',
       pictogram: 'languages',
       ariaLabel: labels.languageNames.join(', '),
     },
     {
-      label: CARD_UI_LABELS[locale].playStyles,
+      label: resolveCardText(data, 'identity.label.playStyles', CARD_UI_LABELS[locale].playStyles),
+      labelTextId: 'identity.label.playStyles',
       value: labels.playStyles.join(' · '),
       field: 'playStyles',
       pictogram: 'playStyles',
@@ -99,8 +103,8 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
     <div className={styles.canvas} data-ratio={ratio ?? data.design.ratio} data-locale={locale} lang={locale}>
       <ArtPhoto data={data} locale={locale} className={styles.photo} />
       {(copy.photoQuote.length > 0 || copy.photoStamp.length > 0) && <div className={styles.photoCopy} lang={locale}>
-        {copy.photoQuote.length > 0 && <p className={styles.photoQuote}>{copy.photoQuote.map((line) => <span key={line}>{line}</span>)}</p>}
-        {copy.photoStamp.length > 0 && <p className={styles.photoStamp}>{copy.photoStamp.map((line) => <span key={line}>{line}</span>)}</p>}
+        {copy.photoQuote.length > 0 && <p className={styles.photoQuote} data-master-typography-role="secondaryDisplay" data-card-text-id="identity.photoQuote">{copy.photoQuote.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
+        {copy.photoStamp.length > 0 && <p className={styles.photoStamp} data-master-typography-role="caption" data-card-text-id="identity.photoStamp">{copy.photoStamp.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
       </div>}
       <div className={styles.stock} aria-hidden="true">
         <Image
@@ -149,11 +153,11 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
           <path d="M3 2H97V82L50 94 3 82Z" strokeWidth=".42" />
           <path d="M6 5H94V80L50 90 6 80Z" strokeWidth=".28" opacity=".58" />
         </svg>
-        <span className={styles.mastheadTitle} data-master-typography-role="micro">{CARD_STOCK_COPY.brand.recordMark}</span>
-        {copy.banner.length > 0 && <span className={styles.mastheadNote} data-master-typography-role="caption">
-          {copy.banner.map((word) => <span key={word}>{word}</span>)}
+        <span className={styles.mastheadTitle} data-master-typography-role="micro" data-card-text-id="brand.recordMark">{CARD_STOCK_COPY.brand.recordMark}</span>
+        {copy.banner.length > 0 && <span className={styles.mastheadNote} data-master-typography-role="caption" data-card-text-id="identity.banner">
+          {copy.banner.map((word, index) => <span key={`${index}-${word}`}>{word}</span>)}
         </span>}
-        {copy.location && <span className={styles.mastheadLocation} data-master-typography-role="micro">{copy.location}</span>}
+        {copy.location && <span className={styles.mastheadLocation} data-master-typography-role="micro" data-card-text-id="identity.location">{copy.location}</span>}
       </header>
 
       <EngravingMark kind="divider" className={styles.seamDivider} />
@@ -169,7 +173,7 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
                 lines={nameLines}
                 script={nameLayout.script}
                 typographyPreset={data.design.typographyPreset}
-                typography={data.design.typography?.display}
+                typography={getCardTextTypographyOverride(data.design, 'character.name', 'display')}
                 className={styles.name}
                 lineClassName={styles.nameLine}
                 {...masterFieldProps('id-card', 'name')}
@@ -197,7 +201,7 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
                   </span>
                 )}
                 <div className={styles.jobCopy}>
-                  <span className={styles.jobLabel} data-typography-role="label" data-master-typography-role="label">{copy.job}</span>
+                  <span className={styles.jobLabel} data-typography-role="label" data-master-typography-role="label" data-card-text-id="identity.label.job">{copy.job}</span>
                   {hasJob && <span className={styles.jobName} data-master-typography-role="job" {...masterFieldProps('id-card', 'job')}>{labels.job}</span>}
                   {nonEmpty(microcopy.jobAbbreviation) && (
                     <span className={styles.jobAbbreviation} data-master-typography-role="micro" {...masterFieldProps('id-card', 'jobAbbreviation')}>
@@ -211,7 +215,7 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
 
           {hasLevel && (
             <dl className={styles.levelPanel}>
-              <dt data-typography-role="label" data-master-typography-role="label">{ui.level}</dt>
+              <dt data-typography-role="label" data-master-typography-role="label" data-card-text-id="identity.label.level">{resolveCardText(data, 'identity.label.level', ui.level)}</dt>
               <dd data-master-typography-role="information" {...masterFieldProps('id-card', 'level')}>{character.level}</dd>
             </dl>
           )}

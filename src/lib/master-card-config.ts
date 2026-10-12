@@ -42,9 +42,15 @@ export const MASTER_CARD_CONFIG = {
   },
 } as const satisfies Readonly<Record<AdventurerCardTemplate, MasterDefinition>>;
 
-export function masterFieldProps(family: AdventurerCardTemplate, field: MasterField) {
+export function masterFieldProps(family: AdventurerCardTemplate, field: MasterField, textId?: string) {
   const spec: MasterDefinition = MASTER_CARD_CONFIG[family];
   const priority: InformationPriority = (['primary', 'secondary', 'optional'] as const).find(tier => spec.information[tier].includes(field)) ?? 'supporting';
   const role = Object.entries(spec.typography).find(([, fields]) => fields.includes(field))?.[0];
-  return { 'data-field': field, 'data-information-priority': priority, 'data-typography-role': role };
+  const defaultTextId = field === 'masthead' ? undefined : `character.${field}`;
+  return {
+    'data-field': field,
+    'data-information-priority': priority,
+    'data-typography-role': role,
+    'data-card-text-id': textId ?? defaultTextId,
+  };
 }

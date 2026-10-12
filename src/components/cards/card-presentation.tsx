@@ -1,6 +1,7 @@
 import type { AdventurerCardData, CardRatio } from './types';
 import type { Locale } from '@/lib/types';
-import { CARD_UI_LABELS, getCardDisplayBio, getCardMasterCopy, getCardPhotoAlt } from '@/lib/card-copy';
+import { CARD_UI_LABELS, getCardDisplayBio, getCardPhotoAlt } from '@/lib/card-copy';
+import { getCardMasterCopyForData } from '@/lib/card-text-editing';
 import { localizeFfxivLabel } from '@/data/ffxiv';
 import { getCardMicrocopy, localizeCardWorld } from '@/lib/card-microcopy';
 import { getCardNameLayout } from '@/lib/card-name-layout';
@@ -33,9 +34,9 @@ export function getArtContext(data: AdventurerCardData, locale: Locale) {
     labels,
     ui: CARD_UI_LABELS[locale],
     copy: {
-      cinematic: getCardMasterCopy('cinematic', locale, decorativeCopy),
-      editorial: getCardMasterCopy('editorial', locale, decorativeCopy),
-      identity: getCardMasterCopy('identity', locale, decorativeCopy),
+      cinematic: getCardMasterCopyForData(data, locale, 'cinematic'),
+      editorial: getCardMasterCopyForData(data, locale, 'editorial'),
+      identity: getCardMasterCopyForData(data, locale, 'identity'),
     },
     microcopy: getCardMicrocopy(character, locale),
     nameLayout: getCardNameLayout(character.name, locale),

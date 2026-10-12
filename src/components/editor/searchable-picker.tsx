@@ -46,6 +46,7 @@ interface SearchablePickerProps {
   onSelect: (option: SearchablePickerOption | null) => void;
   onFocusField?: () => void;
   onBlurField?: () => void;
+  editorControlId?: string;
 }
 
 type PickerListRow =
@@ -73,6 +74,7 @@ export function SearchablePicker({
   onSelect,
   onFocusField,
   onBlurField,
+  editorControlId,
 }: SearchablePickerProps) {
   const generatedId = useId();
   const inputId = `${generatedId}-input`;
@@ -502,7 +504,7 @@ export function SearchablePicker({
   }
 
   return (
-    <div ref={pickerRef} className={styles.picker} onBlur={handleBlur} onKeyDown={handlePickerKeyDown}>
+    <div ref={pickerRef} className={styles.picker} data-card-text-editor-control={editorControlId} onBlur={handleBlur} onKeyDown={handlePickerKeyDown}>
       <span id={labelId} className={styles.pickerLabel}>{label}</span>
       <div
         className={`${styles.pickerInputWrap} ${styles.pickerTriggerDesktop} ${open ? styles.pickerInputOpen : ''}`}

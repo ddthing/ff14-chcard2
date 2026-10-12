@@ -1,6 +1,3 @@
-import type { CardDecorativeCopy } from '@/components/cards/types';
-import type { TypographyFontGroup } from '@/lib/typography-presets';
-
 export type AppLocale = 'ko' | 'en' | 'ja';
 
 export type EditorFieldKey =
@@ -48,13 +45,25 @@ export interface EditorCopy {
   templates: Record<'cinematic' | 'editorial' | 'id-card', string>;
   templateVariation: string;
   variationNames: Record<'a' | 'b' | 'c', string>;
-  decorativeCopy: string;
-  decorativeCopyNames: Record<CardDecorativeCopy, string>;
-  typography: string;
-  typographyFamilyNames: Record<TypographyFontGroup, string>;
+  textEditor: {
+    categories: Record<'identity' | 'information' | 'copy', string>;
+    items: string;
+    selectedItem: string;
+    labelSuffix: string;
+    hiddenText: string;
+    content: string;
+    contentPlaceholder: string;
+    lineCountSuffix: string;
+    cardTypography: string;
+    additionalSettings: string;
+    useDefaultCopy: string;
+    defaultCopyActive: string;
+    restoreDefaultCopy: string;
+    resetToDefault: string;
+    globalTypographyOnly: string;
+    targetLabel: (label: string, ordinal: number) => string;
+  };
   typographyNames: Record<'editorial' | 'modern' | 'condensed' | 'classic' | 'clean', string>;
-  typographyNameFallback: string;
-  typographySpecimens: string;
   colors: string;
   colorModes: Record<'auto' | 'custom' | 'job', string>;
   colorNames: Record<'primary' | 'accent' | 'light' | 'dark', string>;
@@ -376,15 +385,25 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
   ko: {
     title: '어드벤처 카드 에디터',
     backToHome: '홈으로',
-    tasks: { photo: '사진', information: '정보', design: '디자인' },
+    tasks: { photo: '사진', information: '내용', design: '디자인' },
     subtitle: '모험가의 이야기를 다듬어 보세요.',
     sections: { screenshot: '스크린샷', character: '캐릭터', information: '추가 정보', template: '템플릿', style: '스타일', effects: '효과' },
     undo: '실행 취소', redo: '다시 실행', reset: '초기화', resetCardPrompt: '이미지·캐릭터 정보·디자인을 초기화할까요?', cancel: '취소', confirmReset: '초기화', template: '템플릿', experimentalLabel: '실험 레이아웃', saved: '이 브라우저에 저장됨', saving: '이 브라우저에 저장 중…', saveError: '브라우저 저장 실패', saveErrorCompact: '저장 안 됨', saveErrorRecovery: '현재 편집 내용은 이 화면에 남아 있어요. 새로고침하기 전에 카드를 내보내 주세요.', saveErrorExportAction: '카드 내보내기', hydrating: '저장된 카드를 불러오는 중…', zoom: '확대', zoomIn: '확대하기', zoomOut: '축소하기', fitCanvas: '캔버스 맞춤', uploadScreenshot: '스크린샷 업로드', panMode: '캔버스 이동', ratio: '비율', preview: '미리보기', backToEditor: '편집으로 돌아가기', closeInspector: '인스펙터 닫기', export: '내보내기', safeArea: '안전 영역', canvasLabel: '실시간 캔버스', workspaceLabel: '작업 도구', panHint: 'Space 또는 가운데 버튼을 누른 채 이동',
     templates: { cinematic: '시네마틱', editorial: '에디토리얼', 'id-card': '모험가 기록' },
 
     templateVariation: '레이아웃', variationNames: { a: 'A · 마스터', b: 'B · 실험', c: 'C · 실험' },
-    decorativeCopy: '카드 문구', decorativeCopyNames: { none: '없음', default: '기본', adventure: '모험', companions: '동료' },
-    typography: '글꼴', typographyFamilyNames: { serif: '세리프', sans: '산세리프' }, typographyNames: { editorial: '에디토리얼', modern: '모던', condensed: '콘덴스드', classic: '클래식', clean: '클린' }, typographyNameFallback: 'Coner', typographySpecimens: '다국어 글꼴 샘플',
+    textEditor: {
+      categories: { identity: '이름 + 소개', information: '캐릭터 정보', copy: '카드 문구' },
+      items: '카드 텍스트', selectedItem: '선택한 항목', labelSuffix: '레이블', hiddenText: '카드에 표시하지 않음',
+      content: '문구 편집', contentPlaceholder: '선택한 카드 문구를 입력하세요.',
+      lineCountSuffix: '줄',
+      cardTypography: '카드 기본 서체',
+      additionalSettings: '카드 기본값',
+      useDefaultCopy: '기본 샘플 문구 사용', defaultCopyActive: '기본 샘플 문구 사용 중', restoreDefaultCopy: '기본 문구로 복원', resetToDefault: '기본 문구로 초기화',
+      globalTypographyOnly: '현재 스타일에서는 카드 전체 서체를 조절합니다.',
+      targetLabel: (label, ordinal) => `카드 텍스트 ${ordinal}: ${label} 편집`,
+    },
+    typographyNames: { editorial: '에디토리얼', modern: '모던', condensed: '콘덴스드', classic: '클래식', clean: '클린' },
     colors: '컬러 팔레트', colorModes: { auto: '자동', custom: '사용자 지정', job: '직업 테마' }, colorNames: { primary: '메인', accent: '포인트', light: '밝은색', dark: '어두운색' }, jobTheme: '직업 테마 사용', jobThemeHint: '선택한 직업의 포인트 컬러와 장식을 적용합니다.', jobMotif: '직업 문양', jobMotifHint: '카드에 선택한 직업의 문양을 표시합니다.', jobIconColor: '문양 색상', useFamilyAccent: '카드 포인트 색상 사용',
     image: '이미지 조절', uploadTitle: '스크린샷 업로드', chooseFile: '파일 선택', uploading: '이미지 준비 중…', dropToUpload: '여기에 놓아 업로드', uploadSuccess: '스크린샷을 추가했어요.', replaceImage: '이미지 바꾸기', resetImage: '조절 초기화', sampleArtwork: '예시 스크린샷', sampleBadge: '예시', uploadedScreenshot: '내 스크린샷', dragToReposition: '드래그해 위치 조절', fileTypes: 'JPG · PNG · WebP · 최대 24MB', uploadError: '이미지를 읽을 수 없습니다. 24MB 이하의 JPG, PNG 또는 WebP를 선택해 주세요.', noImage: '스크린샷을 선택하면 이곳에 표시됩니다.',
     fields: { name: '캐릭터 이름', service: '서비스', region: '지역', world: '월드', dataCenter: '데이터 센터', freeCompany: '자유부대', job: '직업', level: '레벨', race: '종족', clan: '부족', grandCompany: '총사령부', languages: '사용 언어', playStyles: '플레이 스타일', bio: '짧은 소개' },
@@ -398,15 +417,25 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
   en: {
     title: 'Adventurer Card Editor',
     backToHome: 'Back to home',
-    tasks: { photo: 'Photo', information: 'Information', design: 'Design' },
+    tasks: { photo: 'Photo', information: 'Content', design: 'Design' },
     subtitle: 'Shape the story behind your character.',
     sections: { screenshot: 'Screenshot', character: 'Character', information: 'Additional info', template: 'Template', style: 'Style', effects: 'Effects' },
     undo: 'Undo', redo: 'Redo', reset: 'Reset', resetCardPrompt: 'Reset the image, character details and card settings?', cancel: 'Cancel', confirmReset: 'Reset', template: 'Template', experimentalLabel: 'Experimental layouts', saved: 'Saved in this browser', saving: 'Saving in this browser…', saveError: 'Could not save in this browser', saveErrorCompact: 'Not saved', saveErrorRecovery: 'Your latest edits are still on this screen. Export a copy before refreshing.', saveErrorExportAction: 'Export a copy', hydrating: 'Restoring saved card…', zoom: 'Zoom', zoomIn: 'Zoom in', zoomOut: 'Zoom out', fitCanvas: 'Fit canvas', uploadScreenshot: 'Upload screenshot', panMode: 'Pan canvas', ratio: 'Ratio', preview: 'Preview', backToEditor: 'Back to editor', closeInspector: 'Close inspector', export: 'Export', safeArea: 'Safe area', canvasLabel: 'Live canvas', workspaceLabel: 'Workspace', panHint: 'Hold Space or middle mouse to pan',
     templates: { cinematic: 'Cinematic', editorial: 'Editorial', 'id-card': 'Adventurer Record' },
 
     templateVariation: 'Layout', variationNames: { a: 'A · Master', b: 'B · Experimental', c: 'C · Experimental' },
-    decorativeCopy: 'Card copy', decorativeCopyNames: { none: 'None', default: 'Default', adventure: 'Adventure', companions: 'Companions' },
-    typography: 'Font', typographyFamilyNames: { serif: 'Serif', sans: 'Sans serif' }, typographyNames: { editorial: 'Editorial', modern: 'Modern', condensed: 'Condensed', classic: 'Classic', clean: 'Clean' }, typographyNameFallback: 'Coner', typographySpecimens: 'Multilingual specimens',
+    textEditor: {
+      categories: { identity: 'Name + Bio', information: 'Character information', copy: 'Card phrases' },
+      items: 'Card text', selectedItem: 'Selected item', labelSuffix: 'Label', hiddenText: 'Hidden on card',
+      content: 'Edit phrase', contentPlaceholder: 'Enter the selected card phrase.',
+      lineCountSuffix: 'lines',
+      cardTypography: 'Card typography',
+      additionalSettings: 'Card defaults',
+      useDefaultCopy: 'Use sample copy', defaultCopyActive: 'Sample copy active', restoreDefaultCopy: 'Restore default phrases', resetToDefault: 'Reset to default text',
+      globalTypographyOnly: 'This style uses one font for the whole card.',
+      targetLabel: (label, ordinal) => `Card text ${ordinal}: edit ${label}`,
+    },
+    typographyNames: { editorial: 'Editorial', modern: 'Modern', condensed: 'Condensed', classic: 'Classic', clean: 'Clean' },
     colors: 'Color palette', colorModes: { auto: 'Auto', custom: 'Custom', job: 'Job theme' }, colorNames: { primary: 'Primary', accent: 'Accent', light: 'Light', dark: 'Dark' }, jobTheme: 'Use job theme', jobThemeHint: 'Apply a restrained accent and detail for the selected job.', jobMotif: 'Job motif', jobMotifHint: 'Show the selected job glyph on the card.', jobIconColor: 'Motif color', useFamilyAccent: 'Use family accent',
     image: 'Image adjustment', uploadTitle: 'Upload your screenshot', chooseFile: 'Choose file', uploading: 'Preparing image…', dropToUpload: 'Drop to upload', uploadSuccess: 'Screenshot added.', replaceImage: 'Replace image', resetImage: 'Reset adjustments', sampleArtwork: 'Sample screenshot', sampleBadge: 'Sample', uploadedScreenshot: 'Your screenshot', dragToReposition: 'Drag to reposition', fileTypes: 'JPG · PNG · WebP · up to 24 MB', uploadError: 'Could not read this image. Choose a JPG, PNG or WebP under 24 MB.', noImage: 'Choose a screenshot to see it here.',
     fields: { name: 'Character name', service: 'Service', region: 'Region', world: 'World', dataCenter: 'Data center', freeCompany: 'Free company', job: 'Job', level: 'Level', race: 'Race', clan: 'Clan', grandCompany: 'Grand company', languages: 'Languages', playStyles: 'Play styles', bio: 'Short bio' },
@@ -420,7 +449,7 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
   ja: {
     title: 'アドベンチャーカードエディター',
     backToHome: 'ホームへ',
-    tasks: { photo: '写真', information: '情報', design: 'デザイン' },
+    tasks: { photo: '写真', information: 'コンテンツ', design: 'デザイン' },
     subtitle: 'キャラクターの物語を整えましょう。',
     sections: { screenshot: 'スクリーンショット', character: 'キャラクター', information: '追加情報', template: 'テンプレート', style: 'スタイル', effects: 'エフェクト' },
     experimentalLabel: '実験レイアウト', fitCanvas: 'キャンバスに合わせる', uploadScreenshot: 'スクリーンショットをアップロード',
@@ -428,8 +457,18 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
     templates: { cinematic: 'シネマティック', editorial: 'エディトリアル', 'id-card': '冒険者の記録' },
 
     templateVariation: 'レイアウト', variationNames: { a: 'A · マスター', b: 'B · 実験', c: 'C · 実験' },
-    decorativeCopy: 'カードの文言', decorativeCopyNames: { none: 'なし', default: '標準', adventure: '冒険', companions: '仲間' },
-    typography: 'フォント', typographyFamilyNames: { serif: 'セリフ', sans: 'サンセリフ' }, typographyNames: { editorial: 'エディトリアル', modern: 'モダン', condensed: 'コンデンス', classic: 'クラシック', clean: 'クリーン' }, typographyNameFallback: 'Coner', typographySpecimens: '多言語フォント見本',
+    textEditor: {
+      categories: { identity: '名前・紹介', information: 'キャラクター情報', copy: 'カードの文言' },
+      items: 'カードのテキスト', selectedItem: '選択中の項目', labelSuffix: 'ラベル', hiddenText: 'カードに表示しない',
+      content: '文言を編集', contentPlaceholder: '選択したカードの文言を入力',
+      lineCountSuffix: '行',
+      cardTypography: 'カード全体の文字スタイル',
+      additionalSettings: 'カードの基本設定',
+      useDefaultCopy: 'サンプル文言を使う', defaultCopyActive: '標準の文言を使用中', restoreDefaultCopy: '標準の文言に戻す', resetToDefault: '標準の文言に戻す',
+      globalTypographyOnly: '現在のスタイルではカード全体のフォントを調整します。',
+      targetLabel: (label, ordinal) => `カードのテキスト${ordinal}: ${label}を編集`,
+    },
+    typographyNames: { editorial: 'エディトリアル', modern: 'モダン', condensed: 'コンデンス', classic: 'クラシック', clean: 'クリーン' },
     colors: 'カラーパレット', colorModes: { auto: '自動', custom: 'カスタム', job: 'ジョブテーマ' }, colorNames: { primary: 'プライマリー', accent: 'アクセント', light: 'ライト', dark: 'ダーク' }, jobTheme: 'ジョブテーマを使う', jobThemeHint: '選択中のジョブに合わせた控えめな色と装飾を適用します。', jobMotif: 'ジョブモチーフ', jobMotifHint: '選択したジョブの紋章をカードに表示します。', jobIconColor: 'モチーフの色', useFamilyAccent: 'カードのアクセント色を使う',
     image: '画像の調整', uploadTitle: 'スクリーンショットをアップロード', chooseFile: 'ファイルを選択', uploading: '画像を準備中…', dropToUpload: 'ここにドロップしてアップロード', uploadSuccess: 'スクリーンショットを追加しました。', replaceImage: '画像を変更', resetImage: '調整をリセット', sampleArtwork: 'サンプルスクリーンショット', sampleBadge: 'サンプル', uploadedScreenshot: '自分のスクリーンショット', dragToReposition: 'ドラッグして位置を調整', fileTypes: 'JPG · PNG · WebP · 24MB以下', uploadError: '画像を読み込めません。24MB以下のJPG、PNG、WebPを選んでください。', noImage: 'スクリーンショットを選択するとここに表示されます。',
     fields: { name: 'キャラクター名', service: 'サービス', region: '地域', world: 'ワールド', dataCenter: 'データセンター', freeCompany: 'フリーカンパニー', job: 'ジョブ', level: 'レベル', race: '種族', clan: '部族', grandCompany: 'グランドカンパニー', languages: '対応言語', playStyles: 'プレイスタイル', bio: 'ひとこと紹介' },

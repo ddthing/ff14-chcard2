@@ -288,6 +288,7 @@ export function getCardStaticText(
   template?: AdventurerCardTemplate,
   mode: CardDecorativeCopy = 'default',
   layoutVariant: 'a' | 'b' | 'c' = 'a',
+  extraText: readonly string[] = [],
 ): string[] {
   const families: CardCopyFamily[] = template
     ? [getCardCopyFamily(template)]
@@ -299,7 +300,10 @@ export function getCardStaticText(
     ? Object.fromEntries(families.map((family) => [family, CARD_STOCK_COPY.legacy[family][locale]]))
     : {};
 
-  return flattenStrings({ labels: CARD_UI_LABELS[locale], master, legacy, brand: CARD_STOCK_COPY.brand });
+  return [
+    ...flattenStrings({ labels: CARD_UI_LABELS[locale], master, legacy, brand: CARD_STOCK_COPY.brand }),
+    ...extraText.filter((value) => value.trim().length > 0),
+  ];
 }
 
 export function getCardPhotoAlt(name: string, locale: Locale): string {

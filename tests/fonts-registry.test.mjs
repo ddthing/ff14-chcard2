@@ -8,11 +8,25 @@ import test from 'node:test';
 register('./ts-alias-loader.mjs', import.meta.url);
 
 const projectRoot = fileURLToPath(new URL('../', import.meta.url));
-const [{ FONT_FAMILIES, FONT_REGISTRY }, typography, fontLoader] = await Promise.all([
+const [{ FONT_FAMILIES, FONT_REGISTRY }, typography, fontLoader, fontGenerator] = await Promise.all([
   import('../src/data/fonts/registry.ts'),
   import('../src/lib/typography-presets.ts'),
   import('../src/data/fonts/load-fonts.ts'),
+  import('../tools/generate-font-registry.mjs'),
 ]);
+
+test('font registry validates bundled sources and generates CSS and static stylesheet imports', async () => {
+  await fontGenerator.validateFontRegistry(FONT_REGISTRY);
+
+  const css = readFileSync(resolve(projectRoot, 'src/app/fonts.css'), 'utf8');
+  const loaders = readFileSync(resolve(projectRoot, 'src/data/fonts/stylesheet-loaders.generated.ts'), 'utf8');
+  assert.equal(css, fontGenerator.renderFontsCss(FONT_REGISTRY));
+  assert.equal(loaders, fontGenerator.renderStylesheetLoaders(FONT_REGISTRY));
+
+  const localAssetCount = Object.values(FONT_REGISTRY).reduce((count, entry) => count + (entry.localAssets?.length ?? 0), 0);
+  const localFaceCount = [...css.matchAll(/@font-face\s*\{/gu)].length;
+  assert.equal(localFaceCount, localAssetCount, 'each registered local asset must have exactly one generated face');
+});
 
 function packageRoot(entry) {
   return resolve(projectRoot, 'node_modules', entry.package.name);
@@ -150,6 +164,7 @@ test('V3 handwritten faces are local WOFF2 assets with source licenses and expor
   const preview = readFileSync(resolve(projectRoot, 'src/components/editor/card-preview.tsx'), 'utf8');
   for (const key of ['pinyonScript', 'whisper']) {
     const entry = FONT_REGISTRY[key];
+    assert.equal(entry.selectable, false, `${entry.id} stays available to fixed artwork but hidden from the picker`);
     assert.match(readFileSync(resolve(projectRoot, entry.licenseFile), 'utf8'), /SIL OPEN FONT LICENSE Version 1\.1/i);
     for (const asset of entry.localAssets) {
       assert.equal(statSync(resolve(projectRoot, asset.filePath)).size, asset.bytes);
@@ -163,7 +178,7 @@ test('V3 handwritten faces are local WOFF2 assets with source licenses and expor
 
 test('CJK font registry metadata matches dynamic subset CSS, assets, and licenses', () => {
   const packageJson = JSON.parse(readFileSync(resolve(projectRoot, 'package.json'), 'utf8'));
-  const loader = readFileSync(resolve(projectRoot, 'src/data/fonts/load-fonts.ts'), 'utf8');
+  const loader = readFileSync(resolve(projectRoot, 'src/data/fonts/stylesheet-loaders.generated.ts'), 'utf8');
   const allCjkEntries = ['notoSansKr', 'notoSansJp', 'notoSerifKr', 'notoSerifJp'];
   let allCjkBytes = 0;
 
@@ -187,13 +202,14 @@ test('CJK font registry metadata matches dynamic subset CSS, assets, and license
     assert.equal(license, packageLicense, `${entry.licenseFile} must retain the source notice verbatim`);
     assert.match(license, /Google Inc\./);
     assert.match(license, /SIL Open Font License, Version 1\.1/);
-    assert.match(loader, new RegExp(`import\\('@fontsource-variable\\/${entry.id}\\/wght\\.css'\\)`));
+    assert.ok(loader.includes(`import("${entry.package.stylesheet}")`), `${entry.package.stylesheet} must be a literal import`);
 
     allCjkBytes += fontBytes;
   }
 
   assert.equal(allCjkBytes, 22_066_540);
-  assert.match(loader, /preset\.id === 'editorial' \|\| preset\.id === 'classic'/);
+  const runtimeLoader = readFileSync(resolve(projectRoot, 'src/data/fonts/load-fonts.ts'), 'utf8');
+  assert.match(runtimeLoader, /preset\.id === 'editorial' \|\| preset\.id === 'classic'/);
 });
 
 test('CJK specimen transfer uses only the WOFF2 shards for visible glyphs', () => {
@@ -333,6 +349,26 @@ test('stylesheet plan is limited to active scripts and CJK serif presets', () =>
     getTypographyStylesheetIds(preset, ['korean', 'japanese'])
   )))].sort();
   assert.deepEqual(displayedFamilyFaces, ['notoSansJp', 'notoSansKr', 'notoSerifJp', 'notoSerifKr']);
+});
+
+test('secondary CJK package faces load only when explicitly requested', async () => {
+  const alternate = {
+    ...FONT_REGISTRY,
+    alternateNotoSansKr: {
+      ...FONT_REGISTRY.notoSansKr,
+      id: 'noto-sans-kr-alternate',
+      package: { ...FONT_REGISTRY.notoSansKr.package, isDefault: false },
+    },
+  };
+  const { getTypographyStylesheetIds, getTypographyStylesheetIdsForFontRequests } = fontLoader;
+
+  await fontGenerator.validateFontRegistry(alternate);
+  assert.deepEqual(getTypographyStylesheetIds('modern', 'korean', {}, alternate), ['notoSansKr']);
+  assert.deepEqual(
+    getTypographyStylesheetIdsForFontRequests([{ fontId: 'noto-sans-kr-alternate', weight: 400 }], ['korean'], alternate),
+    ['alternateNotoSansKr'],
+  );
+  assert.ok(fontGenerator.renderStylesheetLoaders(alternate).includes('alternateNotoSansKr: () => import('));
 });
 
 test('identical font face requests share pending and completed loads', async () => {

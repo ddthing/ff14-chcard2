@@ -796,6 +796,81 @@ test('editable typography and texture strengths round-trip, stay immutable, and 
   }
 });
 
+test('semantic text and per-item typography persist immutably and undo independently', () => {
+  restoreDemoCard();
+  try {
+    editorStore.getState().setTextOverride('cinematic.promise', 'THE NEXT\nHORIZON');
+    editorStore.getState().setTextTypographyOverride('character.name', {
+      fontFamily: 'valley-sans',
+      sizePercent: 112,
+      weight: 700,
+      trackingEm: -0.01,
+    });
+
+    const exportedCard = editorStore.getState().toCardData();
+    assert.deepEqual(exportedCard.design.textOverrides, { 'cinematic.promise': 'THE NEXT\nHORIZON' });
+    assert.deepEqual(exportedCard.design.textTypography, {
+      'character.name': { fontFamily: 'valley-sans', sizePercent: 112, weight: 700, trackingEm: -0.01 },
+    });
+
+    const storage = new MemoryStorage();
+    assert.equal(persistEditorDraft(exportedCard, storage), true);
+    const loaded = loadEditorDraft(storage);
+    assert.equal(loaded.migrated, false);
+    assert.deepEqual(loaded.card.design.textOverrides, exportedCard.design.textOverrides);
+    assert.deepEqual(loaded.card.design.textTypography, exportedCard.design.textTypography);
+
+    exportedCard.design.textOverrides['cinematic.promise'] = 'mutated';
+    exportedCard.design.textTypography['character.name'].sizePercent = 75;
+    assert.equal(editorStore.getState().design.textOverrides['cinematic.promise'], 'THE NEXT\nHORIZON');
+    assert.equal(editorStore.getState().design.textTypography['character.name'].sizePercent, 112);
+
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().design.textTypography, undefined);
+    assert.equal(editorStore.getState().design.textOverrides['cinematic.promise'], 'THE NEXT\nHORIZON');
+    editorStore.getState().undo();
+    assert.equal(editorStore.getState().design.textOverrides, undefined);
+    editorStore.getState().redo();
+    assert.equal(editorStore.getState().design.textOverrides['cinematic.promise'], 'THE NEXT\nHORIZON');
+    editorStore.getState().redo();
+    assert.equal(editorStore.getState().design.textTypography['character.name'].sizePercent, 112);
+  } finally {
+    restoreDemoCard();
+  }
+});
+
+test('draft normalization allowlists text slots, clamps text lengths, and preserves hidden registered font IDs', () => {
+  const normalized = normalizeCardData({
+    ...demoAdventurerData,
+    design: {
+      ...demoAdventurerData.design,
+      textOverrides: {
+        'cinematic.promise': 'A'.repeat(200),
+        'cinematic.place': '  ',
+        'cinematic.label.job': 'L'.repeat(60),
+        'editorial.story': 'A\n'.repeat(48),
+        'brand.recordMark': 'NOT XIV',
+        'identity.masthead': 'aria only',
+        'unregistered.slot': 'ignored',
+      },
+      textTypography: {
+        'character.name': { fontFamily: 'pinyon-script', sizePercent: 999, weight: 900, trackingEm: -1 },
+        'unregistered.slot': { fontFamily: 'valley-sans', sizePercent: 110 },
+      },
+    },
+  });
+
+  assert.deepEqual(normalized.design.textOverrides, {
+    'cinematic.promise': 'A'.repeat(160),
+    'cinematic.place': '',
+    'cinematic.label.job': 'L'.repeat(48),
+    'editorial.story': ['A', 'A', 'A', 'A', 'A', 'A'].join('\n'),
+  });
+  assert.deepEqual(normalized.design.textTypography, {
+    'character.name': { fontFamily: 'pinyon-script', sizePercent: 125, weight: 400, trackingEm: -0.12 },
+  });
+});
+
 test('draft normalization allowlists typography roles and fonts and clamps typography and texture values', () => {
   const normalized = normalizeCardData({
     ...demoAdventurerData,

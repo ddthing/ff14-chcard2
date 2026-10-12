@@ -34,6 +34,8 @@ export interface CardTypographyOverride {
 }
 
 export type CardTypographyOverrides = Partial<Record<CardTypographyRole, CardTypographyOverride>>;
+/** Slot keys are allow-listed by card-text-editing at the persistence boundary. */
+export type CardTextTypographyOverrides = Partial<Record<string, CardTypographyOverride>>;
 
 export function isCardDecorativeCopy(value: unknown): value is CardDecorativeCopy {
   return value === 'none' || value === 'default' || value === 'adventure' || value === 'companions';
@@ -99,6 +101,10 @@ export interface AdventurerCardDesign {
   typographyPreset: CardTypographyPreset;
   /** Optional editable typography overrides; older cards continue using typographyPreset. */
   typography?: CardTypographyOverrides;
+  /** Optional per-item copy overrides. Empty values intentionally hide a copy slot. */
+  textOverrides?: Record<string, string>;
+  /** Per-item typography overrides layered over the existing role defaults. */
+  textTypography?: CardTextTypographyOverrides;
   /** Kept for older card renderers and saved drafts. */
   imagePosition: string;
   /** Kept for older card renderers and saved drafts. */

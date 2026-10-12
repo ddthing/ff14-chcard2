@@ -8,8 +8,10 @@ import { resolveCardMaterial } from '@/lib/card-materials';
 import { JobIcon } from '@/components/ffxiv/job-icon';
 import { OpticalName } from '@/components/cards/craft/optical-name';
 import { FitFactValue } from '@/components/cards/craft/fit-fact-value';
+import { FitCardCopy } from '@/components/cards/craft/fit-card-copy';
 import type { CardTypographyOverride } from '@/components/cards/types';
-import { CARD_STOCK_COPY, getCardMasterCopy } from '@/lib/card-copy';
+import { CARD_STOCK_COPY } from '@/lib/card-copy';
+import { getCardMasterCopyForData, getCardTextTypographyOverride, resolveCardText } from '@/lib/card-text-editing';
 import { detectTypographyScript } from '@/lib/typography-presets';
 import type { Locale } from '@/lib/types';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
@@ -59,7 +61,7 @@ export function getEditorialInformationFontContextKey({
 
 export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const { character, bio: localizedBio, labels, ui, microcopy, nameLayout } = getArtContext(data, locale);
-  const copy = getCardMasterCopy('editorial', locale, data.design.decorativeCopy);
+  const copy = getCardMasterCopyForData(data, locale, 'editorial');
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const resolvedRatio = ratio ?? data.design.ratio;
   const brushShape = getEditorialBrushShape(resolvedRatio);
@@ -81,6 +83,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const lineageLabel = labels.race && labels.clan
     ? `${ui.race} / ${ui.clan}`
     : labels.race ? ui.race : ui.clan;
+  const freeCompanyTypography = getCardTextTypographyOverride(data.design, 'character.freeCompany', 'information');
   const informationFontContext = getEditorialInformationFontContextKey({
     name: character.name,
     locale,
@@ -88,7 +91,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
     world: labels.world,
     dataCenter: labels.dataCenter,
     grandCompany: labels.grandCompany,
-    typography: data.design.typography?.information,
+    typography: freeCompanyTypography,
   });
 
   const facts: Array<{ id: string; label: string; parts: EditorialFactPart[] }> = [
@@ -180,8 +183,8 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
         <ArtPhoto data={data} className={styles.photoArt} locale={locale} />
       </div>
 
-      <header className={styles.masthead} aria-label={copy.masthead}>
-        <span className={styles.mastheadTitle} data-master-typography-role="micro">{copy.masthead}</span>
+      <header className={styles.masthead} aria-label={copy.masthead} data-card-text-id="editorial.masthead">
+        <span className={styles.mastheadTitle} data-master-typography-role="micro" data-card-text-id="editorial.masthead">{copy.masthead}</span>
         <span className={styles.mastheadMeta} data-master-typography-role="caption" lang="en">{CARD_STOCK_COPY.brand.finalFantasy}</span>
       </header>
 
@@ -193,7 +196,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
           lines={nameLines}
           script={nameLayout.script}
           typographyPreset={data.design.typographyPreset}
-          typography={data.design.typography?.display}
+          typography={getCardTextTypographyOverride(data.design, 'character.name', 'display')}
           className={styles.name}
           {...masterFieldProps('editorial', 'name')}
           lineClassName={styles.nameLine}
@@ -203,19 +206,40 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
         {paperBio && <p className={styles.quote} data-master-typography-role="secondaryDisplay" {...masterFieldProps('editorial', 'bio')}>{bio}</p>}
       </div>
 
-      {(photoBio || copy.story) && <div
-        className={styles.photoStory}
-        data-photo-story={photoBio ? 'bio' : 'copy'}
-        data-master-typography-role={photoBio ? 'secondaryDisplay' : 'caption'}
-        {...(photoBio ? masterFieldProps('editorial', 'bio') : {})}
-      >
-        {photoBio ? bio : copy.story}
-      </div>}
+      {photoBio ? (
+        <div
+          className={styles.photoStory}
+          data-photo-story="bio"
+          data-master-typography-role="secondaryDisplay"
+          {...masterFieldProps('editorial', 'bio')}
+        >
+          {bio}
+        </div>
+      ) : copy.story && (
+        <FitCardCopy
+          family="editorial"
+          locale={locale}
+          ratio={resolvedRatio}
+          role="caption"
+          text={copy.story}
+          typography={getCardTextTypographyOverride(data.design, 'editorial.story', 'caption')}
+          className={styles.photoStory}
+          data-photo-story="copy"
+          data-master-typography-role="caption"
+          data-card-text-id="editorial.story"
+        />
+      )}
 
       <dl className={styles.facts} aria-label={copy.details}>
         {facts.filter((fact) => fact.parts.length > 0).map((fact) => (
           <div className={styles.fact} data-editorial-row={fact.id} key={fact.id}>
-            <dt className={styles.factLabel} data-master-typography-role="label">{fact.label}</dt>
+            <dt
+              className={styles.factLabel}
+              data-master-typography-role="label"
+              data-card-text-id={`editorial.label.${fact.id === 'data-center' ? 'dataCenter' : fact.id === 'free-company' ? 'freeCompany' : fact.id}`}
+            >
+              {resolveCardText(data, `editorial.label.${fact.id === 'data-center' ? 'dataCenter' : fact.id === 'free-company' ? 'freeCompany' : fact.id}`, fact.label)}
+            </dt>
             <dd className={fact.id === 'lineage' && fact.parts.length === 2 ? `${styles.factValue} ${styles.completeLineage}` : styles.factValue}>
               {fact.parts.map((part) => (
                 <Fragment key={part.field}>
@@ -226,7 +250,8 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
                       locale={locale}
                       ratio={resolvedRatio}
                       typographyPreset={data.design.typographyPreset}
-                      sizePercent={data.design.typography?.information?.sizePercent}
+                      sizePercent={freeCompanyTypography?.sizePercent}
+                      typography={freeCompanyTypography}
                       data-master-typography-role={part.role}
                       {...masterFieldProps('editorial', part.field)}
                     >
@@ -262,7 +287,7 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
               {[jobRoleLabel, microcopy.jobAbbreviation].filter(Boolean).join(' · ')}
             </span>
           )}
-          {copy.warriorOfLight && <span className={styles.insigniaCaption} data-master-typography-role="caption">{copy.warriorOfLight}</span>}
+          {copy.warriorOfLight && <span className={styles.insigniaCaption} data-master-typography-role="caption" data-card-text-id="editorial.warriorOfLight">{copy.warriorOfLight}</span>}
         </section>
       )}
 

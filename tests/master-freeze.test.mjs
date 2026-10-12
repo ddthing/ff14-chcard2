@@ -26,8 +26,13 @@ test('locked compositions print every primary field and retain disjoint priority
   }
 });
 
-test('renderer field attributes preserve each family information and type roles', () => {
-  assert.deepEqual(masterFieldProps('cinematic', 'name'), { 'data-field': 'name', 'data-information-priority': 'primary', 'data-typography-role': 'display' });
+test('renderer field attributes preserve each family information and expose semantic text IDs', () => {
+  assert.deepEqual(masterFieldProps('cinematic', 'name'), {
+    'data-field': 'name',
+    'data-information-priority': 'primary',
+    'data-typography-role': 'display',
+    'data-card-text-id': 'character.name',
+  });
   assert.equal(masterFieldProps('editorial', 'world')['data-information-priority'], 'secondary');
   assert.equal(masterFieldProps('editorial', 'jobAbbreviation')['data-typography-role'], 'secondary-display');
   assert.equal(masterFieldProps('id-card', 'freeCompany')['data-information-priority'], 'primary');

@@ -3,7 +3,9 @@
 import { useLayoutEffect, useRef, useState, type HTMLAttributes } from 'react';
 import { getTypographyScriptsForCardText, loadProfiledFontFace } from '@/data/fonts/load-fonts';
 import type { CardRatio } from '@/components/cards/types';
+import type { CardTypographyOverride } from '@/components/cards/types';
 import type { Locale } from '@/lib/types';
+import { detectTypographyScript, getMasterTypographyTreatment } from '@/lib/typography-presets';
 
 interface FitFactValueProps extends HTMLAttributes<HTMLSpanElement> {
   fontContextKey: string;
@@ -11,6 +13,7 @@ interface FitFactValueProps extends HTMLAttributes<HTMLSpanElement> {
   ratio: CardRatio;
   typographyPreset: string;
   sizePercent?: number;
+  typography?: CardTypographyOverride;
 }
 
 interface MeasuredFactValue {
@@ -70,7 +73,7 @@ function largestFontThatFits(value: HTMLSpanElement, row: HTMLElement, sizeScale
   }
 }
 
-export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, sizePercent = 100, children, style, ...attributes }: FitFactValueProps) {
+export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, sizePercent = 100, typography, children, style, ...attributes }: FitFactValueProps) {
   const valueRef = useRef<HTMLSpanElement>(null);
   const text = typeof children === 'string' ? children : '';
   const sizeScale = Math.min(1.25, Math.max(.75, sizePercent / 100));
@@ -150,11 +153,22 @@ export function FitFactValue({ fontContextKey, locale, ratio, typographyPreset, 
   }, [fontContextKey, locale, measurementKey, ratio, sizeScale, text, typographyPreset]);
 
   const script = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
+  const actualScript = detectTypographyScript(text, script);
+  const treatment = getMasterTypographyTreatment('editorial', 'information', actualScript, typography);
+  const managedStyle = {
+    ...style,
+    ...(typography?.fontFamily ? { fontFamily: treatment.fontFamily } : {}),
+    ...(typography?.weight !== undefined ? { fontWeight: treatment.weight } : {}),
+    ...(typography?.trackingEm !== undefined
+      ? { letterSpacing: `calc(${treatment.tracking} + ${typography.trackingEm}em)` }
+      : {}),
+  };
   return (
     <span
       {...attributes}
       ref={valueRef}
-      style={{ ...style, ...(current ? { fontSize: `${current.fontSize}px` } : {}) }}
+      style={{ ...managedStyle, ...(current ? { fontSize: `${current.fontSize}px` } : {}) }}
+      data-card-typography-managed="true"
       data-optical-name="editorial-free-company"
       data-optical-ratio={ratio}
       data-optical-script={script}

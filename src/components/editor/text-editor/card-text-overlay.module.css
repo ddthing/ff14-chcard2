@@ -1,0 +1,84 @@
+.layer {
+  position: fixed;
+  z-index: 23;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.target {
+  position: fixed;
+  display: block;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
+.target[data-compact='true'] {
+  min-width: 0;
+  min-height: 0;
+}
+
+.target:hover,
+.target[data-selected='true'] {
+  z-index: 1;
+  border-color: var(--app-focus);
+}
+
+.target:focus-visible {
+  z-index: 1;
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.badge {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  display: grid;
+  width: 18px;
+  height: 18px;
+  place-items: center;
+  border: 1px solid var(--app-border-strong);
+  border-radius: 50%;
+  background: var(--app-surface);
+  color: var(--app-text);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 650;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.target[data-selected='true'] .badge {
+  border-color: var(--app-focus);
+  background: var(--app-accent);
+  color: var(--app-on-accent);
+}
+
+@media (forced-colors: active) {
+  .target:hover,
+  .target[data-selected='true'],
+  .target:focus-visible {
+    border-color: Highlight;
+    outline-color: Highlight;
+  }
+
+  .badge {
+    border-color: ButtonText;
+    background: Canvas;
+    color: ButtonText;
+  }
+}
+
+@media print {
+  .layer { display: none; }
+}

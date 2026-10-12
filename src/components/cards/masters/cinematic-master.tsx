@@ -6,7 +6,7 @@ import { JobIcon } from '@/components/ffxiv/job-icon';
 import { EngravingMark } from '../craft/engraving-mark';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
-import { getCardMasterCopy } from '@/lib/card-copy';
+import { getCardMasterCopyForData, getCardTextTypographyOverride, resolveCardText } from '@/lib/card-text-editing';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
 import styles from './cinematic-master.module.css';
 
@@ -19,7 +19,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
   const jobMotifVisible = data.design.jobMotifVisible !== false;
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
   const hasBio = bio.trim().length > 0;
-  const copy = getCardMasterCopy('cinematic', locale, data.design.decorativeCopy);
+  const copy = getCardMasterCopyForData(data, locale, 'cinematic');
   const jobGlyphSize = getJobIdentityGlyphLogicalSize(resolvedRatio);
   const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(resolvedRatio, 'cinematicSeal');
   const hasWorldFacts = Boolean(labels.world || labels.dataCenter);
@@ -41,14 +41,14 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
       <div className={styles.veil} aria-hidden="true" />
 
       {(copy.promise.length > 0 || copy.quote.length > 0) && <div className={styles.topPromise} aria-hidden="true">
-        <p data-master-typography-role="micro">{copy.promise.map((line) => <span key={line}>{line}</span>)}</p>
+        <p data-master-typography-role="micro" data-card-text-id="cinematic.promise">{copy.promise.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
         <span className={styles.promiseRule} />
-        <p className={styles.topQuote} data-master-typography-role="caption">{copy.quote.map((line) => <span key={line}>{line}</span>)}</p>
+        <p className={styles.topQuote} data-master-typography-role="caption" data-card-text-id="cinematic.quote">{copy.quote.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
       </div>}
 
       {(copy.signature.length > 0 || copy.place) && <div className={styles.topSignature} aria-hidden="true">
-        <p data-master-typography-role="caption">{copy.signature.map((line) => <span key={line}>{line}</span>)}</p>
-        <span className={styles.signaturePlace} data-master-typography-role="micro">{copy.place}</span>
+        <p data-master-typography-role="caption" data-card-text-id="cinematic.signature">{copy.signature.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
+        <span className={styles.signaturePlace} data-master-typography-role="micro" data-card-text-id="cinematic.place">{copy.place}</span>
       </div>}
 
       {hasBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('cinematic', 'bio')}>{bio}</p>}
@@ -61,7 +61,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           lines={nameLines}
           script={nameLayout.script}
           typographyPreset={data.design.typographyPreset}
-          typography={data.design.typography?.display}
+          typography={getCardTextTypographyOverride(data.design, 'character.name', 'display')}
           className={styles.name}
           lineClassName={styles.nameLine}
           {...masterFieldProps('cinematic', 'name')}
@@ -78,7 +78,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
         <dl className={styles.metadata}>
           {labels.job && (
             <div className={styles.metaCell} data-cinema-fact="job">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{copy.job}</dt>
+              <dt className={styles.metaLabel} data-master-typography-role="label" data-card-text-id="cinematic.label.job">{copy.job}</dt>
               <dd className={styles.jobLockup} data-job-identity="cinematic">
                 {jobMotifVisible && (
                   <span className={styles.jobSeal} style={{ fontSize: `${jobGlyphCqiSize}cqi` }} aria-hidden="true" data-job-identity-mark="cinematic">
@@ -106,13 +106,13 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           )}
           {hasLevel && (
             <div className={styles.metaCell} data-cinema-fact="level">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{ui.level}</dt>
+              <dt className={styles.metaLabel} data-master-typography-role="label" data-card-text-id="cinematic.label.level">{resolveCardText(data, 'cinematic.label.level', ui.level)}</dt>
               <dd className={`${styles.metaValue} ${styles.levelValue}`} data-master-typography-role="information" {...masterFieldProps('cinematic', 'level')}>{character.level}</dd>
             </div>
           )}
           {hasWorldFacts && (
             <div className={styles.metaCell} data-cinema-fact="world-data-center">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{copy.worldDc}</dt>
+              <dt className={styles.metaLabel} data-master-typography-role="label" data-card-text-id="cinematic.label.worldDc">{copy.worldDc}</dt>
               <dd className={styles.metaValue}>
                 {labels.world && <span {...masterFieldProps('cinematic', 'world')}>{labels.world}</span>}
                 {labels.world && labels.dataCenter && <span aria-hidden="true"> / </span>}
@@ -122,7 +122,7 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           )}
           {character.freeCompany.trim() && (
             <div className={styles.metaCell} data-cinema-fact="free-company">
-              <dt className={styles.metaLabel} data-master-typography-role="label">{ui.freeCompany}</dt>
+              <dt className={styles.metaLabel} data-master-typography-role="label" data-card-text-id="cinematic.label.freeCompany">{resolveCardText(data, 'cinematic.label.freeCompany', ui.freeCompany)}</dt>
               <dd className={styles.metaValue} data-master-typography-role="information" {...masterFieldProps('cinematic', 'freeCompany')}>
                 {character.freeCompany}
               </dd>

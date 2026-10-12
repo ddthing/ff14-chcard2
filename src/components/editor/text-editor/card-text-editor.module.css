@@ -1,0 +1,272 @@
+.editor {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.categories {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.categories button,
+.itemButton,
+.resetContent {
+  min-width: 44px;
+  min-height: 44px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.categories button {
+  padding: 6px 8px;
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.25;
+}
+
+.categories button[aria-pressed='true'],
+.itemButton[aria-pressed='true'] {
+  border-color: var(--app-border-strong);
+  background: var(--app-workspace);
+  color: var(--app-text);
+  font-weight: 650;
+}
+
+.categories button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+.itemGroup {
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+
+.selectedItem {
+  display: flex;
+  min-height: 20px;
+  align-items: baseline;
+  gap: 7px;
+  margin: 0;
+  color: var(--app-text);
+  font-size: 12px;
+}
+
+.selectedItem strong {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+.itemList {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  max-height: min(18dvh, 160px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 1px;
+  list-style: none;
+  overscroll-behavior: contain;
+}
+
+.itemList li { min-width: 0; }
+
+.itemButton {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  overflow: hidden;
+  padding: 8px 10px;
+  text-align: start;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.itemButton span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.itemOrdinal {
+  flex: 0 0 auto;
+  color: var(--app-text-muted);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
+}
+
+.itemButton small {
+  flex: 0 0 auto;
+  color: var(--app-text-muted);
+  font-size: 10px;
+  font-weight: 450;
+}
+
+.itemSelect {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.itemSelect select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-control);
+  color: var(--app-text);
+  font: inherit;
+}
+
+.contentEditor,
+.contentEditor label {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+
+.contentEditor label > span {
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.contentCount {
+  justify-self: end;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.globalTypography label {
+  display: grid;
+  gap: 8px;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 550;
+}
+
+.globalTypography select {
+  width: 100%;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-control);
+  color: var(--app-text);
+  font: inherit;
+}
+
+.defaultCopyButton {
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
+  background: var(--app-surface);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  cursor: pointer;
+}
+
+.defaultCopyButton:disabled { opacity: 0.65; cursor: default; }
+
+.globalTypographyNotice {
+  margin: 0;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.contentEditor input,
+.contentEditor textarea {
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--app-control);
+  color: var(--app-text);
+  font: inherit;
+  font-size: 14px;
+}
+
+.contentEditor textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.resetContent {
+  justify-self: start;
+  padding: 8px 12px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 550;
+}
+
+.categories button:focus-visible,
+.itemButton:focus-visible,
+.resetContent:focus-visible,
+.contentEditor input:focus-visible,
+.contentEditor textarea:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.globalTypography select:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.itemSelect select:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+.defaultCopyButton:focus-visible {
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 420px) {
+  .categories { gap: 4px; }
+  .categories button { padding-inline: 5px; font-size: 11px; }
+  .contentEditor textarea { min-height: 64px; }
+}
+
+@media (forced-colors: active) {
+  .categories button[aria-pressed='true'],
+  .itemButton[aria-pressed='true'] {
+    border-color: Highlight;
+  }
+}

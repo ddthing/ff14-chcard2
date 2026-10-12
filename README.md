@@ -74,6 +74,8 @@ The UI preloads the local DM Sans Latin WOFF2 face. Card typography offers Edito
 
 The source URLs, exact WOFF2 delivery method, and unmodified copyright/license notices are recorded in [FONT_SOURCES.md](licenses/fonts/FONT_SOURCES.md) and the neighboring `*-OFL.txt` files. No runtime Google Fonts request is made.
 
+To add or update a font, follow [Font onboarding](docs/fonts/ONBOARDING.md), then run `npm run fonts:generate` and `npm run fonts:check`. The registry generates local font CSS and package loaders; release builds check those files before compilation. `.node-version` pins the same Node 24.13.1 runtime used for verification.
+
 ## Official FFXIV assets
 
 Runtime job marks use the reviewed, locally pinned XIVAPI originals described in [ffxiv-assets.md](docs/ffxiv-assets.md). The current inventory covers 33 source-backed jobs; Beastmaster and failed sources retain text or role fallbacks. Source artwork, required notices, and source-policy records remain preserved.

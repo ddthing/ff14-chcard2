@@ -12,7 +12,7 @@ import { ROUTES } from "@/lib/routes";
 import { useEditorStore } from "@/store/editor-store";
 import styles from "@/components/app-shell.module.css";
 
-function HeaderSaveStatus() {
+function HeaderSaveStatus({ className }: { className?: string }) {
   const { locale } = useI18n();
   const saveStatus = useEditorStore((state) => state.saveStatus);
   const copy = getEditorCopy(locale);
@@ -25,7 +25,7 @@ function HeaderSaveStatus() {
 
   return (
     <span
-      className={styles.saveStatus}
+      className={className ? `${styles.saveStatus} ${className}` : styles.saveStatus}
       data-status={saveStatus}
       role="status"
       aria-live="polite"
@@ -67,6 +67,7 @@ export function AppHeader() {
         <span className={styles.headerDivider} aria-hidden="true" />
         <div className={styles.documentIdentity} aria-label={`${section}: ${documentName}`} title={documentName}>
           <span className={styles.documentLabel}>{section}</span>
+          {(isEditor || isExport) && <HeaderSaveStatus className={styles.mobileIdentitySaveStatus} />}
           <span className={styles.editorName}>{documentName}</span>
         </div>
       </div>
@@ -80,7 +81,7 @@ export function AppHeader() {
       />
 
       <div className={styles.headerRight}>
-        {(isEditor || isExport) && <HeaderSaveStatus />}
+        {(isEditor || isExport) && <HeaderSaveStatus className={styles.desktopHeaderSaveStatus} />}
         <span className={styles.desktopAppearance}><AppearanceControl /></span>
         <label className={styles.desktopLanguageField}>
           <span className={styles.visuallyHidden}>{t("nav.language")}</span>

@@ -13,3 +13,10 @@
 .root :global([data-card-typography-ready='true'][data-card-tracking-override='true']) {
   letter-spacing: calc(var(--card-typography-base-tracking) + var(--card-typography-tracking)) !important;
 }
+
+.root :global([data-card-text-id^='cinematic.']),
+.root :global([data-card-text-id^='editorial.']),
+.root :global([data-card-text-id^='identity.']) {
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}

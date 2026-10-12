@@ -130,6 +130,8 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
       palette: { primary: '#112233', accent: '#aabbcc', light: '#ffffff', dark: '#000000' },
       accentColor: '#aabbcc', typographyPreset: 'editorial', imagePosition: '50% 50%', imageScale: 1, effects: ['grain'],
       typography: { display: { fontFamily: 'estonia', sizePercent: 112, weight: 400, trackingEm: 0.01 } },
+      textOverrides: { 'cinematic.promise': 'THE NEXT\nHORIZON' },
+      textTypography: { 'character.name': { fontFamily: 'valley-sans', sizePercent: 108 } },
       effectIntensity: { xerox: 45, halftone: 28 },
     },
     imageUrl: 'blob:export-snapshot',
@@ -142,6 +144,8 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
   source.design.ratio = '16:9';
   source.design.effects.push('blur');
   source.design.typography.display.sizePercent = 75;
+  source.design.textOverrides['cinematic.promise'] = 'Changed';
+  source.design.textTypography['character.name'].sizePercent = 75;
   source.design.effectIntensity.xerox = 95;
   source.design.palette.primary = '#ffffff';
   source.imageAdjustments.x = 12;
@@ -156,8 +160,12 @@ test('export job snapshot pins locale, ratio, format, scale, data and nested met
     snapshot.data.imageAdjustments.x,
   ], ['Coner', 'en', '4:5', 1, '#112233', 50]);
   assert.equal(snapshot.data.design.typography.display.sizePercent, 112);
+  assert.equal(snapshot.data.design.textOverrides['cinematic.promise'], 'THE NEXT\nHORIZON');
+  assert.equal(snapshot.data.design.textTypography['character.name'].sizePercent, 108);
   assert.equal(snapshot.data.design.effectIntensity.xerox, 45);
   assert.notEqual(snapshot.data.design.typography, source.design.typography);
+  assert.notEqual(snapshot.data.design.textOverrides, source.design.textOverrides);
+  assert.notEqual(snapshot.data.design.textTypography, source.design.textTypography);
   assert.notEqual(snapshot.data.design.effectIntensity, source.design.effectIntensity);
 });
 
@@ -605,6 +613,86 @@ test('optical readiness wakes on its attribute change instead of polling when Mu
     await waiting?.catch(() => undefined);
     if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
     if (previousRaf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previousRaf;
+  }
+});
+
+test('export waits for fitted custom copy and wakes on its fit-ready attribute', async () => {
+  const previousDocument = globalThis.document;
+  const previousRaf = globalThis.requestAnimationFrame;
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+  const text = { dataset: { cardTextFitReady: 'false' } };
+  let observed;
+  let notifyMutation;
+  let disconnected = false;
+  class FakeMutationObserver {
+    constructor(callback) { notifyMutation = () => callback([], this); }
+    observe(target, options) { observed = { target, options }; }
+    disconnect() { disconnected = true; }
+  }
+  const node = {
+    ownerDocument: { defaultView: { MutationObserver: FakeMutationObserver } },
+    querySelectorAll: selector => selector === '[data-card-text-fit-ready]' ? [text] : [],
+  };
+  let waiting;
+  try {
+    waiting = waitForCardAssets(node, { opticalTimeoutMs: 100 });
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(observed.target, node);
+    assert.deepEqual(observed.options, {
+      attributes: true,
+      attributeFilter: ['data-card-text-fit-ready'],
+      subtree: true,
+    });
+
+    text.dataset.cardTextFitReady = 'true';
+    notifyMutation();
+    await waiting;
+    assert.equal(disconnected, true);
+  } finally {
+    if (!disconnected && notifyMutation) {
+      text.dataset.cardTextFitReady = 'true';
+      notifyMutation();
+    }
+    await waiting?.catch(() => undefined);
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+    if (previousRaf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previousRaf;
+  }
+});
+
+test('export times out when fitted custom copy never reaches its ready state', async () => {
+  const previousDocument = globalThis.document;
+  const previousRaf = globalThis.requestAnimationFrame;
+  globalThis.document = { fonts: createFontSet() };
+  globalThis.requestAnimationFrame = callback => { queueMicrotask(callback); return 1; };
+  const text = { dataset: { cardTextFitReady: 'false' } };
+  const node = { querySelectorAll: selector => selector === '[data-card-text-fit-ready]' ? [text] : [] };
+  try {
+    await assert.rejects(
+      waitForCardAssets(node, { opticalTimeoutMs: 8 }),
+      error => error instanceof CardExportError && error.code === 'optical-timeout',
+    );
+  } finally {
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
+    if (previousRaf === undefined) delete globalThis.requestAnimationFrame; else globalThis.requestAnimationFrame = previousRaf;
+  }
+});
+
+test('export cancellation interrupts fitted custom copy readiness', async () => {
+  const previousDocument = globalThis.document;
+  const controller = new AbortController();
+  globalThis.document = { fonts: createFontSet() };
+  const text = { dataset: { cardTextFitReady: 'false' } };
+  const node = { querySelectorAll: selector => selector === '[data-card-text-fit-ready]' ? [text] : [] };
+  const waiting = waitForCardAssets(node, { signal: controller.signal, opticalTimeoutMs: 1_000 });
+  try {
+    await new Promise(resolve => setImmediate(resolve));
+    controller.abort();
+    await assert.rejects(waiting, error => error instanceof CardExportError && error.code === 'cancelled');
+  } finally {
+    controller.abort();
+    await waiting.catch(() => undefined);
+    if (previousDocument === undefined) delete globalThis.document; else globalThis.document = previousDocument;
   }
 });
 

@@ -154,6 +154,10 @@ export function createCardExportSnapshot(
           ...(data.design.typography ? {
             typography: Object.fromEntries(Object.entries(data.design.typography).map(([role, override]) => [role, { ...override }])),
           } : {}),
+          ...(data.design.textOverrides ? { textOverrides: { ...data.design.textOverrides } } : {}),
+          ...(data.design.textTypography ? {
+            textTypography: Object.fromEntries(Object.entries(data.design.textTypography).map(([id, override]) => [id, { ...override }])),
+          } : {}),
           ...(data.design.effectIntensity ? { effectIntensity: { ...data.design.effectIntensity } } : {}),
         },
         imageAdjustments: { ...data.imageAdjustments },
@@ -288,8 +292,10 @@ export async function waitForCardAssets(node: HTMLElement, options: CardAssetWai
       }
 
       const opticalCount = node.querySelectorAll('[data-optical-name]').length;
+      const fittedCopyCount = node.querySelectorAll('[data-card-text-fit-ready]').length;
       profileCount('export.assets.optical.names.count', opticalCount);
-      const finishOpticalTiming = profileStart('export.assets.optical.ready', { opticalCount });
+      profileCount('export.assets.cardText.fit.count', fittedCopyCount);
+      const finishOpticalTiming = profileStart('export.assets.optical.ready', { opticalCount, fittedCopyCount });
       try {
         await waitForOpticalNames(node, options.opticalTimeoutMs ?? CARD_EXPORT_OPTICAL_TIMEOUT_MS, signal);
       } finally {
@@ -512,12 +518,18 @@ async function waitForImage(image: HTMLImageElement, timeoutMs: number, signal?:
 
 async function waitForOpticalNames(node: HTMLElement, timeoutMs: number, signal?: AbortSignal): Promise<void> {
   const names = Array.from(node.querySelectorAll<HTMLElement>('[data-optical-name]'));
-  if (!names.length) return;
+  const fittedCopy = Array.from(node.querySelectorAll<HTMLElement>('[data-card-text-fit-ready]'));
+  if (!names.length && !fittedCopy.length) return;
+  const observedAttributes = [
+    ...(names.length ? ['data-optical-ready'] : []),
+    ...(fittedCopy.length ? ['data-card-text-fit-ready'] : []),
+  ];
 
   const Observer = node.ownerDocument?.defaultView?.MutationObserver
     ?? (typeof MutationObserver === 'function' ? MutationObserver : undefined);
   await waitForPredicate(
-    () => names.every((name) => name.dataset.opticalReady === 'true'),
+    () => names.every((name) => name.dataset.opticalReady === 'true') &&
+      fittedCopy.every((text) => text.dataset.cardTextFitReady === 'true'),
     timeoutMs,
     'optical-timeout',
     signal,
@@ -525,7 +537,7 @@ async function waitForOpticalNames(node: HTMLElement, timeoutMs: number, signal?
       const observer = new Observer(() => check());
       observer.observe(node, {
         attributes: true,
-        attributeFilter: ['data-optical-ready'],
+        attributeFilter: observedAttributes,
         subtree: true,
       });
       return () => observer.disconnect();

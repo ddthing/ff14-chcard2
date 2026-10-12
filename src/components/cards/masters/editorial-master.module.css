@@ -250,6 +250,11 @@
   -webkit-box-orient: vertical;
 }
 
+.photoStory[data-photo-story='copy'] {
+  display: block;
+  -webkit-line-clamp: unset;
+}
+
 .facts {
   position: absolute;
   z-index: 7;

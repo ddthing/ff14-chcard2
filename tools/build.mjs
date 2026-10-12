@@ -15,6 +15,7 @@ export function runBuild({ env = process.env, args = [], execute = spawnSync } =
       env.NEXT_PUBLIC_FFXIV_OFFICIAL_ASSETS_ENABLED ?? 'true',
   };
   const commands = [
+    ['--experimental-strip-types', path.join(root, 'tools/generate-font-registry.mjs'), '--check'],
     [require.resolve('next/dist/bin/next'), 'build', ...args],
     [path.join(root, 'tools/prune-cloudflare-assets.mjs')],
   ];

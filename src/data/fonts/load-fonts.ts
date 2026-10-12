@@ -1,4 +1,9 @@
-import { FONT_FAMILIES } from './registry';
+import { FONT_REGISTRY, type FontRegistryEntry } from './registry';
+import {
+  TYPOGRAPHY_STYLESHEET_LOADERS,
+  type TypographyStylesheetId,
+} from './stylesheet-loaders.generated';
+export type { TypographyStylesheetId } from './stylesheet-loaders.generated';
 import {
   CARD_EXPORT_FONT_TIMEOUT_MS,
   CardExportError,
@@ -16,7 +21,6 @@ import {
   type TypographyScript,
 } from '@/lib/typography-presets';
 
-export type TypographyStylesheetId = 'notoSansKr' | 'notoSansJp' | 'notoSerifKr' | 'notoSerifJp';
 type StylesheetLoader = () => Promise<unknown>;
 
 export interface TypographyFontLoadOptions {
@@ -38,12 +42,9 @@ export interface FontFaceProfileDetail {
   glyphCount: number;
 }
 
-const STYLESHEET_LOADERS: Readonly<Record<TypographyStylesheetId, StylesheetLoader>> = {
-  notoSansKr: () => import('@fontsource-variable/noto-sans-kr/wght.css'),
-  notoSansJp: () => import('@fontsource-variable/noto-sans-jp/wght.css'),
-  notoSerifKr: () => import('@fontsource-variable/noto-serif-kr/wght.css'),
-  notoSerifJp: () => import('@fontsource-variable/noto-serif-jp/wght.css'),
-};
+const STYLESHEET_LOADERS: Readonly<Record<TypographyStylesheetId, StylesheetLoader>> =
+  TYPOGRAPHY_STYLESHEET_LOADERS;
+const FONT_REGISTRY_ENTRIES = Object.entries(FONT_REGISTRY) as [keyof typeof FONT_REGISTRY, FontRegistryEntry][];
 
 const stylesheetPromises = new Map<TypographyStylesheetId, Promise<void>>();
 const FONT_FACE_CACHE_LIMIT = 96;
@@ -91,21 +92,42 @@ export function getTypographyStylesheetIds(
   presetId: string | null | undefined,
   scripts: TypographyScript | readonly TypographyScript[],
   options: TypographyFontLoadOptions = {},
+  registry: Readonly<Record<string, FontRegistryEntry>> = FONT_REGISTRY,
 ): TypographyStylesheetId[] {
   const preset = getTypographyPreset(presetId);
   const suppliedScripts: readonly TypographyScript[] =
     typeof scripts === 'string' ? [scripts] : scripts;
   const scriptList = Array.from(new Set<TypographyScript>(suppliedScripts));
   const isSerifPreset = options.masterFamily !== undefined || preset.id === 'editorial' || preset.id === 'classic';
+  const roles = isSerifPreset ? ['sans', 'serif'] as const : ['sans'] as const;
+  const registryEntries = Object.entries(registry) as [string, FontRegistryEntry][];
 
-  return scriptList.flatMap<TypographyStylesheetId>((script) => {
-    if (script === 'korean') {
-      return isSerifPreset ? ['notoSansKr', 'notoSerifKr'] : ['notoSansKr'];
-    }
-    if (script === 'japanese') {
-      return isSerifPreset ? ['notoSansJp', 'notoSerifJp'] : ['notoSansJp'];
-    }
-    return [];
+  return scriptList.flatMap((script) => roles.flatMap((role) => {
+    const registeredFont = registryEntries.find(([, entry]) => (
+      entry.package?.isDefault === true && entry.package.role === role && entry.supportedScripts.includes(script)
+    ));
+    return registeredFont ? [registeredFont[0] as TypographyStylesheetId] : [];
+  }));
+}
+
+function getRegisteredScriptFont(script: TypographyScript, role: 'sans' | 'serif') {
+  const match = FONT_REGISTRY_ENTRIES.find(([, entry]) => (
+    entry.package?.isDefault === true && entry.package.role === role && entry.supportedScripts.includes(script)
+  ));
+  return match?.[1];
+}
+
+export function getTypographyStylesheetIdsForFontRequests(
+  fontRequests: TypographyFontLoadOptions['fontRequests'],
+  scripts: readonly TypographyScript[],
+  registry: Readonly<Record<string, FontRegistryEntry>> = FONT_REGISTRY,
+): TypographyStylesheetId[] {
+  const registryEntries = Object.entries(registry) as [string, FontRegistryEntry][];
+  return (fontRequests ?? []).flatMap(({ fontId }) => {
+    const registeredFont = registryEntries.find(([, entry]) => (
+      entry.id === fontId && entry.package && entry.supportedScripts.some((script) => scripts.includes(script))
+    ));
+    return registeredFont ? [registeredFont[0] as TypographyStylesheetId] : [];
   });
 }
 
@@ -156,7 +178,10 @@ export async function loadTypographyFonts(
     typeof scripts === 'string' ? [scripts] : scripts;
   const scriptList: TypographyScript[] = Array.from(new Set<TypographyScript>(suppliedScripts));
   const isSerifPreset = options.masterFamily !== undefined || preset.id === 'editorial' || preset.id === 'classic';
-  const stylesheetIds = getTypographyStylesheetIds(presetId, scriptList, options);
+  const stylesheetIds = [...new Set([
+    ...getTypographyStylesheetIds(presetId, scriptList, options),
+    ...getTypographyStylesheetIdsForFontRequests(options.fontRequests, scriptList),
+  ])];
   const timeoutMs = options.timeoutMs ?? CARD_EXPORT_FONT_TIMEOUT_MS;
   const profileSource = options.profileSource ?? 'other';
   profileCount(`fonts.loader.calls.${profileSource}`);
@@ -191,25 +216,25 @@ export async function loadTypographyFonts(
 
       profileCount(`fonts.loader.script.${script}`);
       const glyphCount = Array.from(glyphs).length;
-      const sansId = script === 'korean' ? 'noto-sans-kr' : 'noto-sans-jp';
-      const sansFamily = script === 'korean' ? FONT_FAMILIES.korean : FONT_FAMILIES.japanese;
-      const faces = [loadProfiledFontFace(`400 16px "${sansFamily}"`, glyphs, {
+      const sansFont = getRegisteredScriptFont(script, 'sans');
+      const faces = sansFont ? [loadProfiledFontFace(`400 16px "${sansFont.family}"`, glyphs, {
         source: profileSource,
-        face: sansId,
+        face: sansFont.id,
         script,
         glyphCount,
-      })];
+      })] : [];
       if (isSerifPreset) {
-        const serifId = script === 'korean' ? 'noto-serif-kr' : 'noto-serif-jp';
-        const serifFamily = script === 'korean' ? FONT_FAMILIES.koreanSerif : FONT_FAMILIES.japaneseSerif;
+        const serifFont = getRegisteredScriptFont(script, 'serif');
         const weight = options.serifWeightByScript?.[script] ?? preset.displayWeight;
-        faces.push(loadProfiledFontFace(`${weight} 16px "${serifFamily}"`, glyphs, {
-          source: profileSource,
-          face: serifId,
-          script,
-          weight,
-          glyphCount,
-        }));
+        if (serifFont) {
+          faces.push(loadProfiledFontFace(`${weight} 16px "${serifFont.family}"`, glyphs, {
+            source: profileSource,
+            face: serifFont.id,
+            script,
+            weight,
+            glyphCount,
+          }));
+        }
       }
       return faces;
     });

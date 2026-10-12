@@ -7,9 +7,11 @@ import {
   type AdventurerCardData,
   type AdventurerCardDesign,
   type AdventurerCardImageAdjustments,
+  type CardTypographyOverride,
 } from '@/components/cards/types';
 import type { CardPalette } from '@/lib/palette';
-import { loadEditorDraft, normalizeCardData, normalizeCharacterUpdate, persistEditorDraft } from '@/store/editor-persistence';
+import { loadEditorDraft, normalizeCardData, normalizeCardTypographyOverride, normalizeCharacterUpdate, persistEditorDraft } from '@/store/editor-persistence';
+import { isCardTextOverrideId, isKnownCardTextId, normalizeCardTextOverride } from '@/lib/card-text-editing';
 import { profileCount, profileStart } from '@/lib/performance-profile';
 
 export interface EditorHistoryOptions {
@@ -61,7 +63,11 @@ export interface EditorStoreState extends EditorSnapshot {
   updateCharacter: <K extends keyof AdventurerCardCharacter>(key: K, value: AdventurerCardCharacter[K], options?: EditorHistoryOptions) => void;
   setCharacter: (partial: Partial<AdventurerCardCharacter>, options?: EditorHistoryOptions) => void;
   updateDesign: <K extends keyof AdventurerCardDesign>(key: K, value: AdventurerCardDesign[K]) => void;
-  setDesign: (partial: Partial<AdventurerCardDesign>) => void;
+  setDesign: (partial: Partial<AdventurerCardDesign>, options?: EditorHistoryOptions) => void;
+  setTextOverride: (id: string, value: string, options?: EditorHistoryOptions) => void;
+  resetTextOverride: (id: string, options?: EditorHistoryOptions) => void;
+  setTextTypographyOverride: (id: string, override: CardTypographyOverride, options?: EditorHistoryOptions) => void;
+  resetTextTypographyOverride: (id: string, options?: EditorHistoryOptions) => void;
   setImage: (partial: Partial<EditorImageState>, options?: { groupId?: string }) => void;
   replaceUploadedImage: (source: Pick<EditorImageState, 'src' | 'fileName' | 'mimeType'>, palette: CardPalette) => void;
   beginHistoryGroup: (groupId: string, scope?: EditorHistoryScope) => void;
@@ -130,6 +136,8 @@ function captureSnapshot(state: Pick<EditorStoreState, 'character' | 'design' | 
       palette: { ...state.design.palette },
       effects: [...state.design.effects],
       ...(state.design.typography ? { typography: cloneTypography(state.design.typography) } : {}),
+      ...(state.design.textOverrides ? { textOverrides: cloneTextOverrides(state.design.textOverrides) } : {}),
+      ...(state.design.textTypography ? { textTypography: cloneTextTypography(state.design.textTypography) } : {}),
       ...(state.design.effectIntensity ? { effectIntensity: cloneEffectIntensity(state.design.effectIntensity) } : {}),
     },
     image: { ...state.image },
@@ -174,6 +182,15 @@ function cloneEffectIntensity(
   return effectIntensity ? { ...effectIntensity } : undefined;
 }
 
+function cloneTextOverrides(overrides: AdventurerCardDesign['textOverrides']): AdventurerCardDesign['textOverrides'] {
+  return overrides ? { ...overrides } : undefined;
+}
+
+function cloneTextTypography(overrides: AdventurerCardDesign['textTypography']): AdventurerCardDesign['textTypography'] {
+  if (!overrides) return undefined;
+  return Object.fromEntries(Object.entries(overrides).map(([id, override]) => [id, { ...override }]));
+}
+
 function normalizeImagePatch(current: EditorImageState, partial: Partial<EditorImageState>): EditorImageState {
   return {
     ...current,
@@ -205,6 +222,11 @@ function sameRecord(a: Readonly<Record<string, number>> = {}, b: Readonly<Record
   return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
 }
 
+function sameStringRecord(a: Readonly<Record<string, string>> = {}, b: Readonly<Record<string, string>> = {}): boolean {
+  const keys = Object.keys(a);
+  return keys.length === Object.keys(b).length && keys.every((key) => a[key] === b[key]);
+}
+
 function sameTypography(
   a: AdventurerCardDesign['typography'],
   b: AdventurerCardDesign['typography'],
@@ -215,6 +237,23 @@ function sameTypography(
   return roles.length === Object.keys(right).length && roles.every((role) => {
     const first = left[role as keyof typeof left];
     const second = right[role as keyof typeof right];
+    return first?.fontFamily === second?.fontFamily &&
+      first?.sizePercent === second?.sizePercent &&
+      first?.weight === second?.weight &&
+      first?.trackingEm === second?.trackingEm;
+  });
+}
+
+function sameTextTypography(
+  a: AdventurerCardDesign['textTypography'],
+  b: AdventurerCardDesign['textTypography'],
+): boolean {
+  const left = a ?? {};
+  const right = b ?? {};
+  const ids = Object.keys(left);
+  return ids.length === Object.keys(right).length && ids.every((id) => {
+    const first = left[id];
+    const second = right[id];
     return first?.fontFamily === second?.fontFamily &&
       first?.sizePercent === second?.sizePercent &&
       first?.weight === second?.weight &&
@@ -237,6 +276,8 @@ function sameDesign(a: AdventurerCardDesign, b: AdventurerCardDesign): boolean {
     (a.decorativeCopy ?? 'default') === (b.decorativeCopy ?? 'default') &&
     a.accentColor === b.accentColor && a.typographyPreset === b.typographyPreset &&
     sameTypography(a.typography, b.typography) &&
+    sameStringRecord(a.textOverrides, b.textOverrides) &&
+    sameTextTypography(a.textTypography, b.textTypography) &&
     sameRecord(a.effectIntensity, b.effectIntensity) &&
     a.imagePosition === b.imagePosition && a.imageScale === b.imageScale &&
     a.palette.primary === b.palette.primary && a.palette.accent === b.palette.accent &&
@@ -287,6 +328,8 @@ function mergeDesign(current: AdventurerCardDesign, partial: Partial<AdventurerC
   }
   if (partial.effects) next.effects = [...partial.effects];
   if (Object.hasOwn(partial, 'typography')) next.typography = cloneTypography(partial.typography);
+  if (Object.hasOwn(partial, 'textOverrides')) next.textOverrides = cloneTextOverrides(partial.textOverrides);
+  if (Object.hasOwn(partial, 'textTypography')) next.textTypography = cloneTextTypography(partial.textTypography);
   if (Object.hasOwn(partial, 'effectIntensity')) next.effectIntensity = cloneEffectIntensity(partial.effectIntensity);
   return next;
 }
@@ -360,7 +403,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
       profileCount('store.design.update.calls');
       get().setDesign({ [key]: value } as Partial<AdventurerCardDesign>);
     },
-    setDesign: (partial) => {
+    setDesign: (partial, options) => {
       profileCount('store.design.set.calls');
       const finishSet = profileStart('store.design.set.total');
       let changed = false;
@@ -378,10 +421,55 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           return state;
         }
         changed = true;
-        return { design, history: historyForChange(state, 'design', Object.keys(partial)) };
+        return {
+          design,
+          history: options?.recordHistory === false
+            ? state.history
+            : historyForChange(state, 'design', Object.keys(partial), options),
+        };
       });
-      if (changed) schedulePersist();
+      if (changed && options?.persist !== false) schedulePersist();
       finishSet();
+    },
+    setTextOverride: (id, value, options) => {
+      if (!isCardTextOverrideId(id)) return;
+      const normalized = normalizeCardTextOverride(value, id);
+      if (normalized === undefined) return;
+      const current = get().design.textOverrides ?? {};
+      if (current[id] === normalized) return;
+      get().setDesign({ textOverrides: { ...current, [id]: normalized } }, options);
+    },
+    resetTextOverride: (id, options) => {
+      if (!isCardTextOverrideId(id)) return;
+      const current = get().design.textOverrides;
+      if (!current || !Object.hasOwn(current, id)) return;
+      const next = { ...current };
+      delete next[id];
+      get().setDesign({ textOverrides: Object.keys(next).length > 0 ? next : undefined }, options);
+    },
+    setTextTypographyOverride: (id, override, options) => {
+      if (!isKnownCardTextId(id)) return;
+      const normalized = normalizeCardTypographyOverride(override);
+      const current = get().design.textTypography ?? {};
+      if (!normalized) {
+        if (!Object.hasOwn(current, id)) return;
+        const next = { ...current };
+        delete next[id];
+        get().setDesign({ textTypography: Object.keys(next).length > 0 ? next : undefined }, options);
+        return;
+      }
+      const previous = current[id];
+      if (previous?.fontFamily === normalized.fontFamily && previous?.sizePercent === normalized.sizePercent &&
+          previous?.weight === normalized.weight && previous?.trackingEm === normalized.trackingEm) return;
+      get().setDesign({ textTypography: { ...current, [id]: normalized } }, options);
+    },
+    resetTextTypographyOverride: (id, options) => {
+      if (!isKnownCardTextId(id)) return;
+      const current = get().design.textTypography;
+      if (!current || !Object.hasOwn(current, id)) return;
+      const next = { ...current };
+      delete next[id];
+      get().setDesign({ textTypography: Object.keys(next).length > 0 ? next : undefined }, options);
     },
     setImage: (partial, options) => {
       profileCount('store.image.set.calls');
@@ -522,6 +610,8 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           palette: { ...state.design.palette },
           effects: [...state.design.effects],
           ...(state.design.typography ? { typography: cloneTypography(state.design.typography) } : {}),
+          ...(state.design.textOverrides ? { textOverrides: cloneTextOverrides(state.design.textOverrides) } : {}),
+          ...(state.design.textTypography ? { textTypography: cloneTextTypography(state.design.textTypography) } : {}),
           ...(state.design.effectIntensity ? { effectIntensity: cloneEffectIntensity(state.design.effectIntensity) } : {}),
           accentColor: state.design.palette.accent,
           imagePosition: `${state.image.x}% ${state.image.y}%`,

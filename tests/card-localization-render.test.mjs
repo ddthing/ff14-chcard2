@@ -80,6 +80,8 @@ const [{ CinematicMaster }, { EditorialMaster, getEditorialInformationFontContex
 const { GLOBAL_WORLDS, RACES, CLANS, getDataCenter, getWorld, findWorld, localizeFfxivLabel } = await import('../src/data/ffxiv/index.ts');
 const { localizeCardWorld } = await import('../src/lib/card-microcopy.ts');
 const { CARD_STOCK_COPY, getCardDisplayBio, getCardMasterCopy } = await import('../src/lib/card-copy.ts');
+const { getCardTextItems, getCardTextMaxLines, isCardTextOverrideId, normalizeCardTextOverride } = await import('../src/lib/card-text-editing.ts');
+const { fitCardCopyFontSize } = await import('../src/components/cards/craft/fit-card-copy.tsx');
 const { MASTER_TYPOGRAPHY_MAP, getTypographyFontFamily } = await import('../src/lib/typography-presets.ts');
 const [{ CinematicCard, EditorialCard, AdventurerIdCard }, { getCardFontRequest, getCardPreviewFontRequestKey, loadCardPreviewFonts }] = await Promise.all([
   import('../src/components/cards/AdventurerCards.tsx'),
@@ -151,6 +153,136 @@ test('all three Korean card masters localize profile metadata and stock copy whi
     }
     assert.ok(!text.includes('LEVEL'), `${Master.name} should keep the level label in Korean`);
   }
+});
+
+test('semantic text IDs stay stable across ratios and expose localized defaults and hidden copy', () => {
+  const portrait = getConerSample('cinematic', '4:5');
+  const wide = getConerSample('cinematic', '16:9');
+  const portraitItems = getCardTextItems(portrait, 'en');
+  const wideItems = getCardTextItems(wide, 'en');
+  const portraitIds = portraitItems.map(({ id }) => id);
+  assert.deepEqual(wideItems.map(({ id }) => id), portraitIds);
+  assert.ok(portraitIds.includes('character.name'));
+  assert.ok(portraitIds.includes('cinematic.promise'));
+  assert.ok(portraitIds.includes('cinematic.label.job'));
+
+  const custom = {
+    ...portrait,
+    design: {
+      ...portrait.design,
+      textOverrides: { 'cinematic.promise': 'ONE\r\nTWO', 'cinematic.place': '   ' },
+    },
+  };
+  const customItems = new Map(getCardTextItems(custom, 'en').map((item) => [item.id, item]));
+  assert.equal(customItems.get('cinematic.promise').value, 'ONE\nTWO');
+  assert.equal(customItems.get('cinematic.promise').defaultValue, 'A BRIGHTER\nTOMORROW\nTOGETHER');
+  assert.equal(customItems.get('cinematic.place').value, '');
+  assert.equal(customItems.get('cinematic.place').visible, false);
+  assert.equal(isCardTextOverrideId('cinematic.promise'), true);
+  assert.equal(isCardTextOverrideId('brand.recordMark'), false);
+});
+
+test('all text item labels are localized and label slots stay distinct from value slots', () => {
+  const templates = ['cinematic', 'editorial', 'id-card'];
+  for (const locale of ['ko', 'en', 'ja']) {
+    for (const template of templates) {
+      const data = makeData(template);
+      for (const item of getCardTextItems(data, locale)) {
+        assert.ok(item.label.trim());
+        assert.ok(!item.label.includes(item.id), `${locale} must not expose raw slot ID ${item.id}`);
+      }
+    }
+  }
+
+  const cinematic = new Map(getCardTextItems(makeData('cinematic'), 'ko').map((item) => [item.id, item]));
+  const editorial = new Map(getCardTextItems(makeData('editorial'), 'en').map((item) => [item.id, item]));
+  const identity = new Map(getCardTextItems(makeData('id-card'), 'ja').map((item) => [item.id, item]));
+  assert.equal(cinematic.get('cinematic.label.worldDc').label, '시네마틱 · 서버 · 데이터 센터');
+  assert.equal(editorial.get('editorial.label.service').label, 'Editorial · Service / region');
+  assert.equal(identity.get('identity.label.playStyles').label, '記録カード · プレイスタイル');
+  assert.equal(identity.has('identity.masthead'), false, 'accessibility-only master copy is not selectable');
+  assert.equal(identity.has('identity.mastheadCaption'), false, 'accessibility-only masthead caption is not selectable');
+  assert.equal(identity.has('identity.label.record'), false, 'accessibility-only section names are not selectable');
+  assert.deepEqual(
+    [...identity.values()].filter((item) => item.category === 'copy').map((item) => item.id),
+    ['identity.banner', 'identity.location', 'identity.photoQuote', 'identity.photoStamp'],
+  );
+});
+
+test('master renderers place custom copy, labels, and character values on stable text IDs', () => {
+  const cinematic = makeData('cinematic');
+  cinematic.design.textOverrides = {
+    'cinematic.promise': 'AFTER THE RAIN\nWE BEGIN',
+    'cinematic.label.job': 'ROLE',
+    'brand.recordMark': 'NOT XIV',
+  };
+  cinematic.design.textTypography = { 'character.name': { fontFamily: 'valley-sans', sizePercent: 110 } };
+  const cinematicMarkup = renderToStaticMarkup(createElement(CinematicMaster, { data: cinematic, locale: 'en' }));
+  assert.ok(cinematicMarkup.includes('data-card-text-id="cinematic.promise"'));
+  assert.ok(cinematicMarkup.includes('AFTER THE RAIN'));
+  assert.ok(cinematicMarkup.includes('WE BEGIN'));
+  assert.ok(cinematicMarkup.includes('data-card-text-id="cinematic.label.job">ROLE</dt>'));
+  assert.ok(cinematicMarkup.includes('data-card-text-id="character.name"'));
+  assert.match(opticalNameStyleProperties(cinematicMarkup, 'cinematic')['font-family'], /Valley Sans/u);
+
+  const editorial = makeData('editorial');
+  editorial.character.bio = '';
+  editorial.design.textOverrides = { 'editorial.story': 'A NEW CHAPTER\nBEGINS HERE', 'editorial.label.job': 'CALLING' };
+  const editorialMarkup = renderToStaticMarkup(createElement(EditorialMaster, { data: editorial, locale: 'en' }));
+  assert.ok(editorialMarkup.includes('data-card-text-id="editorial.story"'));
+  assert.ok(editorialMarkup.includes('A NEW CHAPTER'));
+  assert.ok(editorialMarkup.includes('data-card-text-id="editorial.label.job">CALLING</dt>'));
+
+  const identity = makeData('id-card');
+  identity.design.textOverrides = { 'identity.banner': 'KIN\nAND KIN', 'identity.label.world': 'HOME WORLD' };
+  const identityMarkup = renderToStaticMarkup(createElement(IdentityMaster, { data: identity, locale: 'en' }));
+  assert.ok(identityMarkup.includes('data-card-text-id="identity.banner"'));
+  assert.ok(identityMarkup.includes('KIN'));
+  assert.ok(identityMarkup.includes('AND KIN'));
+  assert.ok(identityMarkup.includes('data-card-text-id="identity.label.world">HOME WORLD</dt>'));
+  assert.ok(identityMarkup.includes('data-card-text-id="brand.recordMark">XIV</span>'));
+  assert.ok(!identityMarkup.includes('NOT XIV'));
+});
+
+test('long Editorial story copy keeps every CJK and Latin character available to the responsive fitter', () => {
+  const ratios = ['1:1', '4:5', '3:4', '9:16', '16:9'];
+  const cjkStory = '星の旅'.repeat(32);
+  const latinStory = 'A longer story follows the adventurer beyond the horizon. '.repeat(2).slice(0, 96);
+  for (const [index, ratio] of ratios.entries()) {
+    const data = makeData('editorial');
+    data.character.bio = '';
+    data.design.ratio = ratio;
+    const story = index % 2 === 0 ? cjkStory : latinStory;
+    data.design.textOverrides = { 'editorial.story': story };
+    const storyItem = getCardTextItems(data, 'en').find(({ id }) => id === 'editorial.story');
+    assert.equal(storyItem.maxLength, 96);
+    assert.equal(storyItem.value, story);
+    const markup = renderToStaticMarkup(createElement(EditorialMaster, { data, locale: 'en', ratio }));
+    assert.ok(markup.includes('data-card-text-fit-ready="false"'));
+    assert.ok(markup.includes(story));
+    assert.match(markup, /style="[^"]*overflow-wrap:anywhere;word-break:normal/u);
+  }
+
+  const defaultData = makeData('editorial');
+  defaultData.character.bio = '';
+  const defaultStory = renderToStaticMarkup(createElement(EditorialMaster, { data: defaultData, locale: 'ja' }));
+  assert.doesNotMatch(defaultStory, /data-photo-story="copy"[^>]*style=/u, 'short localized sample retains authored CSS wrapping');
+});
+
+test('Editorial story line limits keep newline-heavy copy inside the fitted box at 125 percent', () => {
+  const raw = 'A\n'.repeat(48);
+  const normalized = normalizeCardTextOverride(raw, 'editorial.story');
+  assert.equal(getCardTextMaxLines('editorial.story'), 6);
+  assert.equal(normalized.split('\n').length, 6);
+
+  const maximumFontSize = 30 * 1.25;
+  const availableHeight = 100;
+  const fit = fitCardCopyFontSize(maximumFontSize, (fontSize) => normalized.split('\n').length * fontSize * 1.12 <= availableHeight);
+  assert.equal(fit.overflow, false);
+  assert.ok(normalized.split('\n').length * fit.fontSize * 1.12 <= availableHeight);
+
+  const uncapped = fitCardCopyFontSize(maximumFontSize, (fontSize) => raw.split('\n').length * fontSize * 1.12 <= availableHeight);
+  assert.equal(uncapped.overflow, true, 'the fitting box reports impossible line counts without expanding outside the card');
 });
 
 test('unknown level is omitted across all card families, layouts and ratios', () => {
@@ -555,7 +687,13 @@ test('typography scaler observes text and card context without watching its own 
       attributes: true,
       attributeFilter: ['lang', 'data-locale', 'data-ratio', 'data-layout', 'data-typography', 'style'],
     });
-    assert.deepEqual(observed[1], { characterData: true, childList: true, subtree: true });
+    assert.deepEqual(observed[1], {
+      attributes: true,
+      attributeFilter: ['data-card-text-id', 'data-master-typography-role'],
+      characterData: true,
+      childList: true,
+      subtree: true,
+    });
     disconnect();
     assert.equal(disconnects, 3);
   } finally {
@@ -724,6 +862,59 @@ test('preview font requests include the selected locale’s fixed card glyphs', 
       }
     }
   }
+});
+
+test('custom CJK copy and per-item fonts join preview and export font readiness', () => {
+  const data = makeData('editorial');
+  data.character.bio = '';
+  data.design.textOverrides = {
+    'editorial.story': '星の旅\n明日へ',
+    'editorial.label.job': '魔道士',
+  };
+  data.design.textTypography = {
+    'character.name': { fontFamily: 'valley-sans', sizePercent: 115 },
+    'editorial.story': { fontFamily: 'noto-sans-jp', weight: 500 },
+  };
+  const request = getCardFontRequest(
+    data.character,
+    'ja',
+    'editorial',
+    data.imageUrl,
+    data.design.decorativeCopy,
+    data.design.layoutVariant,
+    data.design.typography,
+    data.design.textOverrides,
+    data.design.textTypography,
+  );
+
+  assert.ok(request.scripts.includes('japanese'));
+  assert.ok(request.textByScript.japanese.includes('星の旅'));
+  assert.ok(request.textByScript.japanese.includes('明日へ'));
+  assert.ok(request.fontRequests.some(({ fontId }) => fontId === 'valley-sans'));
+  assert.ok(request.fontRequests.some(({ fontId }) => fontId === 'noto-sans-jp'));
+
+  const fontData = {
+    character: data.character,
+    imageUrl: data.imageUrl,
+    design: {
+      typographyPreset: data.design.typographyPreset,
+      template: data.design.template,
+      layoutVariant: data.design.layoutVariant,
+      decorativeCopy: data.design.decorativeCopy,
+      typography: data.design.typography,
+      textOverrides: data.design.textOverrides,
+      textTypography: data.design.textTypography,
+    },
+  };
+  const key = getCardPreviewFontRequestKey(fontData, 'ja');
+  assert.notEqual(getCardPreviewFontRequestKey({
+    ...fontData,
+    design: { ...fontData.design, textOverrides: { ...data.design.textOverrides, 'editorial.story': '星だけ' } },
+  }, 'ja'), key);
+  assert.notEqual(getCardPreviewFontRequestKey({
+    ...fontData,
+    design: { ...fontData.design, textTypography: { ...data.design.textTypography, 'editorial.story': { fontFamily: 'gmarket-sans' } } },
+  }, 'ja'), key);
 });
 
 test('registered typography overrides add selected families to preview font requests and load supported weights', async () => {

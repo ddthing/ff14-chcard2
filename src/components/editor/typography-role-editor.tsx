@@ -1,80 +1,85 @@
 'use client';
 
-import { useState, type ChangeEvent, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import type { CardTypographyOverride, CardTypographyRole, CardTypographyOverrides } from '@/components/cards/types';
-import { getTypographyFontOptions, getTypographyFontIdForStack, getTypographyFontStackForId, getTypographySupportedWeight, getMasterTypographyFamily, getMasterTypographyTreatment } from '@/lib/typography-presets';
+import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
+import type { CardTypographyOverride } from '@/components/cards/types';
+import type { CardTextItem } from '@/lib/card-text-editing';
+import {
+  detectTypographyScript,
+  getMasterTypographyFamily,
+  getMasterTypographyTreatment,
+  getTypographyFontEntry,
+  getTypographyFontIdForStack,
+  getTypographyFontOptions,
+  getTypographySupportedWeight,
+  isSelectableTypographyFontId,
+} from '@/lib/typography-presets';
 import type { Locale } from '@/lib/types';
 import { editorStore, useEditorStore } from '@/store/editor-store';
+import { resetLegacyTypographyRole } from '@/components/editor/text-editor/card-text-actions';
 import styles from './typography-role-editor.module.css';
-
-const ROLES: readonly CardTypographyRole[] = [
-  'display', 'secondaryDisplay', 'job', 'information', 'label', 'caption', 'micro',
-];
 
 const COPY = {
   ko: {
-    title: '서체 세부 편집', role: '텍스트 그룹', font: '글꼴', size: '크기', weight: '굵기', spacing: '자간',
-    reset: '그룹 초기화', defaultFont: '카드 기본 글꼴', preview: '미리보기', sizeHelp: '카드 기본 크기 기준', fontSupport: '지원 문자',
+    title: '텍스트 스타일', font: '글꼴', size: '크기', weight: '굵기', tracking: '자간', advanced: '세부 조정',
+    reset: '이 항목 스타일 초기화', defaultFont: '기본 글꼴', inheritedFont: '저장된 기본 글꼴', unavailableFont: '저장된 글꼴 (사용할 수 없음)',
+    resetInheritedRole: (role: string) => `${role} 그룹의 저장 스타일 초기화`,
+    sizeHelp: '카드 기본 크기', supports: '지원 문자',
+    fallback: '이 글꼴은 선택한 문자를 지원하지 않아 카드 기본 글꼴로 표시됩니다.',
+    missing: '저장된 글꼴을 찾을 수 없어 카드 기본 글꼴로 표시됩니다.',
+    scripts: { latin: '영문', korean: '한글', japanese: '일본어' },
     roles: { display: '이름', secondaryDisplay: '소개', job: '직업', information: '정보 값', label: '레이블', caption: '캡션', micro: '짧은 문구' },
   },
   en: {
-    title: 'Fine tune typography', role: 'Text group', font: 'Font family', size: 'Size', weight: 'Weight', spacing: 'Letter spacing',
-    reset: 'Reset group', defaultFont: 'Card default', preview: 'Preview', sizeHelp: 'Relative to the card default', fontSupport: 'Supports',
-    roles: { display: 'Name', secondaryDisplay: 'Story', job: 'Job', information: 'Information', label: 'Labels', caption: 'Captions', micro: 'Microcopy' },
+    title: 'Text style', font: 'Font family', size: 'Size', weight: 'Weight', tracking: 'Letter spacing', advanced: 'Advanced',
+    reset: 'Reset item style', defaultFont: 'Default font', inheritedFont: 'Saved default font', unavailableFont: 'Saved font (unavailable)',
+    resetInheritedRole: (role: string) => `Reset saved ${role.toLowerCase()} group style`,
+    sizeHelp: 'Card default', supports: 'Supports',
+    fallback: 'This font does not support the selected script; the card uses its fallback font.',
+    missing: 'The saved font is unavailable; the card uses its fallback font.',
+    scripts: { latin: 'Latin', korean: 'Korean', japanese: 'Japanese' },
+    roles: { display: 'Name', secondaryDisplay: 'Bio', job: 'Job', information: 'Information', label: 'Label', caption: 'Caption', micro: 'Short phrase' },
   },
   ja: {
-    title: '文字を細かく調整', role: 'テキストグループ', font: 'フォント', size: 'サイズ', weight: '太さ', spacing: '文字間隔',
-    reset: 'グループをリセット', defaultFont: 'カードの標準', preview: 'プレビュー', sizeHelp: 'カードの標準サイズを基準', fontSupport: '対応文字',
+    title: 'テキストスタイル', font: 'フォント', size: 'サイズ', weight: '太さ', tracking: '文字間隔', advanced: '詳細設定',
+    reset: 'この項目のスタイルをリセット', defaultFont: '標準フォント', inheritedFont: '保存済み標準フォント', unavailableFont: '保存済みフォント（利用不可）',
+    resetInheritedRole: (role: string) => `保存済みの${role}グループスタイルをリセット`,
+    sizeHelp: 'カードの標準', supports: '対応文字',
+    fallback: 'このフォントは選択した文字に対応していません。カードの代替フォントを使います。',
+    missing: '保存済みのフォントが見つからないため、カードの代替フォントを使います。',
+    scripts: { latin: 'ラテン', korean: '韓国語', japanese: '日本語' },
     roles: { display: '名前', secondaryDisplay: '紹介文', job: 'ジョブ', information: '情報', label: 'ラベル', caption: 'キャプション', micro: '短い文言' },
   },
 } as const;
 
-const SCRIPT_LABELS = {
-  ko: { latin: '영문', korean: '한글', japanese: '일본어' },
-  en: { latin: 'Latin', korean: 'Korean', japanese: 'Japanese' },
-  ja: { latin: 'ラテン', korean: '韓国語', japanese: '日本語' },
-} as const;
+type EditableField = 'fontFamily' | 'sizePercent' | 'weight' | 'trackingEm';
 
-function fontOptionLabel(font: ReturnType<typeof getTypographyFontOptions>[number], locale: Locale): string {
-  const scripts = font.supportedScripts.map((script) => SCRIPT_LABELS[locale][script]).join(' · ');
-  return `${font.family} · ${scripts}`;
-}
-
-function getSample(role: CardTypographyRole, name: string, bio: string, job: string, locale: Locale): string {
-  const local = {
-    ko: { display: '모험가 이름', secondaryDisplay: '여정의 기록', job: '백마도사', information: '초코보 · 달빛회사', label: '월드 · 레벨', caption: '새로운 여정이 시작됩니다', micro: 'XIV · 기록' },
-    en: { display: 'Adventurer Name', secondaryDisplay: 'A note from the journey', job: 'White Mage', information: 'Chocobo · Moonlit', label: 'WORLD · LEVEL', caption: 'A new journey begins', micro: 'XIV · RECORD' },
-    ja: { display: '冒険者の名前', secondaryDisplay: '旅の記録', job: '白魔道士', information: 'チョコボ · 月影', label: 'ワールド · レベル', caption: '新しい旅が始まる', micro: 'XIV · 記録' },
-  }[locale];
-
-  if (role === 'display' && name.trim()) return name;
-  if (role === 'secondaryDisplay' && bio.trim()) return bio;
-  if (role === 'job' && job.trim()) return job;
-  return local[role];
-}
-
-function updateOverride(
-  current: CardTypographyOverrides | undefined,
-  role: CardTypographyRole,
-  patch: Partial<CardTypographyOverride>,
-) {
-  const next = Object.fromEntries(Object.entries(current ?? {}).map(([key, value]) => [key, { ...value }])) as CardTypographyOverrides;
-  const roleOverride = { ...(next[role] ?? {}), ...patch };
-  for (const key of Object.keys(roleOverride) as Array<keyof CardTypographyOverride>) {
-    if (roleOverride[key] === undefined) delete roleOverride[key];
+function copyOverride(current: CardTypographyOverride | undefined, patch: Partial<CardTypographyOverride>): CardTypographyOverride {
+  const next = { ...(current ?? {}), ...patch };
+  for (const key of Object.keys(next) as Array<keyof CardTypographyOverride>) {
+    if (next[key] === undefined) delete next[key];
   }
-  if (Object.keys(roleOverride).length > 0) next[role] = roleOverride;
-  else delete next[role];
-  editorStore.getState().setDesign({ typography: Object.keys(next).length > 0 ? next : undefined });
+  return next;
 }
 
-function beginGroup(role: CardTypographyRole, field: string) {
-  editorStore.getState().beginHistoryGroup(`typography:${role}:${field}`, 'design');
+function updateItemOverride(item: CardTextItem, current: CardTypographyOverride | undefined, patch: Partial<CardTypographyOverride>, groupId: string) {
+  const next = copyOverride(current, patch);
+  const state = editorStore.getState();
+  if (Object.keys(next).length > 0) state.setTextTypographyOverride(item.id, next, { groupId });
+  else state.resetTextTypographyOverride(item.id, { groupId });
 }
 
-function rangeGroupHandlers(role: CardTypographyRole, field: string) {
-  const start = () => beginGroup(role, field);
-  const finish = () => editorStore.getState().endHistoryGroup();
+function beginGroup(itemId: string, field: EditableField) {
+  editorStore.getState().beginHistoryGroup(`text-typography:${itemId}:${field}`, 'design');
+}
+
+function endGroup(itemId: string, field: EditableField) {
+  const state = editorStore.getState();
+  if (state.history.groupId === `text-typography:${itemId}:${field}`) state.endHistoryGroup();
+}
+
+function rangeGroupHandlers(item: CardTextItem, field: EditableField) {
+  const start = () => beginGroup(item.id, field);
+  const finish = () => endGroup(item.id, field);
   const adjustKeys = new Set(['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp']);
   return {
     onFocus: start,
@@ -91,176 +96,175 @@ function rangeGroupHandlers(role: CardTypographyRole, field: string) {
   };
 }
 
-function textValue(event: ChangeEvent<HTMLSelectElement>): string {
-  return event.currentTarget.value;
-}
-
-export function TypographyRoleEditor({ locale }: { locale: Locale }) {
+export function TypographyRoleEditor({ locale, item }: { locale: Locale; item: CardTextItem | null }) {
   const copy = COPY[locale];
   const template = useEditorStore((state) => state.design.template);
-  const layoutVariant = useEditorStore((state) => state.design.layoutVariant);
-  const overrides = useEditorStore((state) => state.design.typography);
-  const character = useEditorStore((state) => state.character);
-  const [activeRole, setActiveRole] = useState<CardTypographyRole>('display');
-  const [isOpen, setIsOpen] = useState(false);
-  const fonts = getTypographyFontOptions();
+  const itemOverride = useEditorStore((state) => item ? state.design.textTypography?.[item.id] : undefined);
+  const inheritedOverride = useEditorStore((state) => item ? state.design.typography?.[item.role] : undefined);
+  const options = getTypographyFontOptions();
 
-  if (layoutVariant !== 'a') return null;
+  if (!item) return null;
+  const selectedItem = item;
 
-  const roleOverride = overrides?.[activeRole] ?? {};
-  const sample = getSample(activeRole, character.name, character.bio, character.job, locale);
   const localeScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
-  const treatmentFamily = getMasterTypographyFamily(template);
-  const script = activeRole === 'display' || activeRole === 'job' || activeRole === 'secondaryDisplay'
-    ? (/[가-힣ㄱ-ㅎㅏ-ㅣ]/u.test(sample) ? 'korean' : /[ぁ-ヿ]/u.test(sample) ? 'japanese' : localeScript)
-    : localeScript;
-  const treatment = getMasterTypographyTreatment(treatmentFamily, activeRole, script);
+  const script = detectTypographyScript(item.value || item.defaultValue, localeScript);
+  const family = getMasterTypographyFamily(template);
+  const treatment = getMasterTypographyTreatment(family, item.role, script);
   const defaultFontId = getTypographyFontIdForStack(treatment.fontFamily, script);
-  const displayedFontId = roleOverride.fontFamily ?? '';
-  const selectedFontOption = fonts.find((font) => font.id === displayedFontId);
-  const weightFont = selectedFontOption
-    ?? fonts.find((font) => font.id === defaultFontId);
-  const weightRange = weightFont?.weightRange ?? [100, 900] as const;
-  const supportedWeights = weightFont?.weights ?? (weightRange[0] === weightRange[1] ? [weightRange[0]] : undefined);
-  const requestedWeight = roleOverride.weight ?? treatment.weight;
-  const weight = getTypographySupportedWeight(weightFont?.id, requestedWeight);
-  const sizePercent = roleOverride.sizePercent ?? 100;
-  const spacing = roleOverride.trackingEm ?? 0;
-  const sampleFont = getTypographyFontStackForId(displayedFontId || defaultFontId, script, treatment.fontFamily);
-  const hasOverride = Boolean(overrides?.[activeRole] && Object.keys(overrides[activeRole] ?? {}).length);
+  const selectedFontId = itemOverride?.fontFamily ?? inheritedOverride?.fontFamily ?? '';
+  const selectedEntry = selectedFontId ? getTypographyFontEntry(selectedFontId) : undefined;
+  const defaultEntry = defaultFontId ? getTypographyFontEntry(defaultFontId) : undefined;
+  const effectiveEntry = selectedEntry ?? defaultEntry;
+  const selectedFontSupportsScript = selectedEntry?.supportedScripts.includes(script) ?? false;
+  const effectiveWeightRange = effectiveEntry?.axes.weight ?? [100, 900] as const;
+  const supportedWeights = (effectiveEntry as (typeof effectiveEntry & { weights?: readonly number[] }) | undefined)?.weights;
+  const requestedWeight = itemOverride?.weight ?? inheritedOverride?.weight ?? treatment.weight;
+  const weight = getTypographySupportedWeight(effectiveEntry?.id, requestedWeight);
+  const inheritedSizePercent = inheritedOverride?.sizePercent ?? 100;
+  const localSizePercent = itemOverride?.sizePercent ?? 100;
+  const minimumSizePercent = Math.round(inheritedSizePercent * 0.75);
+  const maximumSizePercent = Math.round(inheritedSizePercent * 1.25);
+  const sizePercent = Math.min(maximumSizePercent, Math.max(minimumSizePercent, Math.round(inheritedSizePercent * localSizePercent / 100)));
+  const inheritedTracking = inheritedOverride?.trackingEm ?? 0;
+  const localTracking = itemOverride?.trackingEm ?? 0;
+  const minimumTracking = inheritedTracking - 0.12;
+  const maximumTracking = inheritedTracking + 0.2;
+  const tracking = Math.min(maximumTracking, Math.max(minimumTracking, inheritedTracking + localTracking));
+  const hasItemOverride = Boolean(itemOverride && Object.values(itemOverride).some((value) => value !== undefined));
+  const hasInheritedOverride = Boolean(inheritedOverride && Object.values(inheritedOverride).some((value) => value !== undefined));
+  const selectedEntryIsSelectable = selectedEntry ? isSelectableTypographyFontId(selectedEntry.id) : true;
+  const showCurrentFontOption = Boolean(selectedEntry && (!selectedEntryIsSelectable || !selectedFontSupportsScript));
+
+  function storeField(field: EditableField, patch: Partial<CardTypographyOverride>) {
+    updateItemOverride(selectedItem, itemOverride, patch, `text-typography:${selectedItem.id}:${field}`);
+  }
+
+  function changeSize(nextEffectiveSize: number) {
+    const safeInherited = inheritedSizePercent > 0 ? inheritedSizePercent : 100;
+    storeField('sizePercent', { sizePercent: nextEffectiveSize / safeInherited * 100 });
+  }
 
   return (
-    <details
-      className={styles.panel}
-      open={isOpen}
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-    >
-      <summary className={styles.summary}>
-        <span>{copy.title}</span>
-        <strong>{copy.roles[activeRole]}</strong>
-      </summary>
-      {isOpen && (
-        <div className={styles.body}>
-          <div className={styles.rolePicker} role="group" aria-label={copy.role}>
-            {ROLES.map((role) => (
-              <button
-                type="button"
-                key={role}
-                aria-pressed={activeRole === role}
-                onClick={() => setActiveRole(role)}
-              >
-                {copy.roles[role]}
-              </button>
-            ))}
-          </div>
-
-          <label className={styles.field}>
-            <span>{copy.font}</span>
-            <span className={styles.selectWrap}>
-              <select
-                value={displayedFontId}
-                onChange={(event) => {
-                  const fontFamily = textValue(event) || undefined;
-                  const nextFont = fonts.find((font) => font.id === fontFamily);
-                  const nextWeightFont = nextFont ?? fonts.find((font) => font.id === defaultFontId);
-                  const nextWeight = getTypographySupportedWeight(nextWeightFont?.id, requestedWeight);
-                  updateOverride(overrides, activeRole, { fontFamily, weight: nextWeight });
-                }}
-              >
-                <option value="">{copy.defaultFont}</option>
-                {fonts.map((font) => <option key={font.id} value={font.id}>{fontOptionLabel(font, locale)}</option>)}
-              </select>
-              <span className={styles.selectChevron} aria-hidden="true" />
-            </span>
-            {selectedFontOption && (
-              <small className={styles.fontSupport}>
-                {copy.fontSupport}: {selectedFontOption.supportedScripts.map((supported) => SCRIPT_LABELS[locale][supported]).join(' · ')}
-              </small>
+    <section className={styles.panel} data-text-typography-editor={item.id} aria-label={`${copy.title}: ${item.label} · ${copy.roles[item.role]}`}>
+      <div className={styles.primaryControls}>
+        <label className={styles.field}>
+          <span>{copy.font}</span>
+          <select
+            data-text-font-family={item.id}
+            aria-label={copy.font}
+            value={selectedFontId}
+            onFocus={() => beginGroup(item.id, 'fontFamily')}
+            onBlur={() => endGroup(item.id, 'fontFamily')}
+            onChange={(event) => {
+              const fontFamily = event.currentTarget.value || undefined;
+              if (!fontFamily) {
+                storeField('fontFamily', { fontFamily: undefined });
+                return;
+              }
+              const nextEntry = getTypographyFontEntry(fontFamily) ?? defaultEntry;
+              const nextWeight = getTypographySupportedWeight(nextEntry?.id, requestedWeight);
+              storeField('fontFamily', { fontFamily, weight: nextWeight });
+            }}
+          >
+            <option value="">{copy.defaultFont}</option>
+            {selectedFontId && !selectedEntry && <option value={selectedFontId} disabled>{copy.unavailableFont}</option>}
+            {showCurrentFontOption && selectedEntry && (
+              <option value={selectedEntry.id} disabled>
+                {selectedEntry.family} · {!itemOverride?.fontFamily && inheritedOverride?.fontFamily ? `${copy.inheritedFont} · ` : ''}{selectedEntry.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}
+              </option>
             )}
-          </label>
+            {options.filter((font) => !showCurrentFontOption || font.id !== selectedFontId).map((font) => (
+              <option key={font.id} value={font.id} disabled={!font.supportedScripts.includes(script)}>
+                {font.family} · {!itemOverride?.fontFamily && inheritedOverride?.fontFamily === font.id ? `${copy.inheritedFont} · ` : ''}{font.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}
+              </option>
+            ))}
+          </select>
+          {selectedEntry && (
+            <small className={styles.fontSupport}>{copy.supports}: {selectedEntry.supportedScripts.map((supported) => copy.scripts[supported]).join(' · ')}</small>
+          )}
+          {selectedFontId && !selectedEntry && <small className={styles.fontNotice} role="status">{copy.missing}</small>}
+          {selectedFontId && selectedEntry && !selectedFontSupportsScript && <small className={styles.fontNotice} role="status">{copy.fallback}</small>}
+        </label>
 
-          <div className={styles.preview} aria-label={copy.preview}>
-            <span>{copy.preview}</span>
-            <strong style={{ fontFamily: sampleFont, fontSize: `${Math.min(125, Math.max(75, sizePercent))}%`, fontWeight: weight, letterSpacing: `${spacing}em` }}>
-              {sample}
-            </strong>
-          </div>
+        <label className={styles.rangeField}>
+          <span>{copy.size} <output>{sizePercent}%</output></span>
+          <small>{copy.sizeHelp}</small>
+          <input
+            type="range"
+            min={minimumSizePercent}
+            max={maximumSizePercent}
+            step={1}
+            value={sizePercent}
+            aria-label={`${item.label}: ${copy.size}`}
+            aria-valuetext={`${sizePercent}%`}
+            {...rangeGroupHandlers(item, 'sizePercent')}
+            onChange={(event) => changeSize(Number(event.currentTarget.value))}
+          />
+        </label>
+      </div>
 
-          <label className={styles.rangeField}>
-            <span>{copy.size} <output>{Math.round(sizePercent)}%</output></span>
-            <small>{copy.sizeHelp}</small>
-            <input
-              type="range"
-              min={75}
-              max={125}
-              step={1}
-              value={sizePercent}
-              aria-label={`${copy.roles[activeRole]}: ${copy.size}`}
-              aria-valuetext={`${sizePercent}%`}
-              {...rangeGroupHandlers(activeRole, 'size')}
-              onChange={(event) => updateOverride(overrides, activeRole, { sizePercent: Number(event.currentTarget.value) })}
-            />
-          </label>
-
+      <details className={styles.advanced}>
+        <summary>{copy.advanced}</summary>
+        <div className={styles.advancedBody}>
           <label className={styles.rangeField}>
             <span>{copy.weight} <output>{weight}</output></span>
             {supportedWeights && supportedWeights.length > 1 ? (
-              <span className={styles.selectWrap}>
-                <select
-                  value={weight}
-                  aria-label={`${copy.roles[activeRole]}: ${copy.weight}`}
-                  onChange={(event) => updateOverride(overrides, activeRole, { weight: Number(event.currentTarget.value) })}
-                >
-                  {supportedWeights.map((supported) => <option key={supported} value={supported}>{supported}</option>)}
-                </select>
-                <span className={styles.selectChevron} aria-hidden="true" />
-              </span>
+              <select
+                aria-label={`${item.label}: ${copy.weight}`}
+                value={weight}
+                onFocus={() => beginGroup(item.id, 'weight')}
+                onBlur={() => endGroup(item.id, 'weight')}
+                onChange={(event) => storeField('weight', { weight: Number(event.currentTarget.value) })}
+              >
+                {supportedWeights.map((supported) => <option key={supported} value={supported}>{supported}</option>)}
+              </select>
             ) : (
               <input
                 type="range"
-                min={weightRange[0]}
-                max={weightRange[1]}
+                min={effectiveWeightRange[0]}
+                max={effectiveWeightRange[1]}
                 step={1}
                 value={weight}
-                aria-label={`${copy.roles[activeRole]}: ${copy.weight}`}
+                aria-label={`${item.label}: ${copy.weight}`}
                 aria-valuetext={String(weight)}
-                disabled={weightRange[0] === weightRange[1]}
-                {...rangeGroupHandlers(activeRole, 'weight')}
-                onChange={(event) => updateOverride(overrides, activeRole, { weight: Number(event.currentTarget.value) })}
+                disabled={effectiveWeightRange[0] === effectiveWeightRange[1]}
+                {...rangeGroupHandlers(item, 'weight')}
+                onChange={(event) => storeField('weight', { weight: Number(event.currentTarget.value) })}
               />
             )}
           </label>
 
           <label className={styles.rangeField}>
-            <span>{copy.spacing} <output>{spacing.toFixed(2)}em</output></span>
+            <span>{copy.tracking} <output>{tracking.toFixed(2)}em</output></span>
             <input
               type="range"
-              min={-0.12}
-              max={0.2}
+              min={minimumTracking}
+              max={maximumTracking}
               step={0.005}
-              value={spacing}
-              aria-label={`${copy.roles[activeRole]}: ${copy.spacing}`}
-              aria-valuetext={`${spacing.toFixed(2)}em`}
-              {...rangeGroupHandlers(activeRole, 'spacing')}
-              onChange={(event) => updateOverride(overrides, activeRole, { trackingEm: Number(event.currentTarget.value) })}
+              value={tracking}
+              aria-label={`${item.label}: ${copy.tracking}`}
+              aria-valuetext={`${tracking.toFixed(2)}em`}
+              {...rangeGroupHandlers(item, 'trackingEm')}
+              onChange={(event) => storeField('trackingEm', { trackingEm: Number(event.currentTarget.value) - inheritedTracking })}
             />
           </label>
-
-          <button
-            type="button"
-            className={styles.reset}
-            disabled={!hasOverride}
-            onClick={() => updateOverride(overrides, activeRole, {
-              fontFamily: undefined,
-              sizePercent: undefined,
-              weight: undefined,
-              trackingEm: undefined,
-            })}
-          >
-            {copy.reset}
-          </button>
+          {hasInheritedOverride && (
+            <button
+              type="button"
+              className={styles.reset}
+              onClick={() => resetLegacyTypographyRole(item.role)}
+            >{copy.resetInheritedRole(copy.roles[item.role])}</button>
+          )}
         </div>
+      </details>
+
+      {hasItemOverride && (
+        <button
+          type="button"
+          className={styles.reset}
+          onClick={() => editorStore.getState().resetTextTypographyOverride(item.id, { groupId: `text-typography-reset:${item.id}` })}
+        >{copy.reset}</button>
       )}
-    </details>
+    </section>
   );
 }

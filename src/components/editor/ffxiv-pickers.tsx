@@ -53,6 +53,7 @@ function updateCharacter(partial: Partial<AdventurerCardCharacter>) {
 interface PickerFeedbackProps {
   onFocusField: (field: string) => void;
   onBlurField: (field: string) => void;
+  editorControlId?: string;
 }
 
 export function JobPicker({
@@ -61,6 +62,7 @@ export function JobPicker({
   locale,
   onFocusField,
   onBlurField,
+  editorControlId,
 }: PickerFeedbackProps & {
   character: AdventurerCardCharacter;
   copy: EditorCopy;
@@ -92,6 +94,7 @@ export function JobPicker({
   return (
     <SearchablePicker
       label={copy.fields.job}
+      editorControlId={editorControlId ?? 'character.job'}
       value={character.jobId ?? null}
       selectedLabel={character.job}
       placeholder={copy.picker.searchPlaceholder}
@@ -119,6 +122,7 @@ export function WorldPicker({
   locale,
   onFocusField,
   onBlurField,
+  editorControlId,
 }: PickerFeedbackProps & {
   character: AdventurerCardCharacter;
   copy: EditorCopy;
@@ -153,6 +157,7 @@ export function WorldPicker({
       <div className={styles.pickerWideField}>
         <SearchablePicker
           label={copy.fields.world}
+          editorControlId={editorControlId ?? 'character.world'}
           value={currentWorldId}
           selectedLabel={character.world}
           placeholder={copy.picker.searchPlaceholder}
@@ -180,6 +185,7 @@ export function WorldPicker({
           <label className={styles.pickerInlineSelect}>
             <span>{copy.fields.service}</span>
             <select
+              data-card-text-editor-control={editorControlId === 'character.origin' ? editorControlId : undefined}
               value={service}
               aria-label={copy.fields.service}
               aria-describedby={WORLD_SETTINGS_RESET_HINT_ID}
@@ -197,6 +203,7 @@ export function WorldPicker({
           <label className={styles.pickerInlineSelect}>
             <span>{copy.fields.region}</span>
             <select
+              data-card-text-editor-control={editorControlId === 'character.origin' ? editorControlId : undefined}
               value={regionId}
               disabled={service === 'korea'}
               aria-label={copy.fields.region}
@@ -216,6 +223,7 @@ export function WorldPicker({
           <label className={`${styles.pickerInlineSelect} ${styles.pickerWideField}`}>
             <span>{copy.fields.dataCenter}</span>
             <select
+              data-card-text-editor-control="character.dataCenter"
               value={character.dataCenterId ?? ''}
               disabled={service === 'korea'}
               aria-label={copy.fields.dataCenter}
@@ -266,6 +274,7 @@ export function RaceClanPicker({
     <>
       <SearchablePicker
         label={copy.fields.race}
+        editorControlId="character.race"
         value={selectedRaceId || null}
         selectedLabel={character.race}
         placeholder={copy.picker.searchPlaceholder}
@@ -291,6 +300,7 @@ export function RaceClanPicker({
       />
       <SearchablePicker
         label={copy.fields.clan}
+        editorControlId="character.clan"
         value={character.clanId ?? null}
         selectedLabel={character.clan}
         placeholder={copy.picker.searchPlaceholder}
@@ -332,6 +342,7 @@ export function GrandCompanyPicker({
   return (
     <SearchablePicker
       label={copy.fields.grandCompany}
+      editorControlId="character.grandCompany"
       value={character.grandCompanyId ?? null}
       selectedLabel={character.grandCompany}
       placeholder={copy.picker.searchPlaceholder}

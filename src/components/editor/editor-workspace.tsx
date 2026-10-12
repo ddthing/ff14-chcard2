@@ -30,20 +30,13 @@ import { getUploadErrorMessage } from './editor-errors';
 import { committedLevel, isImeComposing, validLevelInput } from './editor-input';
 import { cancelPendingEditorUploads, registerUploadCancellation } from './upload-session';
 import { PERFORMANCE_PROFILING_ENABLED, profileCommit, profileRender, profileTiming } from '@/lib/performance-profile';
-import {
-  detectTypographyScript,
-  getTypographyFontFamily,
-  getTypographyFontGroup,
-  getTypographyPresetForFontGroup,
-  resolveTypographyPresetForFontGroup,
-  TYPOGRAPHY_SPECIMENS,
-  type TypographyFontGroup,
-  type TypographyPresetId,
-  type TypographyScript,
-} from '@/lib/typography-presets';
-import { loadTypographyFonts } from '@/data/fonts/load-fonts';
 import { CardPreview } from '@/components/editor/card-preview';
 import { TypographyRoleEditor } from '@/components/editor/typography-role-editor';
+import { getCardTextItems, type CardTextCategory, type CardTextItem } from '@/lib/card-text-editing';
+import { CardTextEditorNavigation, CardTextOverrideInput, DefaultCopySampleButton, GlobalTypographyPresetPicker } from '@/components/editor/text-editor/card-text-editor';
+import { getEditorTextCategory, resolveSelectedTextItem } from '@/components/editor/text-editor/card-text-model';
+import { CardTextOverlay } from '@/components/editor/text-editor/card-text-overlay';
+import { selectTextEditorControl } from '@/components/editor/text-editor/text-editor-focus';
 import { TextureEffects } from './TextureEffects';
 import { toggleCardTextureEffect, type CardTextureEffect } from '@/lib/card-texture-effects';
 import { getEditorCopy, type EditorCopy } from '@/components/editor/copy';
@@ -55,7 +48,7 @@ import { InlineConfirm } from '@/components/editor/inline-confirm';
 import { resolveEditorKeyboardAction } from '@/components/editor/editor-keyboard';
 import { FFXIVAttribution } from '@/components/ffxiv/ffxiv-attribution';
 import { GrandCompanyPicker, JobPicker, RaceClanPicker, WorldPicker } from '@/components/editor/ffxiv-pickers';
-import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate, type CardDecorativeCopy, type CardLayoutVariant } from '@/components/cards/types';
+import { demoAdventurerCards, demoAdventurerData, type AdventurerCardData, type AdventurerCardTemplate, type CardLayoutVariant } from '@/components/cards/types';
 import { RatioPicker } from '@/components/editor/ratio-picker';
 import {
   isSampleArtworkSource,
@@ -90,13 +83,6 @@ const SAMPLE_ARTWORK_SOURCES = new Set([
   demoAdventurerData.imageUrl,
   ...Object.values(demoAdventurerCards).map((card) => card.imageUrl),
 ]);
-const TYPOGRAPHY_IDS: TypographyPresetId[] = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
-const TYPOGRAPHY_FONT_GROUPS: TypographyFontGroup[] = ['serif', 'sans'];
-const TYPOGRAPHY_SPECIMEN_SCRIPTS = [
-  ['EN', 'latin'],
-  ['KO', 'korean'],
-  ['JA', 'japanese'],
-] as const;
 const COLOR_KEYS = ['primary', 'accent', 'light', 'dark'] as const;
 const BASIC_IMAGE_CONTROL_KEYS = ['x', 'y', 'scale'] as const;
 const ADVANCED_IMAGE_CONTROL_KEYS = ['rotation', 'brightness', 'contrast', 'saturation', 'exposure'] as const;
@@ -201,6 +187,7 @@ const CharacterInput = memo(function CharacterInput({
   onUpdate,
   onFocusField,
   allowEmptyLevel = false,
+  textItemId,
 }: {
   field: TextFieldKey;
   value: string | number;
@@ -208,6 +195,7 @@ const CharacterInput = memo(function CharacterInput({
   onUpdate: (field: TextFieldKey, value: string) => void;
   onFocusField: (field: string) => void;
   allowEmptyLevel?: boolean;
+  textItemId?: string;
 }) {
   const label = copy.fields[field];
   profileRender(`CharacterInput.${field}`);
@@ -287,10 +275,11 @@ const CharacterInput = memo(function CharacterInput({
   return (
     <label className={`${styles.field} ${field === 'bio' ? styles.bioField : ''} ${field === 'name' || field === 'freeCompany' || field === 'bio' ? styles.fieldWide : ''}`}>
       <span>{label}</span>
-      {field === 'bio' ? <><textarea data-editor-field={field} rows={4} maxLength={120} value={currentValue}
+      {field === 'bio' ? <><textarea data-editor-field={field} data-card-text-editor-control={textItemId} rows={4} maxLength={120} value={currentValue}
         placeholder={placeholder} aria-label={label} {...handlers}/><small>{currentValue.length} / 120</small></> : <input
         type={isLevel ? 'number' : 'text'}
         data-editor-field={field}
+        data-card-text-editor-control={textItemId}
         min={isLevel ? 1 : undefined}
         max={isLevel ? 100 : undefined}
         maxLength={isLevel ? undefined : 48}
@@ -306,15 +295,12 @@ const CharacterInput = memo(function CharacterInput({
   );
 });
 
-function FieldGrid({ children, className }: { children: ReactNode; className?: string }) {
-  return <div className={`${styles.fieldGrid} ${className ?? ''}`}>{children}</div>;
-}
-
 const MemoJobPicker = memo(JobPicker, (previous, next) =>
   previous.copy === next.copy &&
   previous.locale === next.locale &&
   previous.character.jobId === next.character.jobId &&
   previous.character.job === next.character.job &&
+  previous.editorControlId === next.editorControlId &&
   previous.onFocusField === next.onFocusField &&
   previous.onBlurField === next.onBlurField,
 );
@@ -327,6 +313,7 @@ const MemoWorldPicker = memo(WorldPicker, (previous, next) =>
   previous.character.dataCenterId === next.character.dataCenterId &&
   previous.character.worldId === next.character.worldId &&
   previous.character.world === next.character.world &&
+  previous.editorControlId === next.editorControlId &&
   previous.onFocusField === next.onFocusField &&
   previous.onBlurField === next.onBlurField,
 );
@@ -351,124 +338,6 @@ const MemoGrandCompanyPicker = memo(GrandCompanyPicker, (previous, next) =>
   previous.onBlurField === next.onBlurField,
 );
 
-function TypographyPresetPicker({
-  copy,
-  layoutVariant,
-  selectedPreset,
-  specimenName,
-  nameScript,
-}: {
-  copy: EditorCopy;
-  layoutVariant: CardLayoutVariant;
-  selectedPreset: TypographyPresetId;
-  specimenName: string;
-  nameScript: TypographyScript;
-}) {
-  const [isOpen, setIsOpen] = useState(false);
-  const selectedGroup = getTypographyFontGroup(selectedPreset);
-  const selectedLabel = layoutVariant === 'a'
-    ? copy.typographyFamilyNames[selectedGroup]
-    : copy.typographyNames[selectedPreset];
-
-  return (
-    <details
-      className={`${styles.editorGroup} ${styles.disclosure} ${styles.typographyDisclosure}`}
-      open={isOpen}
-      onToggle={(event) => setIsOpen(event.currentTarget.open)}
-    >
-      <summary className={styles.typeSummary}>
-        <span className={styles.typeSummaryText}>
-          <span className={styles.typeSummaryLabel}>{copy.typography}</span>
-          <strong className={styles.typeSummaryValue}>{selectedLabel}</strong>
-        </span>
-      </summary>
-      {isOpen && (
-        <>
-          {layoutVariant === 'a' ? (
-            <div className={styles.typeChoices}>
-              {TYPOGRAPHY_FONT_GROUPS.map((group) => {
-                const representativePreset = getTypographyPresetForFontGroup(group);
-                const selected = selectedGroup === group;
-                return (
-                  <button
-                    type="button"
-                    key={group}
-                    className={styles.typeChoice}
-                    aria-label={`${copy.typographyFamilyNames[group]} · ${copy.typographySpecimens}`}
-                    aria-pressed={selected}
-                    onClick={() => editorStore.getState().updateDesign(
-                      'typographyPreset',
-                      resolveTypographyPresetForFontGroup(group, selectedPreset),
-                    )}
-                  >
-                    <span className={styles.typeChoiceHead}>
-                      <span
-                        className={styles.typeSample}
-                        style={{ fontFamily: getTypographyFontFamily(representativePreset, 'display', nameScript) }}
-                        aria-hidden="true"
-                      >Aa</span>
-                      <strong>{copy.typographyFamilyNames[group]}</strong>
-                      {selected && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
-                    </span>
-                    <span className={styles.typeSpecimenList}>
-                      {TYPOGRAPHY_SPECIMEN_SCRIPTS.map(([label, script]) => (
-                        <span className={styles.typeSpecimenRow} key={script}>
-                          <i>{label}</i>
-                          <span style={{ fontFamily: getTypographyFontFamily(representativePreset, 'display', script) }}>
-                            {TYPOGRAPHY_SPECIMENS[script]}
-                          </span>
-                        </span>
-                      ))}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          ) : (
-            <>
-              <div className={styles.typeChoices}>
-                {TYPOGRAPHY_IDS.map((preset) => (
-                  <button
-                    type="button"
-                    key={preset}
-                    className={styles.typeChoice}
-                    aria-label={`${copy.typographyNames[preset]} · ${specimenName}`}
-                    aria-pressed={selectedPreset === preset}
-                    onClick={() => editorStore.getState().updateDesign('typographyPreset', preset)}
-                  >
-                    <span className={styles.typeChoiceHead}>
-                      <span className={styles.typeSample} aria-hidden="true">Aa</span>
-                      <strong>{copy.typographyNames[preset]}</strong>
-                      {selectedPreset === preset && <span className={styles.typeSelectedMark} aria-hidden="true">✓</span>}
-                    </span>
-                    <span className={styles.typeCurrentName} style={{ fontFamily: getTypographyFontFamily(preset, 'display', nameScript) }}>{specimenName}</span>
-                  </button>
-                ))}
-              </div>
-              <details className={styles.typeSpecimenDisclosure}>
-                <summary>{copy.typographySpecimens}</summary>
-                <div className={styles.typeSpecimenList}>
-                  {TYPOGRAPHY_IDS.map((preset) => (
-                    <div className={styles.typeSpecimenGroup} key={preset}>
-                      <strong>{copy.typographyNames[preset]}</strong>
-                      {TYPOGRAPHY_SPECIMEN_SCRIPTS.map(([label, script]) => (
-                        <span className={styles.typeSpecimenRow} key={script}>
-                          <i>{label}</i>
-                          <span style={{ fontFamily: getTypographyFontFamily(preset, 'display', script) }}>{TYPOGRAPHY_SPECIMENS[script]}</span>
-                        </span>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              </details>
-            </>
-          )}
-        </>
-      )}
-    </details>
-  );
-}
-
 function EditorInspector({
   copy,
   activeTask,
@@ -478,6 +347,10 @@ function EditorInspector({
   onSuccessfulUpload,
   locale,
   isOpen,
+  selectedTextId,
+  textCategory,
+  onSelectTextCategory,
+  onSelectTextItem,
 }: {
   copy: EditorCopy;
   activeTask: EditorTaskId;
@@ -487,25 +360,43 @@ function EditorInspector({
   onSuccessfulUpload: () => void;
   locale: Locale;
   isOpen: boolean;
+  selectedTextId: string | null;
+  textCategory: CardTextCategory;
+  onSelectTextCategory: (category: CardTextCategory) => void;
+  onSelectTextItem: (item: CardTextItem) => void;
 }) {
   const switchIdPrefix = useId();
   const character = useEditorStore((state) => state.character);
   const designTemplate = useEditorStore((state) => state.design.template);
   const layoutVariant = useEditorStore((state) => state.design.layoutVariant);
   const decorativeCopy = useEditorStore((state) => state.design.decorativeCopy);
+  const textOverrides = useEditorStore((state) => state.design.textOverrides);
   const ratio = useEditorStore((state) => state.design.ratio);
   const typographyPreset = useEditorStore((state) => state.design.typographyPreset);
-  const typography = useEditorStore((state) => state.design.typography);
   const effectIntensity = useEditorStore((state) => state.design.effectIntensity);
   const colorMode = useEditorStore((state) => state.design.colorMode);
   const palette = useEditorStore((state) => state.design.palette);
   const jobMotifVisible = useEditorStore((state) => state.design.jobMotifVisible);
   const jobIconColor = useEditorStore((state) => state.design.jobIconColor);
   const effects = useEditorStore((state) => state.design.effects);
-  const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, typography, colorMode, palette, jobMotifVisible, jobIconColor, effects, effectIntensity };
+  const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects, effectIntensity };
   const imageSource = useEditorStore((state) => state.image.src);
   const imageFileName = useEditorStore((state) => state.image.fileName);
   const image = useEditorStore((state) => activeTask === 'photo' ? state.image : null);
+  const textItems = useMemo(() => getCardTextItems({
+    character,
+    design: { template: designTemplate, layoutVariant, decorativeCopy, textOverrides },
+    imageUrl: imageSource,
+  }, locale), [character, decorativeCopy, designTemplate, imageSource, layoutVariant, locale, textOverrides]);
+  const supportsPerItemTextEditing = layoutVariant === 'a';
+  const textEditorItems = supportsPerItemTextEditing ? textItems : textItems.filter((item) => item.field !== undefined);
+  const defaultCopyIds = useMemo(
+    () => textItems.filter((item) => item.category === 'copy' && item.supportsTextOverride).map((item) => item.id),
+    [textItems],
+  );
+  const hasDefaultCopyOverrides = defaultCopyIds.some((id) => Object.hasOwn(textOverrides ?? {}, id));
+  const activeTextCategory = !supportsPerItemTextEditing && textCategory === 'copy' ? 'identity' : textCategory;
+  const selectedTextItem = resolveSelectedTextItem(textEditorItems, activeTextCategory, selectedTextId);
   const isSampleArtwork = isSampleArtworkSource(imageSource, SAMPLE_ARTWORK_SOURCES);
   const isHydrated = useEditorStore((state) => state.isHydrated);
   const [uploadError, setUploadError] = useState('');
@@ -590,8 +481,11 @@ function EditorInspector({
   profileRender('EditorInspector');
   if (activeTask === 'design') {
     profileRender('TemplatePicker.subtree');
-    profileRender('TypographyPicker.subtree');
   }
+
+  useEffect(() => {
+    if (selectedTextItem && selectedTextItem.id !== selectedTextId) onSelectTextItem(selectedTextItem);
+  }, [onSelectTextItem, selectedTextId, selectedTextItem]);
 
   useLayoutEffect(() => {
     const previousTask = previousTaskRef.current;
@@ -875,24 +769,99 @@ function EditorInspector({
     accent: jobRecord?.themeAccent ?? getJobTheme(character.job).accent,
     secondary: jobRecord?.themeSecondary ?? getJobTheme(character.job).secondary,
   };
-  const localeScript: TypographyScript = locale === 'ko' ? 'korean' : locale === 'ja' ? 'japanese' : 'latin';
-  const nameScript = detectTypographyScript(character.name, localeScript);
-  const specimenName = character.name || copy.typographyNameFallback;
+  const representedCardFields = new Set(textItems.flatMap((item) => item.field ? [item.field] : []));
+  const isFieldRepresented = (field: string) => representedCardFields.has(field as keyof typeof character);
 
-  useEffect(() => {
-    if (activeTask !== 'design') return;
-    const textByScript = {
-      korean: `${TYPOGRAPHY_SPECIMENS.korean} ${nameScript === 'korean' ? character.name : ''}`,
-      japanese: `${TYPOGRAPHY_SPECIMENS.japanese} ${nameScript === 'japanese' ? character.name : ''}`,
-    };
-    const visibleGroups = layoutVariant === 'a'
-      ? TYPOGRAPHY_FONT_GROUPS
-      : [...new Set(TYPOGRAPHY_IDS.map(getTypographyFontGroup))];
-    const representativePresets = visibleGroups.map(getTypographyPresetForFontGroup);
-    void Promise.all(representativePresets.map((preset) => (
-      loadTypographyFonts(preset, ['korean', 'japanese'], textByScript)
-    ))).catch(() => undefined);
-  }, [activeTask, character.name, layoutVariant, nameScript]);
+  function renderLanguageField(controlId = 'character.languages') {
+    return (
+      <div className={styles.chipField} data-card-text-editor-control={controlId}>
+        <span className={styles.controlLabel}>{copy.fields.languages}<small className={styles.chipCount}>{copy.picker.selectedCount(character.languages.length, copy.picker.maxLanguages)}</small></span>
+        <div className={styles.choiceChips}>
+          {[...LANGUAGES].sort((left, right) => left.sortOrder - right.sortOrder).map((language) => (
+            <button
+              type="button"
+              className={styles.choiceChip}
+              key={language.id}
+              aria-pressed={character.languages.includes(language.id)}
+              aria-label={`${copy.fields.languages}: ${language.localizedName[locale]}`}
+              disabled={!character.languages.includes(language.id) && character.languages.length >= copy.picker.maxLanguages}
+              onFocus={() => onFocusField('languages')}
+              onBlur={() => onFocusField('')}
+              onClick={() => changeArrayField('languages', language.id, copy.picker.maxLanguages)}
+            >{language.localizedName[locale]}</button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function renderPlayStyleField(controlId = 'character.playStyles') {
+    return (
+      <div className={styles.chipField} data-card-text-editor-control={controlId}>
+        <span className={styles.controlLabel}>{copy.fields.playStyles}<small className={styles.chipCount}>{copy.picker.selectedCount(character.playStyles.length, copy.picker.maxPlayStyles)}</small></span>
+        <div className={styles.choiceChips}>
+          {[...PLAY_STYLES].sort((left, right) => left.sortOrder - right.sortOrder).map((playStyle) => (
+            <button
+              type="button"
+              className={styles.choiceChip}
+              key={playStyle.id}
+              aria-pressed={character.playStyles.includes(playStyle.id)}
+              aria-label={`${copy.fields.playStyles}: ${playStyle.localizedName[locale]}`}
+              disabled={!character.playStyles.includes(playStyle.id) && character.playStyles.length >= copy.picker.maxPlayStyles}
+              onFocus={() => onFocusField('playStyles')}
+              onBlur={() => onFocusField('')}
+              onClick={() => changeArrayField('playStyles', playStyle.id, copy.picker.maxPlayStyles)}
+            >{playStyle.localizedName[locale]}</button>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  function renderSelectedProfileControl(): ReactNode {
+    const item = selectedTextItem;
+    if (!item) return null;
+    const itemId = String(item.id);
+
+    if (itemId === 'character.jobAbbreviation') {
+      return <MemoJobPicker character={character} copy={copy} locale={locale} editorControlId={item.id} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+    }
+    if (itemId === 'character.origin') {
+      return <MemoWorldPicker character={character} copy={copy} locale={locale} editorControlId={item.id} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+    }
+    if (!item.field) return null;
+
+    switch (item.field) {
+      case 'name':
+        return <CharacterInput field="name" value={character.name} copy={copy} onUpdate={updateText} onFocusField={onFocusField} textItemId={item.id} />;
+      case 'bio':
+        return <CharacterInput field="bio" value={character.bio} copy={copy} onUpdate={updateText} onFocusField={onFocusField} textItemId={item.id} />;
+      case 'job':
+        return <MemoJobPicker character={character} copy={copy} locale={locale} editorControlId={item.id} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+      case 'level':
+        return <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} allowEmptyLevel={character.profileOrigin === 'user'} textItemId={item.id} />;
+      case 'world':
+      case 'dataCenter':
+        return <MemoWorldPicker character={character} copy={copy} locale={locale} editorControlId={item.id} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+      case 'race':
+      case 'clan':
+        return <MemoRaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+      case 'freeCompany':
+        return <CharacterInput field="freeCompany" value={character.freeCompany} copy={copy} onUpdate={updateText} onFocusField={onFocusField} textItemId={item.id} />;
+      case 'grandCompany':
+        return <MemoGrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />;
+      case 'languages':
+        return renderLanguageField(item.id);
+      case 'playStyles':
+        return renderPlayStyleField(item.id);
+      default:
+        return null;
+    }
+  }
+
+  const hasUnrepresentedProfileFields = [
+    'job', 'level', 'world', 'dataCenter', 'race', 'clan', 'freeCompany', 'grandCompany', 'languages', 'playStyles',
+  ].some((field) => !isFieldRepresented(field));
 
   return (
     <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector}
@@ -1008,68 +977,62 @@ function EditorInspector({
 
         {activeTask === 'information' && (
           <div className={styles.formSection}>
-            <section className={styles.editorGroup} aria-label={copy.sections.character}>
-              <div className={styles.sectionHeading}><h3>{copy.sections.character}</h3></div>
-              <CharacterInput field="name" value={character.name} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-              <FieldGrid className={styles.jobLevelGrid}>
-                <MemoJobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
-                <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} allowEmptyLevel={character.profileOrigin === 'user'} />
-              </FieldGrid>
-              <MemoWorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
-              <FieldGrid>
-                <MemoRaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
-              </FieldGrid>
-              <CharacterInput field="freeCompany" value={character.freeCompany} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />
-            </section>
-            <details className={`${styles.disclosure} ${styles.editorGroup}`}>
-              <summary>{copy.additionalCharacterDetails}</summary>
-              <div className={styles.additionalInformation}>
-                <MemoGrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />
-                <div className={styles.chipField}>
-                  <span className={styles.controlLabel}>{copy.fields.languages}<small className={styles.chipCount}>{copy.picker.selectedCount(character.languages.length, copy.picker.maxLanguages)}</small></span>
-                  <div className={styles.choiceChips}>
-                    {[...LANGUAGES].sort((left, right) => left.sortOrder - right.sortOrder).map((language) => (
-                      <button
-                        type="button"
-                        className={styles.choiceChip}
-                        key={language.id}
-                        aria-pressed={character.languages.includes(language.id)}
-                        aria-label={`${copy.fields.languages}: ${language.localizedName[locale]}`}
-                        disabled={!character.languages.includes(language.id) && character.languages.length >= copy.picker.maxLanguages}
-                        onFocus={() => onFocusField('languages')}
-                        onBlur={() => onFocusField('')}
-                        onClick={() => changeArrayField('languages', language.id, copy.picker.maxLanguages)}
-                      >{language.localizedName[locale]}</button>
-                    ))}
+            <CardTextEditorNavigation
+              items={textEditorItems}
+              category={activeTextCategory}
+              selectedId={selectedTextItem?.id ?? selectedTextId}
+              copy={copy}
+              disabledCategories={supportsPerItemTextEditing ? [] : ['copy']}
+              onCategoryChange={onSelectTextCategory}
+              onSelectItem={onSelectTextItem}
+            >
+              {activeTextCategory !== 'copy' && renderSelectedProfileControl()}
+
+              {!supportsPerItemTextEditing && (
+                <p className={styles.globalTypographyNotice} role="note">{copy.textEditor.globalTypographyOnly}</p>
+              )}
+
+              {textCategory === 'information' && (hasUnrepresentedProfileFields || FFXIV_OFFICIAL_ASSETS_ENABLED) && (
+                <details className={`${styles.disclosure} ${styles.editorGroup}`}>
+                  <summary>{copy.additionalCharacterDetails}</summary>
+                  <div className={styles.additionalInformation}>
+                    {!isFieldRepresented('job') && <MemoJobPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />}
+                    {!isFieldRepresented('level') && <CharacterInput field="level" value={character.level} copy={copy} onUpdate={updateText} onFocusField={onFocusField} allowEmptyLevel={character.profileOrigin === 'user'} />}
+                    {(!isFieldRepresented('world') || !isFieldRepresented('dataCenter')) && <MemoWorldPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />}
+                    {!isFieldRepresented('race') && !isFieldRepresented('clan') && <MemoRaceClanPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />}
+                    {!isFieldRepresented('freeCompany') && <CharacterInput field="freeCompany" value={character.freeCompany} copy={copy} onUpdate={updateText} onFocusField={onFocusField} />}
+                    {!isFieldRepresented('grandCompany') && <MemoGrandCompanyPicker character={character} copy={copy} locale={locale} onFocusField={onFocusField} onBlurField={clearHighlightedField} />}
+                    {!isFieldRepresented('languages') && renderLanguageField()}
+                    {!isFieldRepresented('playStyles') && renderPlayStyleField()}
+                    <FFXIVAttribution
+                      className={styles.privacyNote}
+                      locale={locale}
+                      officialAssetsUsed={FFXIV_OFFICIAL_ASSETS_ENABLED}
+                      service={character.service === 'korea' ? 'KOREA' : 'GLOBAL'}
+                    />
                   </div>
-                </div>
-                <div className={styles.chipField}>
-                  <span className={styles.controlLabel}>{copy.fields.playStyles}<small className={styles.chipCount}>{copy.picker.selectedCount(character.playStyles.length, copy.picker.maxPlayStyles)}</small></span>
-                  <div className={styles.choiceChips}>
-                    {[...PLAY_STYLES].sort((left, right) => left.sortOrder - right.sortOrder).map((playStyle) => (
-                      <button
-                        type="button"
-                        className={styles.choiceChip}
-                        key={playStyle.id}
-                        aria-pressed={character.playStyles.includes(playStyle.id)}
-                        aria-label={`${copy.fields.playStyles}: ${playStyle.localizedName[locale]}`}
-                        disabled={!character.playStyles.includes(playStyle.id) && character.playStyles.length >= copy.picker.maxPlayStyles}
-                        onFocus={() => onFocusField('playStyles')}
-                        onBlur={() => onFocusField('')}
-                        onClick={() => changeArrayField('playStyles', playStyle.id, copy.picker.maxPlayStyles)}
-                      >{playStyle.localizedName[locale]}</button>
-                    ))}
-                  </div>
-                </div>
-                <CharacterInput field="bio" value={character.bio} copy={copy} onUpdate={updateText} onFocusField={onFocusField}/>
-                <FFXIVAttribution
-                  className={styles.privacyNote}
-                  locale={locale}
-                  officialAssetsUsed={FFXIV_OFFICIAL_ASSETS_ENABLED}
-                  service={character.service === 'korea' ? 'KOREA' : 'GLOBAL'}
+                </details>
+              )}
+
+              {supportsPerItemTextEditing && selectedTextItem?.supportsTextOverride && (
+                <CardTextOverrideInput
+                  key={selectedTextItem.id}
+                  item={selectedTextItem}
+                  copy={copy}
+                  overriddenValue={textOverrides?.[selectedTextItem.id]}
                 />
-              </div>
-            </details>
+              )}
+              {supportsPerItemTextEditing
+                ? <TypographyRoleEditor locale={locale} item={selectedTextItem} />
+                : null}
+              <details className={`${styles.disclosure} ${styles.editorGroup}`}>
+                <summary>{copy.textEditor.additionalSettings}</summary>
+                <div className={styles.additionalInformation}>
+                  <GlobalTypographyPresetPicker copy={copy} value={typographyPreset} />
+                  {layoutVariant === 'a' && <DefaultCopySampleButton copy={copy} copyIds={defaultCopyIds} active={decorativeCopy === 'default' && !hasDefaultCopyOverrides} />}
+                </div>
+              </details>
+            </CardTextEditorNavigation>
           </div>
         )}
 
@@ -1107,34 +1070,11 @@ function EditorInspector({
               />
             </section>
 
-            {layoutVariant === 'a' && <section className={styles.editorGroup} aria-label={copy.decorativeCopy}>
-              <label className={styles.decorativeCopyControl}>
-                <span>{copy.decorativeCopy}</span>
-                <select
-                  value={decorativeCopy ?? 'default'}
-                  onChange={(event) => editorStore.getState().updateDesign('decorativeCopy', event.currentTarget.value as CardDecorativeCopy)}
-                >
-                  {(['none', 'default', 'adventure', 'companions'] as const).map((mode) => (
-                    <option key={mode} value={mode}>{copy.decorativeCopyNames[mode]}</option>
-                  ))}
-                </select>
-              </label>
-            </section>}
-
           </div>
         )}
 
         {activeTask === 'design' && (
           <div className={styles.formSection}>
-            <TypographyPresetPicker
-              copy={copy}
-              layoutVariant={layoutVariant}
-              selectedPreset={typographyPreset}
-              specimenName={specimenName}
-              nameScript={nameScript}
-            />
-            <TypographyRoleEditor locale={locale} />
-
             <section className={styles.editorGroup} aria-label={copy.colors}>
               <div className={styles.sectionHeading}><h3>{copy.colors}</h3></div>
               <div className={styles.modeChoices} role="group" aria-label={copy.colors}>
@@ -1281,6 +1221,10 @@ function EditorCanvas({
   copy,
   locale,
   focusedField,
+  contentTextEditing,
+  textCategory,
+  selectedTextId,
+  onSelectTextTarget,
   panMode,
   onTogglePan,
   onRequestScreenshot,
@@ -1291,6 +1235,10 @@ function EditorCanvas({
   copy: EditorCopy;
   locale: Locale;
   focusedField: string;
+  contentTextEditing: boolean;
+  textCategory: CardTextCategory;
+  selectedTextId: string | null;
+  onSelectTextTarget: (item: CardTextItem) => void;
   panMode: boolean;
   onTogglePan: () => void;
   onRequestScreenshot: () => void;
@@ -1351,6 +1299,7 @@ function EditorCanvas({
       exposure: image.exposure,
     },
   }), [character, design, image]);
+  const cardTextItems = useMemo(() => getCardTextItems(cardData, locale), [cardData, locale]);
   const summaryJob = getJob(character.jobId)?.localizedName[locale] ?? character.job;
   const [width, height] = ratioNumber(design.ratio);
   const frameStyle: RatioStyle = {
@@ -1601,6 +1550,16 @@ function EditorCanvas({
         )}
       </div>
 
+      <CardTextOverlay
+        enabled={contentTextEditing && !previewOpen && design.layoutVariant === 'a'}
+        items={cardTextItems}
+        activeCategory={textCategory}
+        selectedId={selectedTextId}
+        measurementKey={`${design.ratio}:${zoom}:${panOffset.x}:${panOffset.y}`}
+        targetLabel={copy.textEditor.targetLabel}
+        onSelect={onSelectTextTarget}
+      />
+
       <div className={styles.bottomTools} role="toolbar" aria-label={copy.title}>
         <div className={styles.toolbarPrimary}>
           <div className={styles.historyTools}>
@@ -1697,6 +1656,9 @@ export function EditorWorkspace() {
   const saveStatus = useEditorStore((state) => state.saveStatus);
   const imageSource = useEditorStore((state) => state.image.src);
   const [focusedField, setFocusedField] = useState('');
+  const [selectedTextId, setSelectedTextId] = useState<string | null>(null);
+  const [textCategory, setTextCategory] = useState<CardTextCategory>('identity');
+  const [pendingTextFocusId, setPendingTextFocusId] = useState<string | null>(null);
   const [panMode, setPanMode] = useState(false);
   const [imageDragHintPhase, setImageDragHintPhase] = useState<ImageDragHintPhase>('idle');
   const imageDragHintPhaseRef = useRef<ImageDragHintPhase>('idle');
@@ -1767,10 +1729,93 @@ export function EditorWorkspace() {
     else requestAnimationFrame(() => document.getElementById(`editor-task-tab-desktop-${task}`)?.focus());
   }, [isMobileViewport]);
 
+  const selectTextItemFromList = useCallback((item: CardTextItem) => {
+    setSelectedTextId(item.id);
+    setTextCategory(getEditorTextCategory(item));
+  }, []);
+
   const openTask = useCallback((task: EditorTaskId) => {
     setMobileFocusTask(task);
     editorStore.getState().setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true });
   }, []);
+
+  const selectTextTarget = useCallback((item: CardTextItem) => {
+    selectTextItemFromList(item);
+    setPendingTextFocusId(item.id);
+    openTask('information');
+  }, [openTask, selectTextItemFromList]);
+
+  useLayoutEffect(() => {
+    if (!pendingTextFocusId || activeTask !== 'information' || !inspectorOpen) return;
+    const focusTargetId = pendingTextFocusId;
+    const focusFrames: number[] = [];
+    let focusAttempts = 0;
+    let cancelled = false;
+    const maximumFocusAttempts = 3;
+
+    const focusWithin = (container: HTMLElement | undefined) => {
+      if (!container) return false;
+      const focusable = container.matches('input, textarea, select, button')
+        ? container
+        : Array.from(container.querySelectorAll<HTMLElement>('input, textarea, select, button'))
+          .find((element) => element.getClientRects().length > 0 && !('disabled' in element && element.disabled));
+      if (!focusable) return false;
+      focusable.focus({ preventScroll: true });
+      return document.activeElement === focusable;
+    };
+
+    const scheduleFocusAttempt = () => {
+      focusFrames.push(requestAnimationFrame(attemptFocus));
+    };
+
+    function attemptFocus() {
+      if (cancelled) return;
+      focusAttempts += 1;
+      const inspector = document.getElementById('editor-inspector');
+      const candidates = inspector
+        ? Array.from(inspector.querySelectorAll<HTMLElement>('[data-card-text-editor-control]'))
+        : [];
+      const control = selectTextEditorControl(candidates, focusTargetId);
+      if (control) {
+        let details = control.closest('details');
+        let openedDetails = false;
+        while (details) {
+          if (!details.open) {
+            details.open = true;
+            openedDetails = true;
+          }
+          details = details.parentElement?.closest('details') ?? null;
+        }
+        if (openedDetails && focusAttempts < maximumFocusAttempts) {
+          scheduleFocusAttempt();
+          return;
+        }
+        if (focusWithin(control)) {
+          setPendingTextFocusId(null);
+          return;
+        }
+      }
+
+      if (focusAttempts < maximumFocusAttempts) {
+        scheduleFocusAttempt();
+        return;
+      }
+
+      const styleControl = inspector
+        ? Array.from(inspector.querySelectorAll<HTMLElement>('[data-text-font-family]'))
+          .find((candidate) => candidate.getAttribute('data-text-font-family') === focusTargetId)
+        : undefined;
+      if (styleControl) focusWithin(styleControl);
+      setPendingTextFocusId(null);
+    }
+
+    scheduleFocusAttempt();
+
+    return () => {
+      cancelled = true;
+      for (const frame of focusFrames) cancelAnimationFrame(frame);
+    };
+  }, [activeTask, inspectorOpen, pendingTextFocusId]);
 
   const requestScreenshotUpload = useCallback(() => {
     openTask('photo');
@@ -2004,6 +2049,10 @@ export function EditorWorkspace() {
           copy={copy}
           locale={locale}
           focusedField={focusedField}
+          contentTextEditing={activeTask === 'information'}
+          textCategory={textCategory}
+          selectedTextId={selectedTextId}
+          onSelectTextTarget={selectTextTarget}
           panMode={panMode}
           onTogglePan={togglePan}
           onRequestScreenshot={requestScreenshotUpload}
@@ -2021,6 +2070,10 @@ export function EditorWorkspace() {
             activeTask={activeTask}
             isMobileViewport={isMobileViewport}
             isOpen={inspectorOpen}
+            selectedTextId={selectedTextId}
+            textCategory={textCategory}
+            onSelectTextCategory={setTextCategory}
+            onSelectTextItem={selectTextItemFromList}
             onFocusField={setFocusedField}
             onClose={closeInspector}
             onSuccessfulUpload={onSuccessfulUpload}

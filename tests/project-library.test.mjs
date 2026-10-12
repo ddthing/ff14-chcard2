@@ -215,6 +215,29 @@ test('project save and reload preserve the selected decorative copy mode without
   assert.equal(loaded.data.design.decorativeCopy, 'companions');
 });
 
+test('project save, reload and duplication preserve independent custom text and typography', async () => {
+  const library = createProjectLibrary(new MemoryIndexedDB());
+  const data = cardWithUploadedImage();
+  data.design = {
+    ...data.design,
+    textOverrides: { 'cinematic.quote': '나의 모험\n오늘도 함께', 'editorial.story': '' },
+    textTypography: { 'cinematic.quote': { fontFamily: 'gmarket-sans', sizePercent: 120, weight: 700 } },
+  };
+  const summary = await library.save({ name: 'Custom card text', data });
+  data.design.textOverrides['cinematic.quote'] = 'Changed after save';
+  data.design.textTypography['cinematic.quote'].fontFamily = 'dm-sans';
+  const loaded = await library.get(summary.id);
+  assert.deepEqual(loaded.data.design.textOverrides, {
+    'cinematic.quote': '나의 모험\n오늘도 함께', 'editorial.story': '',
+  });
+  assert.deepEqual(loaded.data.design.textTypography, {
+    'cinematic.quote': { fontFamily: 'gmarket-sans', sizePercent: 120, weight: 700 },
+  });
+  const duplicate = await library.duplicate(summary.id, 'Custom card text copy');
+  assert.deepEqual((await library.get(duplicate.id)).data.design.textOverrides, loaded.data.design.textOverrides);
+  assert.deepEqual((await library.get(duplicate.id)).data.design.textTypography, loaded.data.design.textTypography);
+});
+
 test('project save and reload preserve a deliberately cleared clan', async () => {
   const library = createProjectLibrary(new MemoryIndexedDB());
   const data = cardWithUploadedImage();

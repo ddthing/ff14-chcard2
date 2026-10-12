@@ -1,89 +1,32 @@
 .panel {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  padding-block: 0;
   border-top: 1px solid var(--app-border);
   border-bottom: 1px solid var(--app-border);
 }
 
-.summary {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  cursor: pointer;
-  color: var(--app-text);
-  font-size: 14px;
-  font-weight: 600;
-  list-style: none;
-}
-
-.summary::-webkit-details-marker { display: none; }
-.summary::after {
-  display: block;
-  width: .45rem;
-  height: .45rem;
-  flex: 0 0 .45rem;
-  border-inline-end: 1.5px solid currentColor;
-  border-block-end: 1.5px solid currentColor;
-  color: var(--app-text-muted);
-  content: '';
-  transform: translateY(-20%) rotate(45deg);
-  transition: transform var(--editor-motion-panel) var(--editor-ease-soft);
-}
-.panel[open] .summary::after { transform: translateY(20%) rotate(225deg); }
-.summary strong { color: var(--app-text-muted); font-size: 12px; font-weight: 500; }
-
-.body {
+.primaryControls {
   display: grid;
-  gap: 16px;
-  padding: 0 0 16px;
-}
-
-.rolePicker {
-  display: flex;
-  flex-wrap: wrap;
   gap: 8px;
-}
-
-.rolePicker button,
-.reset {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-md);
-  background: var(--app-surface);
-  color: var(--app-text);
-  font: inherit;
-  font-size: 12px;
-  cursor: pointer;
-}
-
-.rolePicker button[aria-pressed='true'] {
-  border-color: var(--app-border-strong);
-  background: var(--app-workspace);
-  font-weight: 650;
+  min-width: 0;
 }
 
 .field,
 .rangeField {
   display: grid;
-  gap: 8px;
+  gap: 6px;
   min-width: 0;
   color: var(--app-text);
   font-size: 13px;
   font-weight: 550;
 }
 
-.selectWrap {
-  position: relative;
-  display: block;
-  min-width: 0;
-}
-
-.selectWrap select {
+.field select,
+.rangeField select {
   width: 100%;
   min-height: 44px;
-  appearance: none;
   padding: 8px 36px 8px 12px;
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-sm);
@@ -92,68 +35,107 @@
   font: inherit;
 }
 
-.selectChevron {
-  position: absolute;
-  top: calc(50% - .28rem);
-  right: 14px;
-  width: .45rem;
-  height: .45rem;
-  border-inline-end: 1.5px solid currentColor;
-  border-block-end: 1.5px solid currentColor;
-  color: var(--app-text-muted);
-  pointer-events: none;
-  transform: rotate(45deg);
+.field select:disabled,
+.rangeField select:disabled,
+.rangeField input:disabled {
+  opacity: 0.55;
 }
 
-.preview {
-  display: grid;
-  gap: 8px;
-  min-height: 68px;
-  align-content: center;
-  padding: 10px 12px;
-  border: 1px solid var(--app-border);
-  border-radius: var(--radius-md);
-  background: var(--app-workspace);
-  color: var(--app-text);
-}
-
-.preview > span,
-.rangeField small,
-.fontSupport {
+.fontSupport,
+.fontNotice,
+.rangeField small {
   color: var(--app-text-muted);
   font-size: 12px;
   font-weight: 450;
+  line-height: 1.4;
 }
 
-.preview strong {
-  display: block;
-  max-width: 100%;
-  overflow-wrap: anywhere;
-  line-height: 1.25;
+.fontNotice { max-width: 42ch; }
+
+.rangeField > span {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
 }
 
-.rangeField > span { display: flex; justify-content: space-between; gap: 8px; }
-.rangeField output { font-variant-numeric: tabular-nums; color: var(--app-text-muted); font-weight: 500; }
-.rangeField input[type='range'] { width: 100%; min-height: 44px; accent-color: var(--app-accent); }
-.rangeField input:disabled { opacity: .55; }
+.rangeField output {
+  color: var(--app-text-muted);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+}
+
+.rangeField input[type='range'] {
+  width: 100%;
+  min-height: 44px;
+  accent-color: var(--app-accent);
+}
+
+.advanced {
+  border-top: 1px solid var(--app-border);
+}
+
+.advanced summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--app-text);
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  list-style: none;
+}
+
+.advanced summary::-webkit-details-marker { display: none; }
+
+.advanced summary::after {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  border-inline-end: 1.5px solid currentColor;
+  border-block-end: 1.5px solid currentColor;
+  color: var(--app-text-muted);
+  content: '';
+  transform: translateY(-20%) rotate(45deg);
+}
+
+.advanced[open] summary::after { transform: translateY(20%) rotate(225deg); }
+
+.advancedBody {
+  display: grid;
+  gap: 14px;
+  padding-block: 4px 12px;
+}
+
+@media (max-width: 900px) {
+  .primaryControls { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); align-items: start; }
+}
 
 .reset {
   justify-self: start;
+  min-width: 44px;
   min-height: 44px;
+  padding: 8px 12px;
+  border: 1px solid var(--app-border);
+  border-radius: var(--radius-md);
   background: transparent;
+  color: var(--app-text);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 550;
+  cursor: pointer;
 }
 
-.reset:disabled { opacity: .5; cursor: not-allowed; }
-
-.summary:focus-visible,
-.rolePicker button:focus-visible,
-.selectWrap select:focus-visible,
+.field select:focus-visible,
+.rangeField select:focus-visible,
 .rangeField input:focus-visible,
+.advanced summary:focus-visible,
 .reset:focus-visible {
   outline: 2px solid var(--app-focus);
   outline-offset: 2px;
 }
 
-@media (max-width: 420px) {
-  .rolePicker button { min-height: 44px; padding-inline: 10px; }
+@media (forced-colors: active) {
+  .advanced summary::after { border-color: ButtonText; }
 }

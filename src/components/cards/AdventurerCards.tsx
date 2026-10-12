@@ -399,7 +399,10 @@ function CardRoot({
       lang={resolvedLocale}
       aria-label={`${data.character.name}, ${getLocalizedCharacterFields(data.character, resolvedLocale).job} ${CARD_UI_LABELS[resolvedLocale].cardAltSuffix}`}
     >
-      <CardTypographyOverrideScaler overrides={layoutVariant === 'a' ? data.design.typography : undefined} />
+      <CardTypographyOverrideScaler
+        overrides={layoutVariant === 'a' ? data.design.typography : undefined}
+        textTypography={layoutVariant === 'a' ? data.design.textTypography : undefined}
+      />
       {children}
       {layoutVariant === 'a' && <MasterMaterial family={data.design.template} />}
     </article>
