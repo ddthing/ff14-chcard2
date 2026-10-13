@@ -14,7 +14,6 @@
   --editorial-facts-top: 36.6%;
   --editorial-facts-bottom: 37.2%;
   --editorial-fact-label-column: 32%;
-  --editorial-fact-rule-length: min(22cqi, 58%);
   --editorial-fact-group-space: .65cqi;
   --editorial-fact-group-padding: .9cqi;
   --editorial-fact-padding: .45cqi;
@@ -278,6 +277,7 @@
 }
 
 .fact {
+  position: relative;
   display: grid;
   min-width: 0;
   min-height: 0;
@@ -292,10 +292,21 @@
   margin-block-start: var(--editorial-fact-group-space);
   border-top: 1px solid transparent;
   background-image: linear-gradient(color-mix(in srgb, var(--editorial-ink) 48%, transparent), color-mix(in srgb, var(--editorial-ink) 48%, transparent));
-  background-size: var(--editorial-fact-rule-length) var(--master-rule-weight, .13cqi);
+  background-size: 100% var(--master-rule-weight, .13cqi);
   background-position: left top;
   background-repeat: no-repeat;
   padding-block-start: var(--editorial-fact-group-padding);
+}
+
+.fact:last-child::after {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: var(--master-rule-weight, .13cqi);
+  background: color-mix(in srgb, var(--editorial-ink) 48%, transparent);
+  content: '';
+  pointer-events: none;
 }
 
 .factLabel {
@@ -436,7 +447,6 @@
 .canvas[data-ratio='9:16'] .photoStory[data-photo-story='bio'] { font-size: 1.7cqi; }
 .canvas[data-ratio='9:16'] {
   --editorial-fact-label-column: 36%;
-  --editorial-fact-rule-length: min(20cqi, 58%);
   --editorial-fact-group-space: 0;
   --editorial-fact-group-padding: .8cqi;
   --editorial-fact-padding: .6cqi;
@@ -460,7 +470,6 @@
   --editorial-facts-top: 35%;
   --editorial-facts-bottom: 31%;
   --editorial-fact-label-column: 36%;
-  --editorial-fact-rule-length: min(26cqi, 58%);
   --editorial-fact-group-space: .4cqi;
   --editorial-fact-group-padding: .72cqi;
   --editorial-fact-padding: .45cqi;
