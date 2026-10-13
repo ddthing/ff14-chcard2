@@ -11,7 +11,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## APP UI / CARD DESIGN V3 — IMPLEMENTATION CONTRACT
 
 Read root `DESIGN.md` first. It is the current app UI/UX contract for the
-installed shadcn `bJMSkfGi` Stone theme. Its exact token, component, density,
+Figma-style editor workspace and installed shadcn `bJMSkfGi` Stone theme.
+The user's 2026-10-13 request authorizes this editor redesign and guideline updates.
+`figma/DESIGN.md`, installed with `npx getdesign@latest add figma`, is a
+third-party analysis of Figma's marketing site, not the product editor specification.
+Use the applicability rules and responsive editor contract in root `DESIGN.md`.
+Its exact token, component, density,
 and CSS maintenance rules take precedence over historical app UI proposals.
 Card artwork and data/export boundaries remain governed by the V3 contracts.
 

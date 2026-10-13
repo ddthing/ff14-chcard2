@@ -4,6 +4,7 @@ import test from 'node:test';
 const {
   CARD_RATIO_OPTIONS,
   canBeginCanvasDrag,
+  getCanvasDragIntent,
   getNextComboboxOptionIndex,
   getInlineConfirmKeyboardAction,
   getNextMenuIndex,
@@ -20,6 +21,15 @@ const {
 
 test('exposes the five supported card ratios in visual-picker order', () => {
   assert.deepEqual(CARD_RATIO_OPTIONS, ['1:1', '4:5', '3:4', '16:9', '9:16']);
+});
+
+test('selection and preview drags preserve the photo crop while the photo tool and pan remain usable', () => {
+  const selectedCard = { panRequested: false, insideCard: true, photoEditing: false, previewOpen: false };
+  assert.equal(getCanvasDragIntent(selectedCard), null);
+  assert.equal(getCanvasDragIntent({ ...selectedCard, photoEditing: true }), 'image');
+  assert.equal(getCanvasDragIntent({ ...selectedCard, photoEditing: true, previewOpen: true }), null);
+  assert.equal(getCanvasDragIntent({ ...selectedCard, panRequested: true }), 'pan');
+  assert.equal(getCanvasDragIntent({ ...selectedCard, photoEditing: true, insideCard: false }), null);
 });
 
 test('menu keyboard navigation wraps and supports Home and End', () => {

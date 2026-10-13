@@ -7,7 +7,7 @@
 .categories {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
 }
 
 .categories button,
@@ -24,7 +24,7 @@
 }
 
 .categories button {
-  padding: 6px 8px;
+  padding: 8px;
   font-size: 12px;
   font-weight: 550;
   line-height: 1.25;
@@ -50,7 +50,7 @@
   display: flex;
   min-height: 44px;
   align-items: center;
-  gap: 7px;
+  gap: 8px;
   margin: 0;
   color: var(--app-text);
   font-size: 12px;
@@ -82,7 +82,7 @@
   min-width: 0;
   overflow: hidden;
   color: var(--app-text);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -101,11 +101,11 @@
 .itemList {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 6px;
+  gap: 8px;
   max-height: min(18dvh, 160px);
   overflow-y: auto;
   margin: 0;
-  padding: 1px;
+  padding: 4px;
   list-style: none;
   overscroll-behavior: contain;
 }
@@ -119,10 +119,10 @@
   justify-content: space-between;
   gap: 8px;
   overflow: hidden;
-  padding: 8px 10px;
+  padding: 8px 12px;
   text-align: start;
-  font-size: 12px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .itemButton span {
@@ -136,7 +136,7 @@
   flex: 0 0 auto;
   color: var(--app-text-muted);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 550;
   font-variant-numeric: tabular-nums;
 }
@@ -144,8 +144,12 @@
 .itemButton small {
   flex: 0 0 auto;
   color: var(--app-text-muted);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 450;
+}
+
+.itemButton[aria-pressed='true'] small {
+  color: var(--app-text);
 }
 
 .itemSelect {

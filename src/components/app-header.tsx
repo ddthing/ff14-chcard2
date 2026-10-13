@@ -56,9 +56,33 @@ export function AppHeader() {
   const section = isExport ? copy.export : copy.editor;
   const documentName = name || copy.newCard;
 
+  const navigationMenu = <MobileNavigation
+    key={pathname}
+    pathname={pathname}
+    copy={{ ...copy, saveImage: copy.export, backToEditor: copy.editor }}
+    languageLabel={t("nav.language")}
+    classes={{
+      root: styles.mobileNavigation,
+      trigger: styles.mobileMenuTrigger,
+      panel: styles.mobileMenuPanel,
+      links: styles.mobileMenuLinks,
+      link: styles.mobileMenuLink,
+      settings: styles.mobileMenuSettings,
+      settingsHeading: styles.mobileMenuSettingsHeading,
+      settingRow: styles.mobileMenuSettingRow,
+      settingLabel: styles.mobileMenuSettingLabel,
+      languageField: styles.mobileMenuLanguageField,
+      languageSelect: styles.mobileMenuLanguageSelect,
+    }}
+    onNavigate={(href) => {
+      if (isEditor && href === ROUTES.export) persistNow();
+    }}
+  />;
+
   return (
-    <header className={styles.appHeader} data-app-header>
+    <header className={styles.appHeader} data-app-header data-editor-header={isEditor ? 'true' : undefined}>
       <div className={styles.headerLeft}>
+        {isEditor && navigationMenu}
         <Link className={styles.brand} href={ROUTES.home} aria-label={t("header.brand")}>
           <span className={styles.brandWordmark} aria-hidden="true">
             <strong>XIV</strong><small>ATELIER</small>
@@ -72,13 +96,13 @@ export function AppHeader() {
         </div>
       </div>
 
-      <RouteNavigationLinks
+      {!isEditor && <RouteNavigationLinks
         pathname={pathname}
         copy={copy}
         className={styles.desktopNavigation}
         linkClassName={styles.desktopNavigationLink}
         exclude={isEditor ? [ROUTES.export] : isExport ? [ROUTES.editor] : undefined}
-      />
+      />}
 
       <div className={styles.headerRight}>
         {(isEditor || isExport) && <HeaderSaveStatus className={styles.desktopHeaderSaveStatus} />}
@@ -100,28 +124,7 @@ export function AppHeader() {
             {copy.backToEditor}
           </Link>
         )}
-        <MobileNavigation
-          key={pathname}
-          pathname={pathname}
-          copy={{ ...copy, saveImage: copy.export, backToEditor: copy.editor }}
-          languageLabel={t("nav.language")}
-          classes={{
-            root: styles.mobileNavigation,
-            trigger: styles.mobileMenuTrigger,
-            panel: styles.mobileMenuPanel,
-            links: styles.mobileMenuLinks,
-            link: styles.mobileMenuLink,
-            settings: styles.mobileMenuSettings,
-            settingsHeading: styles.mobileMenuSettingsHeading,
-            settingRow: styles.mobileMenuSettingRow,
-            settingLabel: styles.mobileMenuSettingLabel,
-            languageField: styles.mobileMenuLanguageField,
-            languageSelect: styles.mobileMenuLanguageSelect,
-          }}
-          onNavigate={(href) => {
-            if (isEditor && href === ROUTES.export) persistNow();
-          }}
-        />
+        {!isEditor && navigationMenu}
       </div>
     </header>
   );

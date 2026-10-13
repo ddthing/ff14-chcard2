@@ -11,6 +11,7 @@ export type EditorIconName =
   | 'redo'
   | 'reset'
   | 'safe-area'
+  | 'select'
   | 'sparkle'
   | 'undo'
   | 'upload'
@@ -32,6 +33,7 @@ const shapes: Record<EditorIconName, ReactNode> = {
   redo: <><path d="M15 7h4v4" /><path d="M19 7 13 13a5 5 0 0 1-7 0l-1-1" /></>,
   reset: <><path d="M4 11a8 8 0 1 1 1.7 5.2" /><path d="M4 5v6h6" /></>,
   'safe-area': <><rect x="3" y="3" width="18" height="18" rx="1" /><rect x="7" y="7" width="10" height="10" rx=".5" /></>,
+  select: <path d="M5 3v16l4-4 3.5 6 3-1.8-3.5-6.1H19L5 3Z" />,
   sparkle: <><path d="m12 3 1.8 5.3L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.7L12 3Z" /><path d="m19 15 .8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8L19 15Z" /></>,
   undo: <><path d="M9 7H5v4" /><path d="M5 7 11 13a5 5 0 0 0 7 0l1-1" /></>,
   upload: <><path d="M12 15V4m-4 4 4-4 4 4" /><path d="M5 14v5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-5" /></>,

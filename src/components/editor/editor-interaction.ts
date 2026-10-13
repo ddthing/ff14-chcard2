@@ -65,6 +65,17 @@ export function canBeginCanvasDrag(activePointerId: number | null): boolean {
   return activePointerId === null;
 }
 
+/** Photo edits require the photo tool; ordinary selection never changes the crop. */
+export function getCanvasDragIntent({ panRequested, insideCard, photoEditing, previewOpen }: {
+  panRequested: boolean;
+  insideCard: boolean;
+  photoEditing: boolean;
+  previewOpen: boolean;
+}): 'pan' | 'image' | null {
+  if (panRequested) return 'pan';
+  return insideCard && photoEditing && !previewOpen ? 'image' : null;
+}
+
 export function isCanvasDragPointer(activePointerId: number | null, pointerId: number): boolean {
   return activePointerId === pointerId;
 }

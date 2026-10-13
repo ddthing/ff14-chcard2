@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { register } from 'node:module';
 import test from 'node:test';
+import postcss from 'postcss';
 import { getEditorCopy } from '../src/components/editor/copy.ts';
 import {
   EDITOR_TASK_FOR_PANEL,
@@ -277,7 +278,7 @@ test('experimental layouts keep saved overrides but expose only canonical fields
   assert.match(workspaceSource, /disabledCategories=\{supportsPerItemTextEditing \? \[\] : \['copy'\]\}/u);
   assert.match(workspaceSource, /!supportsPerItemTextEditing && \([\s\S]*?copy\.textEditor\.globalTypographyOnly/u);
   assert.match(workspaceSource, /supportsPerItemTextEditing\s*\?\s*<TypographyRoleEditor/u);
-  assert.match(workspaceSource, /enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.match(workspaceSource, /enabled=\{contentTextEditing && !previewOpen && !blockedByNavigator && design\.layoutVariant === 'a'\}/u);
   assert.match(workspaceSource, /informationItems=\{informationTypographyItems\}/u);
   assert.match(workspaceSource, /getInformationTypographyItems\(textEditorItems\)/u);
   assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.globalTypographyOnly), [
@@ -305,7 +306,7 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /role=\{isMobileViewport \? 'region' : 'tabpanel'\}/u);
   assert.match(workspaceSource, /aria-expanded=\{isMobileDock \? isSelected : undefined\}/u);
   assert.match(workspaceSource, /aria-selected=\{isMobileDock \? undefined : isSelected\}/u);
-  assert.match(workspaceSource, /aria-hidden=\{!isOpen\} inert=\{!isOpen\}/u);
+  assert.match(workspaceSource, /aria-hidden=\{!isOpen \|\| blockedByNavigator\} inert=\{!isOpen \|\| blockedByNavigator\}/u);
   assert.match(workspaceSource, /className=\{styles\.sheetHandle\}[\s\S]*?onPointerDown=\{handleSheetHandlePointerDown\}/u);
   assert.match(workspaceSource, /pendingMobileFocusTask\.current = task/u);
   assert.match(workspaceSource, /\{isSampleArtwork && \([\s\S]*?copy\.sampleBadge/u);
@@ -322,7 +323,7 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /<CardTextEditorNavigation[\s\S]*?items=\{textEditorItems\}[\s\S]*?category=\{activeTextCategory\}[\s\S]*?selectedId=\{selectedTextItem\?\.id/u);
   assert.match(workspaceSource, /<CardTextOverrideInput[\s\S]*?item=\{selectedTextItem\}/u);
   assert.match(workspaceSource, /<TypographyRoleEditor locale=\{locale\} item=\{selectedTextItem\}/u);
-  assert.match(workspaceSource, /<CardTextOverlay[\s\S]*?enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.match(workspaceSource, /<CardTextOverlay[\s\S]*?enabled=\{contentTextEditing && !previewOpen && !blockedByNavigator && design\.layoutVariant === 'a'\}/u);
   assert.match(workspaceSource, /informationTargetLabel=\{copy\.textEditor\.informationTypography\}/u);
   assert.match(textEditorSource, /data-text-editor="true" data-selected-text-id=/u);
   assert.match(textEditorSource, /categoryItems\.length > 2/u);
@@ -333,29 +334,33 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
 });
 
 test('the mobile sheet starts closed and tracks a bounded stage above a stable tool dock', () => {
-  assert.match(editorStyles, /\.page \.workspace\s*\{[^}]*grid-template-columns:\s*84px minmax\(0, 1fr\)/u);
+  assert.match(editorStyles, /\.workspace\s*\{[^}]*grid-template-columns:\s*240px minmax\(0, 1fr\)/u);
   assert.match(editorStyles, /\.mobileTaskTabs\s*\{[^}]*display:\s*none/u);
-  const mobileRules = editorStyles.slice(editorStyles.lastIndexOf('@media (max-width: 900px)'));
-  assert.match(mobileRules, /\.page\s*\{[^}]*height:\s*max\(0px, calc\(var\(--editor-viewport-bottom, 100dvh\) - var\(--app-header-height\)\)\)[^}]*overflow:\s*hidden/u);
-  assert.match(mobileRules, /\.page \.mobileTaskTabs\s*\{[^}]*flex:\s*0 0 var\(--editor-mobile-dock-height\)/u);
+  const mobileBlocks = [];
+  postcss.parse(editorStyles).walkAtRules('media', (rule) => {
+    if (rule.params === '(max-width: 900px)') mobileBlocks.push(rule.toString());
+  });
+  const mobileRules = mobileBlocks.join('\n').replace(/\.page\s+(?=\.)/gu, '');
+  assert.match(mobileRules, /\.page\s*\{[^}]*height:\s*max\(0px, calc\(var\(--editor-viewport-bottom, 100dvh\) - var\(--app-header-height, 56px\)\)\)[^}]*overflow:\s*hidden/u);
+  assert.match(mobileRules, /\.mobileDock\s*\{[^}]*flex:\s*0 0 var\(--editor-mobile-dock-height\)/u);
   assert.match(mobileRules, /\.page:not\(\.inspectorClosed\):not\(\.previewMode\) \.canvasColumn\s*\{[^}]*var\(--editor-mobile-sheet-height\)/u);
-  assert.match(mobileRules, /\.page \.inspector\s*\{[^}]*position:\s*absolute[^}]*env\(safe-area-inset-bottom\)/u);
-  assert.match(mobileRules, /\.page \.inspectorBody\s*\{[^}]*overflow-x:\s*hidden[^}]*overflow-y:\s*auto[^}]*overscroll-behavior:\s*contain/u);
-  assert.doesNotMatch(mobileRules, /\.page \.inspector\s*\{[^}]*position:\s*relative[^}]*flex:\s*1 1 0%/u);
+  assert.match(mobileRules, /\.inspector\s*\{[^}]*position:\s*absolute[^}]*env\(safe-area-inset-bottom\)/u);
+  assert.match(mobileRules, /\.inspectorBody\s*\{[^}]*overflow-x:\s*hidden[^}]*overflow-y:\s*auto[^}]*overscroll-behavior:\s*contain/u);
+  assert.doesNotMatch(mobileRules, /\.inspector\s*\{[^}]*position:\s*relative[^}]*flex:\s*1 1 0%/u);
   assert.match(workspaceSource, /window\.visualViewport[\s\S]*?--editor-mobile-sheet-height[\s\S]*?data-keyboard-open=/u);
   assert.match(workspaceSource, /focusedElement\.matches\('input, textarea, select'\)[\s\S]*?setInputCompactMode\(useInputCompactMode\)/u);
   assert.match(workspaceSource, /inspectorOpen: !matches/u);
   assert.match(workspaceSource, /spellCheck=\{field !== 'name' && field !== 'freeCompany'\}/u);
   assert.match(workspaceSource, /data-input-compact-mode=/u);
-  assert.match(mobileRules, /\.page \.pickerInlineSelect select\s*\{[^}]*font-size:\s*1rem/u);
-  assert.match(mobileRules, /\.page \.sheetHandle\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(mobileRules, /\.pickerInlineSelect select\s*\{[^}]*font-size:\s*1rem/u);
+  assert.match(mobileRules, /\.sheetHandle\s*\{[^}]*min-height:\s*44px/u);
   assert.match(editorStyles, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*none/u);
-  assert.match(mobileRules, /\.page \.mobileStageSampleBadge\s*\{[^}]*display:\s*inline-flex/u);
-  assert.match(mobileRules, /\.page \.mobileStageSampleBadge\s*\{[^}]*pointer-events:\s*none/u);
+  assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*inline-flex/u);
+  assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*pointer-events:\s*none/u);
   assert.match(mobileRules, /\.page\[data-input-compact-mode='true'\] \.canvasStage\s*\{[^}]*visibility:\s*hidden/u);
   assert.match(editorStyles, /\.page \.choiceChip\s*\{[^}]*min-height:\s*44px/u);
   assert.match(workspaceSource, /className=\{styles\.toolbarPrimary\}/u);
-  assert.match(editorStyles, /@media \(max-width: 900px\)[\s\S]*?\.page \.stageUpload\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/u);
+  assert.match(editorStyles, /\.page \.stageUpload\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/u);
   const compactUploadMinimum = editorStyles.match(/\.page \.uploadZoneCompact\s*\{[^}]*min-height:\s*(\d+)px/u)?.[1];
   assert.ok(Number(compactUploadMinimum) >= 56, 'the compact upload row reserves readable file details and a touch target');
   assert.match(editorStyles, /@media \(max-width: 370px\)[\s\S]*?\.page \.historyTools button,[\s\S]*?min-width:\s*44px/u);

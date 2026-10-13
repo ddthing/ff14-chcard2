@@ -1,0 +1,216 @@
+.panel {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.heading {
+  margin: 0;
+  color: var(--editor-text);
+  font-size: 1.125rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.cardButton {
+  display: flex;
+  min-width: 0;
+  min-height: 56px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--editor-line);
+  border-radius: var(--radius-md);
+  padding: 8px;
+  background: var(--editor-control);
+  color: var(--editor-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.cardButton:hover,
+.row:hover {
+  background: var(--editor-control-hover);
+}
+
+.cardButton[data-selected],
+.row[data-selected] {
+  border-color: var(--editor-line-strong);
+  background: var(--editor-accent-soft);
+  box-shadow: inset 2px 0 0 var(--editor-accent);
+}
+
+.cardGlyph {
+  display: grid;
+  width: 30px;
+  height: 36px;
+  flex: 0 0 auto;
+  place-items: center;
+  border: 1px solid var(--editor-line-strong);
+  border-radius: var(--radius-sm);
+  color: var(--editor-muted);
+}
+
+.cardDetails,
+.rowText {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.cardName,
+.rowLabel {
+  overflow: hidden;
+  color: var(--editor-text);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cardRatio,
+.rowContext {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--editor-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 1;
+  overflow-wrap: anywhere;
+}
+
+.cardRatio {
+  font-family: var(--font-mono);
+  font-weight: 550;
+  letter-spacing: 0.01em;
+}
+
+.row:hover .rowContext,
+.row[data-selected] .rowContext {
+  color: var(--editor-text);
+}
+
+.selectedMark {
+  display: grid;
+  width: 18px;
+  height: 18px;
+  flex: 0 0 18px;
+  place-items: center;
+  color: var(--editor-accent);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+
+.navigation {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.group {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.groupHeading {
+  margin: 0;
+  padding: 0 4px;
+  color: var(--editor-muted);
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.list {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.listItem {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 4px 8px;
+  background: transparent;
+  color: var(--editor-text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.rowIcon {
+  display: grid;
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  place-items: center;
+  color: var(--editor-muted);
+}
+
+.row[data-selected] .rowIcon,
+.cardButton[data-selected] .cardGlyph {
+  color: var(--editor-accent);
+}
+
+.ordinal {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  place-items: center;
+  border-radius: var(--radius-sm);
+  background: var(--editor-stage);
+  color: var(--editor-text);
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+}
+
+.cardButton:focus-visible,
+.row:focus-visible {
+  outline: 2px solid var(--editor-focus);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .cardButton[data-selected],
+  .row[data-selected] {
+    border-color: Highlight;
+    box-shadow: inset 2px 0 0 Highlight;
+  }
+
+  .selectedMark {
+    color: Highlight;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cardButton,
+  .row {
+    transition: none;
+  }
+}
