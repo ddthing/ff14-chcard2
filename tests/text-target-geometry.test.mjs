@@ -63,7 +63,58 @@ test('spatially separate text fragments keep separate hit areas even when their 
   )));
 });
 
-test('badge placement returns no marker when every compact position is occupied', () => {
+test('badge hit areas stay at least 24px and leave space between the visual marker and its text', () => {
+  const anchor = { left: 94, top: 84, right: 128, bottom: 101 };
+  const hitTarget = placeTextBadge(
+    [anchor], [anchor], 390, 844,
+    { left: 90, top: 80, right: 250, bottom: 360 },
+    16, 2, [], 24,
+  );
+
+  assert.deepEqual(hitTarget, { left: 130, top: 80, width: 24, height: 24 });
+  assert.ok(hitTarget.left >= anchor.right + 2);
+});
+
+test('coarse-pointer badges use 44px only when the full hit area clears text and clipping', () => {
+  const anchor = { left: 100, top: 100, right: 130, bottom: 118 };
+  const target = placeTextBadge([anchor], [anchor], 390, 844, undefined, 16, 2, [], 44);
+
+  assert.ok(target);
+  assert.equal(target.width, 44);
+  assert.equal(target.height, 44);
+  assert.ok(target.left >= anchor.right + 2);
+  assert.ok(target.left + target.width <= 390);
+});
+
+test('separate badge hit targets avoid adjacent text and each other', () => {
+  const text = [
+    { left: 100, top: 100, right: 120, bottom: 112 },
+    { left: 140, top: 100, right: 160, bottom: 112 },
+  ];
+  const first = placeTextBadge([text[0]], text, 390, 844, undefined, 16, 2, [], 24);
+  assert.ok(first);
+  const second = placeTextBadge([text[1]], text, 390, 844, undefined, 16, 2, [
+    { left: first.left, top: first.top, right: first.left + first.width, bottom: first.top + first.height },
+  ], 24);
+
+  assert.ok(first && second);
+  assert.equal(first.width, 24);
+  assert.equal(second.width, 24);
+  for (const target of [first, second]) {
+    for (const textRect of text) {
+      assert.ok(target.left + target.width <= textRect.left
+        || target.left >= textRect.right
+        || target.top + target.height <= textRect.top
+        || target.top >= textRect.bottom);
+    }
+  }
+  assert.ok(first.left + first.width <= second.left
+    || second.left + second.width <= first.left
+    || first.top + first.height <= second.top
+    || second.top + second.height <= first.top);
+});
+
+test('badge placement returns no marker when every minimum hit area position is occupied', () => {
   const anchor = { left: 45, top: 45, right: 55, bottom: 55 };
   const occupied = [
     anchor,

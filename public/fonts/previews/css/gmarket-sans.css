@@ -1,0 +1,867 @@
+/* Generated from licenses/fonts/PREVIEW_FONT_SUBSETS_2026-10-13.json. */
+
+/* Lazy preview faces for gmarket-sans; source fonts remain the applied/exported faces. */
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u000000.woff2") format("woff2");
+  unicode-range: U+0000-007E, U+00A1-00A5, U+00A7-00AD, U+00B0-00B4, U+00B6-00BF, U+00C6, U+00D0, U+00D7-00D8, U+00DE-00DF, U+00E5-00E6, U+00F0, U+00F7-00F8, U+00FE, U+0111, U+0126-0127, U+0131-0133, U+0138, U+013F-0142, U+0149-014B, U+0152-0153, U+0166-0167;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u000200.woff2") format("woff2");
+  unicode-range: U+02C7, U+02D0, U+02D8-02DD, U+0391-03A1, U+03A3-03A9, U+03B1-03C1, U+03C3-03C9;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u000400.woff2") format("woff2");
+  unicode-range: U+0401, U+0410-044F, U+0451;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u002000.woff2") format("woff2");
+  unicode-range: U+2010, U+2013-2014, U+2016, U+2018-2019, U+201C-201D, U+2020-2021, U+2025-2026, U+2030, U+2032-2033, U+203B, U+203E, U+2074, U+207F, U+2081-2084, U+20A9, U+2103, U+2109, U+2113, U+2116, U+2121-2122, U+2126, U+212B, U+2153-2154, U+215B-215E, U+2160-2169, U+2170-2179, U+2190-2199, U+21D2, U+21D4;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u002200.woff2") format("woff2");
+  unicode-range: U+2200, U+2202-2203, U+2207-2208, U+220B, U+220F, U+2211, U+221A, U+221D-221E, U+2220, U+2227-222C, U+222E, U+2234-2236, U+223C-223D, U+2252, U+2260-2261, U+2264-2265, U+2282-2283, U+2286-2287, U+2299, U+22A5, U+2312;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u002400.woff2") format("woff2");
+  unicode-range: U+2460-246E, U+2474-2482, U+249C-24B5, U+24D0-24E9, U+2500-2503, U+250C-254B, U+2592, U+25A0-25A1, U+25A3-25A9, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C9, U+25CB, U+25CE-25D1;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u002600.woff2") format("woff2");
+  unicode-range: U+2605-2606, U+260E-260F, U+261C, U+261E, U+2640, U+2642, U+2660-2661, U+2663-2665, U+2667-266A, U+266C-266D;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u003000.woff2") format("woff2");
+  unicode-range: U+3000-3003, U+3008-3011, U+3013-3015, U+301C, U+3041-3093, U+30A1-30F6, U+3131-3163, U+3165-318E;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u003200.woff2") format("woff2");
+  unicode-range: U+3200-321C, U+3260-327B, U+327F, U+3380-3384, U+3388-33CA, U+33CF-33D0, U+33D3, U+33D6, U+33D8, U+33DB-33DD;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00ac00.woff2") format("woff2");
+  unicode-range: U+AC00-ADFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00ae00.woff2") format("woff2");
+  unicode-range: U+AE00-AFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00b000.woff2") format("woff2");
+  unicode-range: U+B000-B1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00b200.woff2") format("woff2");
+  unicode-range: U+B200-B3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00b400.woff2") format("woff2");
+  unicode-range: U+B400-B5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00b600.woff2") format("woff2");
+  unicode-range: U+B600-B7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00b800.woff2") format("woff2");
+  unicode-range: U+B800-B9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00ba00.woff2") format("woff2");
+  unicode-range: U+BA00-BBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00bc00.woff2") format("woff2");
+  unicode-range: U+BC00-BDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00be00.woff2") format("woff2");
+  unicode-range: U+BE00-BFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00c000.woff2") format("woff2");
+  unicode-range: U+C000-C1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00c200.woff2") format("woff2");
+  unicode-range: U+C200-C3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00c400.woff2") format("woff2");
+  unicode-range: U+C400-C5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00c600.woff2") format("woff2");
+  unicode-range: U+C600-C7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00c800.woff2") format("woff2");
+  unicode-range: U+C800-C9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00ca00.woff2") format("woff2");
+  unicode-range: U+CA00-CBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00cc00.woff2") format("woff2");
+  unicode-range: U+CC00-CDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00ce00.woff2") format("woff2");
+  unicode-range: U+CE00-CFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00d000.woff2") format("woff2");
+  unicode-range: U+D000-D1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00d200.woff2") format("woff2");
+  unicode-range: U+D200-D3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00d400.woff2") format("woff2");
+  unicode-range: U+D400-D5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00d600.woff2") format("woff2");
+  unicode-range: U+D600-D7A3;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-bold-w700-u00fe00.woff2") format("woff2");
+  unicode-range: U+FF01-FF5E, U+FFE0-FFE3, U+FFE5-FFE6;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u000000.woff2") format("woff2");
+  unicode-range: U+0000-007E, U+00A1-00A5, U+00A7-00AD, U+00B0-00B4, U+00B6-00BF, U+00C6, U+00D0, U+00D7-00D8, U+00DE-00DF, U+00E5-00E6, U+00F0, U+00F7-00F8, U+00FE, U+0111, U+0126-0127, U+0131-0133, U+0138, U+013F-0142, U+0149-014B, U+0152-0153, U+0166-0167;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u000200.woff2") format("woff2");
+  unicode-range: U+02C7, U+02D0, U+02D8-02DD, U+0391-03A1, U+03A3-03A9, U+03B1-03C1, U+03C3-03C9;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u000400.woff2") format("woff2");
+  unicode-range: U+0401, U+0410-044F, U+0451;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u002000.woff2") format("woff2");
+  unicode-range: U+2010, U+2013-2014, U+2016, U+2018-2019, U+201C-201D, U+2020-2021, U+2025-2026, U+2030, U+2032-2033, U+203B, U+203E, U+2074, U+207F, U+2081-2084, U+20A9, U+2103, U+2109, U+2113, U+2116, U+2121-2122, U+2126, U+212B, U+2153-2154, U+215B-215E, U+2160-2169, U+2170-2179, U+2190-2199, U+21D2, U+21D4;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u002200.woff2") format("woff2");
+  unicode-range: U+2200, U+2202-2203, U+2207-2208, U+220B, U+220F, U+2211, U+221A, U+221D-221E, U+2220, U+2227-222C, U+222E, U+2234-2236, U+223C-223D, U+2252, U+2260-2261, U+2264-2265, U+2282-2283, U+2286-2287, U+2299, U+22A5, U+2312;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u002400.woff2") format("woff2");
+  unicode-range: U+2460-246E, U+2474-2482, U+249C-24B5, U+24D0-24E9, U+2500-2503, U+250C-254B, U+2592, U+25A0-25A1, U+25A3-25A9, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C9, U+25CB, U+25CE-25D1;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u002600.woff2") format("woff2");
+  unicode-range: U+2605-2606, U+260E-260F, U+261C, U+261E, U+2640, U+2642, U+2660-2661, U+2663-2665, U+2667-266A, U+266C-266D;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u003000.woff2") format("woff2");
+  unicode-range: U+3000-3003, U+3008-3011, U+3013-3015, U+301C, U+3041-3093, U+30A1-30F6, U+3131-3163, U+3165-318E;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u003200.woff2") format("woff2");
+  unicode-range: U+3200-321C, U+3260-327B, U+327F, U+3380-3384, U+3388-33CA, U+33CF-33D0, U+33D3, U+33D6, U+33D8, U+33DB-33DD;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00ac00.woff2") format("woff2");
+  unicode-range: U+AC00-ADFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00ae00.woff2") format("woff2");
+  unicode-range: U+AE00-AFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00b000.woff2") format("woff2");
+  unicode-range: U+B000-B1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00b200.woff2") format("woff2");
+  unicode-range: U+B200-B3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00b400.woff2") format("woff2");
+  unicode-range: U+B400-B5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00b600.woff2") format("woff2");
+  unicode-range: U+B600-B7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00b800.woff2") format("woff2");
+  unicode-range: U+B800-B9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00ba00.woff2") format("woff2");
+  unicode-range: U+BA00-BBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00bc00.woff2") format("woff2");
+  unicode-range: U+BC00-BDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00be00.woff2") format("woff2");
+  unicode-range: U+BE00-BFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00c000.woff2") format("woff2");
+  unicode-range: U+C000-C1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00c200.woff2") format("woff2");
+  unicode-range: U+C200-C3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00c400.woff2") format("woff2");
+  unicode-range: U+C400-C5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00c600.woff2") format("woff2");
+  unicode-range: U+C600-C7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00c800.woff2") format("woff2");
+  unicode-range: U+C800-C9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00ca00.woff2") format("woff2");
+  unicode-range: U+CA00-CBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00cc00.woff2") format("woff2");
+  unicode-range: U+CC00-CDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00ce00.woff2") format("woff2");
+  unicode-range: U+CE00-CFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00d000.woff2") format("woff2");
+  unicode-range: U+D000-D1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00d200.woff2") format("woff2");
+  unicode-range: U+D200-D3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00d400.woff2") format("woff2");
+  unicode-range: U+D400-D5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00d600.woff2") format("woff2");
+  unicode-range: U+D600-D7A3;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-light-w300-u00fe00.woff2") format("woff2");
+  unicode-range: U+FF01-FF5E, U+FFE0-FFE3, U+FFE5-FFE6;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u000000.woff2") format("woff2");
+  unicode-range: U+0000-007E, U+00A1-00A5, U+00A7-00AD, U+00B0-00B4, U+00B6-00BF, U+00C6, U+00D0, U+00D7-00D8, U+00DE-00DF, U+00E5-00E6, U+00F0, U+00F7-00F8, U+00FE, U+0111, U+0126-0127, U+0131-0133, U+0138, U+013F-0142, U+0149-014B, U+0152-0153, U+0166-0167;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u000200.woff2") format("woff2");
+  unicode-range: U+02C7, U+02D0, U+02D8-02DD, U+0391-03A1, U+03A3-03A9, U+03B1-03C1, U+03C3-03C9;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u000400.woff2") format("woff2");
+  unicode-range: U+0401, U+0410-044F, U+0451;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u002000.woff2") format("woff2");
+  unicode-range: U+2010, U+2013-2014, U+2016, U+2018-2019, U+201C-201D, U+2020-2021, U+2025-2026, U+2030, U+2032-2033, U+203B, U+203E, U+2074, U+207F, U+2081-2084, U+20A9, U+2103, U+2109, U+2113, U+2116, U+2121-2122, U+2126, U+212B, U+2153-2154, U+215B-215E, U+2160-2169, U+2170-2179, U+2190-2199, U+21D2, U+21D4;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u002200.woff2") format("woff2");
+  unicode-range: U+2200, U+2202-2203, U+2207-2208, U+220B, U+220F, U+2211, U+221A, U+221D-221E, U+2220, U+2227-222C, U+222E, U+2234-2236, U+223C-223D, U+2252, U+2260-2261, U+2264-2265, U+2282-2283, U+2286-2287, U+2299, U+22A5, U+2312;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u002400.woff2") format("woff2");
+  unicode-range: U+2460-246E, U+2474-2482, U+249C-24B5, U+24D0-24E9, U+2500-2503, U+250C-254B, U+2592, U+25A0-25A1, U+25A3-25A9, U+25B2-25B3, U+25B6-25B7, U+25BC-25BD, U+25C0-25C1, U+25C6-25C9, U+25CB, U+25CE-25D1;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u002600.woff2") format("woff2");
+  unicode-range: U+2605-2606, U+260E-260F, U+261C, U+261E, U+2640, U+2642, U+2660-2661, U+2663-2665, U+2667-266A, U+266C-266D;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u003000.woff2") format("woff2");
+  unicode-range: U+3000-3003, U+3008-3011, U+3013-3015, U+301C, U+3041-3093, U+30A1-30F6, U+3131-3163, U+3165-318E;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u003200.woff2") format("woff2");
+  unicode-range: U+3200-321C, U+3260-327B, U+327F, U+3380-3384, U+3388-33CA, U+33CF-33D0, U+33D3, U+33D6, U+33D8, U+33DB-33DD;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00ac00.woff2") format("woff2");
+  unicode-range: U+AC00-ADFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00ae00.woff2") format("woff2");
+  unicode-range: U+AE00-AFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00b000.woff2") format("woff2");
+  unicode-range: U+B000-B1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00b200.woff2") format("woff2");
+  unicode-range: U+B200-B3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00b400.woff2") format("woff2");
+  unicode-range: U+B400-B5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00b600.woff2") format("woff2");
+  unicode-range: U+B600-B7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00b800.woff2") format("woff2");
+  unicode-range: U+B800-B9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00ba00.woff2") format("woff2");
+  unicode-range: U+BA00-BBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00bc00.woff2") format("woff2");
+  unicode-range: U+BC00-BDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00be00.woff2") format("woff2");
+  unicode-range: U+BE00-BFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00c000.woff2") format("woff2");
+  unicode-range: U+C000-C1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00c200.woff2") format("woff2");
+  unicode-range: U+C200-C3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00c400.woff2") format("woff2");
+  unicode-range: U+C400-C5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00c600.woff2") format("woff2");
+  unicode-range: U+C600-C7FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00c800.woff2") format("woff2");
+  unicode-range: U+C800-C9FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00ca00.woff2") format("woff2");
+  unicode-range: U+CA00-CBFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00cc00.woff2") format("woff2");
+  unicode-range: U+CC00-CDFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00ce00.woff2") format("woff2");
+  unicode-range: U+CE00-CFFF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00d000.woff2") format("woff2");
+  unicode-range: U+D000-D1FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00d200.woff2") format("woff2");
+  unicode-range: U+D200-D3FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00d400.woff2") format("woff2");
+  unicode-range: U+D400-D5FF;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00d600.woff2") format("woff2");
+  unicode-range: U+D600-D7A3;
+}
+
+@font-face {
+  font-family: "XIV Preview 001";
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url("/fonts/previews/gmarket-sans/gmarket-sans-medium-w500-u00fe00.woff2") format("woff2");
+  unicode-range: U+FF01-FF5E, U+FFE0-FFE3, U+FFE5-FFE6;
+}

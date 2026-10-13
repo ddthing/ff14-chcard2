@@ -22,7 +22,7 @@
   overflow: hidden;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-lg);
-  padding: 16px;
+  padding: var(--editor-density-panel-inset);
   background: var(--app-surface-raised);
   box-shadow: var(--app-shadow-overlay);
   color: var(--app-text);
@@ -30,17 +30,17 @@
 
 .header {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 44px;
+  grid-template-columns: minmax(0, 1fr) auto var(--editor-density-icon-target);
   align-items: start;
-  gap: 12px;
+  gap: var(--editor-density-control-gap);
 }
 
 .eyebrow {
   min-width: 0;
   margin: 0;
-  padding-top: 12px;
+  padding-top: 8px;
   color: var(--app-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 650;
   letter-spacing: 0.02em;
   line-height: 1.35;
@@ -49,15 +49,15 @@
 .counter {
   align-self: center;
   color: var(--app-text-muted);
-  font-size: 0.75rem;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 600;
   white-space: nowrap;
 }
 
 .closeButton {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
   place-items: center;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
@@ -75,8 +75,8 @@
 .progress {
   display: flex;
   align-items: center;
-  gap: 7px;
-  margin-top: 8px;
+  gap: 4px;
+  margin-top: 6px;
 }
 
 .progressDot {
@@ -101,10 +101,10 @@
 
 .stepContent {
   display: flex;
-  min-height: 100px;
+  min-height: 84px;
   flex-direction: column;
   justify-content: center;
-  padding: 12px 0 16px;
+  padding: 8px 0 12px;
 }
 
 .title {
@@ -117,7 +117,7 @@
 }
 
 .description {
-  margin: 12px 0 0;
+  margin: 8px 0 0;
   color: var(--app-text-muted);
   font-size: 14px;
   line-height: 1.5;
@@ -128,21 +128,21 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: var(--editor-density-control-gap);
   border-top: 1px solid var(--app-border);
-  padding-top: 16px;
+  padding-top: 12px;
 }
 
 .secondaryButton,
 .primaryButton {
   display: inline-flex;
-  min-width: 96px;
-  min-height: 44px;
+  min-width: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-md);
-  padding: 0 16px;
+  padding: 0 var(--editor-density-panel-inset);
   font: inherit;
   font-size: 14px;
   font-weight: 650;
@@ -189,17 +189,18 @@
   }
 
   .card {
-    padding: 16px;
+    padding: var(--editor-density-panel-inset);
   }
 
   .stepContent {
     min-height: 100px;
+    padding-block: 12px;
   }
 }
 
 @media (max-height: 520px) {
   .card {
-    padding: 12px;
+    padding: var(--editor-density-panel-inset);
   }
 
   .stepContent {

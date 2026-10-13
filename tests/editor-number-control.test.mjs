@@ -11,6 +11,7 @@ import {
 test('number draft parsing keeps percentage input in display units', () => {
   assert.equal(parseEditorNumberDraft('90', 100), 0.9);
   assert.equal(parseEditorNumberDraft('92.5', 100), 0.925);
+  assert.equal(parseEditorNumberDraft('9', 100), 0.09);
   assert.equal(parseEditorNumberDraft('1.', 1), 1);
   assert.equal(formatEditorNumber(0.9, 0.05, 100), '90');
   assert.equal(formatEditorNumber(0.925, 0.005, 100), '92.5');
@@ -41,6 +42,7 @@ test('incomplete and non-finite numeric drafts remain uncommitted', () => {
 });
 
 test('numeric commits clamp and snap to the field step without floating-point residue', () => {
+  assert.equal(normalizeEditorNumber(parseEditorNumberDraft('9', 100), 0.75, 2.5, 0.01), 0.75);
   assert.equal(normalizeEditorNumber(0.524, 0.55, 1.5, 0.05), 0.55);
   assert.equal(normalizeEditorNumber(0.929, 0.55, 1.5, 0.05), 0.95);
   assert.equal(normalizeEditorNumber(2, 0.55, 1.5, 0.05), 1.5);

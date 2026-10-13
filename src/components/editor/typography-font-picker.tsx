@@ -4,7 +4,6 @@ import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { AppIcon } from '@/components/app-icon';
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react';
-import { loadTypographyFonts } from '@/data/fonts/load-fonts';
 import { getTypographySupportedWeight, type TypographyScript } from '@/lib/typography-presets';
 import type { Locale } from '@/lib/types';
 import { isImeComposing } from './editor-input';
@@ -63,6 +62,8 @@ const COPY = {
   },
 } as const;
 
+const FONT_PREVIEW_STATUS_TIMEOUT_MS = 20_000;
+
 export function getTypographyFontLabel(font: LocalizedFontName, locale: Locale): string {
   return font.displayNames?.[locale] ?? font.family.replace(/\s+Variable$/u, '');
 }
@@ -117,6 +118,22 @@ function moveFocusFromTrigger(trigger: HTMLElement | null, direction: -1 | 1, po
   candidates[triggerIndex + direction]?.focus();
 }
 
+function getChoiceSampleRequestKey(choice: TypographyFontPickerChoice): string {
+  const scriptsKey = choice.scripts.join(',');
+  const scriptTextKey = choice.scripts.map((script) => `${script}:${choice.textByScript[script] ?? ''}`).join('\u001f');
+  return [choice.fontId ?? '', choice.family, choice.fallbackStack, choice.weight, choice.sample, scriptsKey, scriptTextKey].join('\u0000');
+}
+
+function waitForFontPreviewStatus<T>(promise: Promise<T>): Promise<T> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const timeoutPromise = new Promise<T>((_resolve, reject) => {
+    timeout = setTimeout(() => reject(new Error('Font preview status timed out.')), FONT_PREVIEW_STATUS_TIMEOUT_MS);
+  });
+  return Promise.race([promise, timeoutPromise]).finally(() => {
+    if (timeout !== undefined) clearTimeout(timeout);
+  });
+}
+
 function FontSample({
   choice,
   index,
@@ -133,7 +150,15 @@ function FontSample({
   const sampleRef = useRef<HTMLSpanElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(choice.fontId ? 'loading' : 'ready');
+  const [resolvedRequestKey, setResolvedRequestKey] = useState('');
+  const [loadedFamily, setLoadedFamily] = useState<string | null>(null);
   const copy = COPY[locale];
+  const requestKey = getChoiceSampleRequestKey(choice);
+  const scriptsKey = choice.scripts.join(',');
+  const scripts = useMemo(
+    () => scriptsKey ? scriptsKey.split(',') as TypographyScript[] : [],
+    [scriptsKey],
+  );
 
   useEffect(() => {
     const sample = sampleRef.current;
@@ -162,33 +187,45 @@ function FontSample({
   }, [active]);
 
   useEffect(() => {
-    if (!shouldLoad || !choice.fontId) return;
+    const fontId = choice.fontId;
+    if (!shouldLoad || !fontId) return;
     let cancelled = false;
+    const controller = new AbortController();
 
-    void loadTypographyFonts(
-      'clean',
-      choice.scripts,
-      choice.textByScript,
-      {
-        fontRequests: [{
-          fontId: choice.fontId,
-          weight: getTypographySupportedWeight(choice.fontId, choice.weight),
-        }],
-        profileSource: 'other',
-      },
-    ).then(() => {
-      if (!cancelled) setLoadState('ready');
+    void (async () => {
+      const previewLoader = await import('@/data/fonts/load-preview-fonts');
+      const weight = getTypographySupportedWeight(fontId, choice.weight);
+      return waitForFontPreviewStatus(previewLoader.loadTypographyFontPreview(
+        fontId,
+        choice.family,
+        weight,
+        choice.sample,
+        scripts,
+        controller.signal,
+      ));
+    })().then((family) => {
+      if (cancelled) return;
+      setResolvedRequestKey(requestKey);
+      setLoadedFamily(family);
+      setLoadState('ready');
     }).catch(() => {
-      if (!cancelled) setLoadState('error');
+      if (cancelled) return;
+      setResolvedRequestKey(requestKey);
+      setLoadedFamily(null);
+      setLoadState('error');
     });
 
-    return () => { cancelled = true; };
-  }, [choice, shouldLoad]);
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [choice.fontId, choice.family, choice.weight, choice.sample, choice.fallbackStack, scripts, requestKey, shouldLoad]);
 
+  const resolvedPreviewState = resolvedRequestKey === requestKey ? loadState : 'loading';
+  const previewState = choice.fontId ? shouldLoad ? resolvedPreviewState : 'idle' : 'ready';
   const fontFamily = choice.fontId
-    ? '"' + choice.family + '", ' + choice.fallbackStack
+    ? `${JSON.stringify(resolvedRequestKey === requestKey ? loadedFamily ?? choice.family : choice.family)}, ${choice.fallbackStack}`
     : choice.fontStack ?? choice.fallbackStack;
-  const previewState = choice.fontId ? shouldLoad ? loadState : 'idle' : 'ready';
   const sampleStyle = {
     fontFamily: previewState === 'ready' ? fontFamily : choice.fallbackStack,
     fontWeight: choice.weight,

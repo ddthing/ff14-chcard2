@@ -65,6 +65,8 @@ function installBrowserStubs() {
     worker: Object.getOwnPropertyDescriptor(globalThis, 'Worker'),
   };
   const canvases = [];
+  const readbacks = [];
+  let pixelViewOffset = 0;
   globalThis.Image = FakeImage;
   globalThis.Worker = FakeWorker;
   globalThis.document = {
@@ -77,13 +79,16 @@ function installBrowserStubs() {
         return {
           drawImage(_image, _x, _y, width, height) { canvas.drawnSize = [width, height]; },
           getImageData(_x, _y, width, height) {
-            const data = new Uint8ClampedArray(width * height * 4);
+            const byteLength = width * height * 4;
+            const backing = new Uint8ClampedArray(byteLength + pixelViewOffset);
+            const data = new Uint8ClampedArray(backing.buffer, pixelViewOffset, byteLength);
             for (let index = 0; index < data.length; index += 4) {
               data[index] = 80;
               data[index + 1] = 112;
               data[index + 2] = 144;
               data[index + 3] = 255;
             }
+            readbacks.push(data);
             return { width, height, data };
           },
         };
@@ -95,6 +100,8 @@ function installBrowserStubs() {
 
   return {
     canvases,
+    readbacks,
+    setPixelViewOffset(offset) { pixelViewOffset = offset; },
     restore() {
       if (previous.document === undefined) delete globalThis.document; else globalThis.document = previous.document;
       if (previous.image) Object.defineProperty(globalThis, 'Image', previous.image); else delete globalThis.Image;
@@ -128,6 +135,8 @@ test('photo print processing uses a bounded worker, deduplicates consumers, and 
     assert.equal(worker.options.type, 'module');
     assert.match(String(worker.url), /photo-print\.worker\.ts/u);
     assert.deepEqual([worker.messages[0].width, worker.messages[0].height], [8, 6]);
+    assert.strictEqual(worker.messages[0].buffer, browser.readbacks[0].buffer, 'a complete ImageData buffer transfers without a copy');
+    assert.equal(worker.messages[0].buffer.byteLength, browser.readbacks[0].byteLength);
     assert.deepEqual(worker.messages[0].effects, ['xerox']);
     assert.deepEqual(worker.messages[0].intensity, { xerox: 38 });
     assert.deepEqual(worker.messages[0].paperRgb, paper);
@@ -205,6 +214,20 @@ test('photo print processing uses a bounded worker, deduplicates consumers, and 
     assert.equal(FakeWorker.instances.length, 2, 'a later explicit request can start a fresh worker after a transient failure');
     FakeWorker.latest.respondNext();
     await recovered;
+
+    browser.setPixelViewOffset(8);
+    const offsetSource = loadPhotoPrintBlob('blob:photo-print-offset-view', ['xerox'], { xerox: 53 }, paper);
+    const offsetWorker = FakeWorker.latest;
+    const offsetRequestCount = offsetWorker.messages.length + 1;
+    await waitForRequestCount(offsetWorker, offsetRequestCount);
+    const offsetPixels = browser.readbacks.at(-1);
+    const offsetBuffer = offsetWorker.messages.at(-1).buffer;
+    assert.equal(offsetPixels.byteOffset, 8);
+    assert.notStrictEqual(offsetBuffer, offsetPixels.buffer, 'a partial view gets an exact transferable copy');
+    assert.equal(offsetBuffer.byteLength, offsetPixels.byteLength);
+    assert.deepEqual([...new Uint8Array(offsetBuffer)], [...offsetPixels]);
+    offsetWorker.respondNext();
+    await offsetSource;
   } finally {
     browser.restore();
   }

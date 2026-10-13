@@ -8,10 +8,13 @@ const {
   getNextComboboxOptionIndex,
   getInlineConfirmKeyboardAction,
   getNextMenuIndex,
+  getDesktopNavigatorFocusTargetId,
+  getNavigatorFocusDestination,
   hasFileTransfer,
   isBrowserZoomWheelGesture,
   isCanvasDragPointer,
   isEditorShortcutSuppressed,
+  resolveInspectorOpenForViewportChange,
   shouldRetainInspectorForExit,
   tryReleasePointerCapture,
   trySetPointerCapture,
@@ -128,6 +131,14 @@ test('inline confirmation blocks editor shortcuts only while confirming', () => 
   assert.equal(isEditorShortcutSuppressed(null), false);
 });
 
+test('editor shortcuts stay out of native modal dialogs even without a marked target', () => {
+  const targetInsideOpenDialog = {
+    closest: (selector) => selector === 'dialog[open]' ? {} : null,
+  };
+  assert.equal(isEditorShortcutSuppressed(targetInsideOpenDialog), true);
+  assert.equal(isEditorShortcutSuppressed(null, true), true);
+});
+
 test('inline confirmation maps Escape to cancel and armed Enter to confirm', () => {
   assert.equal(getInlineConfirmKeyboardAction('Escape', true), 'cancel');
   assert.equal(getInlineConfirmKeyboardAction('Enter', true), 'confirm');
@@ -142,4 +153,34 @@ test('mobile inspector exit is retained only when motion is allowed and the edit
   assert.equal(shouldRetainInspectorForExit({ wasOpen: true, isMobile: true, previewOpen: true, reducedMotion: false }), false);
   assert.equal(shouldRetainInspectorForExit({ wasOpen: true, isMobile: true, previewOpen: false, reducedMotion: true }), false);
   assert.equal(shouldRetainInspectorForExit({ wasOpen: false, isMobile: true, previewOpen: false, reducedMotion: false }), false);
+});
+
+test('viewport changes preserve the inspector state after the initial mobile or desktop default', () => {
+  assert.equal(resolveInspectorOpenForViewportChange(true, true, true), false);
+  assert.equal(resolveInspectorOpenForViewportChange(true, false, false), true);
+  assert.equal(resolveInspectorOpenForViewportChange(false, true, true), true);
+  assert.equal(resolveInspectorOpenForViewportChange(false, false, false), false);
+});
+
+test('responsive navigator transitions focus the visible control that replaces the one being hidden', () => {
+  assert.equal(getDesktopNavigatorFocusTargetId(false), 'editor-navigator-collapse');
+  assert.equal(getDesktopNavigatorFocusTargetId(true), 'editor-navigator-open');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'desktop', to: 'compact', navigatorOpen: false, focusInsideNavigator: true, focusOnTrigger: false,
+  }), 'compact-open-items');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'mobile', navigatorOpen: true, focusInsideNavigator: true, focusOnTrigger: false,
+  }), 'mobile-task');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'desktop', navigatorOpen: true, focusInsideNavigator: true, focusOnTrigger: false,
+  }), 'desktop-control');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'desktop', navigatorOpen: false, focusInsideNavigator: false, focusOnTrigger: true,
+  }), 'desktop-control');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'desktop', to: 'mobile', navigatorOpen: false, focusInsideNavigator: false, focusOnTrigger: true,
+  }), 'mobile-task');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'mobile', navigatorOpen: false, focusInsideNavigator: false, focusOnTrigger: false,
+  }), null);
 });

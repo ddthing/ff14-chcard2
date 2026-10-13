@@ -65,13 +65,18 @@ import {
   hasFileTransfer,
   canBeginCanvasDrag,
   getCanvasDragIntent,
+  getDesktopNavigatorFocusTargetId,
+  getNavigatorFocusDestination,
   isBrowserZoomWheelGesture,
   isCanvasDragPointer,
   isEditorShortcutSuppressed,
+  resolveInspectorOpenForViewportChange,
   tryReleasePointerCapture,
   trySetPointerCapture,
   transitionUploadInteractionState,
   updateFileDragDepth,
+  type EditorResponsiveLayout,
+  type NavigatorFocusDestination,
   type UploadInteractionState,
 } from '@/components/editor/editor-interaction';
 import type { Locale } from '@/lib/types';
@@ -1369,7 +1374,7 @@ function EditorCanvas({
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
       const target = event.target as HTMLElement | null;
-      if (isEditorShortcutSuppressed(target)) return;
+      if (isEditorShortcutSuppressed(target, document.querySelector('dialog[open]') !== null)) return;
       const isTyping = target?.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A'].includes(target?.tagName ?? '') || target?.getAttribute('role') === 'combobox';
       if (event.code === 'Space' && !isTyping && !target?.closest('summary')) {
         event.preventDefault();
@@ -1780,6 +1785,8 @@ export function EditorWorkspace() {
   const navigatorRef = useRef<HTMLElement>(null);
   const pageRef = useRef<HTMLDivElement>(null);
   const pendingMobileFocusTask = useRef<MobileDockId | null>(null);
+  const responsiveNavigatorLayout = useRef<EditorResponsiveLayout>('desktop');
+  const pendingResponsiveNavigatorFocus = useRef<NavigatorFocusDestination>(null);
 
   const dispatchImageDragHint = useCallback((event: ImageDragHintEvent) => {
     const currentPhase = imageDragHintPhaseRef.current;
@@ -1896,15 +1903,54 @@ export function EditorWorkspace() {
   }, [closeNavigator, navigatorOpen, openTask]);
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 1180px) and (min-width: 901px)');
+    const mobileMedia = window.matchMedia('(max-width: 900px)');
+    const compactMedia = window.matchMedia('(max-width: 1180px) and (min-width: 901px)');
+    const getLayout = (): EditorResponsiveLayout => mobileMedia.matches
+      ? 'mobile'
+      : compactMedia.matches ? 'compact' : 'desktop';
     const sync = () => {
-      setIsCompactNavigator(media.matches);
-      if (!media.matches) setNavigatorOpen(false);
+      const nextLayout = getLayout();
+      const previousLayout = responsiveNavigatorLayout.current;
+      const activeElement = document.activeElement;
+      const focusDestination = getNavigatorFocusDestination({
+        from: previousLayout,
+        to: nextLayout,
+        navigatorOpen,
+        focusInsideNavigator: Boolean(navigatorRef.current?.contains(activeElement)),
+        focusOnTrigger: activeElement === navigatorTriggerRef.current,
+      });
+      responsiveNavigatorLayout.current = nextLayout;
+      if (focusDestination) pendingResponsiveNavigatorFocus.current = focusDestination;
+      setIsCompactNavigator(nextLayout === 'compact');
+      if (nextLayout !== 'compact' && navigatorOpen) setNavigatorOpen(false);
     };
     sync();
-    media.addEventListener('change', sync);
-    return () => media.removeEventListener('change', sync);
-  }, [setNavigatorOpen]);
+    mobileMedia.addEventListener('change', sync);
+    compactMedia.addEventListener('change', sync);
+    window.addEventListener('resize', sync);
+    return () => {
+      mobileMedia.removeEventListener('change', sync);
+      compactMedia.removeEventListener('change', sync);
+      window.removeEventListener('resize', sync);
+    };
+  }, [navigatorOpen, navigatorTriggerRef, setNavigatorOpen]);
+
+  useLayoutEffect(() => {
+    const destination = pendingResponsiveNavigatorFocus.current;
+    if (!destination) return;
+    if (destination === 'mobile-task' && !isMobileViewport) return;
+    if (destination === 'compact-open-items' && (!isCompactNavigator || isMobileViewport)) return;
+    if (destination === 'desktop-control' && (isCompactNavigator || isMobileViewport)) return;
+    pendingResponsiveNavigatorFocus.current = null;
+    if (previewOpen) return;
+    const targetId = destination === 'desktop-control'
+      ? getDesktopNavigatorFocusTargetId(sidebarCollapsed)
+      : destination === 'compact-open-items'
+        ? 'editor-navigator-open'
+        : `editor-task-tab-mobile-${mobileMoreOpen ? 'more' : activeTask}`;
+    const target = document.getElementById(targetId);
+    if (target?.getClientRects().length && !target.closest('[inert]')) target.focus({ preventScroll: true });
+  }, [activeTask, isCompactNavigator, isMobileViewport, mobileMoreOpen, previewOpen, sidebarCollapsed]);
 
   useLayoutEffect(() => {
     if (!navigatorOpen || !isCompactNavigator || previewOpen) return;
@@ -2029,10 +2075,18 @@ export function EditorWorkspace() {
     const entryPanel = getEditorEntryPanel(hydrated.character, hydrated.ui.activePanel);
     if (entryPanel !== hydrated.ui.activePanel) hydrated.setUi({ activePanel: entryPanel });
     const mobileViewport = window.matchMedia('(max-width: 900px)');
+    let isInitialViewportSync = true;
     const applyViewport = (matches: boolean) => {
       setIsMobileViewport(matches);
       if (!matches) setMobileMoreOpen(false);
-      editorStore.getState().setUi({ inspectorOpen: !matches });
+      const currentState = editorStore.getState();
+      const nextInspectorOpen = resolveInspectorOpenForViewportChange(
+        isInitialViewportSync,
+        matches,
+        currentState.ui.inspectorOpen,
+      );
+      isInitialViewportSync = false;
+      if (nextInspectorOpen !== currentState.ui.inspectorOpen) currentState.setUi({ inspectorOpen: nextInspectorOpen });
     };
     applyViewport(mobileViewport.matches);
     const handleViewportChange = (event: MediaQueryListEvent) => {
@@ -2351,6 +2405,7 @@ export function EditorWorkspace() {
         {showNavigatorTrigger && (
           <button
             ref={navigatorTriggerRef}
+            id="editor-navigator-open"
             type="button"
             className={styles.canvasNavigatorButton}
             aria-controls="editor-navigator"

@@ -1,92 +1,18 @@
 .editor {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-control-gap, 8px);
   min-width: 0;
 }
 
-.categories {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
-.categories button,
-.itemButton,
 .resetContent {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--editor-density-control-height, 44px);
+  min-height: var(--editor-density-control-height, 44px);
   border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
   background: var(--app-surface);
   color: var(--app-text);
   font: inherit;
   cursor: pointer;
-}
-
-.categories button {
-  padding: 8px;
-  font-size: 14px;
-  font-weight: 550;
-  line-height: 1.25;
-}
-
-.categories button[aria-pressed='true'],
-.itemButton[aria-pressed='true'] {
-  border-color: transparent;
-  background: var(--editor-selection-soft);
-  color: var(--editor-selection-ink);
-  font-weight: 650;
-  border-radius: var(--radius-md);
-}
-
-.categories button:disabled { opacity: 0.55; cursor: not-allowed; }
-
-.itemGroup {
-  display: grid;
-  gap: 0;
-  min-width: 0;
-}
-
-.navigation summary {
-  display: flex;
-  min-height: 44px;
-  align-items: center;
-  gap: 8px;
-  margin: 0;
-  color: var(--app-text);
-  font-size: 14px;
-  cursor: pointer;
-  list-style: none;
-}
-
-.navigation summary::-webkit-details-marker { display: none; }
-
-.navigation summary::after {
-  width: 7px;
-  height: 7px;
-  margin-inline-start: auto;
-  border-inline-end: 1.5px solid currentColor;
-  border-block-end: 1.5px solid currentColor;
-  content: '';
-  transform: rotate(45deg);
-}
-
-.navigation[open] summary::after { transform: rotate(225deg); }
-
-.navigationBody {
-  display: grid;
-  gap: 8px;
-  padding-block: 0 8px;
-}
-
-.navigation summary strong {
-  min-width: 0;
-  overflow: hidden;
-  color: var(--app-text);
-  font-size: 14px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .visuallyHidden {
@@ -99,85 +25,35 @@
   clip-path: inset(50%);
 }
 
-.itemList {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
-  max-height: min(18dvh, 160px);
-  overflow-y: auto;
-  margin: 0;
-  padding: 4px;
-  list-style: none;
-  overscroll-behavior: contain;
-}
-
-.itemList li { min-width: 0; }
-
-.itemButton {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  overflow: hidden;
-  padding: 8px 12px;
-  text-align: start;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.itemButton span {
-  min-width: 0;
-  flex: 1 1 auto;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.itemOrdinal {
-  flex: 0 0 auto;
-  color: var(--app-text-muted);
-  font-family: var(--font-mono);
-  font-size: 12px;
-  font-weight: 550;
-  font-variant-numeric: tabular-nums;
-}
-
-.itemButton small {
-  flex: 0 0 auto;
-  color: var(--app-text-muted);
-  font-size: 12px;
-  font-weight: 450;
-}
-
-.itemButton[aria-pressed='true'] small {
-  color: var(--editor-selection-ink);
-}
-
 .itemSelect {
-  display: grid;
-  gap: 8px;
+  display: block;
   min-width: 0;
-  color: var(--app-text);
-  font-size: 14px;
-  font-weight: 550;
 }
 
 .itemSelect select {
   width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
+  min-height: var(--editor-density-control-height, 44px);
+  box-sizing: border-box;
+  padding: 4px var(--editor-density-panel-inset, 10px);
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-md);
   background: var(--app-control);
   color: var(--app-text);
   font: inherit;
+  font-size: var(--editor-density-input-font-size, 14px);
+  font-weight: 500;
+  line-height: 1.25;
 }
 
-.contentEditor,
+.contentEditor {
+  display: grid;
+  gap: var(--editor-density-field-gap, 8px);
+  min-width: 0;
+}
+
 .contentEditor label {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-label-gap, 4px);
   min-width: 0;
 }
 
@@ -196,7 +72,7 @@
 
 .globalTypography label {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-label-gap, 4px);
   color: var(--app-text);
   font-size: 14px;
   font-weight: 550;
@@ -204,25 +80,29 @@
 
 .globalTypography select {
   width: 100%;
-  min-height: 44px;
-  padding: 8px 12px;
+  min-height: var(--editor-density-control-height, 44px);
+  box-sizing: border-box;
+  padding: 4px var(--editor-density-panel-inset, 10px);
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-md);
   background: var(--app-control);
   color: var(--app-text);
   font: inherit;
+  font-size: var(--editor-density-input-font-size, 16px);
+  font-weight: 500;
+  line-height: 1.25;
 }
 
 .defaultCopyButton {
-  min-width: 44px;
-  min-height: 44px;
-  padding: 8px 12px;
+  min-width: var(--editor-density-control-height, 44px);
+  min-height: var(--editor-density-control-height, 44px);
+  padding: 4px var(--editor-density-panel-inset, 10px);
   border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
   background: var(--app-surface);
   color: var(--app-text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--editor-density-control-font-size, 14px);
   font-weight: 550;
   cursor: pointer;
 }
@@ -247,32 +127,33 @@
 .contentEditor input,
 .contentEditor textarea {
   width: 100%;
-  min-height: 44px;
-  padding: 10px 12px;
+  min-height: var(--editor-density-control-height, 44px);
+  box-sizing: border-box;
+  padding: 4px var(--editor-density-panel-inset, 10px);
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-md);
   background: var(--app-control);
   color: var(--app-text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--editor-density-input-font-size, 16px);
+  line-height: 1.25;
 }
 
 .contentEditor textarea {
   min-height: 72px;
+  padding-block: 8px;
   resize: vertical;
 }
 
 .resetContent {
   justify-self: start;
-  padding: 8px 12px;
+  padding: 4px var(--editor-density-panel-inset, 10px);
   background: transparent;
-  font-size: 14px;
+  font-size: var(--editor-density-control-font-size, 14px);
   font-weight: 550;
 }
 
-.categories button:focus-visible,
-.navigation summary:focus-visible,
-.itemButton:focus-visible,
+.itemSelect select:focus-visible,
 .resetContent:focus-visible,
 .contentEditor input:focus-visible,
 .contentEditor textarea:focus-visible {
@@ -285,30 +166,15 @@
   outline-offset: 2px;
 }
 
-.itemSelect select:focus-visible {
-  outline: 2px solid var(--app-focus);
-  outline-offset: 2px;
-}
-
 .defaultCopyButton:focus-visible {
   outline: 2px solid var(--app-focus);
   outline-offset: 2px;
 }
 
-@media (max-width: 640px) {
-  .contentEditor input,
-  .contentEditor textarea { font-size: 16px; }
-}
-
 @media (max-width: 420px) {
-  .categories { gap: 4px; }
-  .categories button { padding-inline: 5px; }
   .contentEditor textarea { min-height: 64px; }
 }
 
 @media (forced-colors: active) {
-  .categories button[aria-pressed='true'],
-  .itemButton[aria-pressed='true'] {
-    border-color: Highlight;
-  }
+  .itemSelect select { border-color: ButtonText; }
 }

@@ -70,10 +70,22 @@ test('export progress comes from the renderer and duplicate requests are blocked
   assert.doesNotMatch(page, /progress: 0\.04|setTimeout\([^)]*1000/);
 });
 
+test('queued export retries announce that the previous renderer is still finishing', () => {
+  assert.match(page, /waiting: '이전 렌더링을 마무리하고 있어요…'/);
+  assert.match(page, /waiting: 'Waiting for the previous render to finish…'/);
+  assert.match(page, /waiting: '前のレンダリングが終わるのを待っています…'/);
+  assert.match(page, /case 'waiting': return labels\.waiting/);
+  assert.match(page, /setStatus\(getStageLabel\(nextProgress\.stage, copy\[snapshot\.locale\]\)\)/);
+});
+
 test('cancellation aborts the active export and reports a cancelled state', () => {
   assert.match(page, /activeExport\.controller\.abort\(\)/);
   assert.match(page, /setStatus\(text\.cancelled\)/);
   assert.match(page, /exporting && <button className=\{styles\.cancelButton\}[^>]*onClick=\{cancelExport\}/);
+  const rendered = page.indexOf('rendered = await renderCardBlob');
+  const staleGuard = page.indexOf('if (!isCurrent()) return;', rendered);
+  const dispatch = page.indexOf('downloadCardBlob(download.blob, snapshot.data, snapshot.format, snapshot.scale)', staleGuard);
+  assert.ok(rendered >= 0 && staleGuard > rendered && dispatch > staleGuard, 'a cancelled or stale render cannot reach download dispatch');
 });
 
 test('print waits for fonts and card assets in order before opening the browser dialog', async () => {

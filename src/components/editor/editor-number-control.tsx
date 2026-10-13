@@ -195,7 +195,7 @@ export function EditorNumberControl({
           onBlur={endInteractionIfFocusLeavesControl}
           onChange={handleRangeChange}
         />
-        <span className={styles.numberField} data-unit={Boolean(unit)}>
+        <label className={styles.numberField} htmlFor={numberId} data-unit={Boolean(unit)}>
           <input
             id={numberId}
             className={styles.numberInput}
@@ -220,7 +220,7 @@ export function EditorNumberControl({
             onKeyDown={handleNumberKeyDown}
           />
           {unit && <span className={styles.unit} aria-hidden="true">{unit}</span>}
-        </span>
+        </label>
       </div>
     </div>
   );

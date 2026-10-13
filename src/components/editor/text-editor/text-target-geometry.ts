@@ -133,9 +133,9 @@ export function getTextOutlineBounds(
 }
 
 /**
- * Places a small badge next to the first visible line of text. It skips badge
- * positions that would cover text or another badge, leaving the item accessible
- * through its button label when the card has no clear space.
+ * Places a minimum-size badge hit target next to the first visible line of text.
+ * It skips positions that would cover text or another badge, leaving the item
+ * accessible through its button label when the card has no clear space.
  */
 export function placeTextBadge(
   anchorRects: readonly TextTargetRect[],
@@ -146,6 +146,7 @@ export function placeTextBadge(
   badgeSize = 16,
   gap = 2,
   occupiedBadges: readonly TextTargetRect[] = [],
+  minHitTargetSize = 24,
 ): TextTargetBounds | null {
   const visibleClip = resolveClip(viewportWidth, viewportHeight, clip);
   if (!visibleClip) return null;
@@ -157,25 +158,34 @@ export function placeTextBadge(
   if (!anchor) return null;
 
   const anchorRect = asRect(anchor);
+  const hitTargetSize = Math.max(badgeSize, minHitTargetSize);
+  const hitTargetPadding = (hitTargetSize - badgeSize) / 2;
+  const candidateGap = gap + hitTargetPadding;
   const candidates: TextTargetBounds[] = [
-    { left: anchorRect.right + gap, top: anchor.top, width: badgeSize, height: badgeSize },
-    { left: anchor.left - badgeSize - gap, top: anchor.top, width: badgeSize, height: badgeSize },
-    { left: anchorRect.right - badgeSize, top: anchor.top - badgeSize - gap, width: badgeSize, height: badgeSize },
-    { left: anchor.left, top: anchorRect.bottom + gap, width: badgeSize, height: badgeSize },
-    { left: anchor.left - badgeSize - gap, top: anchorRect.bottom - badgeSize, width: badgeSize, height: badgeSize },
+    { left: anchorRect.right + candidateGap, top: anchor.top, width: badgeSize, height: badgeSize },
+    { left: anchor.left - badgeSize - candidateGap, top: anchor.top, width: badgeSize, height: badgeSize },
+    { left: anchorRect.right - badgeSize, top: anchor.top - badgeSize - candidateGap, width: badgeSize, height: badgeSize },
+    { left: anchor.left, top: anchorRect.bottom + candidateGap, width: badgeSize, height: badgeSize },
+    { left: anchor.left - badgeSize - candidateGap, top: anchorRect.bottom - badgeSize, width: badgeSize, height: badgeSize },
   ];
 
-  return candidates.find((candidate) => {
-    const rect = asRect(candidate);
+  for (const candidate of candidates) {
+    const hitBounds = {
+      left: candidate.left - hitTargetPadding,
+      top: candidate.top - hitTargetPadding,
+      width: hitTargetSize,
+      height: hitTargetSize,
+    };
+    const rect = asRect(hitBounds);
     const insideClip = rect.left >= visibleClip.left
       && rect.top >= visibleClip.top
       && rect.right <= visibleClip.right
       && rect.bottom <= visibleClip.bottom;
-    return insideClip
-      && !occupiedRects.some((occupied) => rectsOverlap(rect, occupied))
-      && !occupiedBadges.some((occupied) => rectsOverlap(rect, occupied))
-      && !rectsOverlap(rect, anchorRect);
-  }) ?? null;
+    const collidesWithText = occupiedRects.some((occupied) => rectsOverlap(rect, occupied));
+    const collidesWithBadge = occupiedBadges.some((occupied) => rectsOverlap(rect, occupied));
+    if (insideClip && !collidesWithText && !collidesWithBadge && !rectsOverlap(rect, anchorRect)) return hitBounds;
+  }
+  return null;
 }
 
 /**

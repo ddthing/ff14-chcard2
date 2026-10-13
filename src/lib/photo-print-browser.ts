@@ -302,12 +302,23 @@ async function preparePhotoPixels(job: PhotoPrintJob): Promise<PreparedPhotoPixe
     // A remote image without CORS permission will fail here. Keep the original
     // photo visible and let export report the failed print effect honestly.
     const pixels = context.getImageData(0, 0, width, height).data;
-    const buffer = pixels.buffer.slice(pixels.byteOffset, pixels.byteOffset + pixels.byteLength) as ArrayBuffer;
+    const pixelBuffer = pixels.buffer;
+    const buffer = pixelBuffer instanceof ArrayBuffer &&
+      pixels.byteOffset === 0 &&
+      pixels.byteLength === pixelBuffer.byteLength
+      ? pixelBuffer
+      : copyPhotoPixels(pixels);
     return { width, height, buffer };
   } finally {
     canvas.width = 0;
     canvas.height = 0;
   }
+}
+
+function copyPhotoPixels(pixels: Uint8ClampedArray): ArrayBuffer {
+  const buffer = new ArrayBuffer(pixels.byteLength);
+  new Uint8Array(buffer).set(pixels);
+  return buffer;
 }
 
 function getPhotoWorker(): Worker {

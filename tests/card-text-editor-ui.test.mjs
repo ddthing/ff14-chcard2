@@ -21,6 +21,7 @@ const { selectTextEditorControl } = await import('../src/components/editor/text-
 const pickerSource = await readFile(new URL('../src/components/editor/ffxiv-pickers.tsx', import.meta.url), 'utf8');
 const workspaceSource = await readFile(new URL('../src/components/editor/editor-workspace.tsx', import.meta.url), 'utf8');
 const navigationSource = await readFile(new URL('../src/components/editor/text-editor/card-text-editor.tsx', import.meta.url), 'utf8');
+const cardTextEditorStyles = await readFile(new URL('../src/components/editor/text-editor/card-text-editor.module.css', import.meta.url), 'utf8');
 const typographySource = await readFile(new URL('../src/components/editor/typography-role-editor.tsx', import.meta.url), 'utf8');
 
 const item = (id, category, fields = {}) => ({
@@ -109,8 +110,25 @@ test('individual typography targets are name, bio, and decorative copy; small in
     'character.job', 'character.level', 'cinematic.label.job',
   ]);
   assert.ok(getInformationTypographyItems(items).some(({ id, visible }) => id === 'character.level' && !visible));
-  assert.match(navigationSource, /function selectCategory[\s\S]*?onSelectItem\(nextItems\[0\]\)/u);
+  assert.match(navigationSource, /TEXT_ITEM_SELECTOR_CATEGORIES:[\s\S]*?= \['identity', 'copy', 'information'\]/u);
+  assert.match(navigationSource, /<select[\s\S]*?data-text-item-select="true"[\s\S]*?aria-label=\{copy\.textEditor\.items\}/u);
+  assert.match(navigationSource, /<optgroup[\s\S]*?disabled=\{disabledCategories\.includes\(itemCategory\)\}/u);
+  assert.match(navigationSource, /getTextItemsForCategory\(items, itemCategory\)\.map\(\(item\) =>/u);
+  assert.match(navigationSource, /const nextCategory = getEditorTextCategory\(item\)[\s\S]*?onCategoryChange\(nextCategory\)[\s\S]*?onSelectItem\(item\)/u);
+  assert.match(navigationSource, /!item\.value\.trim\(\) \? ` · \$\{copy\.textEditor\.hiddenText\}`/u);
+  assert.doesNotMatch(navigationSource, /data-text-navigation|categoryItems\.length > 2/u);
   assert.match(typographySource, /const informationGroup = selectedItem\.category === 'information' && !isIndividualTypographyItem\(selectedItem\)/u);
+});
+
+test('text editor fields use shared density tokens and retain readable multiline input', () => {
+  assert.match(cardTextEditorStyles, /\.contentEditor\s*\{[^}]*gap:\s*var\(--editor-density-field-gap, 8px\)/u);
+  assert.match(cardTextEditorStyles, /\.contentEditor label\s*\{[^}]*gap:\s*var\(--editor-density-label-gap, 4px\)/u);
+  assert.match(cardTextEditorStyles, /\.resetContent\s*\{[^}]*min-height:\s*var\(--editor-density-control-height, 44px\)/u);
+  assert.match(cardTextEditorStyles, /\.globalTypography select\s*\{[^}]*min-height:\s*var\(--editor-density-control-height, 44px\)/u);
+  assert.match(cardTextEditorStyles, /\.defaultCopyButton\s*\{[^}]*min-height:\s*var\(--editor-density-control-height, 44px\)/u);
+  assert.match(cardTextEditorStyles, /\.contentEditor input,[\s\S]*?min-height:\s*var\(--editor-density-control-height, 44px\)[\s\S]*?font-size:\s*var\(--editor-density-input-font-size, 16px\)/u);
+  assert.match(cardTextEditorStyles, /\.contentEditor textarea\s*\{[^}]*min-height:\s*72px/u);
+  assert.match(cardTextEditorStyles, /@media \(max-width: 420px\)[\s\S]*?\.contentEditor textarea \{ min-height: 64px; \}/u);
 });
 
 test('creative target ordinals stay unique across Name + Bio and Card phrases', () => {
@@ -155,6 +173,14 @@ test('the overlay is rendered through a body portal outside the card/export subt
   assert.match(overlay, /createPortal\([\s\S]*?document\.body/u);
   assert.match(overlay, /data-card-text-target=\{target\.id\}/u);
   assert.match(overlay, /data-information-group=\{isInformationGroup \? 'true' : undefined\}/u);
+  assert.match(overlay, /data-card-text-badge-hit="true"[\s\S]*?width: badge\.width[\s\S]*?height: badge\.height/u);
+  assert.match(overlayStyles, /\.badgeHit\s*\{[^}]*pointer-events:\s*auto/u);
+  assert.match(overlayStyles, /\.badge,\s*\.groupMarker\s*\{[^}]*width:\s*16px[^}]*height:\s*16px/u);
+  assert.match(overlay, /onClick=\{\(event\) => \{[\s\S]*?onSelect\(item, event\.detail === 0\)/u);
+  assert.match(overlay, /window\.matchMedia\('\(pointer: coarse\)'\)\.matches \? \[44, 24\] : \[24\]/u);
+  assert.match(overlay, /neighboringTextTargets[\s\S]*?\[\.\.\.allTextRects, \.\.\.neighboringTextTargets\]/u);
+  assert.match(cardTextEditorStyles, /min-height:\s*var\(--editor-density-control-height, 44px\)/u);
+  assert.match(cardTextEditorStyles, /font-size:\s*var\(--editor-density-input-font-size, 14px\)/u);
   assert.match(overlay, /informationTargetLabel\?: string/u);
   assert.match(overlay, /currentItems\.filter\(\(item\) => item\.visible && isIndividualTypographyItem\(item\)\)/u);
   assert.match(overlay, /getInformationTypographyItems\(currentItems\)\.filter\(\(item\) => item\.visible\)/u);

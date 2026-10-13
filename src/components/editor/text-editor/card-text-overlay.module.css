@@ -53,6 +53,19 @@
   pointer-events: none;
 }
 
+.badgeHit {
+  position: absolute;
+  display: grid;
+  box-sizing: border-box;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  pointer-events: auto;
+  touch-action: manipulation;
+  cursor: pointer;
+}
+
 .target:hover .textOutline,
 .target[data-selected='true'] .textOutline {
   border-color: var(--editor-selection);
@@ -66,7 +79,7 @@
 
 .badge,
 .groupMarker {
-  position: absolute;
+  position: relative;
   display: grid;
   width: 16px;
   height: 16px;

@@ -195,6 +195,7 @@ const copy = {
     preparing: '내보내기를 준비하고 있어요…',
     fonts: '글꼴과 카드 이미지를 준비하고 있어요…',
     image: '이미지를 확인하고 있어요…',
+    waiting: '이전 렌더링을 마무리하고 있어요…',
     render: '고해상도 카드를 만들고 있어요…',
     downloadStatus: '다운로드를 준비했어요.',
     exportProgress: '내보내기 진행 상황',
@@ -263,6 +264,7 @@ const copy = {
     preparing: 'Preparing export…',
     fonts: 'Preparing type and card artwork…',
     image: 'Checking card images…',
+    waiting: 'Waiting for the previous render to finish…',
     render: 'Rendering your high resolution card…',
     downloadStatus: 'Preparing your download…',
     exportProgress: 'Export progress',
@@ -331,6 +333,7 @@ const copy = {
     preparing: '書き出しを準備しています…',
     fonts: '文字とカード画像を準備しています…',
     image: '画像を確認しています…',
+    waiting: '前のレンダリングが終わるのを待っています…',
     render: '高解像度カードを作成しています…',
     downloadStatus: 'ダウンロードを準備しました。',
     exportProgress: '書き出しの進行状況',
@@ -363,6 +366,7 @@ function getStageLabel(stage: CardExportProgress['stage'], labels: typeof copy.k
   switch (stage) {
     case 'fonts': return labels.fonts;
     case 'image': return labels.image;
+    case 'waiting': return labels.waiting;
     case 'render': return labels.render;
     case 'download': return labels.downloadStatus;
   }

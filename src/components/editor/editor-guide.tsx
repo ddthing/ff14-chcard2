@@ -135,6 +135,7 @@ export function EditorGuideHost() {
     <dialog
       ref={dialogRef}
       className={styles.dialog}
+      data-editor-shortcuts-disabled="true"
       aria-labelledby="editor-guide-title"
       aria-describedby="editor-guide-description"
       onCancel={handleCancel}

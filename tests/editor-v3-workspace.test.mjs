@@ -12,6 +12,11 @@ import {
   getEditorTaskActivation,
   getEditorEntryPanel,
 } from '../src/components/editor/editor-navigation.ts';
+import {
+  getDesktopNavigatorFocusTargetId,
+  getNavigatorFocusDestination,
+  resolveInspectorOpenForViewportChange,
+} from '../src/components/editor/editor-interaction.ts';
 
 register('./ts-alias-loader.mjs', import.meta.url);
 const [{ editorStore }, { isCardDecorativeCopy }, {
@@ -28,6 +33,7 @@ const [{ editorStore }, { isCardDecorativeCopy }, {
 ]);
 
 const workspaceSource = readFileSync(new URL('../src/components/editor/editor-workspace.tsx', import.meta.url), 'utf8');
+const guideSource = readFileSync(new URL('../src/components/editor/editor-guide.tsx', import.meta.url), 'utf8');
 const editorStyles = readFileSync(new URL('../src/app/editor/editor.module.css', import.meta.url), 'utf8');
 const textEditorSource = readFileSync(new URL('../src/components/editor/text-editor/card-text-editor.tsx', import.meta.url), 'utf8');
 const typographyEditorSource = readFileSync(new URL('../src/components/editor/typography-role-editor.tsx', import.meta.url), 'utf8');
@@ -58,6 +64,13 @@ test('six existing editor panels remain reachable through the three V3 task tabs
   for (const [panel, task] of Object.entries(EDITOR_TASK_FOR_PANEL)) {
     assert.equal(getEditorTaskForPanel(panel), task);
   }
+});
+
+test('the native guide modal suppresses editor shortcuts and handles Escape through its close path', () => {
+  assert.match(guideSource, /<dialog[\s\S]*?data-editor-shortcuts-disabled="true"/u);
+  assert.match(guideSource, /onCancel=\{handleCancel\}[\s\S]*?onClose=\{handleDialogClose\}/u);
+  assert.match(guideSource, /trigger\?\.isConnected[\s\S]*?trigger\.focus\(\{ preventScroll: true \}\)/u);
+  assert.match(workspaceSource, /isEditorShortcutSuppressed\(target, document\.querySelector\('dialog\[open\]'\) !== null\)/u);
 });
 
 test('mobile task controls toggle their sheet and preserve desktop inspector selection', () => {
@@ -327,7 +340,7 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /<CardTextOverlay[\s\S]*?enabled=\{contentTextEditing && !previewOpen && !blockedByNavigator && design\.layoutVariant === 'a'\}/u);
   assert.match(workspaceSource, /informationTargetLabel=\{copy\.textEditor\.informationTypography\}/u);
   assert.match(textEditorSource, /data-text-editor="true" data-selected-text-id=/u);
-  assert.match(textEditorSource, /categoryItems\.length > 2/u);
+  assert.match(textEditorSource, /data-text-item-select="true"[\s\S]*?aria-label=\{copy\.textEditor\.items\}/u);
   assert.match(workspaceSource, /updateDesign\('colorMode'/u);
   assert.match(workspaceSource, /design\.effects\.includes\(effect\)/u);
   assert.match(workspaceSource, /HistoryButton action="undo"/u);
@@ -344,7 +357,7 @@ test('the mobile sheet starts closed and shares available space with one bottom 
   const mobileRules = mobileBlocks.join('\n').replace(/\.page\s+(?=\.)/gu, '');
   assert.match(mobileRules, /\.page\s*\{[^}]*height:\s*max\(0px, calc\(var\(--editor-viewport-bottom, 100dvh\) - var\(--app-header-height, 56px\)\)\)[^}]*overflow:\s*hidden/u);
   assert.match(mobileRules, /\.mobileTaskBar\s*\{[^}]*position:\s*absolute[^}]*bottom:\s*calc\([^}]*safe-area-inset-bottom/u);
-  assert.match(mobileRules, /\.mobileTaskTabs[\s\S]*?\.toolButton\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(mobileRules, /\.mobileTaskTabs[\s\S]*?\.toolButton\s*\{[^}]*min-height:\s*(?:44px|var\(--editor-density-control-height\))/u);
   assert.doesNotMatch(workspaceSource, /id="editor-navigator-mobile-toggle"|id="editor-header-panel-toggle"/u);
   assert.match(mobileRules, /\.page:not\(\.inspectorClosed\):not\(\.previewMode\) \.canvasColumn\s*\{[^}]*var\(--editor-mobile-sheet-height\)/u);
   assert.match(mobileRules, /\.inspector\s*\{[^}]*position:\s*absolute[^}]*env\(safe-area-inset-bottom\)/u);
@@ -352,26 +365,54 @@ test('the mobile sheet starts closed and shares available space with one bottom 
   assert.doesNotMatch(mobileRules, /\.inspector\s*\{[^}]*position:\s*relative[^}]*flex:\s*1 1 0%/u);
   assert.match(workspaceSource, /window\.visualViewport[\s\S]*?--editor-mobile-sheet-height[\s\S]*?data-keyboard-open=/u);
   assert.match(workspaceSource, /focusedElement\.matches\('input, textarea, select'\)[\s\S]*?setInputCompactMode\(useInputCompactMode\)/u);
-  assert.match(workspaceSource, /inspectorOpen: !matches/u);
+  assert.match(workspaceSource, /let isInitialViewportSync = true;[\s\S]*?resolveInspectorOpenForViewportChange\([\s\S]*?isInitialViewportSync = false/u);
+  assert.match(workspaceSource, /const nextInspectorOpen = resolveInspectorOpenForViewportChange\([\s\S]*?currentState\.ui\.inspectorOpen/u);
+  assert.match(workspaceSource, /!previewOpen && \([\s\S]*?<MemoEditorInspector/u);
+  assert.equal(resolveInspectorOpenForViewportChange(true, true, true), false);
+  assert.equal(resolveInspectorOpenForViewportChange(false, true, true), true);
   assert.match(workspaceSource, /spellCheck=\{field !== 'name' && field !== 'freeCompany'\}/u);
   assert.match(workspaceSource, /data-input-compact-mode=/u);
   let readableMobileSelect = false;
   postcss.parse(mobileRules).walkRules((rule) => {
     if (!rule.selectors.some((selector) => selector.endsWith('.pickerInlineSelect select'))) return;
     rule.walkDecls('font-size', (declaration) => {
-      if (declaration.value === '1rem') readableMobileSelect = true;
+      if (declaration.value === '1rem' || declaration.value === 'var(--editor-density-input-font-size)') readableMobileSelect = true;
     });
   });
   assert.ok(readableMobileSelect, 'native mobile selects retain 16px input text in grouped CSS rules');
-  assert.match(mobileRules, /\.sheetHandle\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(mobileRules, /\.sheetHandle\s*\{[^}]*min-height:\s*(?:44px|var\(--editor-density-control-height\))/u);
   assert.match(editorStyles, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*none/u);
   assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*inline-flex/u);
   assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*pointer-events:\s*none/u);
   assert.match(mobileRules, /\.page\[data-input-compact-mode='true'\] \.canvasStage\s*\{[^}]*visibility:\s*hidden/u);
-  assert.match(editorStyles, /(?:\.page\s+)?\.choiceChip\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(editorStyles, /(?:\.page\s+)?\.choiceChip\s*\{[^}]*min-height:\s*(?:44px|var\(--editor-density-control-height\))/u);
   assert.match(workspaceSource, /className=\{styles\.toolbarPrimary\}/u);
-  assert.match(editorStyles, /\.page \.uploadShortcut\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/u);
+  assert.match(editorStyles, /\.page \.uploadShortcut\s*\{[^}]*min-width:\s*(?:44px|var\(--editor-density-control-height\))[^}]*min-height:\s*(?:44px|var\(--editor-density-control-height\))/u);
   const compactUploadMinimum = editorStyles.match(/\.page \.uploadZoneCompact\s*\{[^}]*min-height:\s*(\d+)px/u)?.[1];
   assert.ok(Number(compactUploadMinimum) >= 56, 'the compact upload row reserves readable file details and a touch target');
   assert.match(editorStyles, /@media \(max-width: 370px\)[\s\S]*?\.page \.historyTools button,[\s\S]*?min-width:\s*44px/u);
+});
+
+test('navigator focus moves to visible replacements across desktop, compact, and mobile breakpoints', () => {
+  assert.equal(getDesktopNavigatorFocusTargetId(false), 'editor-navigator-collapse');
+  assert.equal(getDesktopNavigatorFocusTargetId(true), 'editor-navigator-open');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'desktop', to: 'compact', navigatorOpen: false, focusInsideNavigator: true, focusOnTrigger: false,
+  }), 'compact-open-items');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'mobile', navigatorOpen: true, focusInsideNavigator: true, focusOnTrigger: false,
+  }), 'mobile-task');
+  assert.equal(getNavigatorFocusDestination({
+    from: 'compact', to: 'desktop', navigatorOpen: false, focusInsideNavigator: false, focusOnTrigger: true,
+  }), 'desktop-control');
+  assert.match(workspaceSource, /window\.addEventListener\('resize', sync\)/u);
+  assert.match(workspaceSource, /responsiveNavigatorLayout\.current = nextLayout/u);
+  assert.match(workspaceSource, /pendingResponsiveNavigatorFocus\.current = focusDestination/u);
+  assert.match(workspaceSource, /destination === 'mobile-task' && !isMobileViewport/u);
+  assert.match(workspaceSource, /`editor-task-tab-mobile-\$\{mobileMoreOpen \? 'more' : activeTask\}`/u);
+  assert.match(workspaceSource, /destination === 'compact-open-items'[\s\S]*?'editor-navigator-open'/u);
+  assert.match(workspaceSource, /focusOnTrigger: activeElement === navigatorTriggerRef\.current/u);
+  assert.match(workspaceSource, /focusDestination = getNavigatorFocusDestination\(\{/u);
+  assert.match(workspaceSource, /getDesktopNavigatorFocusTargetId\(sidebarCollapsed\)/u);
+  assert.match(workspaceSource, /id="editor-navigator-open"/u);
 });

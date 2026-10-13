@@ -5,6 +5,7 @@ import postcss from 'postcss';
 
 const root = new URL('../', import.meta.url);
 const styles = postcss.parse(readFileSync(new URL('src/components/app-shell.module.css', root), 'utf8'));
+const appTheme = readFileSync(new URL('src/app/app-theme.css', root), 'utf8');
 const header = readFileSync(new URL('src/components/app-header.tsx', root), 'utf8');
 const navigation = readFileSync(new URL('src/components/route-navigation.tsx', root), 'utf8');
 
@@ -26,6 +27,14 @@ test('mobile app header is one 56px row with 44px primary and menu targets', () 
   const mobileStatus = declarationsFor('.mobileIdentitySaveStatus', '(max-width: 640px)');
 
   assert.equal(shell.get('--app-header-height'), '56px');
+  assert.match(appTheme, /--editor-density-header-height:\s*56px/u);
+  assert.match(appTheme, /--editor-density-header-height:\s*48px/u);
+
+  const editorShell = new Map();
+  styles.walkRules(".appShell:has(.appHeader[data-editor-header='true'])", rule => {
+    rule.walkDecls(decl => editorShell.set(decl.prop, decl.value));
+  });
+  assert.equal(editorShell.get('--app-header-height'), 'var(--editor-density-header-height)');
   assert.equal(headerRules.get('height'), 'var(--app-header-height)');
   assert.equal(headerRules.has('grid-template-areas'), false, 'the compact header has no second row');
   assert.equal(action.get('height'), '44px');

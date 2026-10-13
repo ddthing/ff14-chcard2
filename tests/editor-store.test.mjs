@@ -177,6 +177,42 @@ test('a grouped image drag produces one undo entry for the whole gesture', () =>
   assert.equal(editorStore.getState().design.imagePosition, '35% 52%');
 });
 
+test('history byte budgeting keeps shared-photo edits, image groups, undo/redo, and new branches intact', () => {
+  restoreDemoCard();
+  const sharedImage = editorStore.getState().image.src;
+  const initialX = editorStore.getState().image.x;
+  editorStore.getState().updateCharacter('bio', 'A shared image remains one history source.');
+
+  editorStore.getState().beginImageAdjustmentGroup('budgeted-drag');
+  editorStore.getState().setImage({ x: 35 }, { groupId: 'budgeted-drag' });
+  editorStore.getState().setImage({ x: 40 }, { groupId: 'budgeted-drag' });
+  editorStore.getState().endImageAdjustmentGroup();
+  assert.equal(editorStore.getState().history.past.length, 2, 'a grouped drag adds one history snapshot');
+
+  editorStore.getState().undo();
+  assert.equal(editorStore.getState().image.x, initialX);
+  assert.equal(editorStore.getState().history.future.length, 1);
+  editorStore.getState().redo();
+  assert.equal(editorStore.getState().image.x, 40);
+  assert.equal(editorStore.getState().history.future.length, 0);
+
+  editorStore.getState().undo();
+  editorStore.getState().updateCharacter('bio', 'Start a new history branch.');
+  assert.equal(editorStore.getState().history.future.length, 0, 'a new edit clears redo history');
+
+  for (let index = 0; index < 45; index += 1) {
+    editorStore.getState().updateCharacter('bio', `Shared image edit ${index}`);
+  }
+  const state = editorStore.getState();
+  assert.equal(state.history.past.length, 40, 'the existing entry cap remains effective');
+  assert.equal(state.image.src, sharedImage);
+  assert.equal(new Set([
+    state.image.src,
+    ...state.history.past.map((snapshot) => snapshot.image.src),
+    ...state.history.future.map((snapshot) => snapshot.image.src),
+  ]).size, 1, 'forty snapshot references to one upload count as one image source');
+});
+
 test('malformed current storage is backed up before a valid older draft is migrated', () => {
   const storage = new MemoryStorage();
   const corrupt = '{ this is not valid JSON';

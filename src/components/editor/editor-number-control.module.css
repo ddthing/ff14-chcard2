@@ -1,6 +1,6 @@
 .control {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-label-gap);
   min-width: 0;
   color: var(--app-text);
 }
@@ -17,14 +17,15 @@
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   min-width: 0;
 }
 
 .range {
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  height: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   margin: 0;
   accent-color: var(--editor-selection, var(--app-accent));
   cursor: pointer;
@@ -34,13 +35,15 @@
   display: flex;
   width: 96px;
   min-width: 96px;
-  min-height: 44px;
+  height: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
+  box-sizing: border-box;
   align-items: center;
   justify-content: flex-end;
   gap: 3px;
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-md);
-  padding-inline: 8px;
+  padding-inline: 6px;
   background: var(--app-control);
   color: var(--app-text);
   transition: border-color var(--editor-motion-micro, var(--motion-fast)) var(--editor-ease-snappy, var(--ease-editorial)), background-color var(--editor-motion-micro, var(--motion-fast)) var(--editor-ease-snappy, var(--ease-editorial));
@@ -54,14 +57,16 @@
 .numberInput {
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
   border: 0;
   outline: 0;
   padding: 0;
   background: transparent;
   color: inherit;
   font: inherit;
-  font-size: 14px;
+  font-size: var(--editor-density-input-font-size);
   font-variant-numeric: tabular-nums;
   text-align: end;
 }
@@ -74,13 +79,9 @@
 .unit {
   flex: 0 0 auto;
   color: var(--app-text-muted);
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
   line-height: 1;
   white-space: nowrap;
-}
-
-@media (max-width: 640px) {
-  .numberInput { font-size: 16px; }
 }
 
 .control[data-disabled] .label,

@@ -87,8 +87,7 @@ async function processRequest(request: PhotoPrintWorkerRequest): Promise<Blob> {
       throw new Error('The photo print processor returned an invalid image.');
     }
 
-    const imageData = context.createImageData(request.width, request.height);
-    imageData.data.set(result.data);
+    const imageData = createImageDataFromPixels(context, result.data, request.width, request.height);
     context.putImageData(imageData, 0, 0);
     const blob = await canvas.convertToBlob({ type: 'image/png' });
     if (blob.type !== 'image/png' || blob.size === 0) {
@@ -99,6 +98,32 @@ async function processRequest(request: PhotoPrintWorkerRequest): Promise<Blob> {
     canvas.width = 0;
     canvas.height = 0;
   }
+}
+
+function createImageDataFromPixels(
+  context: OffscreenCanvasRenderingContext2D,
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): ImageData {
+  const buffer = pixels.buffer;
+  if (typeof ImageData === 'function' && buffer instanceof ArrayBuffer) {
+    // The new view shares the processor's ArrayBuffer; no RGBA bytes are copied.
+    const directPixels = new Uint8ClampedArray(buffer, pixels.byteOffset, pixels.length);
+    return new ImageData(directPixels, width, height);
+  }
+  return copyImageData(context, pixels, width, height);
+}
+
+function copyImageData(
+  context: OffscreenCanvasRenderingContext2D,
+  pixels: Uint8ClampedArray,
+  width: number,
+  height: number,
+): ImageData {
+  const imageData = context.createImageData(width, height);
+  imageData.data.set(pixels);
+  return imageData;
 }
 
 const workerScope = globalThis as unknown as PhotoPrintWorkerScope;

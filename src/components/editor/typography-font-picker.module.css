@@ -2,17 +2,17 @@
   display: flex;
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height, 44px);
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--editor-density-control-gap, 8px);
   border: 1px solid var(--app-border-strong);
   border-radius: var(--radius-sm);
-  padding: 7px 10px;
+  padding: 4px var(--editor-density-panel-inset, 10px);
   background: var(--app-control);
   color: var(--app-text);
   font: inherit;
-  font-size: 14px;
+  font-size: var(--editor-density-control-font-size, 14px);
   text-align: start;
   cursor: pointer;
   transition: background-color var(--editor-motion-micro) var(--editor-ease-snappy), border-color var(--editor-motion-micro) var(--editor-ease-snappy), color var(--editor-motion-micro) var(--editor-ease-snappy), transform var(--editor-motion-micro) var(--editor-ease-snappy);
@@ -64,29 +64,25 @@
 
 .searchRow {
   display: flex;
-  min-height: 56px;
+  min-height: var(--editor-density-icon-target, 44px);
   flex: 0 0 auto;
   align-items: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap, 8px);
   border-bottom: 1px solid var(--app-border);
-  padding: 6px 8px 6px 10px;
+  padding: 4px var(--editor-density-panel-inset, 10px);
 }
 
 .search {
   width: 100%;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height, 44px);
   border: 0;
   border-radius: var(--radius-sm);
-  padding: 8px 6px;
+  padding: 4px 6px;
   background: transparent;
   color: var(--app-text);
   font: inherit;
-  font-size: 14px;
-}
-
-@media (max-width: 900px) {
-  .search { font-size: 16px; }
+  font-size: var(--editor-density-input-font-size, 16px);
 }
 
 .search::placeholder {
@@ -96,9 +92,9 @@
 
 .close {
   display: grid;
-  width: 44px;
-  min-width: 44px;
-  min-height: 44px;
+  width: var(--editor-density-icon-target, 44px);
+  min-width: var(--editor-density-icon-target, 44px);
+  min-height: var(--editor-density-icon-target, 44px);
   place-items: center;
   border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
@@ -130,12 +126,12 @@
   display: flex;
   width: 100%;
   min-width: 0;
-  min-height: 64px;
+  min-height: var(--editor-density-picker-row-height, 64px);
   align-items: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap, 8px);
   border: 1px solid transparent;
   border-radius: var(--radius-md);
-  padding: 7px 10px;
+  padding: 2px var(--editor-density-panel-inset, 10px);
   color: var(--app-text);
   cursor: pointer;
   transition: background-color var(--editor-motion-micro) var(--editor-ease-snappy), border-color var(--editor-motion-micro) var(--editor-ease-snappy), color var(--editor-motion-micro) var(--editor-ease-snappy), transform var(--editor-motion-micro) var(--editor-ease-snappy);
@@ -168,9 +164,9 @@
   min-width: 0;
   overflow-wrap: anywhere;
   color: inherit;
-  font-size: 14px;
+  font-size: var(--editor-density-control-font-size, 14px);
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.2;
 }
 
 .sample {
@@ -178,8 +174,8 @@
   min-width: 0;
   overflow: hidden;
   color: inherit;
-  font-size: 16px;
-  line-height: 1.35;
+  font-size: 22px;
+  line-height: 1.2;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -204,7 +200,7 @@
   display: block;
   overflow-wrap: anywhere;
   color: var(--app-text-muted);
-  font-size: 11px;
+  font-size: var(--editor-density-meta-font-size, 12px);
   line-height: 1.25;
 }
 

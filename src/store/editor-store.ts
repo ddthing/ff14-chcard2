@@ -13,6 +13,7 @@ import type { CardPalette } from '@/lib/palette';
 import { loadEditorDraft, normalizeCardData, normalizeCardTypographyOverride, normalizeCharacterUpdate, persistEditorDraft } from '@/store/editor-persistence';
 import { isCardTextOverrideId, isKnownCardTextId, normalizeCardTextOverride } from '@/lib/card-text-editing';
 import { profileCount, profileStart } from '@/lib/performance-profile';
+import { trimHistoryByUniqueImageBytes } from './editor-history-budget';
 
 export interface EditorHistoryOptions {
   groupId?: string;
@@ -149,16 +150,19 @@ function captureSnapshot(state: Pick<EditorStoreState, 'character' | 'design' | 
 function appendHistory(
   history: EditorHistoryState,
   snapshot: EditorSnapshot,
+  nextCurrentImageSrc: string,
   groupId: string | null = null,
   groupScope: EditorHistoryScope | null = null,
   groupFields: string[] = [],
 ): EditorHistoryState {
   profileCount('history.append.calls');
+  const boundedEntries = [...history.past, snapshot].slice(-MAX_HISTORY_ENTRIES);
+  const boundedHistory = trimHistoryByUniqueImageBytes(boundedEntries, [], nextCurrentImageSrc);
   return {
-    past: [...history.past, snapshot].slice(-MAX_HISTORY_ENTRIES),
+    past: boundedHistory.past,
     future: [],
     groupId,
-    groupHasSnapshot: groupId !== null,
+    groupHasSnapshot: groupId !== null && boundedHistory.past.includes(snapshot),
     groupScope: groupId === null ? null : groupScope,
     groupFields: groupId === null ? [] : [...groupFields],
   };
@@ -295,6 +299,7 @@ function historyForChange(
   fieldKeys: readonly string[],
   options?: EditorHistoryOptions,
   joinActiveGroup = true,
+  nextImageSrc = state.image.src,
 ): EditorHistoryState {
   profileCount('history.change.calls');
   const fields = [...new Set(fieldKeys)].sort();
@@ -308,11 +313,21 @@ function historyForChange(
     state.history.groupScope === scope && activeFieldsMatch && state.history.groupHasSnapshot;
   if (isSameGroup) {
     profileCount('history.group.joined');
+    const boundedHistory = trimHistoryByUniqueImageBytes(state.history.past, state.history.future, nextImageSrc);
     finish();
-    return state.history;
+    if (
+      boundedHistory.past.length === state.history.past.length &&
+      boundedHistory.future.length === state.history.future.length
+    ) return state.history;
+    return {
+      ...state.history,
+      past: boundedHistory.past,
+      future: boundedHistory.future,
+      groupHasSnapshot: boundedHistory.past.length > 0,
+    };
   }
   profileCount(groupId === null ? 'history.change.standalone' : 'history.group.started');
-  const history = appendHistory(state.history, captureSnapshot(state), groupId, groupId === null ? null : scope, groupFields);
+  const history = appendHistory(state.history, captureSnapshot(state), nextImageSrc, groupId, groupId === null ? null : scope, groupFields);
   finish();
   return history;
 }
@@ -493,7 +508,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           imagePosition: `${image.x}% ${image.y}%`,
           imageScale: image.scale,
         };
-        return { image, design, history: historyForChange(state, 'image', Object.keys(partial), options) };
+        return { image, design, history: historyForChange(state, 'image', Object.keys(partial), options, true, image.src) };
       });
       if (changed) schedulePersist();
       finishSet();
@@ -533,7 +548,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           return state;
         }
         changed = true;
-        return { image, design, history: historyForChange(state, 'image', ['replaceUploadedImage'], undefined, false) };
+        return { image, design, history: historyForChange(state, 'image', ['replaceUploadedImage'], undefined, false, image.src) };
       });
       if (changed) schedulePersist();
       finishReplace();
@@ -575,7 +590,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           ? state.history.past.length || state.history.future.length || state.history.groupId !== null
             ? { past: [], future: [], groupId: null, groupHasSnapshot: false, groupScope: null, groupFields: [] }
             : state.history
-          : cardChanged ? appendHistory(state.history, captureSnapshot(state)) : state.history;
+          : cardChanged ? appendHistory(state.history, captureSnapshot(state), next.image.src) : state.history;
         const nextSaveStatus = options?.saveStatus ?? state.saveStatus;
         if (!cardChanged && state.isHydrated && state.history === history && state.saveStatus === nextSaveStatus) return state;
         return {
@@ -656,11 +671,16 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
         if (state.history.past.length === 0) return state;
         changed = true;
         const snapshot = state.history.past[state.history.past.length - 1];
+        const trimmedHistory = trimHistoryByUniqueImageBytes(
+          state.history.past.slice(0, -1),
+          [captureSnapshot(state), ...state.history.future].slice(0, MAX_HISTORY_ENTRIES),
+          snapshot.image.src,
+        );
         return {
           ...updateSnapshotData(state, snapshot),
           history: {
-            past: state.history.past.slice(0, -1),
-            future: [captureSnapshot(state), ...state.history.future].slice(0, MAX_HISTORY_ENTRIES),
+            past: trimmedHistory.past,
+            future: trimmedHistory.future,
             groupId: null,
             groupHasSnapshot: false,
             groupScope: null,
@@ -678,11 +698,16 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
         if (state.history.future.length === 0) return state;
         changed = true;
         const snapshot = state.history.future[0];
+        const trimmedHistory = trimHistoryByUniqueImageBytes(
+          [...state.history.past, captureSnapshot(state)].slice(-MAX_HISTORY_ENTRIES),
+          state.history.future.slice(1),
+          snapshot.image.src,
+        );
         return {
           ...updateSnapshotData(state, snapshot),
           history: {
-            past: [...state.history.past, captureSnapshot(state)].slice(-MAX_HISTORY_ENTRIES),
-            future: state.history.future.slice(1),
+            past: trimmedHistory.past,
+            future: trimmedHistory.future,
             groupId: null,
             groupHasSnapshot: false,
             groupScope: null,
@@ -701,7 +726,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
         if (!changed && state.isHydrated) return state;
         return {
           ...next,
-          history: changed ? appendHistory(state.history, captureSnapshot(state)) : state.history,
+          history: changed ? appendHistory(state.history, captureSnapshot(state), next.image.src) : state.history,
           isHydrated: true,
         };
       });

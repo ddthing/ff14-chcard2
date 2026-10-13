@@ -26,6 +26,54 @@ html[data-app-theme='dark'] {
   --app-success: var(--foreground);
   --app-success-surface: var(--muted);
   --app-header-height: 56px;
+
+  /* Touch-safe defaults; fine desktop values are applied below. */
+  --editor-density-header-height: 56px;
+  --editor-density-control-height: 44px;
+  --editor-density-icon-target: 44px;
+  --editor-density-toolbar-height: 52px;
+  --editor-density-panel-inset: 10px;
+  --editor-density-label-gap: 4px;
+  --editor-density-field-gap: 8px;
+  --editor-density-control-gap: 8px;
+  --editor-density-section-gap: 12px;
+  --editor-density-panel-gap: 10px;
+  --editor-density-picker-row-height: 64px;
+  --editor-density-input-font-size: 16px;
+  --editor-density-control-font-size: 14px;
+  --editor-density-meta-font-size: 12px;
+}
+
+@media (min-width: 901px) and (pointer: fine) and (hover: hover) {
+  html[data-app-theme='light'],
+  html[data-app-theme='dark'] {
+    --editor-density-header-height: 48px;
+    --editor-density-control-height: 36px;
+    --editor-density-icon-target: 32px;
+    --editor-density-toolbar-height: 44px;
+    --editor-density-panel-inset: 8px;
+    --editor-density-field-gap: 6px;
+    --editor-density-control-gap: 6px;
+    --editor-density-panel-gap: 8px;
+    --editor-density-picker-row-height: 52px;
+    --editor-density-input-font-size: 14px;
+  }
+}
+
+@media (any-pointer: coarse) {
+  html[data-app-theme='light'],
+  html[data-app-theme='dark'] {
+    --editor-density-header-height: 56px;
+    --editor-density-control-height: 44px;
+    --editor-density-icon-target: 44px;
+    --editor-density-toolbar-height: 52px;
+    --editor-density-panel-inset: 10px;
+    --editor-density-field-gap: 8px;
+    --editor-density-control-gap: 8px;
+    --editor-density-panel-gap: 10px;
+    --editor-density-picker-row-height: 64px;
+    --editor-density-input-font-size: 16px;
+  }
 }
 
 html[data-app-theme='light'] {

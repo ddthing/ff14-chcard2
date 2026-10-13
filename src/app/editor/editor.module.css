@@ -66,8 +66,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.65rem;
-  border: 1px solid var(--editor-line);
-  border-inline-start-color: var(--editor-error);
+  border: 1px solid var(--editor-error);
   background: var(--editor-error-surface);
 }
 
@@ -171,7 +170,7 @@
   display: flex;
   width: 44px;
   min-width: 44px;
-  min-height: 56px;
+  min-height: var(--editor-density-control-height);
   flex: 0 0 auto;
   flex-direction: column;
   align-items: center;
@@ -224,10 +223,10 @@
 
 .sidebarHeader > button {
   display: none;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid transparent;
@@ -250,13 +249,13 @@
 
 .sidebarHeader {
   display: flex;
-  min-height: 56px;
+  min-height: var(--editor-density-header-height);
   align-items: center;
   justify-content: space-between;
   overflow: hidden;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   border-bottom: 1px solid var(--editor-line);
-  padding: 8px 12px;
+  padding: 4px var(--editor-density-panel-inset);
   color: var(--editor-text);
   font-size: 0.875rem;
   font-weight: 600;
@@ -271,10 +270,10 @@
 
 .navigatorClose {
   display: inline-grid;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
   flex: 0 0 auto;
   place-items: center;
   border: 1px solid transparent;
@@ -312,14 +311,14 @@
   top: 12px;
   left: 60px;
   display: inline-flex;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   border: 1px solid var(--editor-line-strong);
   border-radius: var(--radius-md);
-  padding: 0 12px;
+  padding: 0 var(--editor-density-panel-inset);
   background: var(--editor-panel);
   color: var(--editor-text);
   font: inherit;
@@ -340,7 +339,7 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
-  padding: 12px;
+  padding: var(--editor-density-panel-inset);
   scrollbar-color: var(--editor-line-strong) transparent;
   scrollbar-width: thin;
 }
@@ -349,7 +348,7 @@
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 52px;
+  min-height: var(--editor-density-toolbar-height);
   flex-direction: column;
   align-items: center;
   justify-content: center;
@@ -389,7 +388,7 @@
 
 .toolButtonLabel {
   max-width: 100%;
-  font-size: 0.75rem;
+  font-size: var(--editor-density-control-font-size);
   font-weight: 550;
   line-height: 1.15;
   white-space: normal;
@@ -413,13 +412,13 @@
   align-items: stretch;
   gap: 4px;
   border-bottom: 1px solid var(--editor-line);
-  padding: 4px 8px;
+  padding: 4px var(--editor-density-panel-inset);
   background: var(--editor-panel);
 }
 
 .inspectorTaskTabs .toolButton {
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   flex-direction: row;
   gap: 6px;
   border-radius: var(--radius-md);
@@ -440,7 +439,7 @@
 .inspectorTaskTabs .toolButtonLabel {
   min-width: 0;
   overflow: hidden;
-  font-size: 0.75rem;
+  font-size: var(--editor-density-control-font-size);
   line-height: 1.15;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -465,7 +464,7 @@
   overflow: hidden;
   isolation: isolate;
   container-type: size;
-  padding-bottom: 80px;
+  padding-bottom: calc(var(--editor-density-toolbar-height) + 28px);
   border: 0;
   border-radius: 0;
   background: var(--editor-stage);
@@ -630,7 +629,7 @@
   display: flex;
   width: fit-content;
   max-width: calc(100% - 32px);
-  min-height: 52px;
+  min-height: var(--editor-density-toolbar-height);
   flex-wrap: nowrap;
   align-items: center;
   justify-content: center;
@@ -646,11 +645,11 @@
 
 .selectionTool {
   display: grid;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
-  flex: 0 0 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
+  flex: 0 0 var(--editor-density-icon-target);
   place-items: center;
   border: 0;
   border-radius: var(--radius-md);
@@ -680,11 +679,11 @@
 
 .mobileCanvasTools button {
   display: inline-flex;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   border: 1px solid var(--editor-line-strong);
   border-radius: var(--radius-md);
   padding-inline: 12px;
@@ -709,17 +708,17 @@
 .mobileOnlyMoreActions button {
   display: inline-flex;
   min-width: 0;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   border: 1px solid var(--editor-line);
   border-radius: var(--radius-md);
   padding: 8px 10px;
   background: var(--editor-control);
   color: var(--editor-text);
   font: inherit;
-  font-size: 0.75rem;
+  font-size: var(--editor-density-control-font-size);
   text-align: left;
   cursor: pointer;
 }
@@ -756,11 +755,11 @@
 
 .toolbarTaskTools > button {
   display: grid;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
-  flex: 0 0 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
+  flex: 0 0 var(--editor-density-icon-target);
   place-items: center;
   border: 0;
   border-radius: var(--radius-md);
@@ -811,13 +810,13 @@
 
 .bottomRatio select,
 .pickerInlineSelect select {
-  min-height: 32px;
+  min-height: var(--editor-density-control-height);
   border: 1px solid var(--editor-line-strong);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 0 0.45rem;
   background: var(--editor-raised);
   color: var(--editor-text);
-  font-size: 0.75rem;
+  font-size: var(--editor-density-input-font-size);
 }
 
 .bottomRatio select {
@@ -875,7 +874,7 @@
 
 .ratioOption {
   display: grid;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   grid-template-columns: 2rem minmax(0, 1fr);
   align-items: center;
   gap: 0.5rem;
@@ -940,7 +939,7 @@
 
 .ratioOptionValue {
   color: var(--editor-text);
-  font-size: 0.75rem;
+  font-size: var(--editor-density-control-font-size);
   line-height: 1.2;
 }
 
@@ -1033,19 +1032,19 @@
 
 .inspectorHead {
   display: flex;
-  min-height: 56px;
+  min-height: var(--editor-density-header-height);
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   border-bottom: 1px solid var(--editor-line);
-  padding: 6px 12px;
+  padding: 4px var(--editor-density-panel-inset);
 }
 
 .inspectorTitle {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
 }
 
 .inspectorTitle > h2 {
@@ -1079,8 +1078,8 @@
 
 .inspectorZoom {
   display: flex;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
@@ -1090,10 +1089,10 @@
 .inspectorZoom select {
   width: 64px;
   min-width: 64px;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   border: 1px solid var(--editor-line-strong);
   border-radius: var(--radius-md);
-  padding-inline: 8px;
+  padding-inline: var(--editor-density-panel-inset);
   background: var(--editor-control);
   color: var(--editor-text);
   font: inherit;
@@ -1108,10 +1107,10 @@
 
 .closeInspector {
   display: grid;
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
-  min-height: 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
   place-items: center;
   border: 0;
   border-radius: var(--radius-md);
@@ -1131,7 +1130,7 @@
   min-height: 0;
   flex: 1 1 auto;
   overflow: auto;
-  padding: 0 16px 16px;
+  padding: 0 var(--editor-density-panel-inset) var(--editor-density-panel-inset);
   overscroll-behavior: contain;
   scrollbar-color: var(--editor-line-strong) transparent;
   scrollbar-width: thin;
@@ -1151,7 +1150,7 @@
   margin: 0;
   border: 1px solid var(--editor-line);
   border-radius: var(--radius-md);
-  padding: 8px 12px;
+  padding: 8px var(--editor-density-panel-inset);
   background: var(--editor-control-hover);
   color: var(--editor-muted);
   font-size: 0.75rem;
@@ -1395,13 +1394,13 @@
 .pickerFilters {
   display: flex;
   overflow: auto;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
   scrollbar-width: thin;
 }
 
 .pickerFilter {
-  min-height: 44px;
-  min-width: 44px;
+  min-height: var(--editor-density-control-height);
+  min-width: var(--editor-density-control-height);
   flex: 0 0 auto;
   border: 1px solid transparent;
   border-radius: var(--radius-md);
@@ -1549,7 +1548,7 @@
 
 .chipField {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-label-gap);
 }
 
 .controlLabel {
@@ -1568,17 +1567,17 @@
 .choiceChips {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: var(--editor-density-control-gap);
 }
 
 .choiceChip {
   display: inline-flex;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   align-items: center;
   justify-content: center;
   border: 1px solid var(--editor-line-strong);
   border-radius: var(--radius-md);
-  padding: 8px 14px;
+  padding: 4px 10px;
   background: var(--editor-control);
   color: var(--editor-text);
   font-size: 0.875rem;
@@ -1803,13 +1802,13 @@
 
 .templatePanel {
   display: grid;
-  gap: 16px;
+  gap: var(--editor-density-section-gap);
 }
 
 .templateChoices,
 .masterTemplateGrid {
   display: grid;
-  gap: 8px;
+  gap: var(--editor-density-panel-gap);
 }
 
 .templateChoice {
@@ -1869,7 +1868,7 @@
   min-width: 0;
   align-content: center;
   gap: 0.18rem;
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   border: 0;
   border-radius: var(--radius-md);
   padding: 0.25rem 0.15rem;
@@ -2003,7 +2002,7 @@
 }
 
 .modeChoices button {
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   border-radius: var(--radius-md);
   border: 0;
   background: transparent;
@@ -2175,11 +2174,11 @@
   min-width: 0;
   grid-template-columns: 1.8rem minmax(0, 1fr) 42px;
   align-items: center;
-  gap: 12px;
+  gap: var(--editor-density-control-gap);
   border: 1px solid var(--editor-line);
   border-radius: var(--radius-lg);
-  padding: 12px 14px;
-  min-height: 56px;
+  padding: 6px 8px;
+  min-height: var(--editor-density-control-height);
   background: var(--editor-control-hover);
   color: inherit;
   text-align: left;
@@ -2482,7 +2481,7 @@
     display: grid;
     width: 100%;
     min-width: 0;
-    min-height: 44px;
+    min-height: var(--editor-density-control-height);
     flex: 1 1 auto;
     grid-template-columns: repeat(4, minmax(0, 1fr));
     align-items: stretch;
@@ -2493,13 +2492,13 @@
 
   .mobileTaskTabs .toolButton {
     min-width: 0;
-    min-height: 44px;
+    min-height: var(--editor-density-control-height);
     flex-direction: column;
     justify-content: center;
     gap: 2px;
     border-radius: var(--radius-md);
     padding: 4px 2px;
-    font-size: 0.75rem;
+    font-size: var(--editor-density-control-font-size);
     font-weight: 550;
     white-space: nowrap;
   }
@@ -2514,7 +2513,7 @@
   .mobileTaskTabs .toolButtonLabel {
     min-width: 0;
     overflow: hidden;
-    font-size: 0.75rem;
+    font-size: var(--editor-density-control-font-size);
     line-height: 1.15;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2547,24 +2546,24 @@
     display: grid;
     min-width: 0;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
+    gap: var(--editor-density-control-gap);
   }
 
   .mobileMoreMount,
   .mobileMoreSheetContent {
     display: grid;
     min-width: 0;
-    gap: 12px;
+    gap: var(--editor-density-panel-gap);
   }
 
-  .mobileMoreSheetContent { padding-block: 4px 12px; }
+  .mobileMoreSheetContent { padding-block: 4px var(--editor-density-panel-inset); }
 
   .mobileCanvasTools {
     display: flex;
     min-width: 0;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    gap: var(--editor-density-control-gap);
     border-top: 1px solid var(--editor-line);
     padding-top: 8px;
   }
@@ -2580,29 +2579,29 @@
 
   .bottomRatio select {
     min-width: 3.2rem;
-    min-height: 1.8rem;
+    min-height: var(--editor-density-control-height);
     padding-inline: 0.25rem;
-    font-size: 0.75rem;
+    font-size: var(--editor-density-input-font-size);
   }
 
   .previewButton {
-    min-height: 1.8rem;
+    min-height: var(--editor-density-control-height);
     gap: 0.2rem;
     padding-inline: 0.4rem;
-    font-size: 0.75rem;
+    font-size: var(--editor-density-control-font-size);
   }
 
   .sectionSummary {
-    min-height: 44px;
+    min-height: var(--editor-density-control-height);
     padding-inline: 0.75rem;
   }
 
   .sectionContent {
-    padding-inline: 0.75rem;
+    padding-inline: var(--editor-density-panel-inset);
   }
 
   .sectionRule {
-    padding-inline: 0.75rem;
+    padding-inline: var(--editor-density-panel-inset);
   }
 
   .previewMode .canvasColumn {
@@ -2690,16 +2689,16 @@
   }
 
   .inspectorHead {
-    min-height: 56px;
-    flex: 0 0 56px;
-    padding: 4px 12px;
+    min-height: var(--editor-density-header-height);
+    flex: 0 0 var(--editor-density-header-height);
+    padding: 4px var(--editor-density-panel-inset);
   }
 
   .inspectorBody {
     flex: 1 1 0%;
     overflow-x: hidden;
     overflow-y: auto;
-    padding: 0 14px 14px;
+    padding: 0 var(--editor-density-panel-inset);
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
     scroll-padding-block: 14px 20vh;
@@ -2707,9 +2706,9 @@
 
   .sheetHandle {
     display: flex;
-    min-width: 44px;
-    min-height: 44px;
-    flex: 0 0 44px;
+    min-width: var(--editor-density-control-height);
+    min-height: var(--editor-density-control-height);
+    flex: 0 0 var(--editor-density-control-height);
     align-items: center;
     justify-content: center;
     border: 0;
@@ -2761,17 +2760,17 @@
   }
 
   .mobileCanvasTools button {
-    min-width: 44px;
-    min-height: 44px;
+    min-width: var(--editor-density-control-height);
+    min-height: var(--editor-density-control-height);
   }
 
   .bottomRatio select {
     min-width: 2.9rem;
-    min-height: 1.65rem;
+    min-height: var(--editor-density-control-height);
   }
 
   .previewButton {
-    min-height: 1.65rem;
+    min-height: var(--editor-density-control-height);
     padding-inline: 0.3rem;
     font-size: 0.75rem;
     flex: 0 0 auto;
@@ -3049,8 +3048,8 @@
 .page .panToggle,
 .page .toolbarMore > summary {
   display: inline-flex;
-  min-width: 44px;
-  min-height: 44px;
+  min-width: var(--editor-density-icon-target);
+  min-height: var(--editor-density-icon-target);
   align-items: center;
   justify-content: center;
   gap: 0;
@@ -3059,7 +3058,7 @@
   padding: 0;
   background: transparent;
   color: var(--editor-text);
-  font-size: 0.8125rem;
+  font-size: var(--editor-density-control-font-size);
   font-weight: 550;
   cursor: pointer;
   transition: background-color var(--editor-motion-micro) var(--editor-ease-snappy), color var(--editor-motion-micro) var(--editor-ease-snappy), transform var(--editor-motion-micro) var(--editor-ease-snappy);
@@ -3080,41 +3079,41 @@
 .page .toolbarMore { position: relative; }
 .page .toolbarMore > summary { list-style: none; color: var(--editor-muted); }
 .page .toolbarMore > summary::-webkit-details-marker { display: none; }
-.page .toolbarMorePanel { position: absolute; z-index: 40; right: 0; bottom: calc(100% + 10px); display: grid; width: min(320px, calc(100vw - 40px)); gap: 12px; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); padding: 14px; background: var(--editor-raised); box-shadow: var(--app-shadow-overlay); transform-origin: bottom right; }
+.page .toolbarMorePanel { position: absolute; z-index: 40; right: 0; bottom: calc(100% + 8px); display: grid; width: min(320px, calc(100vw - 40px)); gap: var(--editor-density-panel-gap); border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); padding: var(--editor-density-panel-inset); background: var(--editor-raised); box-shadow: var(--app-shadow-overlay); transform-origin: bottom right; }
 .page .toolbarMore[open] > .toolbarMorePanel { animation: editor-menu-enter var(--editor-motion-panel) var(--editor-ease-soft) both; }
 .page .toolbarMore:not([open]) > .toolbarMorePanel { display: none; }
-.page .toolbarMoreActions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.page .toolbarMoreActions { display: flex; flex-wrap: wrap; align-items: center; gap: var(--editor-density-control-gap); }
 .page .libraryAction { flex: 1 1 100%; }
-.page .libraryAction button { display: inline-flex; width: 100%; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; border: 1px solid var(--editor-line); border-radius: var(--radius-lg); padding-inline: 12px; background: var(--editor-panel); color: var(--editor-text); font: inherit; cursor: pointer; }
+.page .libraryAction button { display: inline-flex; width: 100%; min-width: var(--editor-density-control-height); min-height: var(--editor-density-control-height); align-items: center; justify-content: center; border: 1px solid var(--editor-line); border-radius: var(--radius-lg); padding-inline: var(--editor-density-panel-inset); background: var(--editor-panel); color: var(--editor-text); font: inherit; cursor: pointer; }
 .page .libraryAction button:hover { border-color: var(--editor-line-strong); background: var(--editor-control-hover); }
 .page .libraryAction button:focus-visible { outline: 2px solid var(--editor-focus); outline-offset: 2px; }
-.page .uploadShortcut { display: inline-flex; width: 100%; min-width: 44px; min-height: 44px; flex: 1 1 100%; align-items: center; justify-content: flex-start; gap: 8px; border: 1px solid var(--editor-line); border-radius: var(--radius-md); padding: 8px 12px; background: var(--editor-control); color: var(--editor-text); font: inherit; cursor: pointer; }
+.page .uploadShortcut { display: inline-flex; width: 100%; min-width: var(--editor-density-control-height); min-height: var(--editor-density-control-height); flex: 1 1 100%; align-items: center; justify-content: flex-start; gap: var(--editor-density-control-gap); border: 1px solid var(--editor-line); border-radius: var(--radius-md); padding: 4px var(--editor-density-panel-inset); background: var(--editor-control); color: var(--editor-text); font: inherit; cursor: pointer; }
 .page .uploadShortcut:hover { border-color: var(--editor-line-strong); background: var(--editor-control-hover); }
 .page .toolbarMoreActions .panToggle,
 .page .toolbarMoreActions .safeAreaToggle,
-.page .toolbarMoreActions .resetButton { display: inline-flex; min-width: 44px; min-height: 44px; align-items: center; justify-content: center; border-radius: var(--radius-lg); padding-inline: 12px; background: var(--editor-control); }
+.page .toolbarMoreActions .resetButton { display: inline-flex; min-width: var(--editor-density-control-height); min-height: var(--editor-density-control-height); align-items: center; justify-content: center; border-radius: var(--radius-lg); padding-inline: var(--editor-density-panel-inset); background: var(--editor-control); }
 .page .toolbarMoreActions .resetButton span { display: inline; }
 .page .toolbarMoreActions .safeAreaToggle { border: 1px solid var(--editor-line-strong); color: var(--editor-text); font: inherit; cursor: pointer; transition: background-color var(--editor-motion-micro) var(--editor-ease-snappy), border-color var(--editor-motion-micro) var(--editor-ease-snappy), color var(--editor-motion-micro) var(--editor-ease-snappy); }
 .page .toolbarMoreActions .safeAreaToggle:hover:not(:disabled) { border-color: var(--editor-line-strong); background: var(--editor-control-hover); }
 .page .toolbarMoreActions .safeAreaToggle[aria-pressed='true'] { border-color: transparent; background: var(--editor-selection-soft); color: var(--editor-selection-ink); border-radius: var(--radius-md); }
 
-.page .formSection { gap: 16px; padding: 8px 0 16px; }
-.page .editorGroup { display: grid; gap: 12px; border: 0; border-top: 1px solid var(--editor-line); border-radius: 0; padding: 12px 0 0; background: transparent; box-shadow: none; }
-.page .additionalInformation { display: grid; gap: 24px; }
+.page .formSection { gap: var(--editor-density-section-gap); padding: 4px 0 8px; }
+.page .editorGroup { display: grid; gap: var(--editor-density-section-gap); border: 0; border-top: 1px solid var(--editor-line); border-radius: 0; padding: 8px 0 0; background: transparent; box-shadow: none; }
+.page .additionalInformation { display: grid; gap: var(--editor-density-section-gap); }
 .page .formSection > .editorGroup:first-of-type,
 .page .formSection > .photoPanel:first-child { border-top: 0; padding-top: 0; }
-.page .sectionHeading { display: flex; min-height: 30px; align-items: center; justify-content: space-between; gap: 8px; border: 0; padding: 0; background: transparent; color: var(--editor-text); }
+.page .sectionHeading { display: flex; min-height: 30px; align-items: center; justify-content: space-between; gap: var(--editor-density-control-gap); border: 0; padding: 0; background: transparent; color: var(--editor-text); }
 .page .sectionHeading h3 { margin: 0; color: var(--editor-text); font-size: 0.875rem; font-weight: 650; line-height: 1.4; }
-.page .sectionHeading > div { display: flex; align-items: center; gap: 8px; }
+.page .sectionHeading > div { display: flex; align-items: center; gap: var(--editor-density-control-gap); }
 .page .sectionHeading > div > span { color: var(--editor-muted); font-size: 0.75rem; font-weight: 600; }
 .page .disclosure > summary,
 .page .sectionSummary { cursor: pointer; }
-.page .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 12px; }
-.page .chipField { gap: 8px; }
+.page .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--editor-density-field-gap) var(--editor-density-control-gap); }
+.page .chipField { gap: var(--editor-density-label-gap); }
 .page .jobLevelGrid { grid-template-columns: minmax(0, 3fr) minmax(72px, 1fr); }
 .page .field,
 .page .picker,
-.page .pickerInlineSelect { gap: 8px; color: var(--editor-text); font-size: 0.875rem; }
+.page .pickerInlineSelect { gap: var(--editor-density-label-gap); color: var(--editor-text); font-size: 0.875rem; }
 .page .field > span,
 .page .pickerLabel,
 .page .pickerInlineSelect > span,
@@ -3124,13 +3123,13 @@
 .page .field textarea,
 .page .pickerInputWrap,
 .page .pickerInlineSelect select {
-  min-height: 44px;
+  min-height: var(--editor-density-control-height);
   border: 1px solid var(--editor-line-strong);
   border-radius: var(--radius-md);
   padding-inline: 8px;
   background: var(--editor-control);
   color: var(--editor-text);
-  font-size: 0.875rem;
+  font-size: var(--editor-density-input-font-size);
   font-weight: 450;
 }
 
@@ -3148,18 +3147,18 @@
 .page .field textarea::placeholder,
 .page .pickerInput::placeholder,
 .page .pickerSearchInput::placeholder { color: var(--editor-muted); opacity: 0.8; }
-.page .pickerInputWrap { border-radius: var(--radius-md); padding-inline: 10px; }
-.page .pickerInput { min-height: 44px; padding-right: 6rem; font-size: 0.875rem; }
+.page .pickerInputWrap { border-radius: var(--radius-md); padding-inline: var(--editor-density-panel-inset); }
+.page .pickerInput { min-height: var(--editor-density-control-height); padding-right: 6rem; font-size: var(--editor-density-input-font-size); }
 .page .pickerTriggerDesktop .pickerInput { padding-right: 0.55rem; }
-.page .pickerTriggerButton { min-height: 44px; border-radius: var(--radius-md); padding-inline: 10px; }
-.page .pickerChevron { min-width: 36px; min-height: 36px; border-radius: var(--radius-md); }
+.page .pickerTriggerButton { min-height: var(--editor-density-control-height); border-radius: var(--radius-md); padding-inline: var(--editor-density-panel-inset); }
+.page .pickerChevron { min-width: var(--editor-density-icon-target); min-height: var(--editor-density-icon-target); border-radius: var(--radius-md); }
 .page .pickerPopover { border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); background: var(--editor-raised); box-shadow: var(--app-shadow-overlay); }
 .page .pickerSheetHead,
-.page .pickerSearchWrap { padding-inline: 16px; }
-.page .pickerSearchInput { min-height: 44px; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-md); background: var(--editor-control); color: var(--editor-text); font-size: 0.875rem; }
+.page .pickerSearchWrap { padding-inline: var(--editor-density-panel-inset); }
+.page .pickerSearchInput { min-height: var(--editor-density-control-height); border: 1px solid var(--editor-line-strong); border-radius: var(--radius-md); background: var(--editor-control); color: var(--editor-text); font-size: var(--editor-density-input-font-size); }
 .page .disclosure { border: 0; border-radius: var(--radius-lg); }
 .page .disclosure > .effectRow + .effectRow { margin-top: 8px; }
-.page .disclosure > summary { min-height: 44px; border-radius: 0; border-bottom: 1px solid var(--editor-line); padding: 10px 0; background: transparent; color: var(--editor-text); font-size: 0.875rem; }
+.page .disclosure > summary { min-height: var(--editor-density-control-height); border-radius: 0; border-bottom: 1px solid var(--editor-line); padding: 6px 0; background: transparent; color: var(--editor-text); font-size: var(--editor-density-control-font-size); }
 
 @supports (interpolate-size: allow-keywords) and (transition-behavior: allow-discrete) {
   .page .disclosure {
@@ -3189,60 +3188,60 @@
   }
 }
 
-.page .photoPanel { display: grid; gap: 8px; padding: 0; }
-.page .photoControls { display: grid; gap: 8px; border: 0; border-radius: 0; padding: 0; background: transparent; }
-.page .photoControlsHeading { display: flex; min-height: 44px; align-items: center; justify-content: space-between; gap: 8px; }
+.page .photoPanel { display: grid; gap: var(--editor-density-panel-gap); padding: 0; }
+.page .photoControls { display: grid; gap: var(--editor-density-control-gap); border: 0; border-radius: 0; padding: 0; background: transparent; }
+.page .photoControlsHeading { display: flex; min-height: var(--editor-density-control-height); align-items: center; justify-content: space-between; gap: var(--editor-density-control-gap); }
 .page .photoControlsHeading h3 { margin: 0; color: var(--editor-text); font-size: 0.875rem; font-weight: 650; }
-.page .photoControls .imageResetButton { min-height: 44px; border: 0; border-radius: var(--radius-md); padding-inline: 10px; background: var(--editor-panel); color: var(--editor-accent); font-size: 0.875rem; }
+.page .photoControls .imageResetButton { min-height: var(--editor-density-control-height); border: 0; border-radius: var(--radius-md); padding-inline: var(--editor-density-panel-inset); background: var(--editor-panel); color: var(--editor-accent); font-size: var(--editor-density-control-font-size); }
 .page .uploadZone { min-height: 136px; border: 1px dashed var(--editor-line-strong); border-radius: var(--radius-lg); padding: 16px; background: var(--editor-control-hover); }
 .page .uploadZoneActive,
 .page .uploadZone[data-state='drag-over'] { border-color: var(--editor-selection); background: var(--editor-selection-soft); }
-.page .uploadZoneCompact { display: grid; min-height: 74px; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; justify-items: stretch; gap: 3px 12px; border-style: solid; border-radius: var(--radius-lg); padding: 9px 12px; text-align: left; }
+.page .uploadZoneCompact { display: grid; min-height: 74px; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; align-items: center; justify-items: stretch; gap: 3px var(--editor-density-control-gap); border-style: solid; border-radius: var(--radius-lg); padding: 8px var(--editor-density-panel-inset); text-align: left; }
 .page .uploadZoneCompact > strong { grid-column: 1; grid-row: 1; min-width: 0; color: var(--editor-text); font-size: 0.875rem; line-height: 1.3; }
 .page .uploadZoneCompact .uploadSymbol { display: none; }
 .page .uploadZoneCompact .uploadButton,
-.page .uploadZoneCompact .currentImage button { min-width: 84px; min-height: 44px; grid-column: 2; grid-row: 1 / span 2; justify-self: end; border: 0; border-radius: var(--radius-md); padding-inline: 12px; background: var(--editor-accent-soft); color: var(--editor-accent); font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
+.page .uploadZoneCompact .currentImage button { min-width: 84px; min-height: var(--editor-density-control-height); grid-column: 2; grid-row: 1 / span 2; justify-self: end; border: 0; border-radius: var(--radius-md); padding-inline: var(--editor-density-panel-inset); background: var(--editor-accent-soft); color: var(--editor-accent); font-size: var(--editor-density-control-font-size); font-weight: 600; white-space: nowrap; }
 .page .uploadZoneCompact .fileTypes { grid-column: 1; grid-row: 2; align-self: start; color: var(--editor-text); font-size: 0.75rem; }
-.page .uploadZoneCompact .currentImage { min-height: 44px; grid-column: 1 / -1; grid-row: 1 / span 2; }
+.page .uploadZoneCompact .currentImage { min-height: var(--editor-density-control-height); grid-column: 1 / -1; grid-row: 1 / span 2; }
 .page .uploadZoneCompact .currentImage ~ .fileTypes { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
 .page .uploadStatus,
 .page .privacyNote,
 .page .fileTypes { color: var(--editor-text); font-size: 0.75rem; line-height: 1.45; }
 .page .uploadStatus,
 .page .privacyNote { color: var(--editor-muted); font-size: 0.75rem; line-height: 1.45; }
-.page .currentImage { gap: 10px; color: var(--editor-text); }
-.page .currentImage button { min-height: 44px; border-radius: var(--radius-md); }
-.page .rangeControl { gap: 8px; padding-block: 0; }
+.page .currentImage { gap: var(--editor-density-control-gap); color: var(--editor-text); }
+.page .currentImage button { min-height: var(--editor-density-control-height); border-radius: var(--radius-md); }
+.page .rangeControl { gap: var(--editor-density-control-gap); padding-block: 0; }
 .page input[type='range'] { accent-color: var(--editor-accent); }
 .page .rangeControl input[type='range']::-webkit-slider-thumb { transition: transform var(--editor-motion-micro) var(--editor-ease-snappy); }
 .page .rangeControl input[type='range']:active::-webkit-slider-thumb { transform: scale(1.12); }
 .page .rangeControl input[type='range']::-moz-range-thumb { transition: transform var(--editor-motion-micro) var(--editor-ease-snappy); }
 .page .rangeControl input[type='range']:active::-moz-range-thumb { transform: scale(1.12); }
 .page .selectedMark { border-radius: 50%; background: var(--editor-selection); color: var(--editor-on-selection); }
-.page .ratioTrigger { min-height: 44px; border-radius: var(--radius-md); }
+.page .ratioTrigger { min-height: var(--editor-density-control-height); border-radius: var(--radius-md); }
 .page .autoPalette { border: 0; border-radius: 0; padding: 8px 0; background: transparent; }
 .page .paletteSwatches { gap: 7px; }
 .page .paletteSwatches span,
 .page .jobSwatches i { flex: 0 0 22px; width: 22px; height: 22px; border: 1px solid var(--editor-line-strong); border-radius: 50%; }
-.page .paletteControls { gap: 12px; }
+.page .paletteControls { gap: var(--editor-density-panel-gap); }
 .page .colorControl { min-height: 48px; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); padding: 7px 10px; background: var(--editor-control); color: var(--editor-text); }
 .page .colorControl input { width: 32px; height: 32px; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-md); }
 .page .jobThemePreview { border: 0; border-radius: 0; padding: 8px 0; background: transparent; }
 .page .jobCrest { width: 36px; height: 36px; border-radius: var(--radius-lg); }
-.page .inlineConfirmPrompt { z-index: 41; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); padding: 12px; background: var(--editor-raised); box-shadow: var(--app-shadow-overlay); }
+.page .inlineConfirmPrompt { z-index: 41; border: 1px solid var(--editor-line-strong); border-radius: var(--radius-lg); padding: var(--editor-density-panel-inset); background: var(--editor-raised); box-shadow: var(--app-shadow-overlay); }
 .page .inlineConfirmCancel,
-.page .inlineConfirmAccept { min-height: 44px; border-radius: var(--radius-md); }
-.page .saveErrorNotice { padding: 10px 16px; }
-.page .saveErrorNotice > p { color: var(--editor-text); font-size: 0.875rem; }
-.page .saveErrorExportButton { min-height: 44px; border: 0; border-radius: var(--radius-md); padding-inline: 14px; background: var(--editor-panel); color: var(--editor-text); font-size: 0.875rem; }
-.page .errorMessage { border-radius: var(--radius-lg); padding: 10px 12px; }
+.page .inlineConfirmAccept { min-height: var(--editor-density-control-height); border-radius: var(--radius-md); }
+.page .saveErrorNotice { padding: 8px var(--editor-density-panel-inset); }
+.page .saveErrorNotice > p { color: var(--editor-error); font-size: 0.875rem; }
+.page .saveErrorExportButton { min-height: var(--editor-density-control-height); border: 0; border-radius: var(--radius-md); padding-inline: var(--editor-density-panel-inset); background: var(--editor-panel); color: var(--editor-text); font-size: var(--editor-density-control-font-size); }
+.page .errorMessage { border-radius: var(--radius-lg); padding: 8px var(--editor-density-panel-inset); }
 
 @media (max-width: 900px) {
   .page .historyTools button,
   .page .fitButton,
-  .page .previewButton { min-width: 44px; min-height: 44px; padding-inline: 10px; font-size: 0.75rem; }
-  .page .formSection { gap: 16px; padding: 8px 0 16px; }
-  .page .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .page .previewButton { min-width: 44px; min-height: 44px; padding-inline: 10px; font-size: var(--editor-density-control-font-size); }
+  .page .formSection { gap: var(--editor-density-section-gap); padding: 4px 0 8px; }
+  .page .fieldGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--editor-density-field-gap) var(--editor-density-control-gap); }
   .page .fieldWide,
   .page .pickerWideField,
   .page .pickerDependencyStack { grid-column: 1 / -1; }
@@ -3254,7 +3253,7 @@
   .page .pickerInputWrap,
   .page .pickerInlineSelect select,
   .page .pickerInput,
-  .page .pickerSearchInput { min-height: 44px; font-size: 1rem; }
+  .page .pickerSearchInput { min-height: var(--editor-density-control-height); font-size: var(--editor-density-input-font-size); }
   .page[data-input-compact-mode='true'] .sheetHandle { display: none; }
   .page[data-compact-viewport='true']:not(.inspectorClosed):not(.previewMode) .bottomTools { display: none; }
   .page[data-input-compact-mode='true'] .mobileTaskBar { display: none; }
@@ -3265,7 +3264,7 @@
     max-height: calc(100% - 16px - env(safe-area-inset-bottom, 0px));
   }
   .page[data-input-compact-mode='true'] .inspectorHead { min-height: 44px; flex-basis: 44px; padding: 0 8px; }
-  .page[data-input-compact-mode='true'] .inspectorHead .closeInspector { display: inline-flex; width: auto; flex: 0 0 auto; align-items: center; justify-content: center; padding-inline: 10px; gap: 6px; background: var(--editor-control-hover); color: var(--editor-text); font-size: 0.75rem; white-space: nowrap; }
+  .page[data-input-compact-mode='true'] .inspectorHead .closeInspector { display: inline-flex; width: auto; flex: 0 0 auto; align-items: center; justify-content: center; padding-inline: 10px; gap: var(--editor-density-control-gap); background: var(--editor-control-hover); color: var(--editor-text); font-size: var(--editor-density-control-font-size); white-space: nowrap; }
   .page[data-input-compact-mode='true'] .canvasStage { visibility: hidden; }
 }
 
@@ -3274,7 +3273,7 @@
 }
 
 @media (max-width: 560px) {
-  .page .inspectorBody { padding-inline: 12px; }
+  .page .inspectorBody { padding-inline: var(--editor-density-panel-inset); }
   .page .templateChoices { grid-template-columns: minmax(0, 1fr); }
   .page .previewButton { padding-inline: 11px; }
 }
@@ -3283,11 +3282,8 @@
   .page .historyTools button,
   .page .fitButton,
   .page .previewButton { min-width: 44px; min-height: 44px; padding-inline: 8px; }
-  .page .historyTools button,
-  .page .fitButton,
-  .page .previewButton { min-width: 44px; min-height: 44px; }
-  .page .inspectorHead { padding-inline: 12px; }
-  .page .inspectorBody { padding-inline: 12px; }
+  .page .inspectorHead { padding-inline: var(--editor-density-panel-inset); }
+  .page .inspectorBody { padding-inline: var(--editor-density-panel-inset); }
 }
 
 @media (prefers-reduced-motion: reduce) {

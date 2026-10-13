@@ -1,10 +1,12 @@
 import type { AdventurerCardData, CardRatio } from '@/components/cards/types';
 import type { Locale } from '@/lib/types';
 import { PERFORMANCE_PROFILING_ENABLED, profileCount, profileStart, profileTiming } from '@/lib/performance-profile';
+import { createCooperativeCloneHook, createSerializedRendererRunner, prepareRendererSandbox } from './renderer-lifecycle';
+import { canUseSvgRasterAdapter, rasterizeForeignObjectSvg, SvgRasterAdapterError, type SvgRasterContext } from './svg-raster-adapter';
 
 export type CardExportFormat = 'png' | 'webp';
 export type CardExportScale = 1 | 2 | 4;
-export type CardExportStage = 'fonts' | 'image' | 'render' | 'download';
+export type CardExportStage = 'fonts' | 'image' | 'waiting' | 'render' | 'download';
 export type CardExportErrorCode =
   | 'cancelled'
   | 'font-timeout'
@@ -634,6 +636,8 @@ type CardExportRendererImport =
   | { ok: true; renderer: CardExportRenderer }
   | { ok: false; error: unknown };
 
+const runSerializedRenderer = createSerializedRendererRunner();
+
 function startCardExportRendererImport(): { promise: Promise<CardExportRendererImport> } {
   const startedAt = performance.now();
   profileCount('export.renderer.import.calls');
@@ -692,72 +696,169 @@ export async function renderCardBlob(
     ratio: data.design.ratio,
   });
   try {
-    const fontPreparationController = new AbortController();
-    const abortFontPreparation = () => fontPreparationController.abort();
-    options.signal?.addEventListener('abort', abortFontPreparation, { once: true });
-    if (options.signal?.aborted) fontPreparationController.abort();
-
-    const renderWithPreparedFonts = async () => {
-      let font: { cssText: string } | undefined;
-      try {
-        const { prepareCardFontCss } = await import('./font-css');
-        const prepared = await prepareCardFontCss(node, { signal: fontPreparationController.signal });
-        if (prepared) {
-          font = { cssText: prepared.cssText };
-          profileCount('export.fontCss.used');
-        }
-      } catch (error) {
-        if (options.signal?.aborted || fontPreparationController.signal.aborted) throw error;
-        // CSS inspection and inlining are an optimization only. Let the
-        // renderer's original stylesheet scan handle any unsupported case.
-        profileCount('export.fontCss.fallback.preparationError');
-      }
-
-      if (options.signal?.aborted || fontPreparationController.signal.aborted) {
-        throw new CardExportError('cancelled');
-      }
-
-      return renderer.domToBlob(node, {
-        width: logical.width,
-        height: logical.height,
-        scale: size.width / logical.width,
-        type: format === 'webp' ? 'image/webp' : 'image/png',
-        quality: format === 'webp' ? 0.94 : undefined,
-        filter: (element) => element.nodeType !== 1 || (element as Element).getAttribute('data-material-preload') !== 'true',
-        onCloneEachNode: preserveCardLocalSvgClip,
-        maximumCanvasSize: CARD_EXPORT_MAX_EDGE,
-        timeout: CARD_EXPORT_RENDERER_TIMEOUT_MS,
-        font,
-        debug: PERFORMANCE_PROFILING_ENABLED && options.profileDebug === true,
-        progress: (current, total) => {
-          if (PERFORMANCE_PROFILING_ENABLED) {
-            const now = performance.now();
-            if (!recordedEmbedTaskCount) {
-              recordedEmbedTaskCount = true;
-              profileCount('export.renderer.embed.tasks.total', total);
-              lastEmbedProgressAt = now;
-            } else {
-              profileCount('export.renderer.embed.progress.events');
-              profileTiming('export.renderer.embed.progress.interval', now - lastEmbedProgressAt, { current, total });
-              lastEmbedProgressAt = now;
-            }
-          }
-          onProgress({ stage: 'render', progress: total ? 0.2 + (current / total) * 0.72 : 0.65 });
-        },
+    const renderWithPreparedFonts = async (signal: AbortSignal) => {
+      const finishActiveRendererTiming = profileStart('export.renderer.operation.active', {
+        format,
+        scale: requestedScale,
+        ratio: data.design.ratio,
       });
+      try {
+        if (signal.aborted) throw new CardExportError('cancelled');
+        let font: { cssText: string } | undefined;
+        try {
+          const { prepareCardFontCss } = await import('./font-css');
+          const prepared = await prepareCardFontCss(node, { signal });
+          if (prepared) {
+            font = { cssText: prepared.cssText };
+            profileCount('export.fontCss.used');
+          }
+        } catch (error) {
+          if (signal.aborted) throw error;
+          // CSS inspection and inlining are an optimization only. Let the
+          // renderer's original stylesheet scan handle any unsupported case.
+          profileCount('export.fontCss.fallback.preparationError');
+        }
+
+        if (signal.aborted) throw new CardExportError('cancelled');
+
+        const useStagedRaster = canUseSvgRasterAdapter(node.ownerDocument);
+
+        let cloneNodeCount = 0;
+        let cloneYieldCount = 0;
+        let cloneStartedAt: number | null = null;
+        const onCloneEachNode = createCooperativeCloneHook((cloned) => {
+          if (PERFORMANCE_PROFILING_ENABLED) {
+            cloneNodeCount += 1;
+            profileCount('export.renderer.clone.nodes');
+          }
+          preserveCardLocalSvgClip(cloned);
+        }, {
+          signal,
+          cancelledError: () => new CardExportError('cancelled'),
+          onYield: () => {
+            if (PERFORMANCE_PROFILING_ENABLED) {
+              cloneYieldCount += 1;
+              profileCount('export.renderer.clone.yields');
+            }
+          },
+        });
+
+        let context: Awaited<ReturnType<CardExportRenderer['createContext']>> | null = null;
+        try {
+          context = await renderer.createContext(node, {
+            width: logical.width,
+            height: logical.height,
+            scale: size.width / logical.width,
+            type: format === 'webp' ? 'image/webp' : 'image/png',
+            quality: format === 'webp' ? 0.94 : undefined,
+            filter: (element) => {
+              if (element.nodeType !== 1) return true;
+              const candidate = element as Element;
+              if (candidate.getAttribute('data-material-preload') === 'true') return false;
+              return !(
+                candidate.hasAttribute('data-photo-print-fallback') &&
+                candidate.parentElement?.getAttribute('data-photo-print-state') === 'ready'
+              );
+            },
+            onCloneEachNode,
+            onCloneNode: () => {
+              if (PERFORMANCE_PROFILING_ENABLED && cloneStartedAt !== null) {
+                profileTiming('export.renderer.clone', performance.now() - cloneStartedAt, {
+                  nodeCount: cloneNodeCount,
+                  yieldCount: cloneYieldCount,
+                });
+              }
+              if (signal.aborted) throw new CardExportError('cancelled');
+            },
+            onEmbedNode: () => {
+              if (signal.aborted) throw new CardExportError('cancelled');
+            },
+            onCreateForeignObjectSvg: () => {
+              if (signal.aborted) throw new CardExportError('cancelled');
+            },
+            maximumCanvasSize: CARD_EXPORT_MAX_EDGE,
+            timeout: CARD_EXPORT_RENDERER_TIMEOUT_MS,
+            font,
+            debug: PERFORMANCE_PROFILING_ENABLED && options.profileDebug === true,
+            // The staged path needs the context through final canvas encoding;
+            // its finally block releases it after the real renderer promise settles.
+            // Unsupported browsers retain modern-screenshot's normal auto-cleanup.
+            autoDestruct: !useStagedRaster,
+            progress: (current, total) => {
+              if (PERFORMANCE_PROFILING_ENABLED) {
+                const now = performance.now();
+                if (!recordedEmbedTaskCount) {
+                  recordedEmbedTaskCount = true;
+                  profileCount('export.renderer.embed.tasks.total', total);
+                  lastEmbedProgressAt = now;
+                } else {
+                  profileCount('export.renderer.embed.progress.events');
+                  profileTiming('export.renderer.embed.progress.interval', now - lastEmbedProgressAt, { current, total });
+                  lastEmbedProgressAt = now;
+                }
+              }
+              if (!signal.aborted) {
+                onProgress({ stage: 'render', progress: total ? 0.2 + (current / total) * 0.72 : 0.65 });
+              }
+            },
+          });
+
+          if (signal.aborted) throw new CardExportError('cancelled');
+          await prepareRendererSandbox(context, {
+            signal,
+            timeoutMs: CARD_EXPORT_RENDERER_LOAD_TIMEOUT_MS,
+            cancelledError: () => new CardExportError('cancelled'),
+            timeoutError: () => new CardExportError('renderer-timeout'),
+            setupError: () => new CardExportError('renderer-load-failed'),
+          });
+          if (signal.aborted) throw new CardExportError('cancelled');
+          if (PERFORMANCE_PROFILING_ENABLED) cloneStartedAt = performance.now();
+          if (!useStagedRaster) return await renderer.domToBlob(context);
+
+          const svg = await renderer.domToForeignObjectSvg(context);
+          if (signal.aborted) throw new CardExportError('cancelled');
+          try {
+            return await rasterizeForeignObjectSvg(svg, context as SvgRasterContext, {
+              document: node.ownerDocument,
+              signal,
+              timeoutMs: CARD_EXPORT_RENDERER_TIMEOUT_MS,
+              cancelledError: () => new CardExportError('cancelled'),
+              timeoutError: () => new CardExportError('renderer-timeout'),
+              loadMedia: (image, timeoutMs) => renderer.loadMedia(image, {
+                ownerDocument: node.ownerDocument,
+                timeout: timeoutMs,
+              }),
+              isNonFallbackError: (error) => error instanceof CardExportError,
+              onTiming: (stage, durationMs, detail) => {
+                if (PERFORMANCE_PROFILING_ENABLED) profileTiming(`export.renderer.${stage}`, durationMs, detail);
+              },
+            });
+          } catch (error) {
+            if (signal.aborted || !(error instanceof SvgRasterAdapterError) || !error.canFallback) throw error;
+            profileCount('export.renderer.svgRasterAdapter.fallback');
+            // The foreignObject was constructed but no image Blob was produced.
+            // Retry with modern-screenshot's own data-URL conversion on this
+            // retained context; real renderer and cancellation errors surface.
+            return await renderer.domToBlob(context);
+          }
+        } finally {
+          // modern-screenshot does not accept an AbortSignal for domToBlob.
+          // Dispose its context after its real promise settles, not when the
+          // caller's abort/timeout race rejects.
+          if (context?.ownerDocument) renderer.destroyContext(context);
+        }
+      } finally {
+        finishActiveRendererTiming();
+      }
     };
 
-    try {
-      blob = await withCardExportTimeout(
-        renderWithPreparedFonts,
-        CARD_EXPORT_RENDER_TIMEOUT_MS,
-        'render-timeout',
-        options.signal,
-      );
-    } finally {
-      options.signal?.removeEventListener('abort', abortFontPreparation);
-      fontPreparationController.abort();
-    }
+    blob = await runSerializedRenderer(renderWithPreparedFonts, {
+      signal: options.signal,
+      timeoutMs: CARD_EXPORT_RENDER_TIMEOUT_MS,
+      cancelledError: () => new CardExportError('cancelled'),
+      timeoutError: () => new CardExportError('render-timeout'),
+      onQueued: () => onProgress({ stage: 'waiting', progress: 0.2 }),
+    });
   } catch (error) {
     if (error instanceof CardExportError) throw error;
     throw new CardExportError('render-failed');

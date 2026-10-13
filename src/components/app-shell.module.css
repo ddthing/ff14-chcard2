@@ -6,6 +6,10 @@
   color-scheme: dark;
 }
 
+.appShell:has(.appHeader[data-editor-header='true']) {
+  --app-header-height: var(--editor-density-header-height);
+}
+
 :global(html[data-app-theme='light']) .appShell {
   color-scheme: light;
 }
@@ -54,7 +58,7 @@
 
 .appHeader[data-editor-header='true'] .headerLeft {
   width: auto;
-  height: 56px;
+  height: var(--app-header-height);
   gap: 0;
   border: 0;
   padding-inline: 8px 0;
@@ -64,40 +68,47 @@
   grid-column: 2;
   width: auto;
   min-width: 0;
-  height: 56px;
-  gap: 8px;
+  height: var(--app-header-height);
+  gap: var(--editor-density-control-gap);
   border: 0;
-  padding-inline: 8px 12px;
+  padding-inline: var(--editor-density-panel-inset);
   background: transparent;
 }
 .appHeader[data-editor-header='true'] .desktopAppearance { display: none; }
 .appHeader[data-editor-header='true'] .desktopLanguageField { display: inline-flex; min-width: 92px; flex: 0 0 auto; }
-.appHeader[data-editor-header='true'] .desktopLanguage { width: 92px; min-width: 92px; font-family: var(--editor-ui-font); }
+.appHeader[data-editor-header='true'] .desktopLanguage { width: 92px; min-width: 92px; height: var(--editor-density-control-height); padding-inline: var(--editor-density-panel-inset); font-family: var(--editor-ui-font); font-size: var(--editor-density-input-font-size); }
 .appHeader[data-editor-header='true'] .headerExport {
   min-width: 88px;
+  height: var(--editor-density-control-height);
+  min-height: var(--editor-density-control-height);
   border-color: var(--editor-selection);
   border-radius: var(--radius-sm);
   background: var(--editor-selection);
   color: var(--editor-on-selection);
   box-shadow: none;
-  font-size: 12px;
+  font-size: var(--editor-density-control-font-size);
   font-weight: 550;
   padding-inline: 8px;
 }
 .appHeader[data-editor-header='true'] .brand { display: none; }
 .appHeader[data-editor-header='true'] .documentIdentity { order: 2; min-width: 0; flex: 1 1 auto; padding-inline: 8px 4px; }
 .appHeader[data-editor-header='true'] .editorName { font-family: var(--editor-ui-font); font-size: 14px; font-weight: 600; }
-.appHeader[data-editor-header='true'] .documentLabel { font-size: 12px; }
+.appHeader[data-editor-header='true'] .documentLabel { font-size: var(--editor-density-meta-font-size); }
 .appHeader[data-editor-header='true'] .headerDivider { display: none; }
-.appHeader[data-editor-header='true'] .mobileNavigation { display: grid; width: 44px; height: 44px; flex: 0 0 44px; place-items: center; }
-.appHeader[data-editor-header='true'] .mobileMenuTrigger { width: 44px; min-width: 44px; height: 44px; padding: 0; border-color: transparent; }
+.appHeader[data-editor-header='true'] .mobileNavigation { display: grid; width: var(--editor-density-icon-target); height: var(--editor-density-icon-target); flex: 0 0 var(--editor-density-icon-target); place-items: center; }
+.appHeader[data-editor-header='true'] .mobileMenuTrigger { width: var(--editor-density-icon-target); min-width: var(--editor-density-icon-target); height: var(--editor-density-icon-target); min-height: var(--editor-density-icon-target); padding: 0; border-color: transparent; }
 .appHeader[data-editor-header='true'] .mobileMenuTrigger > span { display: none; }
-.appHeader[data-editor-header='true'] .mobileMenuPanel { left: 0; right: auto; }
+.appHeader[data-editor-header='true'] .mobileMenuPanel { left: 0; right: auto; padding: var(--editor-density-panel-inset); }
+.appHeader[data-editor-header='true'] .mobileMenuLink { min-height: var(--editor-density-control-height); padding-inline: var(--editor-density-panel-inset); font-size: var(--editor-density-control-font-size); }
+.appHeader[data-editor-header='true'] .mobileMenuSettingRow,
+.appHeader[data-editor-header='true'] .mobileMenuLanguageField { min-height: var(--editor-density-control-height); gap: var(--editor-density-control-gap); }
+.appHeader[data-editor-header='true'] .mobileMenuSettingLabel { font-size: var(--editor-density-control-font-size); }
+.appHeader[data-editor-header='true'] .mobileMenuLanguageSelect { min-height: var(--editor-density-control-height); font-size: var(--editor-density-input-font-size); }
 
 .editorGuideButton {
-  width: 44px;
-  min-width: 44px;
-  height: 44px;
+  width: var(--editor-density-icon-target);
+  min-width: var(--editor-density-icon-target);
+  height: var(--editor-density-icon-target);
   border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
   background: var(--app-control);
@@ -191,7 +202,7 @@
   overflow: hidden;
   min-width: 0;
   color: var(--app-text-muted);
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 550;
   line-height: 1.3;
   text-overflow: ellipsis;
@@ -228,8 +239,8 @@
   flex: 0 0 auto;
   align-items: center;
   justify-content: center;
-  border-bottom: 2px solid transparent;
-  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   padding-inline: clamp(6px, 0.85vw, 12px);
   color: var(--app-text-muted);
   font-size: 12.5px;
@@ -245,9 +256,15 @@
 }
 
 .desktopNavigationLink[aria-current='page'] {
-  border-bottom-color: var(--app-accent);
-  color: var(--app-text);
+  border-color: transparent;
+  background: var(--editor-selection-soft);
+  color: var(--editor-selection-ink);
   font-weight: 650;
+}
+
+.desktopNavigationLink[aria-current='page']:hover {
+  background: var(--editor-selection-soft);
+  color: var(--editor-selection-ink);
 }
 
 .headerRight {
@@ -264,7 +281,7 @@
   align-items: center;
   gap: 7px;
   color: var(--app-text-muted);
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 550;
   white-space: nowrap;
 }
@@ -382,7 +399,7 @@
   padding-inline: 8px;
   color: var(--app-text-muted);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
 }
 
 .appearanceOption:hover {
@@ -398,8 +415,8 @@
 }
 
 .appearanceOption:has(input:checked) {
-  background: var(--app-accent-soft);
-  color: var(--app-text);
+  background: var(--editor-selection-soft);
+  color: var(--editor-selection-ink);
   font-weight: 650;
 }
 
@@ -536,8 +553,8 @@
   display: flex;
   min-height: 44px;
   align-items: center;
-  border-left: 2px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
   padding-inline: 12px;
   color: var(--app-text-muted);
   font-size: 13px;
@@ -552,10 +569,15 @@
 }
 
 .mobileMenuLink[aria-current='page'] {
-  border-left-color: var(--app-accent);
-  background: var(--app-accent-soft);
-  color: var(--app-text);
-  font-weight: 700;
+  border-color: transparent;
+  background: var(--editor-selection-soft);
+  color: var(--editor-selection-ink);
+  font-weight: 650;
+}
+
+.mobileMenuLink[aria-current='page']:hover {
+  background: var(--editor-selection-soft);
+  color: var(--editor-selection-ink);
 }
 
 .mobileMenuSettings {
@@ -568,7 +590,7 @@
 
 .mobileMenuSettingsHeading {
   color: var(--app-text-muted);
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 700;
   letter-spacing: 0.03em;
 }
@@ -584,7 +606,7 @@
 
 .mobileMenuSettingLabel {
   color: var(--app-text);
-  font-size: 12px;
+  font-size: var(--editor-density-meta-font-size);
   font-weight: 550;
 }
 
@@ -617,7 +639,7 @@
   padding: 0.45rem 0.75rem;
   background: var(--app-surface-raised);
   color: var(--app-text);
-  font-size: 0.75rem;
+  font-size: var(--editor-density-meta-font-size);
 }
 
 .skipLink:focus {
@@ -661,9 +683,7 @@
 }
 
 @media (max-width: 640px) {
-  .appShell {
-    --app-header-height: 56px;
-  }
+  .appShell { --app-header-height: 56px; }
 
   .appHeader {
     height: var(--app-header-height);
@@ -697,7 +717,7 @@
   }
 
   .documentLabel {
-    font-size: 12px;
+    font-size: var(--editor-density-meta-font-size);
   }
 
   .editorName {
@@ -711,7 +731,7 @@
 
   .saveStatus {
     gap: 5px;
-    font-size: 12px;
+    font-size: var(--editor-density-meta-font-size);
   }
 
   .desktopHeaderSaveStatus {
@@ -727,7 +747,7 @@
     height: 44px;
     min-height: 44px;
     padding-inline: 10px;
-    font-size: 12px;
+    font-size: var(--editor-density-control-font-size);
   }
 
   .headerExport svg {

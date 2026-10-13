@@ -167,22 +167,36 @@ export function CardTextOverlay({
       const placements = placeTextTargets(positionedItems.map(({ rects }) => rects), viewportWidth, viewportHeight, 44, clip);
       const allTextRects = [...rectsById.values()].flat();
       const usedBadges: TextTargetRect[] = [];
+      const badgeHitTargetSizes = window.matchMedia('(pointer: coarse)').matches ? [44, 24] : [24];
+      const placeBadge = (anchorRects: readonly TextTargetRect[], occupiedRects: readonly TextTargetRect[]) => {
+        for (const hitTargetSize of badgeHitTargetSizes) {
+          const placement = placeTextBadge(
+            anchorRects,
+            occupiedRects,
+            viewportWidth,
+            viewportHeight,
+            clip,
+            16,
+            2,
+            usedBadges,
+            hitTargetSize,
+          );
+          if (placement) return placement;
+        }
+        return null;
+      };
       const nextTargets: PositionedTextTarget[] = [];
       for (let index = 0; index < positionedItems.length; index += 1) {
         const placement = placements[index];
         if (!placement) continue;
         const { item } = positionedItems[index];
         const outlineRects = placement.textFragments.map(boundsToRect);
-        const badgeBounds = placeTextBadge(
-          outlineRects,
-          allTextRects,
-          viewportWidth,
-          viewportHeight,
-          clip,
-          16,
-          2,
-          usedBadges,
-        );
+        const neighboringTextTargets = placements.flatMap((neighborPlacement, neighborIndex) => (
+          neighborIndex === index || !neighborPlacement
+            ? []
+            : neighborPlacement.targetFragments.map(boundsToRect)
+        ));
+        const badgeBounds = placeBadge(outlineRects, [...allTextRects, ...neighboringTextTargets]);
         if (badgeBounds) usedBadges.push(boundsToRect(badgeBounds));
         const outlineBounds = getTextOutlineBounds(outlineRects, viewportWidth, viewportHeight, clip, 2);
         const bounds = placement.targetBounds;
@@ -205,16 +219,7 @@ export function CardTextOverlay({
       if (informationItems.length > 0 && currentInformationLabel) {
         const representative = informationItems.find((item) => item.kind !== 'label' && rectsById.has(item.id));
         const informationRects = informationItems.flatMap((item) => rectsById.get(item.id) ?? []);
-        const markerBounds = placeTextBadge(
-          informationRects,
-          allTextRects,
-          viewportWidth,
-          viewportHeight,
-          clip,
-          16,
-          2,
-          usedBadges,
-        );
+        const markerBounds = placeBadge(informationRects, allTextRects);
         const informationHit = markerBounds
           ? getTextTargetBounds(boundsToRect(markerBounds), viewportWidth, viewportHeight, 44, clip)
           : null;
@@ -371,10 +376,20 @@ export function CardTextOverlay({
             ))}
             {badge && (
               <span
-                className={isInformationGroup ? styles.groupMarker : styles.badge}
+                className={styles.badgeHit}
+                data-card-text-badge-hit="true"
                 aria-hidden="true"
-                style={{ left: badge.left - target.left, top: badge.top - target.top }}
-              >{isInformationGroup ? 'i' : target.ordinal}</span>
+                style={{
+                  left: badge.left - target.left,
+                  top: badge.top - target.top,
+                  width: badge.width,
+                  height: badge.height,
+                }}
+              >
+                <span className={isInformationGroup ? styles.groupMarker : styles.badge}>
+                  {isInformationGroup ? 'i' : target.ordinal}
+                </span>
+              </span>
             )}
           </button>
         );

@@ -98,6 +98,43 @@ export function shouldRetainInspectorForExit({
   return wasOpen && isMobile && !previewOpen && !reducedMotion;
 }
 
+/** Choose the initial mobile/desktop inspector default once, then keep the user's state across resizes. */
+export function resolveInspectorOpenForViewportChange(
+  isInitialSync: boolean,
+  isMobileViewport: boolean,
+  currentlyOpen: boolean,
+): boolean {
+  return isInitialSync ? !isMobileViewport : currentlyOpen;
+}
+
+/** Return the visible desktop control that replaces the compact navigator close button. */
+export function getDesktopNavigatorFocusTargetId(sidebarCollapsed: boolean): 'editor-navigator-open' | 'editor-navigator-collapse' {
+  return sidebarCollapsed ? 'editor-navigator-open' : 'editor-navigator-collapse';
+}
+
+export type EditorResponsiveLayout = 'desktop' | 'compact' | 'mobile';
+export type NavigatorFocusDestination = 'desktop-control' | 'compact-open-items' | 'mobile-task' | null;
+
+export function getNavigatorFocusDestination({
+  from,
+  to,
+  navigatorOpen,
+  focusInsideNavigator,
+  focusOnTrigger,
+}: {
+  from: EditorResponsiveLayout;
+  to: EditorResponsiveLayout;
+  navigatorOpen: boolean;
+  focusInsideNavigator: boolean;
+  focusOnTrigger: boolean;
+}): NavigatorFocusDestination {
+  if (from === 'desktop' && to === 'compact' && focusInsideNavigator) return 'compact-open-items';
+  if (from === 'desktop' && to === 'mobile' && (focusInsideNavigator || focusOnTrigger)) return 'mobile-task';
+  if (from !== 'compact' || to === 'compact') return null;
+  if (!((navigatorOpen && focusInsideNavigator) || focusOnTrigger)) return null;
+  return to === 'mobile' ? 'mobile-task' : 'desktop-control';
+}
+
 export function getNextMenuIndex(currentIndex: number, itemCount: number, key: string, selectedIndex = 0): number | null {
   if (itemCount < 1) return null;
   const current = currentIndex >= 0 && currentIndex < itemCount ? currentIndex : -1;
@@ -120,8 +157,14 @@ export function getNextComboboxOptionIndex(currentIndex: number, itemCount: numb
   return null;
 }
 
-export function isEditorShortcutSuppressed(target: Pick<Element, 'closest'> | null): boolean {
-  return Boolean(target?.closest('[data-editor-shortcuts-disabled="true"]'));
+export function isEditorShortcutSuppressed(
+  target: Pick<Element, 'closest'> | null,
+  hasOpenNativeDialog = false,
+): boolean {
+  return hasOpenNativeDialog || Boolean(
+    target?.closest('[data-editor-shortcuts-disabled="true"]')
+      || target?.closest('dialog[open]'),
+  );
 }
 
 export function getInlineConfirmKeyboardAction(

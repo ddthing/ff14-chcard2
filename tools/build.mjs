@@ -16,6 +16,7 @@ export function runBuild({ env = process.env, args = [], execute = spawnSync } =
   };
   const commands = [
     ['--experimental-strip-types', path.join(root, 'tools/generate-font-registry.mjs'), '--check'],
+    [path.join(root, 'tools/generate-font-preview-css.mjs'), '--check'],
     [require.resolve('next/dist/bin/next'), 'build', ...args],
     [path.join(root, 'tools/prune-cloudflare-assets.mjs')],
   ];
