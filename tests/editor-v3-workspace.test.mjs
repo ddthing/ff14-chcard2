@@ -84,9 +84,9 @@ test('mobile task controls toggle their sheet and preserve desktop inspector sel
 });
 
 test('V3 task names stay localized across the supported app languages', () => {
-  assert.deepEqual(getEditorCopy('ko').tasks, { photo: '사진', information: '내용', design: '디자인' });
-  assert.deepEqual(getEditorCopy('en').tasks, { photo: 'Photo', information: 'Content', design: 'Design' });
-  assert.deepEqual(getEditorCopy('ja').tasks, { photo: '写真', information: 'コンテンツ', design: 'デザイン' });
+  assert.deepEqual(getEditorCopy('ko').tasks, { photo: '사진', information: '문구', design: '디자인' });
+  assert.deepEqual(getEditorCopy('en').tasks, { photo: 'Photo', information: 'Text', design: 'Design' });
+  assert.deepEqual(getEditorCopy('ja').tasks, { photo: '写真', information: 'テキスト', design: 'デザイン' });
   assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.categories), [
     { identity: '이름 + 소개', information: '캐릭터 정보', copy: '카드 문구' },
     { identity: 'Name + Bio', information: 'Character information', copy: 'Card phrases' },
@@ -297,14 +297,15 @@ test('experimental layouts keep saved overrides but expose only canonical fields
   assert.match(typographyEditorSource, /applyTypographyGroupOverrides\([\s\S]*?sizePercent: nextSizePercent/u);
   assert.match(typographyEditorSource, /resetTypographyGroupOverrides\(targets\.map/u);
   assert.match(typographyEditorSource, /data-text-typography-editor=\{informationGroup \? 'information-group' : item\.id\}/u);
-  assert.match(typographyEditorSource, /<select[\s\S]*?className=\{styles\.fontSelect\}[\s\S]*?selectableOptions\.map/u);
+  assert.match(typographyEditorSource, /<TypographyFontPicker[\s\S]*?onValueChange=\{handleFontChange\}/u);
   assert.doesNotMatch(typographyEditorSource, /styles\.fontOptions|styles\.fontChoice/u);
 });
 
 test('V3 tabs keep real editor controls connected to the existing store and preview', () => {
   assert.match(workspaceSource, /role=\{isMobileDock \? 'toolbar' : 'tablist'\}/u);
-  assert.match(workspaceSource, /role=\{isMobileViewport \? 'region' : 'tabpanel'\}/u);
-  assert.match(workspaceSource, /aria-expanded=\{isMobileDock \? isSelected : undefined\}/u);
+  assert.match(workspaceSource, /id="editor-inspector-body"[\s\S]*?role=\{isMobileViewport \? 'region' : 'tabpanel'\}/u);
+  assert.match(workspaceSource, /aria-expanded=\{isMobileDock \? isExpanded : undefined\}/u);
+  assert.match(workspaceSource, /aria-pressed=\{isMobileDock \? isSelected : undefined\}/u);
   assert.match(workspaceSource, /aria-selected=\{isMobileDock \? undefined : isSelected\}/u);
   assert.match(workspaceSource, /aria-hidden=\{!isOpen \|\| blockedByNavigator\} inert=\{!isOpen \|\| blockedByNavigator\}/u);
   assert.match(workspaceSource, /className=\{styles\.sheetHandle\}[\s\S]*?onPointerDown=\{handleSheetHandlePointerDown\}/u);
@@ -333,16 +334,18 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /HistoryButton action="redo"/u);
 });
 
-test('the mobile sheet starts closed and tracks a bounded stage above a stable tool dock', () => {
-  assert.match(editorStyles, /\.workspace\s*\{[^}]*grid-template-columns:\s*240px minmax\(0, 1fr\)/u);
-  assert.match(editorStyles, /\.mobileTaskTabs\s*\{[^}]*display:\s*none/u);
+test('the mobile sheet starts closed and shares available space with one bottom task bar', () => {
+  assert.match(editorStyles, /\.workspace\s*\{[^}]*grid-template-columns:\s*48px 240px minmax\(0, 1fr\)/u);
+  assert.match(editorStyles, /\.mobileTaskBar\s*\{[^}]*display:\s*none/u);
   const mobileBlocks = [];
   postcss.parse(editorStyles).walkAtRules('media', (rule) => {
     if (rule.params === '(max-width: 900px)') mobileBlocks.push(rule.toString());
   });
   const mobileRules = mobileBlocks.join('\n').replace(/\.page\s+(?=\.)/gu, '');
   assert.match(mobileRules, /\.page\s*\{[^}]*height:\s*max\(0px, calc\(var\(--editor-viewport-bottom, 100dvh\) - var\(--app-header-height, 56px\)\)\)[^}]*overflow:\s*hidden/u);
-  assert.match(mobileRules, /\.mobileDock\s*\{[^}]*flex:\s*0 0 var\(--editor-mobile-dock-height\)/u);
+  assert.match(mobileRules, /\.mobileTaskBar\s*\{[^}]*position:\s*absolute[^}]*bottom:\s*calc\([^}]*safe-area-inset-bottom/u);
+  assert.match(mobileRules, /\.mobileTaskTabs[\s\S]*?\.toolButton\s*\{[^}]*min-height:\s*44px/u);
+  assert.doesNotMatch(workspaceSource, /id="editor-navigator-mobile-toggle"|id="editor-header-panel-toggle"/u);
   assert.match(mobileRules, /\.page:not\(\.inspectorClosed\):not\(\.previewMode\) \.canvasColumn\s*\{[^}]*var\(--editor-mobile-sheet-height\)/u);
   assert.match(mobileRules, /\.inspector\s*\{[^}]*position:\s*absolute[^}]*env\(safe-area-inset-bottom\)/u);
   assert.match(mobileRules, /\.inspectorBody\s*\{[^}]*overflow-x:\s*hidden[^}]*overflow-y:\s*auto[^}]*overscroll-behavior:\s*contain/u);
@@ -352,15 +355,22 @@ test('the mobile sheet starts closed and tracks a bounded stage above a stable t
   assert.match(workspaceSource, /inspectorOpen: !matches/u);
   assert.match(workspaceSource, /spellCheck=\{field !== 'name' && field !== 'freeCompany'\}/u);
   assert.match(workspaceSource, /data-input-compact-mode=/u);
-  assert.match(mobileRules, /\.pickerInlineSelect select\s*\{[^}]*font-size:\s*1rem/u);
+  let readableMobileSelect = false;
+  postcss.parse(mobileRules).walkRules((rule) => {
+    if (!rule.selectors.some((selector) => selector.endsWith('.pickerInlineSelect select'))) return;
+    rule.walkDecls('font-size', (declaration) => {
+      if (declaration.value === '1rem') readableMobileSelect = true;
+    });
+  });
+  assert.ok(readableMobileSelect, 'native mobile selects retain 16px input text in grouped CSS rules');
   assert.match(mobileRules, /\.sheetHandle\s*\{[^}]*min-height:\s*44px/u);
   assert.match(editorStyles, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*none/u);
   assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*display:\s*inline-flex/u);
   assert.match(mobileRules, /\.mobileStageSampleBadge\s*\{[^}]*pointer-events:\s*none/u);
   assert.match(mobileRules, /\.page\[data-input-compact-mode='true'\] \.canvasStage\s*\{[^}]*visibility:\s*hidden/u);
-  assert.match(editorStyles, /\.page \.choiceChip\s*\{[^}]*min-height:\s*44px/u);
+  assert.match(editorStyles, /(?:\.page\s+)?\.choiceChip\s*\{[^}]*min-height:\s*44px/u);
   assert.match(workspaceSource, /className=\{styles\.toolbarPrimary\}/u);
-  assert.match(editorStyles, /\.page \.stageUpload\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/u);
+  assert.match(editorStyles, /\.page \.uploadShortcut\s*\{[^}]*min-width:\s*44px[^}]*min-height:\s*44px/u);
   const compactUploadMinimum = editorStyles.match(/\.page \.uploadZoneCompact\s*\{[^}]*min-height:\s*(\d+)px/u)?.[1];
   assert.ok(Number(compactUploadMinimum) >= 56, 'the compact upload row reserves readable file details and a touch target');
   assert.match(editorStyles, /@media \(max-width: 370px\)[\s\S]*?\.page \.historyTools button,[\s\S]*?min-width:\s*44px/u);

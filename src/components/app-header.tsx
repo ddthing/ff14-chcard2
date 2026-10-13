@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AppearanceControl } from "@/components/appearance-control";
 import { EditorIcon } from "@/components/editor/editor-icon";
+import { useEditorChrome } from "@/components/editor/editor-chrome-context";
 import { MobileNavigation, RouteNavigationLinks } from "@/components/route-navigation";
 import { getEditorCopy } from "@/components/editor/copy";
 import { getAppNavigationCopy } from "@/lib/app-navigation";
@@ -55,6 +56,8 @@ export function AppHeader() {
   const persistNow = useEditorStore((state) => state.persistNow);
   const section = isExport ? copy.export : copy.editor;
   const documentName = name || copy.newCard;
+  const { setGuideOpen, guideTriggerRef } = useEditorChrome();
+  const guideLabel = { ko: '사용법', en: 'Guide', ja: '使い方' }[locale];
 
   const navigationMenu = <MobileNavigation
     key={pathname}
@@ -90,8 +93,8 @@ export function AppHeader() {
         </Link>
         <span className={styles.headerDivider} aria-hidden="true" />
         <div className={styles.documentIdentity} aria-label={`${section}: ${documentName}`} title={documentName}>
-          <span className={styles.documentLabel}>{section}</span>
-          {(isEditor || isExport) && <HeaderSaveStatus className={styles.mobileIdentitySaveStatus} />}
+          <span className={styles.documentLabel}>{isEditor ? 'XIV / ATELIER' : section}</span>
+          {isExport && <HeaderSaveStatus className={styles.mobileIdentitySaveStatus} />}
           <span className={styles.editorName}>{documentName}</span>
         </div>
       </div>
@@ -105,7 +108,9 @@ export function AppHeader() {
       />}
 
       <div className={styles.headerRight}>
-        {(isEditor || isExport) && <HeaderSaveStatus className={styles.desktopHeaderSaveStatus} />}
+        {isEditor && <button type="button" className={styles.editorGuideButton} aria-label={guideLabel} title={guideLabel} onClick={(event) => { guideTriggerRef.current = event.currentTarget; setGuideOpen(true); }}>?</button>}
+        {isEditor && <HeaderSaveStatus className={styles.visuallyHidden} />}
+        {isExport && <HeaderSaveStatus className={styles.desktopHeaderSaveStatus} />}
         <span className={styles.desktopAppearance}><AppearanceControl /></span>
         <label className={styles.desktopLanguageField}>
           <span className={styles.visuallyHidden}>{t("nav.language")}</span>

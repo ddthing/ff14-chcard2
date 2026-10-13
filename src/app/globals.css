@@ -10,6 +10,7 @@
   --font-display-korean: "Cormorant Garamond Variable", "Noto Serif KR Variable", "Noto Serif KR", "Nanum Myeongjo", "Noto Sans KR Variable", "Malgun Gothic", "Apple SD Gothic Neo", serif;
   --font-display-japanese: "Cormorant Garamond Variable", "Noto Serif JP Variable", "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", "Noto Sans JP Variable", "Meiryo", serif;
   --font-ui: "DM Sans Variable", "Pretendard", "Noto Sans KR Variable", "Noto Sans JP Variable", "Apple SD Gothic Neo", "Yu Gothic", "Meiryo", "Malgun Gothic", system-ui, sans-serif;
+  --editor-ui-font: "Noto Sans KR Variable", "Noto Sans JP Variable", system-ui, sans-serif;
   --font-ui-latin: "DM Sans Variable", Arial, system-ui, sans-serif;
   --font-ui-korean: "DM Sans Variable", "Pretendard", "Noto Sans KR Variable", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
   --font-ui-japanese: "DM Sans Variable", "Noto Sans JP Variable", "Yu Gothic", "Hiragino Kaku Gothic ProN", "Meiryo", sans-serif;
@@ -47,6 +48,10 @@ html {
   min-width: 0;
   scroll-behavior: smooth;
   background: var(--app-bg);
+}
+
+html[lang='ja'] {
+  --editor-ui-font: "Noto Sans JP Variable", "Noto Sans KR Variable", system-ui, sans-serif;
 }
 
 body {

@@ -1,0 +1,21 @@
+Ok단단체 / Ok Dandan — original TTF, app embedding permission
+Copyright 2025. OKTICON(OkFont). all rights reserved.
+
+Official source: https://www.okticon.com/freefont/?bmode=view&idx=169969648
+Reviewed: 2026-10-13
+Original file: OkDanDan-Bold.ttf (unmodified; its OS/2 weight is 500)
+
+The official listing permits personal and commercial use, prohibits direct font-file redistribution,
+and says images produced using the font may be used in OKTICON marketing. A social-media tag is requested.
+
+The creator separately grants inclusion in an app for users to make images and videos:
+Reply author: 오케이티콘
+Reply date: 2026-08-26 15:01
+Reply ID: c202608265cc319898ba31
+Question ID: c20260826c0e56df3bbd52
+
+“해당 폰트는 앱에 탑재하여 사용자들이 이미지나 영상 제작에 사용할 수 있도록 제공해주셔도 괜찮습니다.”
+
+This application supplies the original font only as an embedded asset for card-image creation.
+This record is not a general redistribution or modification license. Do not convert, subset,
+sell or offer the font as a standalone download on the basis of this app-specific permission.

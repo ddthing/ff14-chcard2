@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useId, useRef, useState, type FormEvent, type KeyboardEvent, type MouseEvent, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
+import { AppIcon } from '@/components/app-icon';
 import { CardPreview } from '@/components/editor/card-preview';
 import { useI18n, type Locale } from '@/lib/i18n';
 import {
@@ -571,7 +572,7 @@ function LibraryPanel({ copy, locale, dialog, titleId, stagePresentation = false
       </div>
       {dialog && onClose ? (
         <button className={styles.closeButton} type="button" onClick={onClose} aria-label={copy.close}>
-          <span aria-hidden="true">×</span>
+          <AppIcon name="X" size={16} />
         </button>
       ) : null}
     </header>

@@ -1,0 +1,494 @@
+Mona upstream credits and notices
+Source: https://github.com/MonadABXY/mona-font
+
+![Banner](./docs/readme-banner.png)
+
+# [English](./README.md) | [한국어로 보기](./README-KO.md)
+
+# Mona Font
+
+Mona Font is a pixel-style font that supports multilingual text, special symbols, and emojis.
+
+> **Mona Font is under active development and is continuously updated to improve its quality.**
+
+## Features
+
+- **Style Options**: Original `Mona` and `Mona S`, which features straightened Hangul strokes.
+- **Localized Forms**: Supports region-specific CJK Ideographs using the OpenType `locl` feature.
+- **Kerning**: Kerning is applied to Latin characters for better readability.
+- **Emoji Support**: Includes both Color Emojis and Monochrome Emojis.
+
+## Font Preview
+
+[Try it out](https://monadabxy.com/fonts/mona/)
+
+### 10px
+
+<img src="./docs/readme-preview-10.png" width="600">
+
+### 12px
+
+<img src="./docs/readme-preview-12.png" width="600">
+
+### Mona vs. Mona S Comparison
+
+<img src="./docs/readme-preview-s12.png" width="600">
+
+## Download
+
+[Download Latest Version](https://github.com/MonadABXY/mona-font/releases/latest)
+
+Please choose the appropriate font file for your needs.
+
+| File Name                  | Description                                                                         |
+| :------------------------- | :---------------------------------------------------------------------------------- |
+| **Mona12.ttf**             | Integrated Font (Text + Emoji)                                                      |
+| **Mona12Text{Region}.ttf** | Text-Only Font with fixed regional glyphs (for environments without `locl` support) |
+| **Mona12ColorEmoji.ttf**   | Color Emoji Only                                                                    |
+| **Mona12Emoji.ttf**        | Monochrome Emoji Only                                                               |
+
+## Webfont Usage
+
+You can load and use the font via an HTML <link> tag or the CSS @import method.
+
+### `<link>`
+
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/MonadABXY/mona-font/web/mona.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/MonadABXY/mona-font/web/monas.css" />
+```
+
+### `@import`
+
+```css
+@import url("https://cdn.jsdelivr.net/gh/MonadABXY/mona-font/web/mona.css");
+@import url("https://cdn.jsdelivr.net/gh/MonadABXY/mona-font/web/monas.css");
+```
+
+### `Using font-family`
+
+```css
+font-family: "Mona12", sans-serif;
+font-family: "MonaS12", sans-serif;
+```
+
+### `Using classes`
+
+```css
+<div class="mona12">Mona12</div>
+<div class="mona12-bold">Mona12 Bold</div>
+<div class="monas12">MonaS12</div>
+<div class="monas12-bold">MonaS12 Bold</div>
+```
+
+## Recommended Sizes
+
+To prevent blurriness and ensure crisp rendering, we recommend using the **specified base pixel size or its integer multiples**.
+You don't need to worry about this on high-resolution displays or for printed materials.
+
+| Font               | px     | pt      |
+| :----------------- | :----- | :------ |
+| **Mona10**         | `10px` | `7.5pt` |
+| **Mona10 Bold**    | `10px` | `7.5pt` |
+| **Mona8x12**       | `12px` | `9pt`   |
+| **Mona10x12**      | `12px` | `9pt`   |
+| **Mona10x12 Bold** | `12px` | `9pt`   |
+| **Mona12**         | `12px` | `9pt`   |
+| **Mona12 Bold**    | `12px` | `9pt`   |
+
+## Coverage
+
+| Category              | Mona10 | Mona10 Bold | Mona8x12 | Mona10x12 | Mona10x12 Bold | Mona12 | Mona12 Bold |
+| --------------------- | ------ | ----------- | -------- | --------- | -------------- | ------ | ----------- |
+| Hangul Syllables      | ✅     | ✅          | ✅       | ✅        | ✅             | ✅     | ✅          |
+| Latin                 | ✅     | ✅          | ✅       | ✅        | ✅             | ✅     | ✅          |
+| CJK Ideographs        | ⚠️     | ⚠️          | ⚠️       | ❌        | ❌             | ✅     | ✅          |
+| Hiragana / Katakana   | ✅     | ✅          | ✅       | ✅        | ✅             | ✅     | ✅          |
+| Greek                 | ✅     | ✅          | ✅       | ✅        | ✅             | ✅     | ✅          |
+| Cyrillic              | ✅     | ✅          | ✅       | ✅        | ✅             | ✅     | ✅          |
+| Symbols / Punctuation | ✅     | ✅          | ❌       | ✅        | ✅             | ✅     | ✅          |
+| Monochrome Emoji      | ❌     | -           | -        | -         | -              | ✅     | ✅          |
+| Color Emoji           | ❌     | -           | -        | -         | -              | ✅     | ✅          |
+
+You can check the detailed list of supported characters below.
+
+[Detailed Glyph List](./docs/GLYPHS.md)
+
+## Feedback
+
+[Submit Feedback (Google Forms)](https://forms.gle/tVEPMUdHvE9P1Lvr6)
+
+## License & Credits
+
+### License
+
+**Mona Font** is released under the [SIL Open Font License 1.1](https://openfontlicense.org/).
+
+It can be freely used, modified, and redistributed by anyone, including personal and corporate users.
+
+However, selling the font file itself is prohibited.
+
+- [OFL 1.1 Original Text](./OFL.txt)
+- [OFL 1.1 Korean Translation](./OFL-KO.txt)
+
+### Credits & Open Source Notice
+
+#### 1. Google Noto Emoji
+
+- **Usage**: Color palette and Flag emojis
+- **License**: SIL Open Font License 1.1 (Fonts) / Apache License 2.0 (Tools/Images)
+- **Source**: [googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji)
+
+#### 2. Ark Pixel Font
+
+- **Usage**: Glyphs in the CJK Ideographs area
+- **License**: SIL Open Font License 1.1
+- **Source**: [TakWolf/ark-pixel-font](https://github.com/TakWolf/ark-pixel-font)
+
+#### 3. PixelMplus (M+ Fonts)
+
+- **Usage**: Reference for Japanese and certain related symbols; some CJK ideograph glyphs
+- **License**: M+ FONT LICENSE
+- **Source**: [itouhiro/PixelMplus](https://github.com/itouhiro/PixelMplus)
+
+#### 4. k8x12
+
+- **Usage**: CJK ideograph glyphs in Mona8x12
+- **License**: See [LICENSE/k8x12.txt](./LICENSE/k8x12.txt)
+- **Copyright**: Copyright (C) 2015-2021 Num Kadoma
+
+
+--- ark-pixel.txt ---
+
+Ark Pixel Font
+https://github.com/TakWolf/ark-pixel-font
+
+Copyright (c) 2021, TakWolf (https://takwolf.com).
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://openfontlicense.org
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
+
+
+--- k8x12.txt ---
+
+===============================================================================
+
+                8×12 ドット日本語ビットマップフォント「k8x12」
+                                (2021-05-05 版)
+
+                       Copyright (C) 2015-2021 Num Kadoma
+
+===============================================================================
+
+-------------------------------------------------------------------------------
+ 概要
+-------------------------------------------------------------------------------
+　k8x12 は 8×12 ドットの日本語ビットマップフォントです。
+　JIS 第一・第二水準をサポートしており、その他の記号も一部含んでいます。
+
+
+-------------------------------------------------------------------------------
+ バリエーション
+-------------------------------------------------------------------------------
+　オリジナルの k8x12 の他に、
+　バリエーションとして k8x12L, k8x12S が存在します。
+　漢字の字形はこれらすべてで共通です (仝々〆〇 を含む)。
+
+・k8x12L
+　k8x12L は k8x12 の仮名を縦に長い形に変更したものです。
+　漢字同様に下端に空白を 1 ラインとった残りの縦 11 ドットを使っています。
+
+・k8x12S
+　k8x12S は k8x12 の非漢字を縦 8 ドットの字形に変更したものです。
+　濁点、半濁点は仮名の上に乗る形になっています。
+　このバリエーションは、8×8 ドット単位でグラフィックを扱うような、
+　昔のゲーム機やマイコンにおける制限を意識しています。
+　
+　文字の枠を 8×12 ではなく 8×16 ドットに広げた方がより「らしく」なりますが、
+　フォントとしての使い勝手を考えてそのままにしています。
+
+
+-------------------------------------------------------------------------------
+ 備考
+-------------------------------------------------------------------------------
+・縦書きには未対応です。
+
+
+-------------------------------------------------------------------------------
+ ライセンス
+-------------------------------------------------------------------------------
+　These fonts are free software.
+　Unlimited permission is granted to use, copy, and distribute them, with or without modification, either commercially or noncommercially.
+　THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+　これらのフォントはフリー（自由な）ソフトウエアです。
+　あらゆる改変の有無に関わらず、また商業的な利用であっても、自由にご利用、複製、再配布することができますが、全て無保証とさせていただきます。
+
+
+-------------------------------------------------------------------------------
+ 制作履歴
+-------------------------------------------------------------------------------
+■2021-05-05
+・文字の追加: ␣
+・字形の修正・変更:
+　*售堕寉寓崔帯廼滞焦瞿矍臭蕉隹隻隼雀集雋霍
+　(k8x12S のみ)│┃┌┏┐┓└┗┘┛├┝┠┣┤┥┨┫┬┯┰┳┴┷┸┻┼┿╂╋╞╡╪╭╮╯╰ホ
+・[TTF] ビットマップを埋込み
+・[BDF] アーカイブ形式を zip に変更
+
+■2017-02-20
+・「8」を首の細長い形状に変更 (「0」との誤認対策)
+
+■2016-08-27
+・「莱」の字形が「菜」になっている問題を修正
+
+■2015-01-29
+・[TTF] Windows 環境で文字幅が広がってしまう問題を修正
+
+■2015-01-28
+・初版公開
+
+■2014-12-09
+・JIS 第二水準漢字が揃う
+
+■2014-08-初～11-初
+・(休憩)
+
+■2014-08-08
+・JIS 第一水準漢字が揃う
+
+■2014-07-06
+・制作開始
+
+
+-------------------------------------------------------------------------------
+ バージョン情報
+-------------------------------------------------------------------------------
+■2021-05-05
+・k8x12 2017-05-05 版 (BDF/TTF/PNG)
+
+■2017-02-20
+・k8x12 2017-07-20 版 (BDF/TTF/PNG)
+
+■2016-08-27
+・k8x12 2016-08-27 版 (BDF/TTF/PNG)
+
+■2015-01-29
+・k8x12 2015-01-29 版 (TTF)
+
+■2015-01-28
+・k8x12 2015-01-28 版 (BDF/TTF/PNG)
+
+
+-------------------------------------------------------------------------------
+ 連絡先
+-------------------------------------------------------------------------------
+　門真 なむ (Num Kadoma)
+　・Twitter: @num_kadoma
+　・Website: http://littlelimit.net/
+
+
+--- mplus.txt ---
+
+M+ FONTS                                Copyright (C) 2002-2013 M+ FONTS PROJECT
+
+-
+
+LICENSE_E
+
+
+
+
+These fonts are free software.
+Unlimited permission is granted to use, copy, and distribute them, with
+or without modification, either commercially or noncommercially.
+THESE FONTS ARE PROVIDED "AS IS" WITHOUT WARRANTY.
+
+
+http://mplus-fonts.sourceforge.jp/mplus-outline-fonts/
+
+
+--- noto-emoji.txt ---
+
+Copyright 2013 Google LLC
+
+This Font Software is licensed under the SIL Open Font License, Version 1.1.
+This license is copied below, and is also available with a FAQ at:
+https://scripts.sil.org/OFL
+
+
+-----------------------------------------------------------
+SIL OPEN FONT LICENSE Version 1.1 - 26 February 2007
+-----------------------------------------------------------
+
+PREAMBLE
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded, 
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+
+DEFINITIONS
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting -- in part or in whole -- any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+
+PERMISSION & CONDITIONS
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+
+TERMINATION
+This license becomes null and void if any of the above conditions are
+not met.
+
+DISCLAIMER
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.

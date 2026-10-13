@@ -1,6 +1,7 @@
 'use client';
 
 import { Fragment, useCallback, useEffect, useId, useMemo, useRef, useState, type FocusEvent, type KeyboardEvent, type PointerEvent as ReactPointerEvent, type ReactNode, type RefObject } from 'react';
+import { AppIcon } from '@/components/app-icon';
 import styles from '@/app/editor/editor.module.css';
 import { isImeComposing } from './editor-input';
 import { getNextComboboxOptionIndex } from './editor-interaction';
@@ -415,7 +416,7 @@ export function SearchablePicker({
             type="button"
             aria-label={closeLabel}
             onClick={() => closePicker(true)}
-          >×</button>
+          ><AppIcon name="X" size={16} /></button>
         </div>
         <div className={styles.pickerSearchWrap}>
           {renderSearchInput(`${generatedId}-mobile-input`, mobileSearchRef, searchInputLabelledBy)}
@@ -459,7 +460,7 @@ export function SearchablePicker({
                   onClick={() => choose(null)}
                 >
                   <span className={styles.pickerOptionText}><span>{clearLabel}</span></span>
-                  {value === null && <span className={styles.pickerOptionCheck} aria-hidden="true">✓</span>}
+                  {value === null && <span className={styles.pickerOptionCheck} aria-hidden="true"><AppIcon name="Check" size={16} /></span>}
                 </li>
               );
             }
@@ -492,7 +493,7 @@ export function SearchablePicker({
                     <span>{option.label}</span>
                     {option.detail && <small>{option.detail}</small>}
                   </span>
-                  {option.id === value && <span className={styles.pickerOptionCheck} aria-hidden="true">✓</span>}
+                  {option.id === value && <span className={styles.pickerOptionCheck} aria-hidden="true"><AppIcon name="Check" size={16} /></span>}
                 </li>
               </Fragment>
             );

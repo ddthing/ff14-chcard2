@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { AppIcon } from '@/components/app-icon';
 import type { AdventurerCardData, AdventurerCardTemplate } from '@/components/cards/types';
 import { demoAdventurerData } from '@/components/cards/types';
 import { CardPreview } from '@/components/editor/card-preview';
@@ -221,7 +222,7 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
     <div className={styles.page} lang={locale} data-page-transition="templates">
       <div className={styles.wrap}>
         <nav className={styles.stepNav} aria-label={labels.navigation}>
-          <Link href="/" className={styles.backLink}><span aria-hidden="true">←</span>{labels.home}</Link>
+          <Link href="/" className={styles.backLink}><span aria-hidden="true"><AppIcon name="ArrowLeft" /></span>{labels.home}</Link>
         </nav>
 
         <header className={styles.heading}>
@@ -322,7 +323,7 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
                   </span>
                   <span className={styles.masterCopy}>
                     <strong>{names[template]}</strong>
-                    <span className={styles.choiceMark} aria-hidden="true">{active ? '✓' : ''}</span>
+                    <span className={styles.choiceMark} aria-hidden="true">{active ? <AppIcon name="Check" /> : ''}</span>
                   </span>
                 </button>
               </article>
@@ -340,13 +341,13 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
             {draft ? (
               <>
                 <button className={styles.primaryAction} type="button" onClick={editSelectedTemplate}>
-                  <span>{labels.apply}</span><span aria-hidden="true">↗</span>
+                  <span>{labels.apply}</span><span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
                 </button>
                 <Link className={styles.secondaryAction} href={getTemplatePhotoPath(selected)}>{labels.newCard}</Link>
               </>
             ) : (
               <Link className={styles.primaryAction} href={getTemplatePhotoPath(selected)}>
-                <span>{labels.photo}</span><span aria-hidden="true">↗</span>
+                <span>{labels.photo}</span><span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
               </Link>
             )}
           </div>

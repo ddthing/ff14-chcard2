@@ -55,12 +55,12 @@
 
 .target:hover .textOutline,
 .target[data-selected='true'] .textOutline {
-  border-color: var(--app-focus);
+  border-color: var(--editor-selection);
 }
 
 .target:focus-visible .textOutline {
-  border-color: var(--app-focus);
-  outline: 2px solid var(--app-focus);
+  border-color: var(--editor-selection);
+  outline: 2px solid var(--editor-selection);
   outline-offset: 2px;
 }
 
@@ -86,14 +86,14 @@
 .target[data-selected='true'] .badge,
 .groupTarget:hover .groupMarker,
 .groupTarget[data-selected='true'] .groupMarker {
-  border-color: var(--app-focus);
-  background: var(--app-accent);
-  color: var(--app-on-accent);
+  border-color: var(--editor-selection);
+  background: var(--editor-selection);
+  color: var(--editor-on-selection);
 }
 
 .groupTarget:focus-visible .groupMarker {
-  border-color: var(--app-focus);
-  outline: 2px solid var(--app-focus);
+  border-color: var(--editor-selection);
+  outline: 2px solid var(--editor-selection);
   outline-offset: 2px;
 }
 

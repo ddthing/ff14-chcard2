@@ -61,7 +61,7 @@ export function CardTextEditorNavigation({
     <section className={styles.editor} data-text-editor="true" data-selected-text-id={selectedItem?.id ?? ''}>
       <details ref={navigationRef} className={styles.navigation} data-text-navigation>
         <summary data-selected-text-context={selectedItem?.id ?? ''}>
-          {selectedOrdinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{selectedOrdinal}</small>}
+          {selectedOrdinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{selectedOrdinal}.</small>}
           <strong>{selectedLabel || copy.textEditor.items}</strong>
         </summary>
         <div className={styles.navigationBody}>
@@ -116,7 +116,7 @@ export function CardTextEditorNavigation({
                         aria-label={`${label}${!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}`}
                         onClick={() => selectItem(item)}
                       >
-                        {ordinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}</small>}
+                        {ordinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}.</small>}
                         <span>{label}</span>
                         {!item.value.trim() && <small>{copy.textEditor.hiddenText}</small>}
                       </button>

@@ -5,6 +5,8 @@ export interface LocalFontAsset {
   readonly publicPath: `/fonts/${string}`;
   readonly filePath: `public/fonts/${string}`;
   readonly bytes: number;
+  /** Preserve original TTF/OTF binaries when a license forbids conversion. */
+  readonly format?: 'woff2' | 'truetype' | 'opentype';
   readonly style?: 'normal' | 'italic';
   readonly stretch?: string;
   /** CSS unicode-range from the upstream subset stylesheet, when this is a subset face. */
@@ -16,6 +18,8 @@ export interface LocalFontAsset {
 export interface FontRegistryEntry {
   readonly id: string;
   readonly family: string;
+  readonly displayNames?: Readonly<Partial<Record<'ko' | 'en' | 'ja', string>>>;
+  readonly attribution?: Readonly<{ label: string; url: `https://${string}` }>;
   readonly license: string;
   readonly licenseFile: `licenses/fonts/${string}`;
   readonly publicLicenseFile?: `public/fonts/licenses/${string}`;
@@ -229,6 +233,164 @@ export const FONT_REGISTRY = {
       fontBytes: 3_519_780,
       unicodeRangeLoading: true,
     },
+  },
+  pretendard: {
+    id: 'pretendard', family: 'Pretendard Variable', displayNames: { ko: '프리텐다드' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Pretendard-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Pretendard-OFL.txt',
+    sourceUrl: 'https://github.com/orioncactus/pretendard/tree/v1.3.9',
+    axes: { weight: [45, 930] }, supportedScripts: ['latin', 'korean'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/pretendard-variable.woff2', filePath: 'public/fonts/pretendard-variable.woff2', bytes: 2057688 }],
+  },
+  pretendardJp: {
+    id: 'pretendard-jp', family: 'Pretendard JP Variable', displayNames: { ko: '프리텐다드 JP' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Pretendard-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Pretendard-OFL.txt',
+    sourceUrl: 'https://github.com/orioncactus/pretendard/tree/v1.3.9',
+    axes: { weight: [45, 930] }, supportedScripts: ['latin', 'korean', 'japanese'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/pretendard-jp-variable.woff2', filePath: 'public/fonts/pretendard-jp-variable.woff2', bytes: 5348104 }],
+  },
+  maruminyaHangul: {
+    id: 'maruminya-hangul', family: 'x12y12pxMaruMinyaHangul', displayNames: { ko: '마루미냐 한글', en: 'MaruMinya Hangul' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/MaruMinya-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/MaruMinya-OFL.txt',
+    sourceUrl: 'https://quiple.dev/font/maruminya-hangul',
+    axes: { weight: [500, 500] }, weights: [500], supportedScripts: ['latin', 'korean', 'japanese'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/maruminya-hangul.woff2', filePath: 'public/fonts/maruminya-hangul.woff2', bytes: 497884 }],
+  },
+  mona12: {
+    id: 'mona-12', family: 'Mona12', displayNames: { ko: '모나 12', en: 'Mona 12' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Mona-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Mona-OFL.txt', sourceUrl: 'https://github.com/MonadABXY/mona-font',
+    axes: { weight: [400, 700] }, weights: [400, 700], supportedScripts: ['latin', 'korean', 'japanese'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/mona-12.woff2', filePath: 'public/fonts/mona-12.woff2', bytes: 1253032, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/mona-12-bold.woff2', filePath: 'public/fonts/mona-12-bold.woff2', bytes: 1308056, weight: 700 },
+    ],
+  },
+  limgul12: {
+    id: 'limgul-12', family: 'Limgul 12', displayNames: { ko: '림굴 12' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Limgul-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Limgul-OFL.txt', sourceUrl: 'https://github.com/MonadABXY/limgul-font',
+    axes: { weight: [400, 700] }, weights: [400, 700], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/limgul-12.woff2', filePath: 'public/fonts/limgul-12.woff2', bytes: 416564, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/limgul-12-bold.woff2', filePath: 'public/fonts/limgul-12-bold.woff2', bytes: 361976, weight: 700 },
+    ],
+  },
+  suhgung12: {
+    id: 'suhgung-12', family: 'Suhgung 12', displayNames: { ko: '서궁 12' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Suhgung-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Suhgung-OFL.txt', sourceUrl: 'https://github.com/MonadABXY/suhgung-font',
+    axes: { weight: [400, 700] }, weights: [400, 700], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/suhgung-12.woff2', filePath: 'public/fonts/suhgung-12.woff2', bytes: 435512, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/suhgung-12-bold.woff2', filePath: 'public/fonts/suhgung-12-bold.woff2', bytes: 368108, weight: 700 },
+    ],
+  },
+  tangba12: {
+    id: 'tangba-12', family: 'Tangba 12', displayNames: { ko: '탕바 12' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Tangba-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Tangba-OFL.txt', sourceUrl: 'https://github.com/MonadABXY/tangba-font',
+    axes: { weight: [400, 700] }, weights: [400, 700], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/tangba-12.woff2', filePath: 'public/fonts/tangba-12.woff2', bytes: 422320, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/tangba-12-bold.woff2', filePath: 'public/fonts/tangba-12-bold.woff2', bytes: 367832, weight: 700 },
+    ],
+  },
+  umdot12: {
+    id: 'umdot-12', family: 'Umdot 12', displayNames: { ko: '움돋 12' },
+    license: 'SIL Open Font License 1.1', licenseFile: 'licenses/fonts/Umdot-OFL.txt',
+    publicLicenseFile: 'public/fonts/licenses/Umdot-OFL.txt', sourceUrl: 'https://github.com/MonadABXY/umdot-font',
+    axes: { weight: [400, 700] }, weights: [400, 700], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/umdot-12.woff2', filePath: 'public/fonts/umdot-12.woff2', bytes: 409428, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/umdot-12-bold.woff2', filePath: 'public/fonts/umdot-12-bold.woff2', bytes: 361188, weight: 700 },
+    ],
+  },
+  chaiHwaljjak: {
+    id: 'chai-hwaljjak', family: 'Chai Hwaljjak', displayNames: { ko: '차이 활짝체' },
+    license: 'CHAI Font License', licenseFile: 'licenses/fonts/CHAI-Hwaljjak-License.txt',
+    publicLicenseFile: 'public/fonts/licenses/CHAI-Hwaljjak-License.txt', sourceUrl: 'https://www.artistchai.co.kr/#/pride/identity_font',
+    axes: { weight: [400, 800] }, weights: [400, 500, 700, 800], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/chai-hwaljjak-regular.woff2', filePath: 'public/fonts/chai-hwaljjak-regular.woff2', bytes: 383064, weight: 400 },
+      { subset: 'full', publicPath: '/fonts/chai-hwaljjak-medium.woff2', filePath: 'public/fonts/chai-hwaljjak-medium.woff2', bytes: 376988, weight: 500 },
+      { subset: 'full', publicPath: '/fonts/chai-hwaljjak-bold.woff2', filePath: 'public/fonts/chai-hwaljjak-bold.woff2', bytes: 346852, weight: 700 },
+      { subset: 'full', publicPath: '/fonts/chai-hwaljjak-heavy.woff2', filePath: 'public/fonts/chai-hwaljjak-heavy.woff2', bytes: 380600, weight: 800 },
+    ],
+  },
+  chaiRising: {
+    id: 'chai-rising', family: 'Rising CHAI', displayNames: { ko: '차이 상승체', en: 'CHAI Rising' },
+    license: 'CHAI Font License', licenseFile: 'licenses/fonts/CHAI-Rising-License.txt',
+    publicLicenseFile: 'public/fonts/licenses/CHAI-Rising-License.txt', sourceUrl: 'https://www.artistchai.co.kr/#/pride/identity_font',
+    axes: { weight: [300, 800] }, weights: [300, 800], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/chai-rising-light.woff2', filePath: 'public/fonts/chai-rising-light.woff2', bytes: 222536, weight: 300 },
+      { subset: 'full', publicPath: '/fonts/chai-rising-extrabold.woff2', filePath: 'public/fonts/chai-rising-extrabold.woff2', bytes: 246500, weight: 800 },
+    ],
+  },
+  ownglyphYeongrong: {
+    id: 'ownglyph-yeongrong', family: 'Ownglyph brilliant', displayNames: { ko: '온글잎 영롱', en: 'Ownglyph Yeongrong' },
+    license: 'Ownglyph Original Font License', licenseFile: 'licenses/fonts/Ownglyph-Original-License.txt',
+    publicLicenseFile: 'public/fonts/licenses/Ownglyph-Original-License.txt',
+    sourceUrl: 'https://www.ownglyph.com/trial/30d9b1a5-8d7a-4e6d-8df6-f7a6bedfa959',
+    axes: { weight: [400, 400] }, weights: [400], supportedScripts: ['latin', 'korean'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/ownglyph-yeongrong.woff2', filePath: 'public/fonts/ownglyph-yeongrong.woff2', bytes: 603648 }],
+  },
+  ownglyphParkDahyeon: {
+    id: 'ownglyph-park-dahyeon', family: 'Ownglyph PDH', displayNames: { ko: '온글잎 박다현체', en: 'Ownglyph Park Dahyeon' },
+    license: 'Ownglyph Original Font License', licenseFile: 'licenses/fonts/Ownglyph-Original-License.txt',
+    publicLicenseFile: 'public/fonts/licenses/Ownglyph-Original-License.txt',
+    sourceUrl: 'https://www.ownglyph.com/trial/11ebf7f8-0997-4f03-a393-0959a07286aa',
+    axes: { weight: [400, 400] }, weights: [400], supportedScripts: ['latin', 'korean'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/ownglyph-park-dahyeon.woff2', filePath: 'public/fonts/ownglyph-park-dahyeon.woff2', bytes: 986572 }],
+  },
+  okDandan: {
+    id: 'ok-dandan', family: 'OkDanDan', displayNames: { ko: 'Ok단단체', en: 'Ok Dandan' },
+    license: 'OKTICON app embedding permission', licenseFile: 'licenses/fonts/Ok-Dandan-Permission.txt',
+    publicLicenseFile: 'public/fonts/licenses/Ok-Dandan-Permission.txt', sourceUrl: 'https://www.okticon.com/freefont/?bmode=view&idx=169969648',
+    axes: { weight: [500, 500] }, weights: [500], supportedScripts: ['latin', 'korean'],
+    localAssets: [{ subset: 'full', publicPath: '/fonts/ok-dandan-bold.ttf', filePath: 'public/fonts/ok-dandan-bold.ttf', bytes: 457932, format: 'truetype' }],
+  },
+  seoulHangang: {
+    id: 'seoul-hangang', family: 'SeoulHangang', displayNames: { ko: '서울한강체', en: 'Seoul Hangang' },
+    license: 'KOGL Type 1', licenseFile: 'licenses/fonts/Seoul-KOGL-Type-1.txt',
+    publicLicenseFile: 'public/fonts/licenses/Seoul-KOGL-Type-1.txt', sourceUrl: 'https://www.seoul.go.kr/seoul/font.do',
+    attribution: { label: 'Seoul Metropolitan Government', url: 'https://www.seoul.go.kr/seoul/font.do' },
+    axes: { weight: [300, 800] }, weights: [300, 500, 700, 800], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/seoul-hangang-light.woff2', filePath: 'public/fonts/seoul-hangang-light.woff2', bytes: 1366320, weight: 300 },
+      { subset: 'full', publicPath: '/fonts/seoul-hangang-medium.woff2', filePath: 'public/fonts/seoul-hangang-medium.woff2', bytes: 1659940, weight: 500 },
+      { subset: 'full', publicPath: '/fonts/seoul-hangang-bold.woff2', filePath: 'public/fonts/seoul-hangang-bold.woff2', bytes: 1475336, weight: 700 },
+      { subset: 'full', publicPath: '/fonts/seoul-hangang-extrabold.woff2', filePath: 'public/fonts/seoul-hangang-extrabold.woff2', bytes: 1704132, weight: 800 },
+    ],
+  },
+  seoulNamsan: {
+    id: 'seoul-namsan', family: 'SeoulNamsan', displayNames: { ko: '서울남산체', en: 'Seoul Namsan' },
+    license: 'KOGL Type 1', licenseFile: 'licenses/fonts/Seoul-KOGL-Type-1.txt',
+    publicLicenseFile: 'public/fonts/licenses/Seoul-KOGL-Type-1.txt', sourceUrl: 'https://www.seoul.go.kr/seoul/font.do',
+    attribution: { label: 'Seoul Metropolitan Government', url: 'https://www.seoul.go.kr/seoul/font.do' },
+    axes: { weight: [300, 800] }, weights: [300, 500, 700, 800], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/seoul-namsan-light.woff2', filePath: 'public/fonts/seoul-namsan-light.woff2', bytes: 1090508, weight: 300 },
+      { subset: 'full', publicPath: '/fonts/seoul-namsan-medium.woff2', filePath: 'public/fonts/seoul-namsan-medium.woff2', bytes: 1158528, weight: 500 },
+      { subset: 'full', publicPath: '/fonts/seoul-namsan-bold.woff2', filePath: 'public/fonts/seoul-namsan-bold.woff2', bytes: 1130876, weight: 700 },
+      { subset: 'full', publicPath: '/fonts/seoul-namsan-extrabold.woff2', filePath: 'public/fonts/seoul-namsan-extrabold.woff2', bytes: 1247012, weight: 800 },
+    ],
+  },
+  seoulAlrim: {
+    id: 'seoul-alrim', family: 'SeoulAlrim', displayNames: { ko: '서울알림체', en: 'Seoul Alrim' },
+    license: 'KOGL Type 1', licenseFile: 'licenses/fonts/Seoul-KOGL-Type-1.txt',
+    publicLicenseFile: 'public/fonts/licenses/Seoul-KOGL-Type-1.txt', sourceUrl: 'https://www.seoul.go.kr/seoul/font.do',
+    attribution: { label: 'Seoul Metropolitan Government', url: 'https://www.seoul.go.kr/seoul/font.do' },
+    axes: { weight: [500, 900] }, weights: [500, 700, 800, 900], supportedScripts: ['latin', 'korean'],
+    localAssets: [
+      { subset: 'full', publicPath: '/fonts/seoul-alrim-medium.woff2', filePath: 'public/fonts/seoul-alrim-medium.woff2', bytes: 528848, weight: 500 },
+      { subset: 'full', publicPath: '/fonts/seoul-alrim-bold.woff2', filePath: 'public/fonts/seoul-alrim-bold.woff2', bytes: 681836, weight: 700 },
+      { subset: 'full', publicPath: '/fonts/seoul-alrim-extrabold.woff2', filePath: 'public/fonts/seoul-alrim-extrabold.woff2', bytes: 680012, weight: 800 },
+      { subset: 'full', publicPath: '/fonts/seoul-alrim-heavy.woff2', filePath: 'public/fonts/seoul-alrim-heavy.woff2', bytes: 563896, weight: 900 },
+    ],
   },
   notoSansJp: {
     id: 'noto-sans-jp',

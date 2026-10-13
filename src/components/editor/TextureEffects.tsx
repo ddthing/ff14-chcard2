@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useId, useRef } from 'react';
+import { useId } from 'react';
 import {
   CARD_TEXTURE_EFFECTS,
   getCardTextureEffectIntensity,
   type CardTextureEffect,
   type CardTextureEffectIntensity,
 } from '@/lib/card-texture-effects';
+import { EditorNumberControl } from './editor-number-control';
 import styles from './TextureEffects.module.css';
 
 type TextureEffectsLocale = 'ko' | 'en' | 'ja';
@@ -47,17 +48,6 @@ const COPY: Record<TextureEffectsLocale, TextureEffectCopy> = {
   },
 };
 
-const RANGE_ADJUSTMENT_KEYS = new Set([
-  'ArrowDown',
-  'ArrowLeft',
-  'ArrowRight',
-  'ArrowUp',
-  'End',
-  'Home',
-  'PageDown',
-  'PageUp',
-]);
-
 export interface TextureEffectsProps {
   locale: TextureEffectsLocale;
   effects: readonly string[];
@@ -79,30 +69,6 @@ export function TextureEffects({
 }: TextureEffectsProps) {
   const copy = COPY[locale];
   const idPrefix = useId();
-  const activeInteraction = useRef<CardTextureEffect | null>(null);
-  const interactionEnd = useRef(onInteractionEnd);
-
-  useEffect(() => {
-    interactionEnd.current = onInteractionEnd;
-  }, [onInteractionEnd]);
-
-  const beginInteraction = (effect: CardTextureEffect) => {
-    if (activeInteraction.current === effect) return;
-    if (activeInteraction.current) interactionEnd.current(activeInteraction.current);
-    activeInteraction.current = effect;
-    onInteractionStart(effect);
-  };
-
-  const endInteraction = (effect: CardTextureEffect) => {
-    if (activeInteraction.current !== effect) return;
-    activeInteraction.current = null;
-    interactionEnd.current(effect);
-  };
-
-  useEffect(() => () => {
-    if (activeInteraction.current) interactionEnd.current(activeInteraction.current);
-    activeInteraction.current = null;
-  }, []);
 
   return (
     <div className={styles.group} role="group" aria-label={copy.group}>
@@ -111,7 +77,6 @@ export function TextureEffects({
           const selected = effects.includes(effect);
           const labelId = `${idPrefix}-${effect}-label`;
           const descriptionId = `${idPrefix}-${effect}-description`;
-          const rangeId = `${idPrefix}-${effect}-strength`;
           const intensity = getCardTextureEffectIntensity(effectIntensity, effect);
           const label = copy.effects[effect].label;
 
@@ -136,31 +101,20 @@ export function TextureEffects({
                 </span>
               </button>
               <div className={styles.strength}>
-                <label htmlFor={rangeId}>
-                  <span>{copy.strength}</span>
-                  <output htmlFor={rangeId}>{intensity}%</output>
-                </label>
-                <input
-                  id={rangeId}
-                  type="range"
+                <EditorNumberControl
+                  label={copy.strength}
+                  ariaLabel={`${label}: ${copy.strength}`}
+                  value={intensity}
                   min={0}
                   max={100}
                   step={1}
-                  value={intensity}
+                  unit="%"
+                  valueLabel={`${intensity}%`}
                   disabled={!selected}
-                  aria-label={`${label}: ${copy.strength}`}
-                  aria-valuetext={`${intensity}%`}
-                  onPointerDown={() => beginInteraction(effect)}
-                  onPointerUp={() => endInteraction(effect)}
-                  onPointerCancel={() => endInteraction(effect)}
-                  onKeyDown={(event) => {
-                    if (RANGE_ADJUSTMENT_KEYS.has(event.key) && !event.repeat) beginInteraction(effect);
-                  }}
-                  onKeyUp={(event) => {
-                    if (RANGE_ADJUSTMENT_KEYS.has(event.key)) endInteraction(effect);
-                  }}
-                  onBlur={() => endInteraction(effect)}
-                  onChange={(event) => onIntensityChange(effect, Number(event.currentTarget.value))}
+                  className={styles.strengthControl}
+                  onValueChange={(next) => onIntensityChange(effect, next)}
+                  onInteractionStart={() => onInteractionStart(effect)}
+                  onInteractionEnd={() => onInteractionEnd(effect)}
                 />
               </div>
             </div>

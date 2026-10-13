@@ -1,6 +1,26 @@
 # Font sources and web delivery
 
-Every bundled font is under the SIL Open Font License 1.1. The unmodified license and copyright notice for each source is kept next to this file. Gmarket Sans also carries its original clause 6, which grants eBay Korea promotional use of production images made with the font unless the user explicitly rejects that use to the rightsholder. The four added font notices are shipped at `/fonts/NOTICE.txt`, with their full text at `/fonts/licenses/`. WOFF2 files are served with the app; the site does not contact Google Fonts at runtime.
+Bundled fonts use the licenses named in the registry: SIL OFL 1.1, CHAI Font License, Ownglyph Original Font License, KOGL Type 1, and the creator's specific Ok Dandan app-embedding permission. Copyright and license evidence is kept next to this file and shipped at `/fonts/NOTICE.txt` and `/fonts/licenses/`. Gmarket Sans retains its original clause 6 on promotional use of production images. CHAI, Ownglyph and OkFont also have promotional-image terms documented below and in their notices. Font files are served with the app; no external font CDN is contacted at runtime.
+
+## 2026-10-13 additions
+
+The [request-by-request review](../../docs/design/v3/REQUESTED_FONTS_2026-10-13.md) covers all 13 supplied sources. [The audit manifest](REQUESTED_FONT_AUDIT_2026-10-13.json) records the SHA-256, original file size and inspected coverage of all 34 added faces (30,899,628 bytes across 16 families).
+
+| Families | Source | Delivery and conditions |
+| --- | --- | --- |
+| Pretendard / Pretendard JP | [orioncactus v1.3.9](https://github.com/orioncactus/pretendard/tree/v1.3.9) | Original variable WOFF2, axes 45–930. OFL and RFNs retained. JP is offered for Korean, English and Japanese; the base face is offered for Korean and English. |
+| MaruMinya Hangul | [quiple](https://quiple.dev/font/maruminya-hangul) | Original WOFF2, static 500. Korean, English and Japanese specimen coverage verified. OFL retained. |
+| Mona 12 / Limgul 12 / Suhgung 12 / Tangba 12 / Umdot 12 | [Monad ABXY](https://monadabxy.com/fonts/) | Original 12px regular/bold WOFF2, CSS weights 400/700. All five OFLs and Mona's upstream notices are included. Mona supports the Japanese specimen; the other four have some missing Japanese common ideographs and are offered for Korean and English. |
+| CHAI Hwaljjak / CHAI Rising | [CHAI](https://www.artistchai.co.kr/#/pride/identity_font) | Original official WOFF2 only; no conversion or subsetting. Hwaljjak 400/500/700/800, Rising 300/800. Complete policy permits bundling with software and forbids modifying the font files. It allows promotional/research use of produced images unless the user asks the publisher to exclude them. |
+| Ownglyph Yeongrong / Park Dahyeon | [Ownglyph license](https://www.ownglyph.com/font) | Original official WOFF2, static 400. Explicit web/server embedding and font distribution permission, modification and font sale prohibited. Hangul counts are 2,350/2,780. The license includes promotional use of images made with the fonts. |
+| Ok Dandan | [official font and creator reply](https://www.okticon.com/freefont/?bmode=view&idx=169969648) | Original `OkDanDan-Bold.ttf`, stored weight 500, unchanged. The creator's 2026-08-26 reply permits app inclusion for image/video creation. The permission does not authorize general standalone redistribution or conversion. |
+| Seoul Hangang / Namsan / Alrim | [Seoul Metropolitan Government](https://www.seoul.go.kr/seoul/font.do) | The font copyright section displays KOGL Type 1. Source credit/link and full notice accompany the fonts. Only container compression to WOFF2 was performed, with all cmap entries, glyph order and horizontal metrics checked. L/M/B/EB are mapped to CSS 300/500/700/800 for Hangang/Namsan; their old OS/2 tables label every face 400, so the official style labels govern CSS matching. Alrim uses its native 500/700/800/900. |
+
+**서울서체 출처표시:** 본 웹앱은 서울특별시가 공공누리 제1유형으로 개방한 서울서체(서울한강체·서울남산체·서울알림체)를 이용합니다. 원본은 [서울특별시 서울서체 페이지](https://www.seoul.go.kr/seoul/font.do)에서 무료로 받을 수 있습니다. 출처의 변경 허용 조건에 따라 글리프를 유지하며 웹 전송 컨테이너를 WOFF2로 압축했습니다. 서울특별시의 후원이나 제휴를 의미하지 않습니다.
+
+The picker loads preview faces only as their rows become visible. Missing glyphs retain the existing Noto/script-specific fallback. Original format and derivative status are explicit in the audit manifest; no unreviewed font conversion is hidden behind a filename change.
+
+KoPubWorld (separate server/app approval), Eulyoo1945 (embedding/redistribution ban), and Ok Mallang / Ownglyph Okticon / Ok SunnyNote (no confirmed app-file redistribution grant) were not bundled. See the request review for source links and exact scope.
 
 ## Latin families
 

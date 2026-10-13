@@ -1,6 +1,6 @@
 'use client';
 
-import type { KeyboardEvent as ReactKeyboardEvent, ReactNode } from 'react';
+import type { ReactNode } from 'react';
 import type { CardTypographyOverride } from '@/components/cards/types';
 import type { CardTextItem } from '@/lib/card-text-editing';
 import {
@@ -13,12 +13,15 @@ import {
   getTypographyScriptsForText,
   getTypographySupportedWeight,
   isSelectableTypographyFontId,
+  type TypographyScript,
 } from '@/lib/typography-presets';
 import type { Locale } from '@/lib/types';
 import { applyTypographyGroupOverrides, resetLegacyTypographyRole, resetTypographyGroupOverrides } from '@/components/editor/text-editor/card-text-actions';
 import { editorStore, useEditorStore } from '@/store/editor-store';
 import { getInformationTypographyItems, getTypographyGroupPrimaryScript, isIndividualTypographyItem } from '@/components/editor/text-editor/card-text-model';
 import { getEditorCopy } from '@/components/editor/copy';
+import { EditorNumberControl } from './editor-number-control';
+import { getTypographyFontLabel, TypographyFontPicker, type TypographyFontPickerChoice } from './typography-font-picker';
 import styles from './typography-role-editor.module.css';
 
 const COPY = {
@@ -30,6 +33,7 @@ const COPY = {
     groupFallback: '지원하지 않는 문자는 카드 기본 서체를 사용합니다.',
     missing: '저장된 글꼴을 찾을 수 없어 카드 기본 글꼴로 표시됩니다.',
     hidden: '저장된 글꼴은 새 선택 목록에서 숨겨져 있으며, 바꾸기 전까지 유지됩니다.',
+    source: '출처',
     roles: { display: '이름', secondaryDisplay: '소개', job: '직업', information: '정보 값', label: '레이블', caption: '캡션', micro: '짧은 문구' },
   },
   en: {
@@ -40,6 +44,7 @@ const COPY = {
     groupFallback: 'Unsupported characters keep the card’s default font.',
     missing: 'The saved font is unavailable; the card uses its fallback font.',
     hidden: 'This saved font is hidden from new choices and remains saved until replaced.',
+    source: 'Source',
     roles: { display: 'Name', secondaryDisplay: 'Bio', job: 'Job', information: 'Information', label: 'Label', caption: 'Caption', micro: 'Short phrase' },
   },
   ja: {
@@ -50,6 +55,7 @@ const COPY = {
     groupFallback: '対応していない文字はカードの標準フォントを使います。',
     missing: '保存済みのフォントが見つからないため、カードの代替フォントを使います。',
     hidden: '保存済みフォントは新しい選択肢に表示されず、置き換えるまで保存されます。',
+    source: '出典',
     roles: { display: '名前', secondaryDisplay: '紹介文', job: 'ジョブ', information: '情報', label: 'ラベル', caption: 'キャプション', micro: '短い文言' },
   },
 } as const;
@@ -58,10 +64,11 @@ type EditableField = 'fontFamily' | 'sizePercent' | 'weight' | 'trackingEm';
 const LEGACY_FONT_VALUE = '__saved-font__';
 const EXISTING_GROUP_VALUE = '__existing-settings__';
 const DEFAULT_FONT_VALUE = '__default-font__';
-
-function getFontLabel(family: string): string {
-  return family.replace(/\s+Variable$/u, '');
-}
+const SEOUL_FONT_ATTRIBUTION_LABELS: Record<Locale, string> = {
+  ko: '서울특별시',
+  en: 'Seoul Metropolitan Government',
+  ja: 'ソウル特別市',
+};
 
 function copyOverride(current: CardTypographyOverride | undefined, patch: Partial<CardTypographyOverride>): CardTypographyOverride {
   const next = { ...(current ?? {}), ...patch };
@@ -86,25 +93,6 @@ function beginGroup(targetId: string, field: EditableField) {
 function endGroup(targetId: string, field: EditableField) {
   const state = editorStore.getState();
   if (state.history.groupId === `text-typography:${targetId}:${field}`) state.endHistoryGroup();
-}
-
-function rangeGroupHandlers(targetId: string, field: EditableField) {
-  const start = () => beginGroup(targetId, field);
-  const finish = () => endGroup(targetId, field);
-  const adjustKeys = new Set(['ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp', 'End', 'Home', 'PageDown', 'PageUp']);
-  return {
-    onFocus: start,
-    onBlur: finish,
-    onPointerDown: start,
-    onPointerUp: finish,
-    onPointerCancel: finish,
-    onKeyDown: (event: ReactKeyboardEvent<HTMLInputElement>) => {
-      if (adjustKeys.has(event.key) && !event.repeat) start();
-    },
-    onKeyUp: (event: ReactKeyboardEvent<HTMLInputElement>) => {
-      if (adjustKeys.has(event.key)) finish();
-    },
-  };
 }
 
 export function TypographyRoleEditor({
@@ -155,6 +143,12 @@ export function TypographyRoleEditor({
     ? font.supportedScripts.includes(groupPrimaryScript)
     : requiredScripts.every((requiredScript) => font.supportedScripts.includes(requiredScript)) && font.id !== defaultFontId);
   const selectedEntry = selectedFontId ? getTypographyFontEntry(selectedFontId) : undefined;
+  const selectedAttribution = selectedEntry?.attribution;
+  const selectedAttributionLabel = selectedAttribution
+    ? selectedAttribution.label === 'Seoul Metropolitan Government'
+      ? SEOUL_FONT_ATTRIBUTION_LABELS[locale]
+      : selectedAttribution.label
+    : undefined;
   const effectiveEntry = selectedEntry ?? defaultEntry;
   const selectedFontSupportsScript = selectedEntry
     ? informationGroup
@@ -197,6 +191,55 @@ export function TypographyRoleEditor({
     : informationGroup
       ? selectedFontId && !groupHasMixedFonts ? selectedFontId : EXISTING_GROUP_VALUE
       : defaultFontIsSelected ? defaultFontValue : selectedFontId;
+  const sampleItem = informationGroup
+    ? targets.find((target) => detectTypographyScript(target.value || target.defaultValue, localeScript) === groupPrimaryScript) ?? targets[0]
+    : selectedItem;
+  const sampleValue = sampleItem?.value || sampleItem?.defaultValue || (
+    localeScript === 'korean' ? '모험가의 여정' : localeScript === 'japanese' ? '冒険者の旅' : 'An adventurer’s journey'
+  );
+  const sampleScripts = getTypographyScriptsForText(sampleValue, localeScript);
+  const sampleTextByScript = Object.fromEntries(sampleScripts.map((sampleScript) => [sampleScript, sampleValue])) as Partial<Record<TypographyScript, string>>;
+  const localizedSelectableOptions = [...selectableOptions].sort((left, right) => (
+    getTypographyFontLabel(left, locale).localeCompare(getTypographyFontLabel(right, locale), locale)
+  ));
+  const pickerChoices: TypographyFontPickerChoice[] = [
+    ...(!informationGroup ? [{
+      value: defaultFontValue,
+      label: defaultEntry
+        ? copy.defaultFont + ' · ' + getTypographyFontLabel(defaultEntry, locale)
+        : copy.defaultFont,
+      fontId: defaultEntry?.id,
+      family: defaultEntry?.family ?? '',
+      fontStack: defaultEntry ? undefined : treatment.fontFamily,
+      fallbackStack: treatment.fontFamily,
+      weight: getTypographySupportedWeight(defaultEntry?.id, requestedWeight),
+      scripts: sampleScripts,
+      textByScript: sampleTextByScript,
+      sample: sampleValue,
+    }] : []),
+    ...localizedSelectableOptions.map((font) => ({
+      value: font.id,
+      label: getTypographyFontLabel(font, locale),
+      fontId: font.id,
+      family: font.family,
+      fallbackStack: treatment.fontFamily,
+      weight: getTypographySupportedWeight(font.id, requestedWeight),
+      scripts: sampleScripts,
+      textByScript: sampleTextByScript,
+      sample: sampleValue,
+    })),
+  ];
+  const fontPickerValueLabel = selectedFontIsLegacyUnavailable
+    ? selectedEntry ? getTypographyFontLabel(selectedEntry, locale) : copy.unavailableFont
+    : informationGroup
+      ? editorCopy.textEditor.existingSettings
+      : defaultFontIsSelected
+        ? defaultEntry
+          ? copy.defaultFont + ' · ' + getTypographyFontLabel(defaultEntry, locale)
+          : copy.defaultFont
+        : selectedEntry
+          ? getTypographyFontLabel(selectedEntry, locale)
+          : copy.unavailableFont;
 
   function storeField(field: EditableField, patch: Partial<CardTypographyOverride>) {
     updateItemOverride(selectedItem, itemOverride, patch, `text-typography:${typographyTargetId}:${field}`);
@@ -248,7 +291,7 @@ export function TypographyRoleEditor({
         },
       };
     });
-    applyTypographyGroupOverrides(updates);
+    applyTypographyGroupOverrides(updates, 'text-typography:' + typographyTargetId + ':fontFamily');
   }
 
   function handleFontChange(value: string) {
@@ -277,58 +320,58 @@ export function TypographyRoleEditor({
       <div className={styles.primaryControls}>
         <label className={styles.field}>
           <span className={styles.fieldLabel}>{copy.font}</span>
-          <select
-            className={styles.fontSelect}
-            data-text-font-family={informationGroup ? undefined : item.id}
-            aria-label={`${informationGroup ? editorCopy.textEditor.informationTypography : item.label}: ${copy.font}`}
+          <TypographyFontPicker
+            locale={locale}
+            label={(informationGroup ? editorCopy.textEditor.informationTypography : item.label) + ': ' + copy.font}
             value={selectValue}
-            onFocus={() => beginGroup(typographyTargetId, 'fontFamily')}
-            onBlur={() => endGroup(typographyTargetId, 'fontFamily')}
-            onChange={(event) => handleFontChange(event.currentTarget.value)}
-          >
-            {informationGroup ? (
-              <option value={EXISTING_GROUP_VALUE} disabled>{editorCopy.textEditor.existingSettings}</option>
-            ) : (
-              <option value={defaultFontValue}>
-                {copy.defaultFont}{defaultEntry ? ` · ${getFontLabel(defaultEntry.family)}` : ''}
-              </option>
-            )}
-            {selectedFontIsLegacyUnavailable && (
-              <option value={LEGACY_FONT_VALUE} disabled>
-                {selectedEntry ? getFontLabel(selectedEntry.family) : copy.unavailableFont}
-              </option>
-            )}
-            {selectableOptions.map((font) => <option key={font.id} value={font.id}>{getFontLabel(font.family)}</option>)}
-          </select>
+            valueLabel={fontPickerValueLabel}
+            dataTextFontFamily={informationGroup ? undefined : item.id}
+            choices={pickerChoices}
+            onValueChange={handleFontChange}
+            onOpenChange={(open) => {
+              if (open) beginGroup(typographyTargetId, 'fontFamily');
+              else endGroup(typographyTargetId, 'fontFamily');
+            }}
+          />
+          {selectedAttribution && selectedAttributionLabel && (
+            <a
+              className={styles.fontAttribution}
+              href={selectedAttribution.url}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {copy.source} · {selectedAttributionLabel}
+            </a>
+          )}
           {selectedFontId && !selectedEntry && <small className={styles.fontNotice} role="status">{copy.missing}</small>}
           {selectedFontId && selectedEntry && !selectedEntryIsSelectable && <small className={styles.fontNotice} role="status">{copy.hidden}</small>}
           {selectedFontId && selectedEntry && informationGroup && selectedFontHasScriptFallback && <small className={styles.fontNotice} role="status">{copy.groupFallback}</small>}
           {selectedFontId && selectedEntry && !informationGroup && !selectedFontSupportsScript && <small className={styles.fontNotice} role="status">{copy.fallback}</small>}
         </label>
 
-        <label className={`${styles.rangeField} ${styles.sizeField}`}>
-          <span>{copy.size} <output>{groupHasMixedSizes ? editorCopy.textEditor.existingSettings : `${sizePercent}%`}</output></span>
-          <input
-            type="range"
-            min={minimumSizePercent}
-            max={maximumSizePercent}
-            step={1}
-            value={sizePercent}
-            aria-label={`${informationGroup ? editorCopy.textEditor.informationTypography : item.label}: ${copy.size}`}
-            aria-valuetext={groupHasMixedSizes ? editorCopy.textEditor.existingSettings : `${sizePercent}%`}
-            {...rangeGroupHandlers(typographyTargetId, 'sizePercent')}
-            onChange={(event) => changeSize(Number(event.currentTarget.value))}
-          />
-        </label>
+        <EditorNumberControl
+          className={styles.rangeField}
+          label={copy.size}
+          ariaLabel={`${informationGroup ? editorCopy.textEditor.informationTypography : item.label}: ${copy.size}`}
+          value={sizePercent}
+          min={minimumSizePercent}
+          max={maximumSizePercent}
+          step={1}
+          unit="%"
+          valueLabel={groupHasMixedSizes ? editorCopy.textEditor.existingSettings : `${sizePercent}%`}
+          onInteractionStart={() => beginGroup(typographyTargetId, 'sizePercent')}
+          onInteractionEnd={() => endGroup(typographyTargetId, 'sizePercent')}
+          onValueChange={changeSize}
+        />
       </div>
 
       {!informationGroup && (
         <details className={styles.advanced}>
           <summary>{copy.advanced}</summary>
           <div className={styles.advancedBody}>
-            <label className={styles.rangeField}>
-              <span>{copy.weight} <output>{weight}</output></span>
-              {supportedWeights && supportedWeights.length > 1 ? (
+            {supportedWeights && supportedWeights.length > 1 ? (
+              <label className={styles.rangeField}>
+                <span>{copy.weight}</span>
                 <select
                   aria-label={`${item.label}: ${copy.weight}`}
                   value={weight}
@@ -338,36 +381,38 @@ export function TypographyRoleEditor({
                 >
                   {supportedWeights.map((supported) => <option key={supported} value={supported}>{supported}</option>)}
                 </select>
-              ) : (
-                <input
-                  type="range"
-                  min={effectiveWeightRange[0]}
-                  max={effectiveWeightRange[1]}
-                  step={1}
-                  value={weight}
-                  aria-label={`${item.label}: ${copy.weight}`}
-                  aria-valuetext={String(weight)}
-                  disabled={effectiveWeightRange[0] === effectiveWeightRange[1]}
-                  {...rangeGroupHandlers(item.id, 'weight')}
-                  onChange={(event) => storeField('weight', { weight: Number(event.currentTarget.value) })}
-                />
-              )}
-            </label>
-
-            <label className={styles.rangeField}>
-              <span>{copy.tracking} <output>{tracking.toFixed(2)}em</output></span>
-              <input
-                type="range"
-                min={minimumTracking}
-                max={maximumTracking}
-                step={0.005}
-                value={tracking}
-                aria-label={`${item.label}: ${copy.tracking}`}
-                aria-valuetext={`${tracking.toFixed(2)}em`}
-                {...rangeGroupHandlers(item.id, 'trackingEm')}
-                onChange={(event) => storeField('trackingEm', { trackingEm: Number(event.currentTarget.value) - inheritedTracking })}
+              </label>
+            ) : (
+              <EditorNumberControl
+                className={styles.rangeField}
+                label={copy.weight}
+                ariaLabel={`${item.label}: ${copy.weight}`}
+                value={weight}
+                min={effectiveWeightRange[0]}
+                max={effectiveWeightRange[1]}
+                step={1}
+                valueLabel={String(weight)}
+                disabled={effectiveWeightRange[0] === effectiveWeightRange[1]}
+                onInteractionStart={() => beginGroup(item.id, 'weight')}
+                onInteractionEnd={() => endGroup(item.id, 'weight')}
+                onValueChange={(next) => storeField('weight', { weight: next })}
               />
-            </label>
+            )}
+
+            <EditorNumberControl
+              className={styles.rangeField}
+              label={copy.tracking}
+              ariaLabel={`${item.label}: ${copy.tracking}`}
+              value={tracking}
+              min={minimumTracking}
+              max={maximumTracking}
+              step={0.005}
+              unit="em"
+              valueLabel={`${tracking.toFixed(3)}em`}
+              onInteractionStart={() => beginGroup(item.id, 'trackingEm')}
+              onInteractionEnd={() => endGroup(item.id, 'trackingEm')}
+              onValueChange={(next) => storeField('trackingEm', { trackingEm: next - inheritedTracking })}
+            />
             {hasInheritedOverride && (
               <button
                 type="button"

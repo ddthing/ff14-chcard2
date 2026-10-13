@@ -9,10 +9,10 @@ import { getEditorLayerPanelModel } from './editor-layer-panel-model';
 import type { EditorTaskId } from './editor-navigation';
 import styles from './editor-layer-panel.module.css';
 
-const NAVIGATOR_COPY: Record<Locale, { items: string; layers: string }> = {
-  ko: { items: '편집 항목', layers: '카드 레이어' },
-  en: { items: 'Items', layers: 'Card layers' },
-  ja: { items: '編集項目', layers: 'カードのレイヤー' },
+const NAVIGATOR_COPY: Record<Locale, { items: string; layers: string; informationSet: string }> = {
+  ko: { items: '편집 항목', layers: '카드 레이어', informationSet: '정보 세트' },
+  en: { items: 'Items', layers: 'Card layers', informationSet: 'Information set' },
+  ja: { items: '編集項目', layers: 'カードのレイヤー', informationSet: '情報セット' },
 };
 
 interface EditorLayerPanelProps {
@@ -69,15 +69,13 @@ export function EditorLayerPanel({
           title={item.label}
           onClick={() => onSelectItem(item)}
         >
-          <span className={styles.rowIcon} aria-hidden="true">
-            <EditorIcon name={item.field === 'name' || item.field === 'bio' ? 'character' : 'sparkle'} size={16} />
-          </span>
           <span className={styles.rowText}>
-            <span className={styles.rowLabel}>{visibleLabel}</span>
+            <span className={styles.rowLabel}>
+              {ordinal > 0 && <span className={styles.ordinal} aria-hidden="true">{ordinal}.</span>}
+              <span className={styles.rowTitle}>{visibleLabel}</span>
+            </span>
             <span className={styles.rowContext}>{getItemContext(item, copy.textEditor.hiddenText)}</span>
           </span>
-          {ordinal > 0 && <span className={styles.ordinal} aria-hidden="true">{ordinal}</span>}
-          <span className={styles.selectedMark} aria-hidden="true">{isSelected ? '✓' : ''}</span>
         </button>
       </li>
     );
@@ -89,7 +87,7 @@ export function EditorLayerPanel({
 
   return (
     <section className={styles.panel} data-active-task={activeTask}>
-      <h2 className={styles.heading}>{NAVIGATOR_COPY[locale].items}</h2>
+      <h2 className={styles.visuallyHidden}>{NAVIGATOR_COPY[locale].items}</h2>
 
       <button
         type="button"
@@ -99,12 +97,11 @@ export function EditorLayerPanel({
         aria-label={`${templateLabel} · ${ratio} · ${copy.tasks.design}`}
         onClick={() => onSelectTask('design')}
       >
-        <span className={styles.cardGlyph} aria-hidden="true"><EditorIcon name="template" size={17} /></span>
+        <span className={styles.cardGlyph} aria-hidden="true"><EditorIcon name="template" size={16} /></span>
         <span className={styles.cardDetails}>
           <span className={styles.cardName}>{templateLabel}</span>
           <span className={styles.cardRatio}>{ratio}</span>
         </span>
-        <span className={styles.selectedMark} aria-hidden="true">{frameSelected ? '✓' : ''}</span>
       </button>
 
       <nav className={styles.navigation} aria-label={NAVIGATOR_COPY[locale].layers}>
@@ -119,7 +116,6 @@ export function EditorLayerPanel({
             >
               <span className={styles.rowIcon} aria-hidden="true"><EditorIcon name="screenshot" size={16} /></span>
               <span className={styles.rowText}><span className={styles.rowLabel}>{copy.sections.screenshot}</span></span>
-              <span className={styles.selectedMark} aria-hidden="true">{photoSelected ? '✓' : ''}</span>
             </button>
           </li>
         </ul>
@@ -139,7 +135,7 @@ export function EditorLayerPanel({
         )}
 
         {model.informationAnchor && (
-          <section className={styles.group} aria-label={copy.textEditor.informationTypography}>
+          <section className={styles.group} aria-label={NAVIGATOR_COPY[locale].informationSet}>
             <ul className={styles.list}>
               <li className={styles.listItem}>
                 <button
@@ -147,15 +143,13 @@ export function EditorLayerPanel({
                   className={styles.row}
                   data-selected={infoSelected ? '' : undefined}
                   aria-pressed={infoSelected}
-                  aria-label={`${copy.textEditor.informationTypography} · ${copy.textEditor.informationScope}`}
+                  aria-label={`${NAVIGATOR_COPY[locale].informationSet} · ${copy.textEditor.informationScope}`}
                   onClick={() => onSelectItem(model.informationAnchor!)}
                 >
-                  <span className={styles.rowIcon} aria-hidden="true"><EditorIcon name="information" size={16} /></span>
                   <span className={styles.rowText}>
-                    <span className={styles.rowLabel}>{copy.textEditor.informationTypography}</span>
+                    <span className={styles.rowLabel}>{NAVIGATOR_COPY[locale].informationSet}</span>
                     <span className={styles.rowContext}>{copy.textEditor.informationScope}</span>
                   </span>
-                  <span className={styles.selectedMark} aria-hidden="true">{infoSelected ? '✓' : ''}</span>
                 </button>
               </li>
             </ul>

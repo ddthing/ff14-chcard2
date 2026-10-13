@@ -1,0 +1,30 @@
+서울특별시 서울서체 / Seoul Metropolitan Government — Seoul Fonts
+서울한강체 (SeoulHangang), 서울남산체 (SeoulNamsan), 서울알림체 (SeoulAlrim)
+
+Source and original downloads: https://www.seoul.go.kr/seoul/font.do
+Original manual package: https://www.seoul.go.kr/upload/seoul/font/seoul_font3.zip
+License: KOGL Type 1 (source attribution)
+License terms: https://www.kogl.or.kr/info/licenseType1.do
+Reviewed: 2026-10-13
+
+Source attribution:
+본 웹앱은 서울특별시가 공공누리 제1유형으로 개방한 서울서체(서울한강체·서울남산체·서울알림체)를 이용합니다.
+원본은 서울특별시 https://www.seoul.go.kr/seoul/font.do 에서 무료로 내려받을 수 있습니다.
+서울특별시가 이 앱을 후원하거나 이 앱과 특별한 관계를 맺었다는 의미는 아닙니다.
+
+The font page's copyright section displays the KOGL Type 1 mark immediately below the font-use notice.
+It permits free use and prohibits font sale, paid transfer and unauthorized distribution.
+KOGL Type 1 permits online/offline sharing, commercial use and derivative use with source attribution.
+Where possible, a hyperlink to the source must be provided; do not imply the institution endorses this app.
+Respect the author's moral rights; failure to meet the license conditions ends the permission.
+
+Source-file copyright notices retained in the fonts:
+COPYRIGHT © 2018 by Seoul Metropolitan Government. All rights reserved.
+Font designed by Type4Design CO., LTD. (SeoulHangang / SeoulNamsan)
+Copyright © 2024 by Seoul Metropolitan Government. All Rights Reserved. (SeoulAlrim)
+
+Web delivery modification:
+The original TTF/OTF font containers were compressed to WOFF2 using fontTools without subsetting or
+editing glyph designs. Cmap entries, glyph order and horizontal metrics are checked against the originals.
+Source and delivered file hashes are recorded in REQUESTED_FONT_AUDIT_2026-10-13.json.
+The original embedded copyright notices and embedding flags are retained.

@@ -1,0 +1,102 @@
+.control {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: var(--app-text);
+}
+
+.label {
+  min-width: 0;
+  color: var(--app-text);
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 1.35;
+}
+
+.adjustment {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.range {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  accent-color: var(--editor-selection, var(--app-accent));
+  cursor: pointer;
+}
+
+.numberField {
+  display: flex;
+  width: 96px;
+  min-width: 96px;
+  min-height: 44px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  border: 1px solid var(--app-border-strong);
+  border-radius: var(--radius-md);
+  padding-inline: 8px;
+  background: var(--app-control);
+  color: var(--app-text);
+  transition: border-color var(--editor-motion-micro, var(--motion-fast)) var(--editor-ease-snappy, var(--ease-editorial)), background-color var(--editor-motion-micro, var(--motion-fast)) var(--editor-ease-snappy, var(--ease-editorial));
+}
+
+.numberField:focus-within {
+  border-color: var(--editor-selection, var(--app-focus));
+  background: var(--app-surface);
+}
+
+.numberInput {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  border: 0;
+  outline: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  font-variant-numeric: tabular-nums;
+  text-align: end;
+}
+
+.numberInput:focus-visible {
+  outline: 0;
+  box-shadow: none;
+}
+
+.unit {
+  flex: 0 0 auto;
+  color: var(--app-text-muted);
+  font-size: 12px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .numberInput { font-size: 16px; }
+}
+
+.control[data-disabled] .label,
+.control[data-disabled] .numberField {
+  opacity: 0.56;
+}
+
+.control[data-disabled] .range,
+.control[data-disabled] .numberInput {
+  cursor: not-allowed;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .numberField { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .numberField:focus-within { border-color: Highlight; }
+}

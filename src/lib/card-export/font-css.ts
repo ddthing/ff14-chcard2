@@ -1,10 +1,12 @@
 import { profileCount, profileStart, profileTiming } from '@/lib/performance-profile';
 
 type UnicodeRange = readonly [start: number, end: number];
+type FontFileFormat = 'woff2' | 'truetype' | 'opentype';
+type FontDataUrlResource = { dataUrl: string; bytes: number; format: FontFileFormat };
 
 type SourceItem =
   | { kind: 'local'; cssText: string }
-  | { kind: 'woff2'; url: string; format: string | null; resolvedUrl?: string; dataUrl?: string; bytes?: number }
+  | { kind: FontFileFormat; url: string; format: string | null; resolvedUrl?: string; dataUrl?: string; bytes?: number }
   | { kind: 'other-url' };
 
 type FontFaceRule = CSSRule & { style: CSSStyleDeclaration; parentStyleSheet?: CSSStyleSheet | null };
@@ -21,12 +23,12 @@ export interface PreparedCardFontCss {
 const MAX_INLINED_FONT_BYTES = 24 * 1024 * 1024;
 const FONT_FETCH_CONCURRENCY = 4;
 const FONT_DATA_URL_CACHE_MAX_BYTES = 8 * 1024 * 1024;
-const fontDataUrlCache = new Map<string, { dataUrl: string; bytes: number }>();
+const fontDataUrlCache = new Map<string, FontDataUrlResource>();
 let fontDataUrlCacheBytes = 0;
 
-function getCachedFontDataUrl(url: string): { dataUrl: string; bytes: number } | undefined {
+function getCachedFontDataUrl(url: string, format: FontFileFormat): FontDataUrlResource | undefined {
   const cached = fontDataUrlCache.get(url);
-  if (!cached) {
+  if (!cached || cached.format !== format) {
     profileCount('export.fontCss.resourceCache.miss');
     return undefined;
   }
@@ -36,7 +38,7 @@ function getCachedFontDataUrl(url: string): { dataUrl: string; bytes: number } |
   return cached;
 }
 
-function cacheFontDataUrl(url: string, resource: { dataUrl: string; bytes: number }): void {
+function cacheFontDataUrl(url: string, resource: FontDataUrlResource): void {
   if (resource.bytes > FONT_DATA_URL_CACHE_MAX_BYTES) return;
 
   const previous = fontDataUrlCache.get(url);
@@ -452,11 +454,28 @@ function parseSourceItem(value: string): SourceItem | null {
     format = formatValue;
   }
 
-  const isDataWoff2 = /^data:(?:font\/woff2|application\/font-woff2)(?:;|,)/iu.test(url);
-  const isWoff2 = (format?.startsWith('woff2') ?? false) || isDataWoff2 || /\.woff2(?:[?#]|$)/iu.test(url);
-  if (isDataWoff2 && isWoff2) return { kind: 'woff2', url, format };
-  if (!isWoff2) return { kind: 'other-url' };
-  return { kind: 'woff2', url, format };
+  const dataMime = url.match(/^data:([^;,]+)/iu)?.[1]?.toLowerCase();
+  const formatFromMime: FontFileFormat | null = dataMime === 'font/woff2' || dataMime === 'application/font-woff2'
+    ? 'woff2'
+    : dataMime === 'font/ttf' || dataMime === 'application/x-font-ttf' || dataMime === 'application/x-truetype-font'
+      ? 'truetype'
+      : dataMime === 'font/otf' || dataMime === 'application/vnd.ms-opentype'
+        ? 'opentype'
+        : null;
+  const formatFromDescriptor: FontFileFormat | null = format?.startsWith('woff2')
+    ? 'woff2'
+    : format === 'truetype' || format === 'opentype'
+      ? format
+      : null;
+  const formatFromPath: FontFileFormat | null = /\.woff2(?:[?#]|$)/iu.test(url)
+    ? 'woff2'
+    : /\.ttf(?:[?#]|$)/iu.test(url)
+      ? 'truetype'
+      : /\.otf(?:[?#]|$)/iu.test(url)
+        ? 'opentype'
+        : null;
+  const fileFormat = formatFromMime ?? formatFromDescriptor ?? formatFromPath;
+  return fileFormat ? { kind: fileFormat, url, format } : { kind: 'other-url' };
 }
 
 export function parseCssFontSourceList(value: string): SourceItem[] | null {
@@ -479,20 +498,32 @@ function resolveSameOriginFontUrl(url: string, baseHref: string | null, document
   }
 }
 
-function buildDataUrl(bytes: ArrayBuffer): string {
+function buildDataUrl(bytes: ArrayBuffer, format: FontFileFormat): string {
   const view = new Uint8Array(bytes);
   let binary = '';
   for (let offset = 0; offset < view.length; offset += 0x8000) {
     binary += String.fromCharCode(...view.subarray(offset, Math.min(offset + 0x8000, view.length)));
   }
-  return `data:font/woff2;base64,${btoa(binary)}`;
+  const mime = format === 'woff2' ? 'font/woff2' : format === 'truetype' ? 'font/ttf' : 'font/otf';
+  return `data:${mime};base64,${btoa(binary)}`;
+}
+
+function fontBytesMatchFormat(bytes: ArrayBuffer, format: FontFileFormat): boolean {
+  if (bytes.byteLength < 4) return false;
+  const signature = new Uint8Array(bytes, 0, 4);
+  if (format === 'woff2') return signature[0] === 0x77 && signature[1] === 0x4f && signature[2] === 0x46 && signature[3] === 0x32;
+  if (format === 'truetype') {
+    return signature[0] === 0x00 && signature[1] === 0x01 && signature[2] === 0x00 && signature[3] === 0x00
+      || signature[0] === 0x74 && signature[1] === 0x72 && signature[2] === 0x75 && signature[3] === 0x65;
+  }
+  return signature[0] === 0x4f && signature[1] === 0x54 && signature[2] === 0x54 && signature[3] === 0x4f;
 }
 
 async function fetchFontData(
-  urls: readonly string[],
+  urls: readonly { url: string; format: FontFileFormat }[],
   signal: AbortSignal,
-): Promise<Map<string, { dataUrl: string; bytes: number }>> {
-  const results = new Map<string, { dataUrl: string; bytes: number }>();
+): Promise<Map<string, FontDataUrlResource>> {
+  const results = new Map<string, FontDataUrlResource>();
   let next = 0;
   let totalBytes = 0;
   const worker = async () => {
@@ -501,8 +532,8 @@ async function fetchFontData(
       const index = next;
       next += 1;
       if (index >= urls.length) return;
-      const url = urls[index];
-      const cached = getCachedFontDataUrl(url);
+      const { url, format } = urls[index];
+      const cached = getCachedFontDataUrl(url, format);
       if (cached) {
         totalBytes += cached.bytes;
         if (totalBytes > MAX_INLINED_FONT_BYTES) throw new Error('Font resource budget exceeded');
@@ -512,13 +543,10 @@ async function fetchFontData(
       const response = await fetch(url, { signal, cache: 'force-cache', credentials: 'same-origin' });
       if (!response.ok) throw new Error('Font resource request failed');
       const bytes = await response.arrayBuffer();
-      const signature = new Uint8Array(bytes, 0, Math.min(4, bytes.byteLength));
-      if (signature.length !== 4 || signature[0] !== 0x77 || signature[1] !== 0x4f || signature[2] !== 0x46 || signature[3] !== 0x32) {
-        throw new Error('Font resource is not WOFF2');
-      }
+      if (!fontBytesMatchFormat(bytes, format)) throw new Error(`Font resource does not match ${format}`);
       totalBytes += bytes.byteLength;
       if (totalBytes > MAX_INLINED_FONT_BYTES) throw new Error('Font resource budget exceeded');
-      const resource = { dataUrl: buildDataUrl(bytes), bytes: bytes.byteLength };
+      const resource = { dataUrl: buildDataUrl(bytes, format), bytes: bytes.byteLength, format };
       results.set(url, resource);
       if (responseHasImmutableCacheControl(response)) cacheFontDataUrl(url, resource);
     }
@@ -634,7 +662,7 @@ export async function prepareCardFontCss(
         const src = rule.style.getPropertyValue('src');
         const sources = src ? parseCssFontSourceList(src) : null;
         if (!sources) return null;
-        if (!sources.some((source) => source.kind === 'woff2' || source.kind === 'local')) return null;
+        if (!sources.some((source) => source.kind !== 'other-url')) return null;
         selected.push({ rule, sources: sources.filter((source) => source.kind !== 'other-url') });
       }
     } finally {
@@ -644,21 +672,23 @@ export async function prepareCardFontCss(
     selectedFaceCount = selected.length;
     if (!selected.length) return null;
 
-    const uniqueUrlSet = new Set<string>();
+    const uniqueUrlFormats = new Map<string, FontFileFormat>();
     for (const face of selected) {
       for (const source of face.sources) {
-        if (source.kind !== 'woff2' || source.url.startsWith('data:')) continue;
+        if (source.kind === 'local' || source.kind === 'other-url' || source.url.startsWith('data:')) continue;
         const resolvedUrl = resolveSameOriginFontUrl(source.url, face.rule.parentStyleSheet?.href ?? null, node.ownerDocument);
         if (!resolvedUrl) return null;
+        const previousFormat = uniqueUrlFormats.get(resolvedUrl);
+        if (previousFormat && previousFormat !== source.kind) return null;
         source.resolvedUrl = resolvedUrl;
-        uniqueUrlSet.add(resolvedUrl);
+        uniqueUrlFormats.set(resolvedUrl, source.kind);
       }
     }
 
-    const uniqueUrls = Array.from(uniqueUrlSet);
+    const uniqueUrls = Array.from(uniqueUrlFormats, ([url, format]) => ({ url, format }));
     uniqueFontResourceCount = uniqueUrls.length;
     const finishResourceTiming = profileStart('export.fontCss.resourceLoad', { uniqueFontResourceCount });
-    let resources: Map<string, { dataUrl: string; bytes: number }>;
+    let resources: Map<string, FontDataUrlResource>;
     try {
       resources = uniqueUrls.length ? await fetchFontData(uniqueUrls, fetchController.signal) : new Map();
     } finally {
@@ -677,7 +707,7 @@ export async function prepareCardFontCss(
             outputSources.push(source.cssText);
             continue;
           }
-          if (source.kind !== 'woff2') continue;
+          if (source.kind === 'other-url') continue;
 
           if (source.url.startsWith('data:')) {
             const format = source.format ? ` format("${source.format}")` : '';

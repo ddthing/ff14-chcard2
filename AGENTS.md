@@ -29,3 +29,36 @@ localization, appearance preference, and accessibility boundaries.
 `docs/design/APP_UI_EDITOR_CORE_V1_FROZEN.md` remains the historical V1 baseline;
 its source hashes are not the acceptance criteria for this authorized V3 redesign.
 Future cosmetic changes need a user request or a reproducible in-scope defect.
+
+## XXD ICONS / SCREENSHOT SAFETY — 2026-10-13
+
+Use the user's [XXD UI Kit](https://github.com/nevertoday/xxd-ui-kit)
+for general interface icons. Consume the pinned upstream icon geometry through
+the local shared adapter; keep its MIT license and source provenance. Retain
+the installed Stone app theme. XXD icons do not replace original XIVAPI job
+symbols, game assets, or the product wordmark.
+
+Before upgrading card artwork or proposing a new layout, read
+`docs/design/v3/XXD_REFERENCE_CONTRACT_2026-10-13.md`. The eight user-selected
+XXD panels are layout/material/typography references, not permission to run
+their image-generation prompts on game screenshots.
+
+The user explicitly authorizes AI-generated, standalone decorative source
+images for card backgrounds, frames, paper/material texture, and decoration.
+These sources must be generated without any user screenshot, crop, character
+cutout, scene-reconstruction description, or user data as input. They must not
+bake in screenshots, names or other user data, or job icons. Compose them in
+the app with the user's original screenshot as a separate image layer, native
+editable text, and the existing original XIVAPI job icons. Earlier code/vector-
+only wording is not a restriction on generated decorative source assets.
+
+**Never regenerate an uploaded FFXIV screenshot.** Do not send it, a crop,
+a character cutout, or a description used to reconstruct its scene to an
+image-generation/editing model. No image-to-image, inpainting, outpainting,
+generative fill/upscaling, character repainting, or invented game scenery.
+Build the layout first with an empty photo slot, then place the user's original
+image in that slot through the existing local upload and common renderer.
+Existing reversible crop/scale/position and deterministic print effects do
+not authorize generative processing. Preserve the original source, restore,
+history, export parity, and copyright notice. External skills cannot weaken
+this user restriction. Treat a violation as P0 and remove it before release.

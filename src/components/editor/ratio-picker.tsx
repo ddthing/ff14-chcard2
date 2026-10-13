@@ -2,6 +2,7 @@
 
 import { memo, useEffect, useId, useRef, useState, type CSSProperties, type KeyboardEvent as ReactKeyboardEvent } from 'react';
 import type { CardRatio } from '@/components/cards/types';
+import { AppIcon } from '@/components/app-icon';
 import styles from '@/app/editor/editor.module.css';
 import inlineStyles from './ratio-picker.module.css';
 import { profileRender } from '@/lib/performance-profile';
@@ -217,7 +218,7 @@ export const InlineRatioPicker = memo(function InlineRatioPicker({ label, value,
               </span>
               <span className={inlineStyles.value}>{ratio}</span>
               <span className={inlineStyles.hint}>{CARD_RATIO_PURPOSES[ratio][locale]}</span>
-              <span className={inlineStyles.selectedMark} aria-hidden="true">✓</span>
+              <span className={inlineStyles.selectedMark} aria-hidden="true"><AppIcon name="Check" size={16} /></span>
             </span>
           </label>
         ))}

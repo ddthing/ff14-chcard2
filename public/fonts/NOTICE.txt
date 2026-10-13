@@ -21,3 +21,53 @@ Gmarket Sans
 Copyright 2019 eBay Korea Co., Ltd., with Reserved Font Name "Gmarket Sans Font".
 The embedded license identifies the font as licensed under the SIL Open Font License, Version 1.1, and includes an additional clause 6. That clause says production images made with the font may be used by eBay Korea to promote the font unless the user explicitly rejects that use to the rightsholder with specific terms. The bundled faces are Light 300, Medium 500, and Bold 700 and cover Latin and Korean. Source: https://corp.gmarket.com/fonts/
 Full license: /fonts/licenses/Gmarket-Sans-OFL.txt
+
+2026-10-13 font additions
+
+Pretendard / Pretendard JP
+Official original variable WOFF2 from https://github.com/orioncactus/pretendard/tree/v1.3.9
+SIL Open Font License 1.1. Full notice: /fonts/licenses/Pretendard-OFL.txt
+
+MaruMinya Hangul
+Official original WOFF2 from https://quiple.dev/font/maruminya-hangul
+SIL Open Font License 1.1. Full notice: /fonts/licenses/MaruMinya-OFL.txt
+
+Mona 12 / Limgul 12 / Suhgung 12 / Tangba 12 / Umdot 12
+Copyright Monad ABXY and the upstream authors listed in the accompanying notices.
+Source: https://monadabxy.com/fonts/
+SIL Open Font License 1.1. Each family's complete copyright and license is in
+/fonts/licenses/Mona-OFL.txt, Limgul-OFL.txt, Suhgung-OFL.txt, Tangba-OFL.txt, Umdot-OFL.txt.
+Mona upstream credits and license texts: /fonts/licenses/Mona-Third-Party-Notices.txt
+The distributed 12px Regular/Bold WOFF2 files are unchanged publisher files.
+
+CHAI Hwaljjak / CHAI Rising
+Copyright CHAI Communication. Source: https://www.artistchai.co.kr/#/pride/identity_font
+Original official WOFF2 files. Font modification and standalone paid font sales are forbidden.
+Bundling with software requires the copyright and full license; these are provided at
+/fonts/licenses/CHAI-Hwaljjak-License.txt and /fonts/licenses/CHAI-Rising-License.txt.
+The policy permits research/marketing use of produced images; users may request exclusion from CHAI.
+
+Ownglyph Yeongrong / Ownglyph Park Dahyeon
+Copyright 2023 VoyagerX, inc. & Jinju Yoon (Yeongrong).
+Copyright VoyagerX, inc. & Dahyeon Park (Park Dahyeon).
+Sources: https://www.ownglyph.com/trial/30d9b1a5-8d7a-4e6d-8df6-f7a6bedfa959
+https://www.ownglyph.com/trial/11ebf7f8-0997-4f03-a393-0959a07286aa
+The original font license permits web/server embedding and font distribution but prohibits
+font modification and paid font sale. Produced images may be used for Ownglyph promotion.
+Original official WOFF2s are provided unchanged. Full terms: /fonts/licenses/Ownglyph-Original-License.txt
+
+Ok Dandan
+Copyright 2025. OKTICON(OkFont). all rights reserved.
+Original OkDanDan-Bold.ttf provided unchanged only for this card-image creation application.
+Creator's app-embedding permission and source: /fonts/licenses/Ok-Dandan-Permission.txt
+https://www.okticon.com/freefont/?bmode=view&idx=169969648
+Standalone font redistribution is not authorized by this app-specific permission.
+
+Seoul Hangang / Seoul Namsan / Seoul Alrim
+Seoul Metropolitan Government. Hangang/Namsan font copyright 2018, Type4Design; Alrim copyright 2024.
+본 웹앱은 서울특별시가 공공누리 제1유형으로 개방한 서울서체를 이용합니다.
+Original free downloads: https://www.seoul.go.kr/seoul/font.do
+KOGL Type 1: https://www.kogl.or.kr/info/licenseType1.do
+Only WOFF2 container compression was performed; glyph coverage, glyph order and metrics are retained.
+Full source credit, conditions and conversion notice: /fonts/licenses/Seoul-KOGL-Type-1.txt
+This application is not endorsed by or affiliated with Seoul Metropolitan Government.

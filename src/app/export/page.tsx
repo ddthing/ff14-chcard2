@@ -4,6 +4,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState, type CSSProper
 import { flushSync } from 'react-dom';
 import Image from 'next/image';
 import Link from 'next/link';
+import { AppIcon } from '@/components/app-icon';
 import { CardPreview, loadCardPreviewFonts } from '@/components/editor/card-preview';
 import { FFXIVAttribution } from '@/components/ffxiv';
 import type { CardRatio } from '@/components/cards/types';
@@ -795,7 +796,7 @@ export default function ExportPage() {
         {result ? (
           <header className={`${styles.hero} ${styles.resultHero}`}>
             <div className={styles.resultHeading}>
-              <span className={styles.successMark} aria-hidden="true">✓</span>
+              <span className={styles.successMark} aria-hidden="true"><AppIcon name="Check" /></span>
               <div>
                 <h1 className={styles.title}>{text.resultTitle}</h1>
                 <p className={styles.fileName}>{result.filename}</p>
@@ -866,7 +867,7 @@ export default function ExportPage() {
               <div className={styles.mobileActionArea}>
                 <button className={styles.downloadButton} type="button" onClick={handlePrimaryAction} disabled={printPreparing} aria-busy={printPreparing} aria-describedby={error ? 'export-feedback' : undefined}>
                   <span>{error ? text.retryDownload : text.redownload}</span>
-                  <span aria-hidden="true">↓</span>
+                  <span aria-hidden="true"><AppIcon name="Download" /></span>
                 </button>
               </div>
               <div className={styles.resultActions}>
@@ -946,7 +947,7 @@ export default function ExportPage() {
               <div className={styles.mobileActionArea}>
                 <button className={styles.downloadButton} type="button" onClick={handlePrimaryAction} disabled={exporting || printPreparing} aria-busy={exporting || printPreparing} aria-describedby={error ? 'export-feedback' : undefined}>
                   <span>{primaryLabel}</span>
-                  <span aria-hidden="true">{exporting ? '…' : error ? '↻' : '↓'}</span>
+                  <span aria-hidden="true"><AppIcon name={exporting ? 'Ellipsis' : error ? 'RotateCcw' : 'Download'} /></span>
                 </button>
                 {exporting && <button className={styles.cancelButton} type="button" onClick={cancelExport} disabled={status === text.cancelled}>{text.cancelExport}</button>}
               </div>
@@ -955,7 +956,7 @@ export default function ExportPage() {
                   <button type="button" className={styles.pdfButton} onClick={requestPrint} disabled={exporting || printPreparing} aria-busy={printPreparing} aria-describedby="export-pdf-hint">{text.pdf}</button>
                   <span id="export-pdf-hint" className={styles.actionHint}>{text.pdfHint}</span>
                 </div>
-                <Link className={styles.editLink} href="/editor">← {text.edit}</Link>
+                <Link className={styles.editLink} href="/editor"><AppIcon name="ArrowLeft" /> {text.edit}</Link>
               </div>
               {printPreparing && <p className={styles.printStatus} role="status" aria-live="polite">{printStatus}</p>}
               {printError && <p className={`${styles.statusText} ${styles.errorText}`} role="alert">{printError}</p>}

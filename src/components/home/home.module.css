@@ -193,6 +193,12 @@
   text-align: center;
 }
 
+.styleCheck > svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 .stageActions {
   display: flex;
   flex: 0 0 auto;

@@ -11,6 +11,7 @@ export type MasterTypographyRole = CardTypographyRole;
 export interface TypographyFontOption {
   id: string;
   family: string;
+  displayNames?: FontRegistryEntry['displayNames'];
   supportedScripts: FontRegistryEntry['supportedScripts'];
   weightRange: FontRegistryEntry['axes']['weight'];
   weights?: readonly number[];
@@ -29,8 +30,8 @@ const selectableFonts = registeredFonts.filter((entry) => entry.selectable !== f
 const fontEntriesById = new Map(registeredFonts.map((entry) => [entry.id, entry]));
 const selectableFontIds = new Set(selectableFonts.map((entry) => entry.id));
 const typographyFontOptions: readonly TypographyFontOption[] = Object.freeze(selectableFonts
-  .map(({ id, family, supportedScripts, axes, weights }) => ({
-    id, family, supportedScripts, weightRange: axes.weight, weights,
+  .map(({ id, family, displayNames, supportedScripts, axes, weights }) => ({
+    id, family, displayNames, supportedScripts, weightRange: axes.weight, weights,
   }))
   .sort((first, second) => first.family.localeCompare(second.family)));
 

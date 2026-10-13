@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
+import { AppIcon } from '@/components/app-icon';
 import type { AdventurerCardData, AdventurerCardTemplate } from '@/components/cards/types';
 import { demoAdventurerData } from '@/components/cards/types';
 import { CardPreview } from '@/components/editor/card-preview';
@@ -75,7 +76,7 @@ export default function HomePage() {
                 <span className={styles.saveStatus} data-status={saveStatus} role="status" aria-live="polite" aria-atomic="true">{saveLabel}</span>
               </div>
               <Link className={styles.resumeAction} href="/editor">
-                {copy.resumeDraft}<span aria-hidden="true">↗</span>
+                {copy.resumeDraft}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
               </Link>
             </section>
           ) : null}
@@ -132,7 +133,7 @@ export default function HomePage() {
                     onClick={() => setActiveTemplate(template)}
                   >
                     <span className={styles.styleLabel}>{styleNames[template]}</span>
-                    <span className={styles.styleCheck} aria-hidden="true">{isActive ? '✓' : ''}</span>
+                    <span className={styles.styleCheck} aria-hidden="true">{isActive ? <AppIcon name="Check" /> : ''}</span>
                   </button>
                 );
               })}
@@ -140,10 +141,10 @@ export default function HomePage() {
 
             <div className={styles.stageActions}>
               <Link className={styles.primaryAction} href={getTemplatePhotoPath(activeTemplate)}>
-                {copy.create}<span aria-hidden="true">→</span>
+                {copy.create}<span aria-hidden="true"><AppIcon name="ArrowRight" /></span>
               </Link>
               <Link className={styles.compareAction} href={compareHref}>
-                {draft ? copy.exploreDraft : copy.explore}<span aria-hidden="true">↗</span>
+                {draft ? copy.exploreDraft : copy.explore}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
               </Link>
             </div>
           </div>

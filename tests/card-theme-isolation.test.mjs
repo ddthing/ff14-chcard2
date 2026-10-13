@@ -51,6 +51,7 @@ test('card render roots freeze only the inherited browser context already used b
   assert.deepEqual([...resetProperties.keys()].sort(), [...expectedAmbientProperties].sort());
   assert.ok([...resetProperties.values()].every((value) => value === 'initial'));
   assert.deepEqual(Object.fromEntries([...declarations].filter(([name]) => !name.startsWith('--'))), {
+    'font-family': 'var(--font-ui)',
     'color-scheme': 'dark',
     'font-synthesis': 'none',
     'text-rendering': 'optimizeLegibility',

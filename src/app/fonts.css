@@ -198,3 +198,275 @@
   src: url("/fonts/gmarket-sans-bold.woff2") format("woff2");
 }
 
+@font-face {
+  font-family: "Pretendard Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 45 930;
+  src: url("/fonts/pretendard-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Pretendard JP Variable";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 45 930;
+  src: url("/fonts/pretendard-jp-variable.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "x12y12pxMaruMinyaHangul";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/maruminya-hangul.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Mona12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/mona-12.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Mona12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/mona-12-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Limgul 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/limgul-12.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Limgul 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/limgul-12-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Suhgung 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/suhgung-12.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Suhgung 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/suhgung-12-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Tangba 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/tangba-12.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Tangba 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/tangba-12-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Umdot 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/umdot-12.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Umdot 12";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/umdot-12-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Chai Hwaljjak";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/chai-hwaljjak-regular.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Chai Hwaljjak";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/chai-hwaljjak-medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Chai Hwaljjak";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/chai-hwaljjak-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Chai Hwaljjak";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/chai-hwaljjak-heavy.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Rising CHAI";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url("/fonts/chai-rising-light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Rising CHAI";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/chai-rising-extrabold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Ownglyph brilliant";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/ownglyph-yeongrong.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "Ownglyph PDH";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url("/fonts/ownglyph-park-dahyeon.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "OkDanDan";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/ok-dandan-bold.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "SeoulHangang";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url("/fonts/seoul-hangang-light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulHangang";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/seoul-hangang-medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulHangang";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/seoul-hangang-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulHangang";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/seoul-hangang-extrabold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulNamsan";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url("/fonts/seoul-namsan-light.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulNamsan";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/seoul-namsan-medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulNamsan";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/seoul-namsan-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulNamsan";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/seoul-namsan-extrabold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulAlrim";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url("/fonts/seoul-alrim-medium.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulAlrim";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url("/fonts/seoul-alrim-bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulAlrim";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 800;
+  src: url("/fonts/seoul-alrim-extrabold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: "SeoulAlrim";
+  font-style: normal;
+  font-display: swap;
+  font-weight: 900;
+  src: url("/fonts/seoul-alrim-heavy.woff2") format("woff2");
+}
+

@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useRef, useState, type ChangeEvent, type DragEvent as ReactDragEvent } from 'react';
 import { useRouter } from 'next/navigation';
+import { AppIcon } from '@/components/app-icon';
 import { CardPreview } from '@/components/editor/card-preview';
 import type { AdventurerCardData, AdventurerCardTemplate } from '@/components/cards/types';
 import { demoAdventurerData, getConerSample } from '@/components/cards/types';
@@ -305,7 +306,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
     <div className={styles.page} lang={locale}>
       <div className={styles.content}>
         <nav className={styles.stepNav} aria-label={locale === 'ko' ? '카드 만들기' : locale === 'ja' ? 'カード作成' : 'Create a card'}>
-          <Link className={styles.backLink} href="/"><span aria-hidden="true">←</span>{text.backHome}</Link>
+          <Link className={styles.backLink} href="/"><span aria-hidden="true"><AppIcon name="ArrowLeft" /></span>{text.backHome}</Link>
           <Link className={styles.navAction} href={`/templates?template=${selectedTemplate}`}>{text.templatesLink}</Link>
         </nav>
 
@@ -328,7 +329,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
               {uploadState === 'processing'
                 ? <span className={styles.uploadSpinner} />
                 : photoReady
-                  ? <span className={styles.uploadSuccessMark}>✓</span>
+                  ? <span className={styles.uploadSuccessMark}><AppIcon name="Check" /></span>
                   : <EditorIcon name="upload" size={26} />}
             </span>
             <h2 id="upload-title">{confirmUpload ? text.confirmUploadTitle : text.uploadTitle}</h2>
@@ -378,7 +379,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                   <p>{text.confirmUploadMessage}<strong>{pendingUpload.fileName}</strong></p>
                 </div>
                 <button ref={confirmUploadRef} className={styles.confirmAction} type="button" onClick={() => applyPreparedUpload(pendingUpload, { fromConfirmation: true })}>
-                  {text.confirmUploadAction}<span aria-hidden="true">↗</span>
+                  {text.confirmUploadAction}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
                 </button>
                 <button className={styles.cancelConfirm} type="button" onClick={cancelPendingUpload}>{text.cancelReplace}</button>
               </div>
@@ -391,7 +392,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                 <p className={styles.eyebrow}>{showCardPreview ? text.previewLabel : text.samplePreviewLabel}</p>
                 <h2 id="preview-title">{templateNames[selectedTemplate]}</h2>
               </div>
-              {photoReady && <span className={styles.previewReady} aria-hidden="true">✓</span>}
+              {photoReady && <span className={styles.previewReady} aria-hidden="true"><AppIcon name="Check" /></span>}
             </header>
 
             <div className={styles.previewStage}>
@@ -410,11 +411,11 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
             {photoReady && (
               <div className={styles.readyActions}>
                 <button ref={continueToEditorRef} className={styles.continueButton} type="button" onClick={() => router.push('/editor')}>
-                  {text.continueToEditor}<span aria-hidden="true">↗</span>
+                  {text.continueToEditor}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
                 </button>
                 <Link className={styles.comparePhotoLink} href={`/templates?compare=personal&template=${selectedTemplate}`}>
                   {locale === 'ko' ? '내 사진으로 세 스타일 비교' : locale === 'ja' ? '自分の写真で三つのスタイルを比較' : 'Compare three styles with my photo'}
-                  <span aria-hidden="true">→</span>
+                  <span aria-hidden="true"><AppIcon name="ArrowRight" /></span>
                 </Link>
               </div>
             )}
@@ -443,7 +444,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                         <Image src={conerSample.screenshots[role].optimized} alt="" fill sizes="(max-width: 760px) 72px, 96px" />
                       </span>
                       <span>{label}</span>
-                      <span className={styles.sampleMark} aria-hidden="true">{active ? '✓' : ''}</span>
+                      <span className={styles.sampleMark} aria-hidden="true">{active ? <AppIcon name="Check" /> : ''}</span>
                     </button>
                   );
                 })}
@@ -452,20 +453,20 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                 <div className={styles.sampleConfirm} role="group" aria-label={text.confirmLabel}>
                   <p>{text.confirmMessage}</p>
                   <button ref={confirmSampleRef} className={styles.sampleAction} type="button" onClick={openSampleInEditor}>
-                    <span>{text.confirmReplace}</span><span aria-hidden="true">↗</span>
+                    <span>{text.confirmReplace}</span><span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
                   </button>
                   <button className={styles.cancelConfirm} type="button" onClick={() => { setConfirmSample(false); setPendingSample(null); }}>{text.cancelReplace}</button>
                 </div>
               ) : (
                 <button className={styles.sampleAction} type="button" disabled={uploadState === 'processing' || confirmUpload} onClick={startWithSample}>
-                  <span>{text.sampleAction}</span><span aria-hidden="true">↗</span>
+                  <span>{text.sampleAction}</span><span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
                 </button>
               )}
             </section>
 
             {currentDraftData && !photoReady && uploadState !== 'processing' && !confirmUpload && (
               <Link className={styles.resumeLink} href="/editor">
-                {text.resumeDraft}<span aria-hidden="true">↗</span>
+                {text.resumeDraft}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
               </Link>
             )}
           </aside>

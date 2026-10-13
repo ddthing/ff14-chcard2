@@ -1,12 +1,23 @@
 import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
 import test from 'node:test';
 import {CARD_PICTOGRAMS} from '../src/lib/card-graphics/pictograms.ts';
 import {getCraftMaterialProperties} from '../src/lib/card-graphics/materials.ts';
 
-test('printed pictogram registry covers every record field with unique local geometry',()=>{
+const xxdIconSource=readFileSync(new URL('../src/components/icons/vendor/xxd-ui-kit/nodes.js',import.meta.url),'utf8');
+const appIconSource=readFileSync(new URL('../src/components/app-icon.tsx',import.meta.url),'utf8');
+const xxdIconNames=new Set([...xxdIconSource.matchAll(/^  ([A-Za-z][A-Za-z0-9]*):/gm)].map((match)=>match[1]));
+
+test('printed pictogram registry covers every record field with unique XXD icon mappings',()=>{
  assert.deepEqual(Object.keys(CARD_PICTOGRAMS).sort(),['world','dataCenter','service','race','clan','grandCompany','languages','playStyles','freeCompany'].sort());
- assert.equal(new Set(Object.values(CARD_PICTOGRAMS).map(v=>v.path)).size,9);
- for(const entry of Object.values(CARD_PICTOGRAMS)){assert.ok(entry.purpose);assert.match(entry.path,/^M/);assert.doesNotMatch(entry.path,/https?:|data:|<|>/);}
+ const pictograms=Object.values(CARD_PICTOGRAMS);
+ assert.equal(new Set(pictograms.map(v=>v.iconName)).size,9);
+ for(const entry of pictograms){assert.ok(entry.purpose);assert.ok(xxdIconNames.has(entry.iconName));}
+ assert.match(xxdIconSource, /"stroke-width": 1\.5/);
+ assert.match(xxdIconSource, /"stroke-linecap": "round"/);
+ assert.match(xxdIconSource, /"stroke-linejoin": "miter"/);
+ assert.match(appIconSource, /viewBox="0 0 24 24"/);
+ assert.match(appIconSource, /strokeWidth=\{1\.5\}/);
 });
 
 test('craft material roles retain the custom palette rather than imposing sample colors',()=>{

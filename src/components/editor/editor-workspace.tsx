@@ -17,6 +17,7 @@ import {
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from 'react';
+import { createPortal } from 'react-dom';
 import { MOTION_DURATION, MOTION_EASE } from '@/lib/motion';
 import { useI18n } from '@/lib/i18n';
 import { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER } from '@/lib/master-card-config';
@@ -26,6 +27,7 @@ import { getJob, LANGUAGES, PLAY_STYLES } from '@/data/ffxiv';
 import { prepareImageFile, ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
 import { EditorBoundary } from './editor-boundary';
 import { EditorLayerPanel } from './editor-layer-panel';
+import { useEditorChrome } from './editor-chrome-context';
 import { EDITOR_TASK_FOR_PANEL as TASK_FOR_PANEL, EDITOR_TASK_IDS as TASK_IDS, EDITOR_TASK_PANEL as TASK_PANEL, getEditorEntryPanel, getEditorTaskActivation, type EditorTaskId } from './editor-navigation';
 import { getUploadErrorMessage } from './editor-errors';
 import { committedLevel, isImeComposing, validLevelInput } from './editor-input';
@@ -40,9 +42,11 @@ import { CardTextOverlay } from '@/components/editor/text-editor/card-text-overl
 import { selectTextEditorControl } from '@/components/editor/text-editor/text-editor-focus';
 import { TextureEffects } from './TextureEffects';
 import { toggleCardTextureEffect, type CardTextureEffect } from '@/lib/card-texture-effects';
+import { EditorNumberControl } from '@/components/editor/editor-number-control';
 import { getEditorCopy, type EditorCopy } from '@/components/editor/copy';
 import { formatAccessibleImageControlValue, formatAccessiblePercent } from '@/components/editor/editor-accessibility';
 import { EditorIcon, type EditorIconName } from '@/components/editor/editor-icon';
+import { AppIcon } from '@/components/app-icon';
 import { ToolbarTooltipButton } from '@/components/editor/toolbar-tooltip-button';
 import { ProjectLibraryDialogTrigger } from '@/components/library/local-project-library';
 import { InlineConfirm } from '@/components/editor/inline-confirm';
@@ -80,6 +84,8 @@ const TASK_ICONS: Record<EditorTaskId, EditorIconName> = {
   information: 'character',
   design: 'template',
 };
+const MOBILE_DOCK_IDS = [...TASK_IDS, 'more'] as const;
+type MobileDockId = (typeof MOBILE_DOCK_IDS)[number];
 const CARD_TEMPLATES = MASTER_TEMPLATE_ORDER;
 const SAMPLE_ARTWORK_SOURCES = new Set([
   demoAdventurerData.imageUrl,
@@ -90,9 +96,9 @@ const BASIC_IMAGE_CONTROL_KEYS = ['x', 'y', 'scale'] as const;
 const ADVANCED_IMAGE_CONTROL_KEYS = ['rotation', 'brightness', 'contrast', 'saturation', 'exposure'] as const;
 const IMAGE_DRAG_HINT_DURATION_MS = 3200;
 const WORKSPACE_COPY = {
-  ko: { items: '편집 항목', openItems: '편집 항목 열기', closeItems: '편집 항목 닫기', select: '항목 선택' },
-  en: { items: 'Items', openItems: 'Open items', closeItems: 'Close items', select: 'Select item' },
-  ja: { items: '編集項目', openItems: '編集項目を開く', closeItems: '編集項目を閉じる', select: '項目を選択' },
+  ko: { items: '편집 항목', openItems: '항목 열기', closeItems: '항목 닫기', collapseItems: '편집 항목 접기', cardView: '카드 보기', select: '항목 선택', guide: '사용법', canvasZoom: '화면 확대' },
+  en: { items: 'Edit items', openItems: 'Open items', closeItems: 'Close items', collapseItems: 'Collapse items', cardView: 'View card', select: 'Select item', guide: 'Guide', canvasZoom: 'Canvas zoom' },
+  ja: { items: '編集項目', openItems: '項目を開く', closeItems: '項目を閉じる', collapseItems: '項目を折りたたむ', cardView: 'カードを見る', select: '項目を選択', guide: '使い方', canvasZoom: '表示倍率' },
 } as const;
 const SCREENSHOT_INPUT_ID = 'editor-screenshot-file';
 const SCREENSHOT_TYPES_ID = 'editor-screenshot-types';
@@ -145,12 +151,6 @@ function getTemplateChoiceActionLabel(
 }
 
 function moreCanvasControlsLabel(locale: Locale): string {
-  if (locale === 'ko') return '추가 도구';
-  if (locale === 'ja') return 'その他';
-  return 'More tools';
-}
-
-function compactMoreCanvasControlsLabel(locale: Locale): string {
   if (locale === 'ko') return '더보기';
   if (locale === 'ja') return 'その他';
   return 'More';
@@ -282,7 +282,7 @@ const CharacterInput = memo(function CharacterInput({
   return (
     <label className={`${styles.field} ${field === 'bio' ? styles.bioField : ''} ${field === 'name' || field === 'freeCompany' || field === 'bio' ? styles.fieldWide : ''}`}>
       <span>{label}</span>
-      {field === 'bio' ? <><textarea data-editor-field={field} data-card-text-editor-control={textItemId} rows={4} maxLength={120} value={currentValue}
+      {field === 'bio' ? <><textarea data-editor-field={field} data-card-text-editor-control={textItemId} rows={3} maxLength={120} value={currentValue}
         placeholder={placeholder} aria-label={label} {...handlers}/><small>{currentValue.length} / 120</small></> : <input
         type={isLevel ? 'number' : 'text'}
         data-editor-field={field}
@@ -349,30 +349,40 @@ function EditorInspector({
   copy,
   activeTask,
   isMobileViewport,
+  isCompactNavigator,
   onFocusField,
   onClose,
   onSuccessfulUpload,
   locale,
   isOpen,
+  inputCompactMode,
   blockedByNavigator,
   selectedTextId,
   textCategory,
   onSelectTextCategory,
   onSelectTextItem,
+  mobileMoreOpen,
+  onMobileMoreMountChange,
+  taskTabsSlot,
 }: {
   copy: EditorCopy;
   activeTask: EditorTaskId;
   isMobileViewport: boolean;
+  isCompactNavigator: boolean;
   onFocusField: (field: string) => void;
   onClose: () => void;
   onSuccessfulUpload: () => void;
   locale: Locale;
   isOpen: boolean;
+  inputCompactMode: boolean;
   blockedByNavigator: boolean;
   selectedTextId: string | null;
   textCategory: CardTextCategory;
   onSelectTextCategory: (category: CardTextCategory) => void;
   onSelectTextItem: (item: CardTextItem) => void;
+  mobileMoreOpen: boolean;
+  onMobileMoreMountChange: (element: HTMLDivElement | null) => void;
+  taskTabsSlot: ReactNode;
 }) {
   const switchIdPrefix = useId();
   const character = useEditorStore((state) => state.character);
@@ -387,6 +397,7 @@ function EditorInspector({
   const palette = useEditorStore((state) => state.design.palette);
   const jobMotifVisible = useEditorStore((state) => state.design.jobMotifVisible);
   const jobIconColor = useEditorStore((state) => state.design.jobIconColor);
+  const canvasZoom = useEditorStore((state) => state.ui.zoom);
   const effects = useEditorStore((state) => state.design.effects);
   const design = { template: designTemplate, layoutVariant, decorativeCopy, ratio, typographyPreset, colorMode, palette, jobMotifVisible, jobIconColor, effects, effectIntensity };
   const imageSource = useEditorStore((state) => state.image.src);
@@ -423,7 +434,8 @@ function EditorInspector({
   const sheetHandlePointerFallbackCleanup = useRef<(() => void) | null>(null);
   const previousTaskRef = useRef(activeTask);
   const previousInspectorOpenRef = useRef(isOpen);
-  const copyForPanel = copy.tasks[activeTask];
+  const showingMobileMore = isMobileViewport && mobileMoreOpen;
+  const copyForPanel = showingMobileMore ? moreCanvasControlsLabel(locale) : copy.tasks[activeTask];
   const clearHighlightedField = useCallback(() => onFocusField(''), [onFocusField]);
 
   function finishSheetHandlePointer(pointerId: number, clientX: number, clientY: number) {
@@ -628,7 +640,6 @@ function EditorInspector({
     const state = editorStore.getState();
     if (state.image[key] === nextValue) return;
     const groupId = `image-${key}`;
-    state.beginImageAdjustmentGroup(groupId);
     state.setImage({ [key]: nextValue } as Partial<EditorImageState>, { groupId });
   }, []);
 
@@ -722,14 +733,6 @@ function EditorInspector({
     }
   }
 
-  function formatControlValue(key: ImageControlKey, value: number): string {
-    if (key === 'x' || key === 'y') return `${Math.round(value)}%`;
-    if (key === 'scale') return `${value.toFixed(2)}×`;
-    if (key === 'rotation') return `${value.toFixed(1)}°`;
-    if (key === 'exposure') return `${value > 0 ? '+' : ''}${value.toFixed(1)} EV`;
-    return `${Math.round(value * 100)}%`;
-  }
-
   const screenshotDescriptionIds = [
     SCREENSHOT_TYPES_ID,
     SCREENSHOT_STATUS_ID,
@@ -743,37 +746,28 @@ function EditorInspector({
   function renderImageControl(key: ImageControlKey) {
     const config = IMAGE_CONTROL_CONFIG[key];
     const value = getControlValue(key);
+    const displayMultiplier = key === 'scale' || key === 'brightness' || key === 'contrast' || key === 'saturation' ? 100 : 1;
+    const unit = key === 'x' || key === 'y' || displayMultiplier === 100 ? '%' : key === 'rotation' ? '°' : 'EV';
+    const groupId = `image-${key}`;
     return (
-      <div className={styles.rangeControl} key={key}>
-        <span className={styles.rangeLabel}><span>{copy.imageControls[key]}</span><output aria-live="off" aria-hidden="true">{formatControlValue(key, value)}</output></span>
-        <input
-          type="range"
-          min={config.min}
-          max={config.max}
-          step={config.step}
-          value={value}
-          aria-label={copy.imageControls[key]}
-          aria-valuetext={formatAccessibleImageControlValue(locale, key, value)}
-          onPointerUp={endAdjustment}
-          onPointerCancel={endAdjustment}
-          onBlur={endAdjustment}
-          onKeyUp={endAdjustment}
-          onChange={(event) => updateImageControl(key, Number(event.currentTarget.value))}
-        />
-        <input
-          className={styles.rangeNumber}
-          type="number"
-          min={config.min}
-          max={config.max}
-          step={config.step}
-          value={Number(value.toFixed(config.step < 1 ? config.step.toString().split('.')[1]?.length ?? 0 : 0))}
-          aria-label={copy.imageValueLabel(copy.imageControls[key])}
-          onBlur={endAdjustment}
-          onChange={(event) => {
-            if (event.currentTarget.value !== '') updateImageControl(key, Number(event.currentTarget.value));
-          }}
-        />
-      </div>
+      <EditorNumberControl
+        key={key}
+        className={styles.rangeControl}
+        value={value}
+        min={config.min}
+        max={config.max}
+        step={config.step}
+        displayMultiplier={displayMultiplier}
+        unit={unit}
+        label={copy.imageControls[key]}
+        ariaLabel={copy.imageValueLabel(copy.imageControls[key])}
+        valueLabel={displayMultiplier === 100
+          ? formatAccessiblePercent(locale, value * 100)
+          : formatAccessibleImageControlValue(locale, key, value)}
+        onValueChange={(nextValue) => updateImageControl(key, nextValue)}
+        onInteractionStart={() => editorStore.getState().beginImageAdjustmentGroup(groupId)}
+        onInteractionEnd={endAdjustment}
+      />
     );
   }
 
@@ -879,8 +873,7 @@ function EditorInspector({
 
   return (
     <aside ref={inspectorRef} id="editor-inspector" className={styles.inspector}
-      role={isMobileViewport ? 'region' : 'tabpanel'}
-      aria-labelledby={isMobileViewport ? 'editor-inspector-title' : `editor-task-tab-desktop-${activeTask}`}
+      role="presentation"
       data-state={isOpen ? 'open' : 'closing'} aria-hidden={!isOpen || blockedByNavigator} inert={!isOpen || blockedByNavigator}>
       <button
         className={styles.sheetHandle}
@@ -894,15 +887,35 @@ function EditorInspector({
       >
         <span aria-hidden="true" />
       </button>
+      {taskTabsSlot}
       <div className={styles.inspectorHead}>
         <div className={styles.inspectorTitle}>
-          <span className={styles.inspectorIcon}><EditorIcon name={TASK_ICONS[activeTask]} /></span>
+          <span className={styles.inspectorIcon}><EditorIcon name={showingMobileMore ? 'more' : TASK_ICONS[activeTask]} /></span>
           <h2 id="editor-inspector-title" tabIndex={-1}>{copyForPanel}</h2>
         </div>
-        <button className={styles.closeInspector} type="button" onClick={onClose} aria-label={copy.closeInspector}><EditorIcon name="close" size={16} /></button>
+        {!showingMobileMore && <label className={styles.inspectorZoom}>
+          <span className={styles.srOnly}>{copy.zoom}</span>
+          <select aria-label={`${copy.canvasLabel}: ${copy.zoom}`} value={String(canvasZoom)} onChange={(event) => editorStore.getState().setUi({ zoom: Number(event.currentTarget.value) })}>
+            {Array.from(new Set([0.55, 0.75, 1, 1.25, 1.5, canvasZoom])).sort((a, b) => a - b).map((value) => <option key={value} value={String(value)}>{Math.round(value * 100)}%</option>)}
+          </select>
+        </label>}
+        <button className={styles.closeInspector} type="button" onClick={onClose} aria-label={inputCompactMode ? WORKSPACE_COPY[locale].cardView : copy.closeInspector}>
+          {inputCompactMode ? <><EditorIcon name="fit" size={16} /><span>{WORKSPACE_COPY[locale].cardView}</span></> : <EditorIcon name="close" size={16} />}
+        </button>
       </div>
 
-      <div ref={inspectorBodyRef} className={styles.inspectorBody}>
+      <div
+        ref={inspectorBodyRef}
+        id="editor-inspector-body"
+        className={styles.inspectorBody}
+        role={isMobileViewport ? 'region' : 'tabpanel'}
+        aria-labelledby={isMobileViewport
+          ? 'editor-inspector-title'
+          : `editor-task-tab-${isCompactNavigator ? 'inspector' : 'desktop'}-${activeTask}`}
+      >
+        {showingMobileMore ? (
+          <div ref={onMobileMoreMountChange} className={styles.mobileMoreMount} />
+        ) : <>
         {activeTask === 'photo' && (
           <div className={styles.photoPanel}>
             <section className={styles.photoControls} aria-label={copy.image}>
@@ -948,7 +961,7 @@ function EditorInspector({
                 </>
               ) : (
                 <div className={styles.currentImage}>
-                  <span className={styles.currentImageMark} aria-hidden="true">✓</span>
+                  <span className={styles.currentImageMark} aria-hidden="true"><AppIcon name="Check" size={16} /></span>
                   <span title={imageFileName ?? copy.uploadedScreenshot}>{imageFileName ?? copy.uploadedScreenshot}</span>
                   <button
                     type="button"
@@ -1068,7 +1081,7 @@ function EditorInspector({
                       }}>
                         <span className={styles.templateChoiceName}>{getTemplateLabel(copy, template)}</span>
                         {experimentalVariant && <span className={styles.templateVariantBadge}>{copy.variationNames[experimentalVariant]}</span>}
-                        <span className={styles.selectedMark} aria-hidden="true">{selected ? '✓' : ''}</span>
+                        {selected && <span className={styles.selectedMark} aria-hidden="true"><AppIcon name="Check" size={16} /></span>}
                       </button>
                     </div>
                   );
@@ -1124,7 +1137,7 @@ function EditorInspector({
               )}
               {colorMode === 'job' && (
                 <div className={styles.jobThemePreview}>
-                  <span className={styles.jobCrest} style={{ '--job-accent': activeJobTheme.accent, '--job-secondary': activeJobTheme.secondary } as CSSProperties} aria-hidden="true">✦</span>
+                  <span className={styles.jobCrest} style={{ '--job-accent': activeJobTheme.accent, '--job-secondary': activeJobTheme.secondary } as CSSProperties} aria-hidden="true"><AppIcon name="Sparkle" size={20} /></span>
                   <span><strong>{jobRecord?.localizedName[locale] ?? character.job}</strong><small>{copy.jobThemeHint}</small></span>
                   <div className={styles.jobSwatches} aria-label={copy.jobTheme}>
                     <i style={{ backgroundColor: activeJobTheme.accent }} /><i style={{ backgroundColor: activeJobTheme.secondary }} />
@@ -1143,7 +1156,7 @@ function EditorInspector({
                 aria-describedby={`${switchIdPrefix}-job-motif-description`}
                 onClick={() => editorStore.getState().updateDesign('jobMotifVisible', jobMotifVisible === false)}
               >
-                <span className={styles.effectIcon} aria-hidden="true">✦</span>
+                <span className={styles.effectIcon} aria-hidden="true"><AppIcon name="Sparkle" size={16} /></span>
                 <span>
                   <strong id={`${switchIdPrefix}-job-motif-label`}>{copy.jobMotif}</strong>
                   <small id={`${switchIdPrefix}-job-motif-description`}>{copy.jobMotifHint}</small>
@@ -1193,7 +1206,7 @@ function EditorInspector({
                     aria-describedby={descriptionId}
                     onClick={() => editorStore.getState().updateDesign('effects', selected ? design.effects.filter((item) => item !== effect) : [...design.effects, effect])}
                   >
-                    <span className={styles.effectIcon} aria-hidden="true">{effect === 'grain' ? '∴' : '✧'}</span>
+                    <span className={styles.effectIcon} aria-hidden="true"><AppIcon name={effect === 'grain' ? 'CircleDashed' : 'Sparkles'} size={16} /></span>
                     <span>
                       <strong id={labelId}>{effect === 'grain' ? copy.grain : copy.holographic}</strong>
                       <small id={descriptionId}>{effect === 'grain' ? copy.grainDescription : copy.holographicDescription}</small>
@@ -1226,6 +1239,7 @@ function EditorInspector({
           </div>
         )}
         {!isHydrated && <span className={styles.hydrationHint} aria-live="polite">{copy.hydrating}</span>}
+        </>}
       </div>
     </aside>
   );
@@ -1236,6 +1250,10 @@ const MemoEditorInspector = memo(EditorInspector);
 function EditorCanvas({
   copy,
   locale,
+  isMobileViewport,
+  mobileMoreMount,
+  mobileMoreOpen,
+  onMobileMoreOpenChange,
   focusedField,
   contentTextEditing,
   photoEditing,
@@ -1246,6 +1264,8 @@ function EditorCanvas({
   panMode,
   onTogglePan,
   onSelectTool,
+  activeTask,
+  onActivateTask,
   onRequestScreenshot,
   onEscapeClose,
   showImageDragHint,
@@ -1253,6 +1273,10 @@ function EditorCanvas({
 }: {
   copy: EditorCopy;
   locale: Locale;
+  isMobileViewport: boolean;
+  mobileMoreMount: HTMLDivElement | null;
+  mobileMoreOpen: boolean;
+  onMobileMoreOpenChange: (open: boolean) => void;
   focusedField: string;
   contentTextEditing: boolean;
   photoEditing: boolean;
@@ -1263,12 +1287,15 @@ function EditorCanvas({
   panMode: boolean;
   onTogglePan: () => void;
   onSelectTool: () => void;
+  activeTask: EditorTaskId;
+  onActivateTask: (task: EditorTaskId) => void;
   onRequestScreenshot: () => void;
   onEscapeClose: () => void;
   showImageDragHint: boolean;
   onImageDragStart: () => void;
 }) {
   profileRender('EditorCanvas');
+  const { setGuideOpen, guideTriggerRef } = useEditorChrome();
   const character = useEditorStore((state) => state.character);
   const design = useEditorStore((state) => state.design);
   const image = useEditorStore((state) => state.image);
@@ -1365,7 +1392,14 @@ function EditorCanvas({
       if (action === 'close') {
         if (state.ui.previewOpen) {
           state.setUi({ previewOpen: false });
-          requestAnimationFrame(() => previewButtonRef.current?.focus());
+          requestAnimationFrame(() => {
+            if (isMobileViewport) {
+              document.getElementById('editor-task-tab-mobile-more')?.focus();
+              return;
+            }
+            const trigger = previewButtonRef.current;
+            (trigger?.getClientRects().length ? trigger : moreControlsSummaryRef.current)?.focus();
+          });
         }
         else if (state.ui.inspectorOpen) onEscapeClose();
         else return;
@@ -1390,7 +1424,7 @@ function EditorCanvas({
       window.removeEventListener('keyup', onKeyUp);
       if (wheelGroupTimeout.current) clearTimeout(wheelGroupTimeout.current);
     };
-  }, [adjustZoom, fitCanvas, onEscapeClose]);
+  }, [adjustZoom, fitCanvas, isMobileViewport, onEscapeClose]);
 
   const flushPointerMove = useCallback((pointerId?: number, updatePan = true) => {
     const event = pendingPointerEventRef.current;
@@ -1529,26 +1563,98 @@ function EditorCanvas({
     return () => stage.removeEventListener('wheel', onWheel);
   }, [onWheel]);
 
+  const morePanelContent = (
+    <>
+      {isMobileViewport && <p className={styles.toolbarMoreMetadata}>{copy.ratio} {design.ratio}</p>}
+      <div className={styles.mobileOnlyMoreActions}>
+        <HistoryButton action="undo" copy={copy} showLabel />
+        <HistoryButton action="redo" copy={copy} showLabel />
+        <button type="button" onClick={fitCanvas}><EditorIcon name="fit" size={18} /><span>{copy.fitCanvas}</span></button>
+        <button type="button" aria-pressed={previewOpen} onClick={() => {
+          onMobileMoreOpenChange(false);
+          editorStore.getState().setUi({ previewOpen: !previewOpen, ...(isMobileViewport ? { inspectorOpen: false } : {}) });
+          requestAnimationFrame(() => (isMobileViewport
+            ? document.getElementById('editor-task-tab-mobile-more')
+            : moreControlsSummaryRef.current)?.focus());
+        }}><EditorIcon name="preview" size={18} /><span>{previewOpen ? copy.backToEditor : copy.preview}</span></button>
+        <button type="button" onClick={() => {
+          const trigger = document.getElementById('editor-task-tab-mobile-more');
+          guideTriggerRef.current = trigger instanceof HTMLButtonElement ? trigger : null;
+          onMobileMoreOpenChange(false);
+          editorStore.getState().setUi({ inspectorOpen: false });
+          setGuideOpen(true);
+        }}><EditorIcon name="information" size={18} /><span>{WORKSPACE_COPY[locale].guide}</span></button>
+      </div>
+      <div className={styles.mobileCanvasTools}>
+        <button type="button" aria-pressed={contentTextEditing && !panMode} onClick={() => { onSelectTool(); onMobileMoreOpenChange(false); }}><EditorIcon name="select" size={17} /><span>{WORKSPACE_COPY[locale].select}</span></button>
+        <button type="button" aria-pressed={panMode} onClick={() => { onTogglePan(); onMobileMoreOpenChange(false); }}><EditorIcon name="pan" size={17} /><span>{copy.panMode}</span></button>
+      </div>
+      <EditorNumberControl
+        className={styles.rangeControl}
+        label={WORKSPACE_COPY[locale].canvasZoom}
+        ariaLabel={WORKSPACE_COPY[locale].canvasZoom}
+        value={zoom}
+        min={0.55}
+        max={1.5}
+        step={0.05}
+        displayMultiplier={100}
+        unit="%"
+        valueLabel={formatAccessiblePercent(locale, zoom * 100)}
+        onValueChange={(nextZoom) => editorStore.getState().setUi({ zoom: nextZoom })}
+      />
+      <div className={styles.toolbarMoreActions}>
+        <button type="button" className={styles.uploadShortcut} onClick={onRequestScreenshot}><EditorIcon name="upload" size={18} /><span>{copy.uploadScreenshot}</span></button>
+        <div className={styles.libraryAction}><ProjectLibraryDialogTrigger /></div>
+        <button
+          type="button"
+          className={styles.safeAreaToggle}
+          aria-pressed={safeAreaVisible}
+          onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}
+        >
+          <EditorIcon name="safe-area" size={16} /><span>{copy.safeArea}</span>
+        </button>
+        <InlineConfirm
+          triggerLabel={copy.reset}
+          triggerClassName={styles.resetButton}
+          triggerContent={resetTriggerContent}
+          prompt={copy.resetCardPrompt}
+          cancelLabel={copy.cancel}
+          confirmLabel={copy.confirmReset}
+          onConfirm={resetCard}
+        />
+      </div>
+    </>
+  );
+
+  const moreControls = (
+    <details
+      ref={moreControlsRef}
+      className={styles.toolbarMore}
+      onKeyDown={(event) => {
+        if (event.key !== 'Escape' || isImeComposing(event.nativeEvent) || !moreControlsRef.current?.open) return;
+        if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
+        event.preventDefault();
+        event.stopPropagation();
+        moreControlsRef.current.open = false;
+        moreControlsSummaryRef.current?.focus();
+      }}
+    >
+      <summary ref={moreControlsSummaryRef} aria-label={moreCanvasControlsLabel(locale)}><EditorIcon name="more" size={18} /></summary>
+      <div className={styles.toolbarMorePanel}>{morePanelContent}</div>
+    </details>
+  );
+
   return (
+    <>
     <section
       className={`${styles.canvasColumn} ${previewOpen ? styles.canvasPreviewMode : ''}`}
       inert={blockedByNavigator}
-      data-has-heading={isSampleArtwork ? 'true' : 'false'}
+      data-has-heading="false"
       aria-label={`${copy.canvasLabel}: ${copy.cardPreviewSummary(character.name, summaryJob, localizeCardWorld(character, locale))}`}
     >
       <span className={styles.srOnly} role="status" aria-live="polite" aria-atomic="true">
         {focusedFieldLabel ? formatFocusedFieldHint(locale, focusedFieldLabel) : ''}
       </span>
-      {isSampleArtwork && (
-        <div className={styles.canvasHeading}>
-          <div className={styles.canvasHeadingActions}>
-            <span className={styles.stageSampleBadge}>{copy.sampleBadge}</span>
-            <button type="button" className={styles.stageUpload} onClick={onRequestScreenshot} aria-label={copy.uploadScreenshot}>
-              <EditorIcon name="upload" size={15} /><span>{copy.uploadScreenshot}</span>
-            </button>
-          </div>
-        </div>
-      )}
       <div
         ref={stageRef}
         id="editor-canvas-stage"
@@ -1588,100 +1694,50 @@ function EditorCanvas({
 
       <div className={styles.bottomTools} role="toolbar" aria-label={copy.title}>
         <div className={styles.toolbarPrimary}>
-          <ToolbarTooltipButton type="button" className={styles.selectionTool} aria-pressed={contentTextEditing && !panMode} onClick={onSelectTool} aria-label={WORKSPACE_COPY[locale].select} tooltip={WORKSPACE_COPY[locale].select}><EditorIcon name="select" size={17} /></ToolbarTooltipButton>
+          <ToolbarTooltipButton type="button" className={styles.selectionTool} aria-pressed={!panMode} onClick={onSelectTool} aria-label={WORKSPACE_COPY[locale].select} tooltip={WORKSPACE_COPY[locale].select}><EditorIcon name="select" size={18} /></ToolbarTooltipButton>
           <ToolbarTooltipButton type="button" className={`${styles.panToggle} ${panMode ? styles.panToggleActive : ''}`} aria-pressed={panMode} onClick={onTogglePan} aria-label={copy.panMode} tooltip={copy.panHint}><EditorIcon name="pan" size={17} /></ToolbarTooltipButton>
+          <div className={styles.toolbarTaskTools}>
+            {TASK_IDS.map((task) => <ToolbarTooltipButton key={task} type="button" aria-pressed={activeTask === task} onClick={() => onActivateTask(task)} aria-label={copy.tasks[task]} tooltip={copy.tasks[task]}><EditorIcon name={task === 'information' ? 'text' : TASK_ICONS[task]} size={18} /></ToolbarTooltipButton>)}
+          </div>
           <div className={styles.historyTools}>
             <HistoryButton action="undo" copy={copy} />
             <HistoryButton action="redo" copy={copy} />
           </div>
-          <ToolbarTooltipButton type="button" className={styles.fitButton} onClick={fitCanvas} aria-label={copy.fitCanvas} aria-keyshortcuts="0" tooltip={`${copy.fitCanvas} · 0`}><EditorIcon name="fit" size={15} /><span>{copy.fitCanvas}</span></ToolbarTooltipButton>
+          <ToolbarTooltipButton type="button" className={styles.fitButton} onClick={fitCanvas} aria-label={copy.fitCanvas} aria-keyshortcuts="0" tooltip={`${copy.fitCanvas} · 0`}><EditorIcon name="fit" size={18} /></ToolbarTooltipButton>
           <button
             ref={previewButtonRef}
             type="button"
             className={styles.previewButton}
             aria-controls="editor-canvas-stage"
-            aria-label={copy.preview}
+            aria-label={previewOpen ? copy.backToEditor : copy.preview}
+            title={previewOpen ? copy.backToEditor : copy.preview}
             aria-pressed={previewOpen}
             onClick={(event) => {
               if (!previewOpen && event.detail === 0) event.currentTarget.focus();
               editorStore.getState().setUi({ previewOpen: !previewOpen });
             }}
           >
-            <EditorIcon name="preview" size={15} /><span>{previewOpen ? copy.backToEditor : copy.preview}</span>
+            <EditorIcon name="preview" size={18} />
           </button>
-          <div className={styles.zoomControls}>
-            <ToolbarTooltipButton type="button" onClick={() => adjustZoom(-0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomOut}`} tooltip={copy.zoomOut}><EditorIcon name="zoom-out" size={15} /></ToolbarTooltipButton>
-            <label>
-              <span className={styles.srOnly}>{copy.zoom}</span>
-              <select aria-label={`${copy.canvasLabel}: ${copy.zoom}`} value={String(zoom)} onChange={(event) => editorStore.getState().setUi({ zoom: Number(event.currentTarget.value) })}>
-                {Array.from(new Set([0.55, 0.75, 1, 1.25, 1.5, zoom])).sort((a, b) => a - b).map((value) => <option key={value} value={String(value)}>{Math.round(value * 100)}%</option>)}
-              </select>
-            </label>
-            <ToolbarTooltipButton type="button" onClick={() => adjustZoom(0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomIn}`} tooltip={copy.zoomIn}><EditorIcon name="zoom-in" size={15} /></ToolbarTooltipButton>
-          </div>
         </div>
-        <details
-          ref={moreControlsRef}
-          className={styles.toolbarMore}
-          onKeyDown={(event) => {
-            if (event.key !== 'Escape' || isImeComposing(event.nativeEvent) || !moreControlsRef.current?.open) return;
-            if (event.target instanceof Element && event.target.closest('dialog[open]')) return;
-            event.preventDefault();
-            event.stopPropagation();
-            moreControlsRef.current.open = false;
-            moreControlsSummaryRef.current?.focus();
-          }}
-        >
-          <summary ref={moreControlsSummaryRef} aria-label={moreCanvasControlsLabel(locale)}>
-            <span className={styles.moreToolsLabel} aria-hidden="true">{moreCanvasControlsLabel(locale)}</span>
-            <span className={styles.moreToolsCompactLabel} aria-hidden="true">{compactMoreCanvasControlsLabel(locale)}</span>
-          </summary>
-          <div className={styles.toolbarMorePanel}>
-            <div className={styles.mobileCanvasTools}>
-              <button type="button" aria-pressed={contentTextEditing && !panMode} onClick={onSelectTool}><EditorIcon name="select" size={17} /><span>{WORKSPACE_COPY[locale].select}</span></button>
-              <button type="button" aria-pressed={panMode} onClick={onTogglePan}><EditorIcon name="pan" size={17} /><span>{copy.panMode}</span></button>
-            </div>
-            <div className={styles.zoomTools}>
-              <ToolbarTooltipButton type="button" onClick={() => adjustZoom(-0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomOut}`} aria-keyshortcuts="-" tooltip={`${copy.canvasLabel}: ${copy.zoomOut} · -`}><EditorIcon name="zoom-out" size={15} /></ToolbarTooltipButton>
-              <input type="range" min="0.55" max="1.5" step="0.05" value={zoom} onChange={(event) => editorStore.getState().setUi({ zoom: Number(event.currentTarget.value) })} aria-label={`${copy.canvasLabel}: ${copy.zoom}`} aria-valuetext={formatAccessiblePercent(locale, zoom * 100)} />
-              <ToolbarTooltipButton type="button" onClick={() => adjustZoom(0.1)} aria-label={`${copy.canvasLabel}: ${copy.zoomIn}`} aria-keyshortcuts="+" tooltip={`${copy.canvasLabel}: ${copy.zoomIn} · +`}><EditorIcon name="zoom-in" size={15} /></ToolbarTooltipButton>
-              <output aria-live="off" aria-hidden="true">{Math.round(zoom * 100)}%</output>
-            </div>
-            <div className={styles.toolbarMoreActions}>
-              <div className={styles.libraryAction}><ProjectLibraryDialogTrigger /></div>
-              <button
-                type="button"
-                className={styles.safeAreaToggle}
-                aria-pressed={safeAreaVisible}
-                onClick={() => editorStore.getState().setUi({ safeAreaVisible: !safeAreaVisible })}
-              >
-                <EditorIcon name="safe-area" size={16} /><span>{copy.safeArea}</span>
-              </button>
-              <InlineConfirm
-                triggerLabel={copy.reset}
-                triggerClassName={styles.resetButton}
-                triggerContent={resetTriggerContent}
-                prompt={copy.resetCardPrompt}
-                cancelLabel={copy.cancel}
-                confirmLabel={copy.confirmReset}
-                onConfirm={resetCard}
-              />
-            </div>
-          </div>
-        </details>
+        {!isMobileViewport && moreControls}
       </div>
     </section>
+    {isMobileViewport && mobileMoreOpen && mobileMoreMount
+      ? createPortal(<div className={styles.mobileMoreSheetContent}>{morePanelContent}</div>, mobileMoreMount)
+      : null}
+    </>
   );
 }
 
 const MemoEditorCanvas = memo(EditorCanvas);
 
-function HistoryButton({ action, copy }: { action: 'undo' | 'redo'; copy: EditorCopy }) {
+function HistoryButton({ action, copy, showLabel = false }: { action: 'undo' | 'redo'; copy: EditorCopy; showLabel?: boolean }) {
   const disabled = useEditorStore((state) => action === 'undo' ? state.history.past.length === 0 : state.history.future.length === 0);
   const label = action === 'undo' ? copy.undo : copy.redo;
   const shortcut = action === 'undo' ? 'Ctrl/Cmd+Z' : 'Ctrl/Cmd+Shift+Z';
   const keyshortcuts = action === 'undo' ? 'Control+Z Meta+Z' : 'Control+Shift+Z Meta+Shift+Z';
-  return <ToolbarTooltipButton type="button" onClick={() => editorStore.getState()[action]()} disabled={disabled} aria-label={label} aria-keyshortcuts={keyshortcuts} tooltip={`${label} · ${shortcut}`}><EditorIcon name={action} size={16} /></ToolbarTooltipButton>;
+  return <ToolbarTooltipButton type="button" onClick={() => editorStore.getState()[action]()} disabled={disabled} aria-label={label} aria-keyshortcuts={keyshortcuts} tooltip={`${label} · ${shortcut}`}><EditorIcon name={action} size={16} />{showLabel && <span>{label}</span>}</ToolbarTooltipButton>;
 }
 
 export function EditorWorkspace() {
@@ -1708,7 +1764,10 @@ export function EditorWorkspace() {
   const [keyboardOpen, setKeyboardOpen] = useState(false);
   const [compactViewport, setCompactViewport] = useState(false);
   const [inputCompactMode, setInputCompactMode] = useState(false);
-  const [mobileFocusTask, setMobileFocusTask] = useState<EditorTaskId | null>(null);
+  const [mobileFocusTask, setMobileFocusTask] = useState<MobileDockId | null>(null);
+  const [mobileMoreMount, setMobileMoreMount] = useState<HTMLDivElement | null>(null);
+  const [mobileMoreOpen, setMobileMoreOpen] = useState(false);
+  const [pendingTaskNavigationFocus, setPendingTaskNavigationFocus] = useState<MobileDockId | null>(null);
   const character = useEditorStore((state) => state.character);
   const design = useEditorStore((state) => state.design);
   const layerItems = useMemo(() => {
@@ -1716,12 +1775,11 @@ export function EditorWorkspace() {
     return design.layoutVariant === 'a' ? items : items.filter((item) => item.field !== undefined);
   }, [character, design, imageSource, locale]);
   const layerSelection = resolveSelectedTextItem(layerItems, textCategory, selectedTextId);
-  const [navigatorOpen, setNavigatorOpen] = useState(false);
+  const { navigatorOpen, setNavigatorOpen, sidebarCollapsed, setSidebarCollapsed, navigatorTriggerRef } = useEditorChrome();
   const [isCompactNavigator, setIsCompactNavigator] = useState(false);
   const navigatorRef = useRef<HTMLElement>(null);
-  const navigatorTriggerRef = useRef<HTMLButtonElement | null>(null);
   const pageRef = useRef<HTMLDivElement>(null);
-  const pendingMobileFocusTask = useRef<EditorTaskId | null>(null);
+  const pendingMobileFocusTask = useRef<MobileDockId | null>(null);
 
   const dispatchImageDragHint = useCallback((event: ImageDragHintEvent) => {
     const currentPhase = imageDragHintPhaseRef.current;
@@ -1765,9 +1823,10 @@ export function EditorWorkspace() {
   }, [dispatchImageDragHint, imageDragHintPhase, imageSource]);
 
   const closeInspector = useCallback(() => {
+    setMobileMoreOpen(false);
     const state = editorStore.getState();
     state.setUi({ inspectorOpen: false });
-    const task = TASK_FOR_PANEL[state.ui.activePanel];
+    const task: MobileDockId = mobileMoreOpen ? 'more' : TASK_FOR_PANEL[state.ui.activePanel];
     setMobileFocusTask(task);
     if (isMobileViewport) {
       setKeyboardOpen(false);
@@ -1778,8 +1837,12 @@ export function EditorWorkspace() {
       document.activeElement.blur();
     }
     if (isMobileViewport) pendingMobileFocusTask.current = task;
-    else requestAnimationFrame(() => document.getElementById(`editor-task-tab-desktop-${task}`)?.focus());
-  }, [isMobileViewport]);
+    else requestAnimationFrame(() => {
+      const tab = document.getElementById(`editor-task-tab-desktop-${task}`);
+      const target = tab?.getClientRects().length ? tab : navigatorTriggerRef.current;
+      if (target?.getClientRects().length && !target.closest('[inert]')) target.focus();
+    });
+  }, [isMobileViewport, mobileMoreOpen, navigatorTriggerRef, setMobileMoreOpen]);
 
   const selectTextItemFromList = useCallback((item: CardTextItem) => {
     setSelectedTextId(item.id);
@@ -1787,9 +1850,10 @@ export function EditorWorkspace() {
   }, []);
 
   const openTask = useCallback((task: EditorTaskId) => {
+    setMobileMoreOpen(false);
     setMobileFocusTask(task);
     editorStore.getState().setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true });
-  }, []);
+  }, [setMobileMoreOpen]);
 
   const selectTextTarget = useCallback((item: CardTextItem, focusInput = false) => {
     selectTextItemFromList(item);
@@ -1802,7 +1866,18 @@ export function EditorWorkspace() {
     if (restoreFocus) requestAnimationFrame(() => {
       if (navigatorTriggerRef.current?.getClientRects().length) navigatorTriggerRef.current.focus();
     });
-  }, []);
+  }, [navigatorTriggerRef, setNavigatorOpen]);
+
+  const openNavigator = useCallback(() => {
+    if (isCompactNavigator) {
+      setNavigatorOpen(true);
+      return;
+    }
+    setSidebarCollapsed(false);
+    requestAnimationFrame(() => document.getElementById('editor-navigator-collapse')?.focus({ preventScroll: true }));
+  }, [isCompactNavigator, setNavigatorOpen, setSidebarCollapsed]);
+
+  const showNavigatorTrigger = !isMobileViewport && !previewOpen && (isCompactNavigator ? !navigatorOpen : sidebarCollapsed);
 
   const activateLayer = useCallback((item: CardTextItem) => {
     selectTextTarget(item);
@@ -1821,7 +1896,7 @@ export function EditorWorkspace() {
   }, [closeNavigator, navigatorOpen, openTask]);
 
   useEffect(() => {
-    const media = window.matchMedia('(max-width: 1180px)');
+    const media = window.matchMedia('(max-width: 1180px) and (min-width: 901px)');
     const sync = () => {
       setIsCompactNavigator(media.matches);
       if (!media.matches) setNavigatorOpen(false);
@@ -1829,7 +1904,7 @@ export function EditorWorkspace() {
     sync();
     media.addEventListener('change', sync);
     return () => media.removeEventListener('change', sync);
-  }, []);
+  }, [setNavigatorOpen]);
 
   useLayoutEffect(() => {
     if (!navigatorOpen || !isCompactNavigator || previewOpen) return;
@@ -1956,6 +2031,7 @@ export function EditorWorkspace() {
     const mobileViewport = window.matchMedia('(max-width: 900px)');
     const applyViewport = (matches: boolean) => {
       setIsMobileViewport(matches);
+      if (!matches) setMobileMoreOpen(false);
       editorStore.getState().setUi({ inspectorOpen: !matches });
     };
     applyViewport(mobileViewport.matches);
@@ -1999,28 +2075,29 @@ export function EditorWorkspace() {
       const inspector = page.querySelector<HTMLElement>(`.${styles.inspector}`);
       const focusedElement = document.activeElement;
       const focusedEditorField = Boolean(
-        inspector
-          && focusedElement instanceof HTMLElement
-          && inspector.contains(focusedElement)
-          && focusedElement.matches('input, textarea, select'),
+        focusedElement instanceof HTMLElement
+          && focusedElement.matches('input, textarea, select')
+          && (inspector?.contains(focusedElement) || focusedElement.matches('[data-editor-portal-input="true"]')),
       );
       const hasKeyboard = viewportReducedForKeyboard && focusedEditorField;
-      const useInputCompactMode = hasKeyboard || (viewportHeight < 600 && focusedEditorField);
+      const useInputCompactMode = hasKeyboard || (viewportHeight < 600 && (inspectorOpen || mobileMoreOpen));
       const workspaceStyle = workspace ? window.getComputedStyle(workspace) : null;
       const verticalPadding = workspaceStyle
         ? (Number.parseFloat(workspaceStyle.paddingTop) || 0) + (Number.parseFloat(workspaceStyle.paddingBottom) || 0)
         : 16;
+      const compactPaddingAdjustment = useInputCompactMode && page.dataset.inputCompactMode !== 'true' ? 60 : 0;
       const appHeaderHeight = Number.parseFloat(window.getComputedStyle(page).getPropertyValue('--app-header-height')) || 56;
       const workspaceOffset = workspace
         ? workspace.getBoundingClientRect().top - page.getBoundingClientRect().top
         : 0;
       const visibleWorkspaceHeight = Math.max(0, viewportBottom - appHeaderHeight - workspaceOffset);
-      const workspaceContentHeight = Math.max(0, visibleWorkspaceHeight - verticalPadding);
-      const dockHeight = useInputCompactMode ? 0 : 60;
-      const toolbarHeight = compactHeight ? 0 : 48;
+      const workspaceContentHeight = Math.max(0, visibleWorkspaceHeight - verticalPadding + compactPaddingAdjustment);
+      const dockHeight = useInputCompactMode ? 0 : 52;
+      const toolbarHeight = 0;
+      const taskBarHeight = 0;
       const minimumStageHeight = useInputCompactMode ? 0 : compactHeight ? 48 : 150;
-      const sheetGap = 8;
-      const maxSheetHeight = Math.max(76, workspaceContentHeight - dockHeight - toolbarHeight - minimumStageHeight - sheetGap - 6);
+      const sheetGap = useInputCompactMode ? 0 : 8;
+      const maxSheetHeight = Math.max(76, workspaceContentHeight - taskBarHeight - toolbarHeight - minimumStageHeight - sheetGap - 6);
       const preferredSheetHeight = Math.round(viewportHeight * (useInputCompactMode ? 0.54 : compactHeight ? 0.46 : 0.48));
       const sheetHeight = Math.min(preferredSheetHeight, maxSheetHeight);
 
@@ -2051,7 +2128,7 @@ export function EditorWorkspace() {
       page.removeEventListener('focusin', syncViewport);
       page.removeEventListener('focusout', syncViewport);
     };
-  }, [activeTask, isMobileViewport]);
+  }, [activeTask, inspectorOpen, isMobileViewport, mobileMoreOpen]);
 
   useEffect(() => {
     const task = pendingMobileFocusTask.current;
@@ -2060,83 +2137,181 @@ export function EditorWorkspace() {
     requestAnimationFrame(() => document.getElementById(`editor-task-tab-mobile-${task}`)?.focus());
   }, [inputCompactMode, inspectorOpen]);
 
+  useLayoutEffect(() => {
+    const task = pendingTaskNavigationFocus;
+    if (!task || previewOpen) return;
+
+    const activeElement = document.activeElement;
+    if (activeElement instanceof HTMLElement
+      && activeElement !== document.body
+      && activeElement !== document.documentElement
+      && activeElement.getClientRects().length > 0) {
+      return;
+    }
+
+    const taskToRestore = task === 'more' && !isMobileViewport ? activeTask : task;
+    const nav = isMobileViewport ? 'mobile' : isCompactNavigator ? 'inspector' : 'desktop';
+    const target = document.getElementById(`editor-task-tab-${nav}-${taskToRestore}`);
+    if (!target || target.getClientRects().length === 0 || target.closest('[inert]')) return;
+
+    target.focus({ preventScroll: true });
+  }, [activeTask, isCompactNavigator, isMobileViewport, pendingTaskNavigationFocus, previewOpen]);
+
+  useEffect(() => {
+    if (!pendingTaskNavigationFocus) return;
+    const clearForVisibleNonNavigationFocus = (event: FocusEvent) => {
+      const target = event.target;
+      if (!(target instanceof HTMLElement)
+        || target === document.body
+        || target === document.documentElement
+        || target.id.startsWith('editor-task-tab-')) return;
+      setPendingTaskNavigationFocus(null);
+    };
+    document.addEventListener('focusin', clearForVisibleNonNavigationFocus, true);
+    return () => document.removeEventListener('focusin', clearForVisibleNonNavigationFocus, true);
+  }, [pendingTaskNavigationFocus]);
+
+  useLayoutEffect(() => {
+    if (!isMobileViewport || !mobileMoreOpen || !inputCompactMode || !inspectorOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const activeElement = document.activeElement;
+      if (activeElement instanceof HTMLElement && (activeElement.matches('input, textarea, select') || activeElement.closest('dialog[open], [role="dialog"]'))) return;
+      document.getElementById('editor-inspector-title')?.focus({ preventScroll: true });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [inputCompactMode, inspectorOpen, isMobileViewport, mobileMoreOpen]);
+
   const exportCard = useCallback(() => {
     editorStore.getState().persistNow();
     router.push('/export');
   }, [router]);
 
-  function handleTaskTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, task: EditorTaskId, nav: 'desktop' | 'mobile') {
+  function handleTaskTabKeyDown(event: React.KeyboardEvent<HTMLButtonElement>, task: EditorTaskId | MobileDockId, nav: 'desktop' | 'mobile' | 'inspector') {
     let nextIndex = -1;
-    const currentIndex = TASK_IDS.indexOf(task);
+    const currentIndex = nav === 'mobile'
+      ? MOBILE_DOCK_IDS.indexOf(task as MobileDockId)
+      : TASK_IDS.indexOf(task as EditorTaskId);
+    const itemCount = nav === 'mobile' ? MOBILE_DOCK_IDS.length : TASK_IDS.length;
     if (event.key === 'Home') nextIndex = 0;
-    else if (event.key === 'End') nextIndex = TASK_IDS.length - 1;
-    else if (nav === 'mobile' && event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % TASK_IDS.length;
-    else if (nav === 'mobile' && event.key === 'ArrowLeft') nextIndex = (currentIndex + TASK_IDS.length - 1) % TASK_IDS.length;
-    else if (nav === 'desktop' && (event.key === 'ArrowDown' || event.key === 'ArrowRight')) nextIndex = (currentIndex + 1) % TASK_IDS.length;
-    else if (nav === 'desktop' && (event.key === 'ArrowUp' || event.key === 'ArrowLeft')) nextIndex = (currentIndex + TASK_IDS.length - 1) % TASK_IDS.length;
+    else if (event.key === 'End') nextIndex = itemCount - 1;
+    else if (nav === 'mobile' && event.key === 'ArrowRight') nextIndex = (currentIndex + 1) % itemCount;
+    else if (nav === 'mobile' && event.key === 'ArrowLeft') nextIndex = (currentIndex + itemCount - 1) % itemCount;
+    else if (nav !== 'mobile' && (event.key === 'ArrowDown' || event.key === 'ArrowRight')) nextIndex = (currentIndex + 1) % TASK_IDS.length;
+    else if (nav !== 'mobile' && (event.key === 'ArrowUp' || event.key === 'ArrowLeft')) nextIndex = (currentIndex + TASK_IDS.length - 1) % TASK_IDS.length;
     if (nextIndex < 0) return;
     event.preventDefault();
-    const nextTask = TASK_IDS[nextIndex];
     if (nav === 'mobile') {
+      const nextTask = MOBILE_DOCK_IDS[nextIndex];
       setMobileFocusTask(nextTask);
       requestAnimationFrame(() => document.getElementById(`editor-task-tab-mobile-${nextTask}`)?.focus());
       return;
     }
+    const nextTask = TASK_IDS[nextIndex];
     openTask(nextTask);
     requestAnimationFrame(() => document.getElementById(`editor-task-tab-${nav}-${nextTask}`)?.focus());
   }
 
-  function activateTaskTab(task: EditorTaskId, nav: 'desktop' | 'mobile') {
+  function activateTaskTab(task: EditorTaskId | MobileDockId, nav: 'desktop' | 'mobile' | 'inspector') {
     if (nav === 'mobile') {
       setMobileFocusTask(task);
       const state = editorStore.getState();
+      if (task === 'more') {
+        if (mobileMoreOpen && state.ui.inspectorOpen && !state.ui.previewOpen) {
+          setMobileMoreOpen(false);
+          state.setUi({ inspectorOpen: false });
+          return;
+        }
+        setMobileMoreOpen(true);
+        state.setUi({ inspectorOpen: true, previewOpen: false });
+        return;
+      }
+      if (mobileMoreOpen || previewOpen) {
+        setMobileMoreOpen(false);
+        state.setUi({ activePanel: TASK_PANEL[task], inspectorOpen: true, previewOpen: false });
+        return;
+      }
       const activation = getEditorTaskActivation(task, state.ui.activePanel, state.ui.inspectorOpen, true);
       if (!activation.inspectorOpen) {
         closeInspector();
         return;
       }
-      state.setUi(activation);
+      setMobileMoreOpen(false);
+      state.setUi({ ...activation, previewOpen: false });
       return;
     }
-    openTask(task);
+    if (task !== 'more') openTask(task);
   }
 
-  function renderTaskTabs(nav: 'desktop' | 'mobile') {
+  function renderTaskTabs(nav: 'desktop' | 'mobile' | 'inspector') {
     const isMobileDock = nav === 'mobile';
+    const controlledPanelId = isMobileDock ? 'editor-inspector' : 'editor-inspector-body';
     return (
       <nav
-        className={isMobileDock ? styles.mobileTaskTabs : styles.toolNav}
+        className={isMobileDock ? styles.mobileTaskTabs : nav === 'inspector' ? styles.inspectorTaskTabs : styles.toolRail}
         role={isMobileDock ? 'toolbar' : 'tablist'}
         aria-label={copy.workspaceLabel}
-        aria-orientation="horizontal"
+        aria-orientation={nav === 'desktop' ? 'vertical' : 'horizontal'}
         data-active-task={activeTask}
         data-inspector-open={inspectorOpen}
       >
-        {TASK_IDS.map((task, index) => {
-          const isSelected = activeTask === task && (!isMobileDock || inspectorOpen);
+        {TASK_IDS.map((task) => {
+          const isSelected = activeTask === task && (!isMobileDock || !mobileMoreOpen);
+          const isExpanded = isSelected && inspectorOpen && !previewOpen && !mobileMoreOpen;
           return (
             <button
               type="button"
               key={task}
               id={`editor-task-tab-${nav}-${task}`}
               role={isMobileDock ? undefined : 'tab'}
-              className={`${styles.toolButton} ${isSelected ? styles.toolButtonActive : ''}`}
-              aria-controls="editor-inspector"
+              className={nav !== 'desktop' ? `${styles.toolButton} ${isSelected ? styles.toolButtonActive : ''}` : `${styles.railToolButton} ${isSelected ? styles.railToolButtonActive : ''}`}
+              aria-controls={!previewOpen ? controlledPanelId : undefined}
               aria-selected={isMobileDock ? undefined : isSelected}
-              aria-expanded={isMobileDock ? isSelected : undefined}
+              aria-expanded={isMobileDock ? isExpanded : undefined}
+              aria-pressed={isMobileDock ? isSelected : undefined}
               aria-label={copy.tasks[task]}
               tabIndex={isMobileDock
                 ? ((mobileFocusTask ?? activeTask) === task ? 0 : -1)
                 : (activeTask === task ? 0 : -1)}
               onKeyDown={(event) => handleTaskTabKeyDown(event, task, nav)}
               onClick={() => activateTaskTab(task, nav)}
+              onFocus={() => {
+                setPendingTaskNavigationFocus(task);
+                if (isMobileDock) setMobileFocusTask(task);
+              }}
+              onBlur={(event) => {
+                if (event.currentTarget.getClientRects().length === 0) setPendingTaskNavigationFocus(task);
+                else if (pendingTaskNavigationFocus === task) setPendingTaskNavigationFocus(null);
+              }}
             >
-              <span className={styles.toolButtonIcon} aria-hidden="true"><EditorIcon name={TASK_ICONS[task]} /></span>
+              {nav !== 'mobile' && <span className={styles.toolButtonIcon} aria-hidden="true"><EditorIcon name={TASK_ICONS[task]} /></span>}
               <span className={styles.toolButtonLabel}>{copy.tasks[task]}</span>
-              <small aria-hidden="true">{String(index + 1).padStart(2, '0')}</small>
             </button>
           );
         })}
+        {isMobileDock && (
+          <button
+            type="button"
+            id="editor-task-tab-mobile-more"
+            className={`${styles.toolButton} ${mobileMoreOpen ? styles.toolButtonActive : ''}`}
+            aria-controls={!previewOpen ? 'editor-inspector' : undefined}
+            aria-expanded={mobileMoreOpen && inspectorOpen && !previewOpen}
+            aria-pressed={mobileMoreOpen}
+            aria-label={moreCanvasControlsLabel(locale)}
+            tabIndex={(mobileFocusTask ?? (mobileMoreOpen ? 'more' : activeTask)) === 'more' ? 0 : -1}
+            onKeyDown={(event) => handleTaskTabKeyDown(event, 'more', 'mobile')}
+            onClick={() => activateTaskTab('more', 'mobile')}
+            onFocus={() => {
+              setPendingTaskNavigationFocus('more');
+              setMobileFocusTask('more');
+            }}
+            onBlur={(event) => {
+              if (event.currentTarget.getClientRects().length === 0) setPendingTaskNavigationFocus('more');
+              else if (pendingTaskNavigationFocus === 'more') setPendingTaskNavigationFocus(null);
+            }}
+          >
+            <span className={styles.toolButtonLabel}>{moreCanvasControlsLabel(locale)}</span>
+          </button>
+        )}
       </nav>
     );
   }
@@ -2145,11 +2320,21 @@ export function EditorWorkspace() {
     <div
       ref={pageRef}
       className={`${styles.page} ${previewOpen ? styles.previewMode : ''} ${!inspectorOpen && !previewOpen ? styles.inspectorClosed : ''}`}
+      onFocusCapture={(event) => {
+        const target = event.target;
+        if (!(target instanceof HTMLElement)
+          || target === document.body
+          || target === document.documentElement
+          || target.id.startsWith('editor-task-tab-')) return;
+        setPendingTaskNavigationFocus(null);
+      }}
       data-active-task={activeTask}
       data-keyboard-open={keyboardOpen ? 'true' : 'false'}
       data-compact-viewport={compactViewport ? 'true' : 'false'}
       data-input-compact-mode={inputCompactMode ? 'true' : 'false'}
       data-navigator-open={navigatorOpen ? 'true' : 'false'}
+      data-navigator-collapsed={sidebarCollapsed ? 'true' : 'false'}
+      data-compact-navigator={isCompactNavigator ? 'true' : 'false'}
     >
       <h1 className={styles.srOnly}>{copy.title}</h1>
 
@@ -2162,7 +2347,28 @@ export function EditorWorkspace() {
         </div>
       )}
 
-      <div className={styles.workspace}>
+      <div className={styles.workspace} data-navigator-trigger-visible={showNavigatorTrigger ? 'true' : 'false'}>
+        {showNavigatorTrigger && (
+          <button
+            ref={navigatorTriggerRef}
+            type="button"
+            className={styles.canvasNavigatorButton}
+            aria-controls="editor-navigator"
+            aria-expanded={isCompactNavigator ? navigatorOpen : false}
+            aria-label={WORKSPACE_COPY[locale].openItems}
+            inert={navigatorOpen && isCompactNavigator}
+            onClick={openNavigator}
+          >
+            <EditorIcon name="panel-left" size={17} />
+            <span>{WORKSPACE_COPY[locale].openItems}</span>
+          </button>
+        )}
+        {isMobileViewport && <div className={styles.mobileTaskBar} inert={navigatorOpen && isCompactNavigator}>
+          {renderTaskTabs('mobile')}
+        </div>}
+        {!previewOpen && <div className={styles.railColumn} inert={navigatorOpen && isCompactNavigator}>
+          {renderTaskTabs('desktop')}
+        </div>}
         {!previewOpen && (
           <aside
             ref={navigatorRef}
@@ -2172,16 +2378,26 @@ export function EditorWorkspace() {
             aria-modal={isCompactNavigator && navigatorOpen ? true : undefined}
             data-editor-shortcuts-disabled={isCompactNavigator && navigatorOpen ? 'true' : undefined}
             aria-label={WORKSPACE_COPY[locale].items}
-            aria-hidden={isMobileViewport && !navigatorOpen ? true : undefined}
+            aria-hidden={isCompactNavigator ? !navigatorOpen : sidebarCollapsed}
           >
-            <button id="editor-navigator-toggle" type="button" className={styles.navigatorToggle} aria-label={navigatorOpen ? WORKSPACE_COPY[locale].closeItems : WORKSPACE_COPY[locale].openItems} aria-controls="editor-navigator-content" aria-expanded={navigatorOpen} onClick={(event) => { navigatorTriggerRef.current = event.currentTarget; if (navigatorOpen) closeNavigator(); else setNavigatorOpen(true); }}><EditorIcon name="template" size={19} /></button>
-            <div id="editor-navigator-content" className={styles.navigatorContents} inert={isCompactNavigator && !navigatorOpen} aria-hidden={isCompactNavigator && !navigatorOpen ? true : undefined}>
+            <div id="editor-navigator-content" className={styles.navigatorContents} inert={isCompactNavigator ? !navigatorOpen : sidebarCollapsed} aria-hidden={(isCompactNavigator ? !navigatorOpen : sidebarCollapsed) ? true : undefined}>
               <div className={styles.sidebarHeader}>
-                <span>{character.name.trim() || copy.fields.name}</span>
-                <button type="button" className={styles.navigatorClose} aria-label={WORKSPACE_COPY[locale].closeItems} onClick={() => closeNavigator()}><EditorIcon name="close" size={17} /></button>
+                <span>{WORKSPACE_COPY[locale].items}</span>
+                {!isCompactNavigator && !isMobileViewport && !previewOpen && <button
+                  id="editor-navigator-collapse"
+                  type="button"
+                  className={styles.collapseNavigatorButton}
+                  aria-controls="editor-navigator-content"
+                  aria-expanded={!sidebarCollapsed}
+                  aria-label={WORKSPACE_COPY[locale].collapseItems}
+                  onClick={() => {
+                    setSidebarCollapsed(true);
+                    requestAnimationFrame(() => navigatorTriggerRef.current?.focus({ preventScroll: true }));
+                  }}
+                ><EditorIcon name="panel-left" size={17} /></button>}
+                {isCompactNavigator && <button type="button" className={styles.navigatorClose} aria-label={WORKSPACE_COPY[locale].closeItems} onClick={() => closeNavigator()}><EditorIcon name="close" size={17} /></button>}
               </div>
               {navigatorOpen && saveStatus === 'error' && <p className={styles.errorMessage} role="alert">{copy.saveErrorRecovery}</p>}
-              {renderTaskTabs('desktop')}
               <EditorLayerPanel items={layerItems} selectedId={layerSelection?.id ?? null} activeTask={activeTask} locale={locale} templateLabel={copy.templates[design.template]} ratio={design.ratio} onSelectItem={activateLayer} onSelectTask={activateLayerTask} />
             </div>
           </aside>
@@ -2190,26 +2406,27 @@ export function EditorWorkspace() {
         <Profiler id="EditorCanvas" onRender={profileCommit}><MemoEditorCanvas
           copy={copy}
           locale={locale}
+          isMobileViewport={isMobileViewport}
+          mobileMoreMount={mobileMoreMount}
+          mobileMoreOpen={mobileMoreOpen}
+          onMobileMoreOpenChange={setMobileMoreOpen}
           focusedField={focusedField}
-          contentTextEditing={activeTask === 'information'}
-          photoEditing={activeTask === 'photo'}
+          contentTextEditing={activeTask === 'information' && !mobileMoreOpen}
+          photoEditing={activeTask === 'photo' && !mobileMoreOpen}
           blockedByNavigator={navigatorOpen && isCompactNavigator}
           textCategory={textCategory}
           selectedTextId={selectedTextId}
           onSelectTextTarget={selectTextTarget}
           panMode={panMode}
           onTogglePan={togglePan}
-          onSelectTool={() => { setPanMode(false); openTask('information'); }}
+          onSelectTool={() => { setPanMode(false); editorStore.getState().setUi({ previewOpen: false }); openTask('information'); }}
+          activeTask={activeTask}
+          onActivateTask={(task) => { editorStore.getState().setUi({ previewOpen: false }); openTask(task); }}
           onRequestScreenshot={requestScreenshotUpload}
           onEscapeClose={closeInspector}
           showImageDragHint={imageDragHintPhase === 'visible'}
           onImageDragStart={dismissImageDragHint}
         /></Profiler>
-
-        {!previewOpen && <div className={styles.mobileDock} inert={navigatorOpen && isCompactNavigator}>
-          <button id="editor-navigator-mobile-toggle" type="button" className={styles.mobileNavigatorButton} aria-label={WORKSPACE_COPY[locale].openItems} aria-controls="editor-navigator-content" aria-expanded={navigatorOpen} onClick={(event) => { navigatorTriggerRef.current = event.currentTarget; setNavigatorOpen(true); }}><EditorIcon name="template" size={18} /><span>{WORKSPACE_COPY[locale].items}</span></button>
-          {renderTaskTabs('mobile')}
-        </div>}
 
         {!previewOpen && (
           <EditorBoundary resetKey={`${activeTask}-${locale}`}><MemoEditorInspector
@@ -2217,8 +2434,12 @@ export function EditorWorkspace() {
             locale={locale}
             activeTask={activeTask}
             isMobileViewport={isMobileViewport}
+            isCompactNavigator={isCompactNavigator}
             isOpen={inspectorOpen}
+            inputCompactMode={inputCompactMode}
             blockedByNavigator={navigatorOpen && isCompactNavigator}
+            mobileMoreOpen={mobileMoreOpen}
+            onMobileMoreMountChange={setMobileMoreMount}
             selectedTextId={selectedTextId}
             textCategory={textCategory}
             onSelectTextCategory={setTextCategory}
@@ -2226,6 +2447,7 @@ export function EditorWorkspace() {
             onFocusField={setFocusedField}
             onClose={closeInspector}
             onSuccessfulUpload={onSuccessfulUpload}
+            taskTabsSlot={renderTaskTabs('inspector')}
           /></EditorBoundary>
         )}
         {navigatorOpen && isCompactNavigator && !previewOpen && <button type="button" className={styles.navigatorBackdrop} aria-hidden="true" tabIndex={-1} onClick={() => closeNavigator()} />}

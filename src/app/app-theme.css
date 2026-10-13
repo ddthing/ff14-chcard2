@@ -1,5 +1,6 @@
 /* Semantic aliases to the installed shadcn Stone preset.
  * Keep color values and the radius scale in shadcn-theme.css authoritative.
+ * Editor-only canvas and selection roles are approved in DESIGN.md.
  * Card artwork remains isolated from these application tokens.
  */
 html[data-app-theme='light'],
@@ -28,12 +29,22 @@ html[data-app-theme='dark'] {
 }
 
 html[data-app-theme='light'] {
+  --editor-canvas: #e5e5e5;
+  --editor-selection: #0075d9;
+  --editor-selection-soft: #e5f4ff;
+  --editor-selection-ink: #075b96;
+  --editor-on-selection: #ffffff;
   color-scheme: light;
   --app-overlay: rgb(0 0 0 / 32%);
   --app-shadow-overlay: 0 12px 32px rgb(0 0 0 / 16%);
 }
 
 html[data-app-theme='dark'] {
+  --editor-canvas: #252525;
+  --editor-selection: #80caff;
+  --editor-selection-soft: #163a50;
+  --editor-selection-ink: #80caff;
+  --editor-on-selection: #082c47;
   color-scheme: dark;
   --app-overlay: rgb(0 0 0 / 58%);
   --app-shadow-overlay: 0 14px 40px rgb(0 0 0 / 34%);

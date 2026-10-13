@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { AppIcon } from "@/components/app-icon";
 import { AppearanceControl } from "@/components/appearance-control";
 import { useI18n } from "@/lib/i18n";
 import { getAppNavigationItems, isRouteCurrent, type AppNavigationCopy } from "@/lib/app-navigation";
@@ -122,9 +123,7 @@ export function MobileNavigation({ pathname, copy, languageLabel, classes, onNav
         onClick={() => setOpen((value) => !value)}
         ref={triggerRef}
       >
-        <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18" fill="none">
-          <path d="M3 5.5h14M3 10h14M3 14.5h14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-        </svg>
+        <AppIcon name="Menu" size={18} />
         <span>{copy.menu}</span>
       </button>
       <div className={classes.panel} id={panelId} hidden={!open}>

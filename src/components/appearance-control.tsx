@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { useI18n } from "@/lib/i18n";
 import type { AppAppearancePreference } from "@/lib/app-appearance";
 import { useAppearance } from "@/components/theme-provider";
+import { AppIcon } from "@/components/app-icon";
 import styles from "@/components/app-shell.module.css";
 
 const labels = {
@@ -65,10 +66,7 @@ export function AppearanceControl() {
         onClick={() => setOpen((value) => !value)}
         ref={triggerRef}
       >
-        <svg aria-hidden="true" viewBox="0 0 20 20" width="18" height="18" fill="none">
-          <path d="M10 2.5a7.5 7.5 0 1 0 7.5 7.5A6 6 0 0 1 10 2.5Z" stroke="currentColor" strokeWidth="1.35" strokeLinejoin="round" />
-          <path d="M10 2.5v15" stroke="currentColor" strokeWidth="1.1" opacity=".5" />
-        </svg>
+        <AppIcon name={preference === "light" ? "Sun" : preference === "dark" ? "Moon" : "Contrast"} size={18} />
       </button>
       <div className={styles.appearancePopup} id={`appearance-options-${id}`} hidden={!open}>
         <fieldset className={styles.appearanceFieldset}>

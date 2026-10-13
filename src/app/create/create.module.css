@@ -645,6 +645,12 @@
 
 .uploadSuccessMark { font-size: 1.75rem; font-weight: 650; line-height: 1; }
 
+.uploadSuccessMark > svg {
+  display: block;
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
 .selectedFile {
   display: flex;
   width: min(100%, 30rem);

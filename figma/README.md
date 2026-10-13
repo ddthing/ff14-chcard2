@@ -17,3 +17,5 @@ This is a third-party analysis of Figma's **marketing website**, not an official
 The application contract is [`../DESIGN.md`](../DESIGN.md). It incorporates the reference's monochrome frame, thin dividers, restrained elevation, consistent spacing, and action hierarchy. The user's editor screenshot informs the three-region workspace. Marketing display type, pastel story panels, pricing patterns, and pill-only buttons do not replace dense editor controls. Existing licensed fonts and the app's light/dark, localization, accessibility, persistence, and export behavior remain supported.
 
 Do not copy this reference over the root contract without reconciling those boundaries. See [implementation and validation](../docs/design/v3/FIGMA_EDITOR_REDESIGN_2026-10-13.md).
+
+The user's later product-UI comparison prompted [a chrome repair](../docs/design/v3/FIGMA_CHROME_REPAIR_2026-10-13.md): an independent tool rail, collapsible layers, a compact icon dock, and editor-specific blue selection roles. Those product roles are defined in the root contract and are not attributed to this marketing analysis.

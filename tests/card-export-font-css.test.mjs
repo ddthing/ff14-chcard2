@@ -1,6 +1,9 @@
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { register } from 'node:module';
+import path from 'node:path';
 import test from 'node:test';
+import { fileURLToPath } from 'node:url';
 
 register('./ts-alias-loader.mjs', import.meta.url);
 
@@ -12,6 +15,60 @@ const {
   prepareCardFontCss,
   unicodeCodePointsForText,
 } = await import('../src/lib/card-export/font-css.ts');
+const { FONT_REGISTRY } = await import('../src/data/fonts/registry.ts');
+
+const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+
+class TestStyleDeclaration {
+  constructor(entries) {
+    this.values = new Map(entries);
+    this.names = entries.map(([name]) => name);
+    this.length = this.names.length;
+  }
+  item(index) { return this.names[index] ?? ''; }
+  getPropertyValue(name) { return this.values.get(name) ?? ''; }
+  getPropertyPriority() { return ''; }
+}
+
+class CSSFontFaceRule {
+  constructor(entries, parentStyleSheet) {
+    this.style = new TestStyleDeclaration(entries);
+    this.parentStyleSheet = parentStyleSheet;
+  }
+}
+
+function createFontExportNode(family, src) {
+  const parentStyleSheet = { href: 'https://app.test/assets/cards.css' };
+  const face = new CSSFontFaceRule([
+    ['font-family', JSON.stringify(family)],
+    ['font-style', 'normal'],
+    ['font-weight', '400'],
+    ['src', src],
+  ], parentStyleSheet);
+  const sheet = { href: parentStyleSheet.href, cssRules: [face] };
+  const textElement = { tagName: 'SPAN', fontFamily: JSON.stringify(family) };
+  const textNode = { nodeValue: 'A', parentElement: textElement };
+  const document = {
+    styleSheets: [sheet],
+    location: { href: 'https://app.test/export' },
+    baseURI: 'https://app.test/export',
+    defaultView: {
+      getComputedStyle(element, pseudo) {
+        if (pseudo) return { content: 'none', fontFamily: JSON.stringify(family), textTransform: 'none' };
+        return { fontFamily: element.fontFamily ?? JSON.stringify(family), textTransform: 'none' };
+      },
+    },
+    createTreeWalker() {
+      let read = false;
+      return { nextNode: () => read ? null : (read = true, textNode) };
+    },
+  };
+  return {
+    ownerDocument: document,
+    tagName: 'ARTICLE',
+    querySelectorAll: () => [textElement],
+  };
+}
 
 test('font unicode ranges support singletons, spans, and trailing wildcards', () => {
   const ranges = parseUnicodeRangeDescriptor('U+0041, U+4E00-4E02, U+304?');
@@ -53,6 +110,99 @@ test('font src parsing keeps local sources and identifies WOFF2 while excluding 
   assert.deepEqual(sources?.map(({ kind }) => kind), ['local', 'woff2', 'other-url']);
   assert.equal(sources?.[1]?.kind === 'woff2' ? sources[1].format : null, 'woff2-variations');
   assert.equal(parseCssFontSourceList('url("font.woff2") format("woff2"), url("font.woff2"'), null);
+});
+
+test('font src parsing recognizes original TrueType and OpenType URLs', () => {
+  const sources = parseCssFontSourceList(
+    'url("../fonts/source.ttf") format("truetype"), url("../fonts/source.otf") format("opentype"), url("../fonts/source.woff2") format("woff2-variations"), url("../fonts/source.woff") format("woff")',
+  );
+  assert.deepEqual(sources?.map(({ kind }) => kind), ['truetype', 'opentype', 'woff2', 'other-url']);
+});
+
+test('export inlines original TrueType bytes unchanged with a TrueType data URL', async () => {
+  const registeredFontAsset = Object.values(FONT_REGISTRY)
+    .flatMap((entry) => (entry.localAssets ?? []).map((asset) => ({ entry, asset })))
+    .find(({ asset }) => asset.format === 'truetype' && asset.bytes <= 24 * 1024 * 1024);
+  // Keep the byte-preserving export test runnable while the registry has no TTF yet.
+  const fontAsset = registeredFontAsset ?? {
+    entry: { family: 'Geist Export Fixture' },
+    asset: {
+      filePath: 'node_modules/next/dist/compiled/@vercel/og/Geist-Regular.ttf',
+      publicPath: '/fonts/geist-export-fixture.ttf',
+    },
+  };
+
+  const originalBytes = await readFile(path.resolve(projectRoot, fontAsset.asset.filePath));
+  const node = createFontExportNode(
+    fontAsset.entry.family,
+    `url(${JSON.stringify(fontAsset.asset.publicPath)}) format("truetype")`,
+  );
+  const originalFetch = globalThis.fetch;
+  let fetchedUrl;
+  globalThis.fetch = async (url, options) => {
+    fetchedUrl = url;
+    assert.equal(options.credentials, 'same-origin');
+    return {
+      ok: true,
+      headers: { get: () => null },
+      arrayBuffer: async () => Uint8Array.from(originalBytes).buffer,
+    };
+  };
+  try {
+    const prepared = await prepareCardFontCss(node);
+    assert.ok(prepared);
+    assert.equal(fetchedUrl, `https://app.test${fontAsset.asset.publicPath}`);
+    assert.equal(prepared.uniqueFontResourceCount, 1);
+    assert.equal(prepared.inlinedBytes, originalBytes.byteLength);
+
+    const encodedFont = prepared.cssText.match(/data:font\/ttf;base64,([^"]+)/u)?.[1];
+    assert.ok(encodedFont, 'the prepared CSS must use the TrueType MIME type');
+    assert.deepEqual(Buffer.from(encodedFont, 'base64'), originalBytes, 'export must preserve the original font bytes');
+    assert.match(prepared.cssText, /format\("truetype"\)/u);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('unsupported font URL formats preserve the full renderer stylesheet fallback', async () => {
+  const node = createFontExportNode('Unsupported Font', 'url("./font.woff") format("woff")');
+  assert.equal(await prepareCardFontCss(node), null);
+});
+
+test('font bytes that do not match their declared TrueType format fall back safely', async () => {
+  const node = createFontExportNode('Mismatched Font', 'url("./font.ttf") format("truetype")');
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    headers: { get: () => null },
+    arrayBuffer: async () => Uint8Array.of(0x77, 0x4f, 0x46, 0x32, 1, 2, 3).buffer,
+  });
+  try {
+    assert.equal(await prepareCardFontCss(node), null);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('OpenType source bytes serialize with the OpenType MIME type', async () => {
+  const node = createFontExportNode('OpenType Font', 'url("./font.otf") format("opentype")');
+  const originalBytes = Uint8Array.of(0x4f, 0x54, 0x54, 0x4f, 1, 2, 3, 4);
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => ({
+    ok: true,
+    headers: { get: () => null },
+    arrayBuffer: async () => originalBytes.slice().buffer,
+  });
+  try {
+    const prepared = await prepareCardFontCss(node);
+    assert.ok(prepared);
+    const encodedFont = prepared.cssText.match(/data:font\/otf;base64,([^"]+)/u)?.[1];
+    assert.ok(encodedFont);
+    assert.deepEqual(Buffer.from(encodedFont, 'base64'), Buffer.from(originalBytes));
+    assert.match(prepared.cssText, /format\("opentype"\)/u);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
 });
 
 test('font CSS preparation includes whitespace and quoted pseudo families without reordering src candidates', async () => {

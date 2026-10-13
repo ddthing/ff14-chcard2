@@ -15,6 +15,21 @@ const generatedFiles = [
     render: renderStylesheetLoaders,
   },
 ];
+const LOCAL_FONT_FORMATS = new Set(['woff2', 'truetype', 'opentype']);
+
+function getLocalFontFormat(asset, label) {
+  const format = asset.format === undefined ? 'woff2' : asset.format;
+  assert.ok(LOCAL_FONT_FORMATS.has(format), `${label}.format must be woff2, truetype, or opentype`);
+  return format;
+}
+
+function fontSignatureMatches(bytes, format) {
+  if (bytes.length < 4) return false;
+  const signature = bytes.subarray(0, 4).toString('latin1');
+  if (format === 'woff2') return signature === 'wOF2';
+  if (format === 'truetype') return signature === '\u0000\u0001\u0000\u0000' || signature === 'true';
+  return signature === 'OTTO';
+}
 
 function assertSafeProjectPath(relativePath, label) {
   assert.equal(typeof relativePath, 'string', `${label} must be a string`);
@@ -91,7 +106,8 @@ export async function validateFontRegistry(registry = FONT_REGISTRY) {
       const fileStats = await stat(assetPath);
       assert.equal(fileStats.size, asset.bytes, `${asset.filePath} byte count changed; review and update registry metadata`);
       const bytes = await readFile(assetPath);
-      assert.equal(bytes.subarray(0, 4).toString('ascii'), 'wOF2', `${asset.filePath} must be WOFF2`);
+      const format = getLocalFontFormat(asset, label);
+      assert.ok(fontSignatureMatches(bytes, format), `${asset.filePath} signature must match ${format}`);
       assert.ok(['latin', 'latin-ext', 'vietnamese', 'full'].includes(asset.subset), `${label} has an unknown subset`);
       assert.ok(asset.style === undefined || ['normal', 'italic'].includes(asset.style), `${label}.style must be normal or italic`);
       if (asset.stretch !== undefined) assert.match(asset.stretch, /^\d+(?:\.\d+)?%$/u, `${label}.stretch must be a CSS percentage`);
@@ -138,8 +154,9 @@ export function renderFontsCss(registry = FONT_REGISTRY) {
     (left.cssOrder ?? Number.POSITIVE_INFINITY) - (right.cssOrder ?? Number.POSITIVE_INFINITY)
   ));
 
-  for (const [, entry] of orderedEntries) {
-    for (const asset of entry.localAssets ?? []) {
+  for (const [key, entry] of orderedEntries) {
+    for (const [assetIndex, asset] of (entry.localAssets ?? []).entries()) {
+      const format = getLocalFontFormat(asset, `${key}.localAssets[${assetIndex}]`);
       const [minimumWeight, maximumWeight] = entry.axes.weight;
       const weight = asset.weight ?? (minimumWeight === maximumWeight ? `${minimumWeight}` : `${minimumWeight} ${maximumWeight}`);
       const lines = [
@@ -149,7 +166,7 @@ export function renderFontsCss(registry = FONT_REGISTRY) {
         `  font-display: ${entry.fontDisplay ?? 'swap'};`,
         `  font-weight: ${weight};`,
         ...(asset.stretch ? [`  font-stretch: ${asset.stretch};`] : []),
-        `  src: url(${JSON.stringify(asset.publicPath)}) format("woff2");`,
+        `  src: url(${JSON.stringify(asset.publicPath)}) format(${JSON.stringify(format)});`,
         ...(asset.unicodeRange ? [`  unicode-range: ${asset.unicodeRange};`] : []),
         '}',
       ];

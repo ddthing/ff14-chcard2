@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { AppHeader } from "@/components/app-header";
+import { EditorChromeProvider } from "@/components/editor/editor-chrome-context";
 import SiteHeader from "@/components/site-header";
 import { useI18n } from "@/lib/i18n";
 import { ROUTES } from "@/lib/routes";
@@ -27,10 +28,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className={styles.appShell} data-app-shell>
+    <EditorChromeProvider><div className={styles.appShell} data-app-shell>
       <a className={styles.skipLink} href="#main-content">{t("nav.skipToContent")}</a>
       <AppHeader />
       <main className={styles.appMain} data-app-main id="main-content" tabIndex={-1}>{children}</main>
-    </div>
+    </div></EditorChromeProvider>
   );
 }
