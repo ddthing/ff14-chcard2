@@ -7,7 +7,7 @@ import { editorStore } from '@/store/editor-store';
 import type { EditorCopy } from '@/components/editor/copy';
 import { isImeComposing } from '@/components/editor/editor-input';
 import { applyDefaultCopySample, applyGlobalTypographyPreset } from './card-text-actions';
-import { CARD_TEXT_CATEGORIES, getCardTextItemOrdinal, getTextItemsForCategory, resolveSelectedTextItem } from './card-text-model';
+import { CARD_TEXT_CATEGORIES, getIndividualTypographyOrdinal, getTextItemsForCategory, isIndividualTypographyItem, resolveSelectedTextItem } from './card-text-model';
 import styles from './card-text-editor.module.css';
 
 const TYPOGRAPHY_PRESETS: readonly CardTypographyPreset[] = ['editorial', 'modern', 'condensed', 'classic', 'clean'];
@@ -39,6 +39,9 @@ export function CardTextEditorNavigation({
   const selectedLabel = selectedItem?.kind === 'label'
     ? `${selectedItem.label} · ${copy.textEditor.labelSuffix}`
     : selectedItem?.label ?? '';
+  const selectedOrdinal = selectedItem && isIndividualTypographyItem(selectedItem)
+    ? getIndividualTypographyOrdinal(items, selectedItem.id)
+    : 0;
 
   function selectCategory(nextCategory: CardTextCategory) {
     onCategoryChange(nextCategory);
@@ -58,7 +61,7 @@ export function CardTextEditorNavigation({
     <section className={styles.editor} data-text-editor="true" data-selected-text-id={selectedItem?.id ?? ''}>
       <details ref={navigationRef} className={styles.navigation} data-text-navigation>
         <summary data-selected-text-context={selectedItem?.id ?? ''}>
-          <small className={styles.itemOrdinal} aria-hidden="true">{selectedItem ? getCardTextItemOrdinal(categoryItems, selectedItem.id) : ''}</small>
+          {selectedOrdinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{selectedOrdinal}</small>}
           <strong>{selectedLabel || copy.textEditor.items}</strong>
         </summary>
         <div className={styles.navigationBody}>
@@ -90,9 +93,9 @@ export function CardTextEditorNavigation({
                 }}
               >
                 {categoryItems.map((item) => {
-                  const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
+                  const ordinal = isIndividualTypographyItem(item) ? getIndividualTypographyOrdinal(items, item.id) : 0;
                   const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
-                  return <option key={item.id} value={item.id}>{ordinal}. {label}{!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}</option>;
+                  return <option key={item.id} value={item.id}>{ordinal > 0 ? `${ordinal}. ` : ''}{label}{!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}</option>;
                 })}
               </select>
             </label>
@@ -100,7 +103,7 @@ export function CardTextEditorNavigation({
             <div className={styles.itemGroup}>
               <ul className={styles.itemList} aria-label={copy.textEditor.categories[category]}>
                 {categoryItems.map((item) => {
-                  const ordinal = getCardTextItemOrdinal(categoryItems, item.id);
+                  const ordinal = isIndividualTypographyItem(item) ? getIndividualTypographyOrdinal(items, item.id) : 0;
                   const label = item.kind === 'label' ? `${item.label} · ${copy.textEditor.labelSuffix}` : item.label;
                   return (
                     <li key={item.id}>
@@ -113,7 +116,7 @@ export function CardTextEditorNavigation({
                         aria-label={`${label}${!item.value.trim() ? ` · ${copy.textEditor.hiddenText}` : ''}`}
                         onClick={() => selectItem(item)}
                       >
-                        <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}</small>
+                        {ordinal > 0 && <small className={styles.itemOrdinal} aria-hidden="true">{ordinal}</small>}
                         <span>{label}</span>
                         {!item.value.trim() && <small>{copy.textEditor.hiddenText}</small>}
                       </button>

@@ -114,6 +114,21 @@ function textContent(markup) {
   return markup.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 }
 
+function editorialFactRows(markup) {
+  const rows = [...markup.matchAll(/<div\b([^>]*\bdata-editorial-row="([^"]+)"[^>]*)>([\s\S]*?)(?=<div\b[^>]*\bdata-editorial-row=|<\/dl>)/gu)];
+  return rows.map(([, attributes, id, body]) => {
+    const group = attributes.match(/\bdata-editorial-group="([^"]+)"/u)?.[1];
+    assert.ok(group, `${id} exposes its rendered information group`);
+    return {
+      id,
+      group,
+      startsGroup: attributes.includes('data-editorial-group-start="true"'),
+      fields: [...body.matchAll(/\bdata-field="([^"]+)"/gu)].map(([, field]) => field),
+      text: textContent(body),
+    };
+  });
+}
+
 function cardStyleProperties(markup) {
   const rootTag = markup.match(/<article\b[^>]*>/s)?.[0];
   const style = rootTag?.match(/\bstyle="([\s\S]*)"\s+data-template=/)?.[1];
@@ -302,6 +317,70 @@ test('unknown level is omitted across all card families, layouts and ratios', ()
   }
 });
 
+test('Master A keeps long localized names and the full user bio at every ratio', () => {
+  const cases = [
+    ['en', 'Seraphine of the Ember Bloom', 'A new story follows the adventurer beyond every horizon. '.repeat(3).slice(0, 120)],
+    ['ko', '모서리의붉은빛모험기록', '모험가의 이야기는 아직 계속되고 있습니다. '.repeat(6).slice(0, 120)],
+    ['ja', 'コナー・クリムゾンホライズン', '冒険者の物語はまだ続いていきます。'.repeat(7).slice(0, 120)],
+  ];
+  const ratios = ['1:1', '4:5', '3:4', '9:16', '16:9'];
+  const cards = [
+    [CinematicMaster, 'cinematic'],
+    [EditorialMaster, 'editorial'],
+    [IdentityMaster, 'id-card'],
+  ];
+
+  for (const [locale, name, bio] of cases) {
+    for (const [Master, template] of cards) {
+      for (const ratio of ratios) {
+        const data = getConerSample(template, ratio);
+        data.character.name = name;
+        data.character.bio = bio;
+        data.character.profileOrigin = 'user';
+        const markup = renderToStaticMarkup(createElement(Master, { data, locale, ratio }));
+        const renderedText = textContent(markup).replace(/\s+/gu, '');
+
+        assert.match(markup, /data-field="bio"/u, `${template}/${locale}/${ratio} keeps a bio field`);
+        assert.match(markup, /data-card-text-fit-ready="false"/u, `${template}/${locale}/${ratio} measures the complete bio before export`);
+        assert.ok(renderedText.includes(name.replace(/\s+/gu, '')), `${template}/${locale}/${ratio} keeps the full name`);
+        assert.ok(renderedText.includes(bio.replace(/\s+/gu, '')), `${template}/${locale}/${ratio} keeps the full user bio`);
+
+        if (template === 'cinematic') {
+          assert.match(markup, /class="nameDivider"/u, `${locale}/${ratio} keeps the name divider with a populated name`);
+          assert.match(markup, /data-print-frame="cinematic"/u, `${locale}/${ratio} keeps the frame`);
+        } else if (template === 'editorial') {
+          assert.match(markup, /data-photo-story="bio"/u, `${locale}/${ratio} gives a long bio its fitted photo slot`);
+          assert.match(markup, /data-job-identity-mark="editorial"/u, `${locale}/${ratio} keeps the profession mark`);
+        } else {
+          assert.match(markup, /class="records"/u, `${locale}/${ratio} retains the complete record area`);
+          assert.match(markup, /data-print-frame="id-card"/u, `${locale}/${ratio} keeps the frame`);
+        }
+      }
+    }
+  }
+});
+
+test('Cinematic print rules stay anchored as copy changes length', () => {
+  const data = makeData('cinematic');
+  data.design.textOverrides = {
+    'cinematic.promise': '',
+    'cinematic.quote': 'A keepsake for the road.',
+  };
+  const quoteOnly = renderToStaticMarkup(createElement(CinematicMaster, { data, locale: 'en', ratio: '16:9' }));
+  assert.ok(textContent(quoteOnly).includes('A keepsake for the road.'));
+  assert.doesNotMatch(quoteOnly, /class="promiseRule"/u, 'a divider is not left without its promise line');
+  assert.doesNotMatch(quoteOnly, /data-card-text-id="cinematic\.promise"/u, 'an empty promise has no rendered text node');
+
+  for (const ratio of ['1:1', '4:5', '3:4', '9:16', '16:9']) {
+    data.design.ratio = ratio;
+    data.character.name = 'Seraphine of the Ember Bloom';
+    const markup = renderToStaticMarkup(createElement(CinematicMaster, { data, locale: 'en', ratio }));
+    assert.match(markup, /class="nameDivider"/u, `${ratio} keeps the divider with a populated long name`);
+    assert.match(markup, /data-print-frame="cinematic"/u, `${ratio} keeps the frame independent of name length`);
+    assert.match(markup, /data-card-text-id="cinematic\.quote"/u, `${ratio} keeps the non-empty quote`);
+  }
+});
+
 test('legacy B/C card photos use the same processed-image readiness path and keep their photo alt', () => {
   const cards = [CinematicCard, EditorialCard, AdventurerIdCard];
   const templates = ['cinematic', 'editorial', 'id-card'];
@@ -338,6 +417,82 @@ test('record and editorial facts use localized service, region, language, race, 
     assert.ok(record.includes(visible), `record should print ${visible}`);
   }
   assert.ok(record.includes('불멸대'));
+});
+
+test('Editorial rendered facts group populated rows without placeholders or losing text', () => {
+  const full = makeData('editorial');
+  full.character.bio = '';
+  full.design.textOverrides = {
+    'editorial.label.job': 'Calling',
+    'editorial.label.world': 'Home',
+  };
+  const fullRows = editorialFactRows(renderToStaticMarkup(createElement(EditorialMaster, { data: full, locale: 'en' })));
+
+  assert.deepEqual(fullRows.map(({ id, group, startsGroup }) => [id, group, startsGroup]), [
+    ['job', 'identity', false],
+    ['level', 'identity', false],
+    ['world', 'route', true],
+    ['data-center', 'route', false],
+    ['lineage', 'lineage', true],
+    ['free-company', 'affiliation', true],
+    ['service', 'affiliation', false],
+  ]);
+  assert.deepEqual(fullRows.map(({ fields }) => fields), [
+    ['job', 'jobAbbreviation'],
+    ['level'],
+    ['world'],
+    ['dataCenter'],
+    ['race', 'clan'],
+    ['freeCompany'],
+    ['origin'],
+  ]);
+  for (const [id, visible] of [
+    ['job', ['Calling', 'Red Mage', 'RDM']],
+    ['level', ['100']],
+    ['world', ['Home', 'Moogle']],
+    ['data-center', ['Chaos']],
+    ['lineage', ['Lalafell', 'Dunesfolk']],
+    ['free-company', ['Ember Bloom']],
+    ['service', ['Global', 'Europe']],
+  ]) {
+    const row = fullRows.find((candidate) => candidate.id === id);
+    for (const value of visible) assert.ok(row.text.includes(value), `${id} keeps rendered text ${value}`);
+  }
+
+  const sparse = makeData('editorial');
+  sparse.character = {
+    ...sparse.character,
+    level: 0,
+    world: '',
+    worldId: null,
+    dataCenter: 'Chaos',
+    dataCenterId: 'global.chaos',
+    race: '',
+    raceId: null,
+    clan: '',
+    clanId: null,
+    freeCompany: '',
+  };
+  sparse.character.bio = '';
+  sparse.design.textOverrides = { 'editorial.label.job': 'Calling' };
+  const sparseRows = editorialFactRows(renderToStaticMarkup(createElement(EditorialMaster, { data: sparse, locale: 'en' })));
+
+  assert.deepEqual(sparseRows.map(({ id, group, startsGroup }) => [id, group, startsGroup]), [
+    ['job', 'identity', false],
+    ['data-center', 'route', true],
+    ['service', 'affiliation', true],
+  ]);
+  assert.deepEqual(sparseRows.map(({ fields }) => fields), [
+    ['job', 'jobAbbreviation'],
+    ['dataCenter'],
+    ['origin'],
+  ]);
+  assert.ok(sparseRows[0].text.includes('Calling'));
+  assert.ok(sparseRows[0].text.includes('Red Mage'));
+  assert.ok(sparseRows[0].text.includes('RDM'));
+  assert.ok(sparseRows[1].text.includes('Chaos'));
+  assert.ok(sparseRows[2].text.includes('Global'));
+  assert.ok(sparseRows[2].text.includes('Europe'));
 });
 
 test('Editorial photo wash reuses the live image decoratively and stays absent without a photo', () => {

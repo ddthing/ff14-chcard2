@@ -45,6 +45,29 @@ test('optical envelopes have script caps and measured dense glyphs shrink withou
  }
 });
 
+test('Cinematic Latin short-name caps ease by 20 percent without changing CJK envelopes',()=>{
+ const expected={
+  '4:5':{latin:25.6,korean:22.4,japanese:24},
+  '1:1':{latin:22.4,korean:20,japanese:21.6},
+  '3:4':{latin:25.6,korean:22.4,japanese:24},
+  '9:16':{latin:22.4,korean:20.2,japanese:21.8},
+  '16:9':{latin:8,korean:7.2,japanese:7.8},
+ };
+ const reference={width:90,height:90,ink:5000,lines:1};
+ for(const [ratio,caps] of Object.entries(expected)){
+  const box=CARD_NAME_ENVELOPES.cinematic[ratio];
+  assert.ok(Math.abs(caps.latin-box.referenceSize*.8)<.001,`${ratio} Latin cap`);
+  assert.deepEqual(box.caps,caps,`${ratio} script caps`);
+  const fit=fitOpticalName({
+   family:'cinematic',ratio,script:'latin',
+   metrics:{width:80,height:40,ink:1000,lines:1},
+   reference,lineHeight:1,availableWidth:box.width,
+  });
+  assert.equal(fit.size,caps.latin,`${ratio} short Latin name uses the restrained cap`);
+  assert.equal(fit.limiting,'cap',`${ratio} fit remains measured and cap-limited`);
+ }
+});
+
 test('relative name sizing changes measured font size while preserving optical width and height bounds',()=>{
  const box=CARD_NAME_ENVELOPES.cinematic['4:5'];
  const inputs={

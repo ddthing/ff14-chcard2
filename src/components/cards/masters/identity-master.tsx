@@ -5,6 +5,7 @@ import { getJobIdentityGlyphCqiSize, getJobIdentityGlyphLogicalSize, getJobIdent
 import { resolveCardMaterial } from '@/lib/card-materials';
 import { CardPictogram } from '../craft/card-pictogram';
 import { EngravingMark } from '../craft/engraving-mark';
+import { FitCardCopy } from '../craft/fit-card-copy';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
 import { ArtPhoto, getArtContext, type MasterArtProps } from '../card-presentation';
@@ -60,14 +61,13 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   const copy = getCardMasterCopyForData(data, locale, 'identity');
   const nameLines = nameLayout.lines.length > 0 ? nameLayout.lines : [nameLayout.normalizedName];
   const fitNameTight = nameLayout.category === 'long' || nameLines.length >= 3;
-  const isCjkName = nameLayout.script === 'korean' || nameLayout.script === 'japanese';
   const jobMotifVisible = data.design.jobMotifVisible !== false;
   const jobGlyphSize = getJobIdentityGlyphLogicalSize(ratio ?? data.design.ratio);
   const jobGlyphCqiSize = getJobIdentityGlyphCqiSize(ratio ?? data.design.ratio, 'identityBadge');
   const hasJob = nonEmpty(labels.job);
   const jobMarkState = getJobIdentityMarkState(jobMotifVisible, hasJob);
   const bio = localizedBio.trim();
-  const showBio = nonEmpty(bio) && Array.from(bio).length <= 120 && !(isCjkName && fitNameTight);
+  const hasBio = nonEmpty(bio);
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
 
   const originFacts: RecordFact[] = [
@@ -100,7 +100,13 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
   ];
 
   return (
-    <div className={styles.canvas} data-ratio={ratio ?? data.design.ratio} data-locale={locale} lang={locale}>
+    <div
+      className={styles.canvas}
+      data-ratio={ratio ?? data.design.ratio}
+      data-locale={locale}
+      data-content-density={hasBio && (bio.length >= 80 || fitNameTight) ? 'dense' : undefined}
+      lang={locale}
+    >
       <ArtPhoto data={data} locale={locale} className={styles.photo} />
       {(copy.photoQuote.length > 0 || copy.photoStamp.length > 0) && <div className={styles.photoCopy} lang={locale}>
         {copy.photoQuote.length > 0 && <p className={styles.photoQuote} data-master-typography-role="secondaryDisplay" data-card-text-id="identity.photoQuote">{copy.photoQuote.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
@@ -183,7 +189,6 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
                 data-name-fit={fitNameTight ? 'tight' : undefined}
               />
             )}
-            {showBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('id-card', 'bio')}>{bio}</p>}
           </div>
 
           {(hasJob || nonEmpty(microcopy.jobAbbreviation)) && (
@@ -220,6 +225,18 @@ export function IdentityMaster({ data, locale, ratio }: MasterArtProps) {
             </dl>
           )}
         </section>
+
+        {hasBio && <FitCardCopy
+          family="identity"
+          locale={locale}
+          ratio={ratio ?? data.design.ratio}
+          role="secondaryDisplay"
+          text={bio}
+          typography={getCardTextTypographyOverride(data.design, 'character.bio', 'secondaryDisplay')}
+          className={styles.bio}
+          data-master-typography-role="secondaryDisplay"
+          {...masterFieldProps('id-card', 'bio')}
+        />}
 
         <div className={styles.records}>
           <RecordColumn title={copy.origin} facts={originFacts} />

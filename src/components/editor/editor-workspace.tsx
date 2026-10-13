@@ -34,7 +34,7 @@ import { CardPreview } from '@/components/editor/card-preview';
 import { TypographyRoleEditor } from '@/components/editor/typography-role-editor';
 import { getCardTextItems, type CardTextCategory, type CardTextItem } from '@/lib/card-text-editing';
 import { CardTextEditorNavigation, CardTextOverrideInput, DefaultCopySampleButton, GlobalTypographyPresetPicker } from '@/components/editor/text-editor/card-text-editor';
-import { getEditorTextCategory, resolveSelectedTextItem } from '@/components/editor/text-editor/card-text-model';
+import { getEditorTextCategory, getInformationTypographyItems, resolveSelectedTextItem } from '@/components/editor/text-editor/card-text-model';
 import { CardTextOverlay } from '@/components/editor/text-editor/card-text-overlay';
 import { selectTextEditorControl } from '@/components/editor/text-editor/text-editor-focus';
 import { TextureEffects } from './TextureEffects';
@@ -390,6 +390,7 @@ function EditorInspector({
   }, locale), [character, decorativeCopy, designTemplate, imageSource, layoutVariant, locale, textOverrides]);
   const supportsPerItemTextEditing = layoutVariant === 'a';
   const textEditorItems = supportsPerItemTextEditing ? textItems : textItems.filter((item) => item.field !== undefined);
+  const informationTypographyItems = useMemo(() => getInformationTypographyItems(textEditorItems), [textEditorItems]);
   const defaultCopyIds = useMemo(
     () => textItems.filter((item) => item.category === 'copy' && item.supportsTextOverride).map((item) => item.id),
     [textItems],
@@ -991,7 +992,7 @@ function EditorInspector({
               onSelectItem={onSelectTextItem}
             >
               {supportsPerItemTextEditing
-                ? <TypographyRoleEditor locale={locale} item={selectedTextItem}>
+                ? <TypographyRoleEditor locale={locale} item={selectedTextItem} informationItems={informationTypographyItems}>
                     {activeTextCategory !== 'copy' && renderSelectedProfileControl()}
                     {selectedTextItem?.supportsTextOverride && (
                       <CardTextOverrideInput
@@ -1563,6 +1564,7 @@ function EditorCanvas({
         selectedId={selectedTextId}
         measurementKey={`${design.ratio}:${zoom}:${panOffset.x}:${panOffset.y}`}
         targetLabel={copy.textEditor.targetLabel}
+        informationTargetLabel={copy.textEditor.informationTypography}
         onSelect={onSelectTextTarget}
       />
 

@@ -4,6 +4,7 @@ import { resolveCardMaterial } from '@/lib/card-materials';
 import { getJobIdentityGlyphCqiSize, getJobIdentityGlyphLogicalSize } from '@/lib/job-identity-optics';
 import { JobIcon } from '@/components/ffxiv/job-icon';
 import { EngravingMark } from '../craft/engraving-mark';
+import { FitCardCopy } from '../craft/fit-card-copy';
 import { OpticalName } from '../craft/optical-name';
 import { PrintFrame } from '../craft/print-frame';
 import { getCardMasterCopyForData, getCardTextTypographyOverride, resolveCardText } from '@/lib/card-text-editing';
@@ -41,17 +42,27 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
       <div className={styles.veil} aria-hidden="true" />
 
       {(copy.promise.length > 0 || copy.quote.length > 0) && <div className={styles.topPromise} aria-hidden="true">
-        <p data-master-typography-role="micro" data-card-text-id="cinematic.promise">{copy.promise.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
-        <span className={styles.promiseRule} />
-        <p className={styles.topQuote} data-master-typography-role="caption" data-card-text-id="cinematic.quote">{copy.quote.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
+        {copy.promise.length > 0 && <p data-master-typography-role="micro" data-card-text-id="cinematic.promise">{copy.promise.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
+        {copy.promise.length > 0 && copy.quote.length > 0 && <span className={styles.promiseRule} />}
+        {copy.quote.length > 0 && <p className={styles.topQuote} data-master-typography-role="caption" data-card-text-id="cinematic.quote">{copy.quote.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
       </div>}
 
       {(copy.signature.length > 0 || copy.place) && <div className={styles.topSignature} aria-hidden="true">
-        <p data-master-typography-role="caption" data-card-text-id="cinematic.signature">{copy.signature.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>
-        <span className={styles.signaturePlace} data-master-typography-role="micro" data-card-text-id="cinematic.place">{copy.place}</span>
+        {copy.signature.length > 0 && <p data-master-typography-role="caption" data-card-text-id="cinematic.signature">{copy.signature.map((line, index) => <span key={`${index}-${line}`}>{line}</span>)}</p>}
+        {copy.place && <span className={styles.signaturePlace} data-master-typography-role="micro" data-card-text-id="cinematic.place">{copy.place}</span>}
       </div>}
 
-      {hasBio && <p className={styles.bio} data-master-typography-role="secondaryDisplay" {...masterFieldProps('cinematic', 'bio')}>{bio}</p>}
+      {hasBio && <FitCardCopy
+        family="cinematic"
+        locale={locale}
+        ratio={resolvedRatio}
+        role="secondaryDisplay"
+        text={bio}
+        typography={getCardTextTypographyOverride(data.design, 'character.bio', 'secondaryDisplay')}
+        className={styles.bio}
+        data-master-typography-role="secondaryDisplay"
+        {...masterFieldProps('cinematic', 'bio')}
+      />}
 
       <section className={styles.identity} aria-label={copy.details}>
         <OpticalName
@@ -69,11 +80,11 @@ export function CinematicMaster({ data, locale, ratio }: MasterArtProps) {
           data-name-composition={nameLayout.category}
         />
 
-        <div className={styles.nameDivider} aria-hidden="true">
+        {nameLayout.normalizedName.trim() && <div className={styles.nameDivider} aria-hidden="true">
           <span />
           <EngravingMark kind="divider" className={styles.nameDiamond} />
           <span />
-        </div>
+        </div>}
 
         <dl className={styles.metadata}>
           {labels.job && (

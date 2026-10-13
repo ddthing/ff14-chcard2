@@ -77,3 +77,43 @@ test('grand companies, languages, and play styles accept stable IDs and legacy d
   assert.equal(ffxiv.localizeFfxivLabel('playStyle', 'story', 'ja'), 'ストーリー');
   assert.equal(ffxiv.localizeFfxivLabel('job', 'Old Job Text', 'ko'), 'Old Job Text');
 });
+
+test('play-style catalog uses the supplied Korean community labels and preserves older drafts', () => {
+  assert.equal(ffxiv.PLAY_STYLES.length, 30);
+  assert.equal(new Set(ffxiv.PLAY_STYLES.map((style) => style.id)).size, ffxiv.PLAY_STYLES.length);
+  assert.equal(new Set(ffxiv.PLAY_STYLES.map((style) => style.sortOrder)).size, ffxiv.PLAY_STYLES.length);
+
+  const byKoreanName = new Map(ffxiv.PLAY_STYLES.map((style) => [style.localizedName.ko, style.id]));
+  for (const [label, id] of [
+    ['PvP', 'pvp'], ['PvE', 'pve'], ['터주', 'big-fishing'], ['하우징', 'housing'], ['마작', 'mahjong'],
+    ['지도&보물고', 'treasure-maps'], ['라이트', 'casual'], ['즐겜', 'for-fun'], ['하드컨텐츠', 'high-end-raid'],
+    ['초보', 'beginner'], ['새싹', 'sprout'], ['업적', 'achievement'], ['제작', 'crafting'], ['RP', 'roleplay'],
+    ['스샷', 'gpose'], ['절', 'ultimate'], ['복귀', 'returning-player'], ['골드소서', 'gold-saucer'],
+    ['디스코드', 'discord'], ['인게임 위주', 'in-game-focused'], ['트위터 교류', 'twitter'],
+  ]) assert.equal(byKoreanName.get(label), id, `the Korean option label ${label} should remain exact`);
+
+  for (const locale of ['ko', 'en', 'ja']) {
+    for (const style of ffxiv.PLAY_STYLES) {
+      assert.ok(style.localizedName[locale], `${style.id} should have a ${locale} label`);
+      assert.equal(ffxiv.normalizePlayStyleId(style.localizedName[locale]), style.id, `${style.id} should normalize from its ${locale} label`);
+    }
+  }
+
+  for (const [oldLabel, id] of [
+    ['Casual', 'casual'], ['캐주얼', 'casual'], ['カジュアル', 'casual'],
+    ['High-end Raid', 'high-end-raid'], ['고난도 레이드', 'high-end-raid'], ['高難易度レイド', 'high-end-raid'],
+    ['롤플레이', 'roleplay'],
+    ['포토 모드', 'gpose'], ['Gpose', 'gpose'], ['Group Pose', 'gpose'], ['グルポ', 'gpose'],
+    ['소셜', 'social'], ['ソーシャル', 'social'],
+  ]) assert.equal(ffxiv.normalizePlayStyleId(oldLabel), id, `the old label ${oldLabel} should still resolve`);
+
+  assert.equal(ffxiv.localizeFfxivLabel('playStyle', 'Casual', 'ko'), '라이트');
+  assert.equal(ffxiv.localizeFfxivLabel('playStyle', 'High-end Raid', 'ja'), 'ハイエンドコンテンツ');
+  assert.equal(ffxiv.localizeFfxivLabel('playStyle', '롤플레이', 'ko'), 'RP');
+  assert.equal(ffxiv.localizeFfxivLabel('playStyle', 'Gpose', 'ko'), '스샷');
+  assert.equal(ffxiv.getPlayStyle('casual').localizedName.ja, 'カジュアル');
+  assert.equal(ffxiv.getPlayStyle('for-fun').localizedName.ja, 'エンジョイ');
+  assert.equal(ffxiv.getPlayStyle('in-game-focused').localizedName.en, 'Mostly in-game');
+  assert.equal(ffxiv.getPlayStyle('twitter').localizedName.en, 'X / Twitter');
+  assert.equal(ffxiv.getPlayStyle('twitter').localizedName.ja, 'Xで交流');
+});

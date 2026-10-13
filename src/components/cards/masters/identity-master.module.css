@@ -18,6 +18,8 @@
   --identity-value-size: 2cqi;
   --identity-icon-size: 3cqi;
   --identity-column-gap: 4.5cqi;
+  --identity-bio-size: 2.2cqi;
+  --identity-bio-max-height: 10cqi;
   --identity-rule: var(--master-rule-weight, .13cqi);
   position: absolute;
   z-index: 0;
@@ -233,6 +235,8 @@
   color: var(--craft-ink);
 }
 
+.paper:has(> .bio) { grid-template-rows: auto auto minmax(0, 1fr); }
+
 .paper::before {
   position: absolute;
   top: 0;
@@ -305,19 +309,21 @@
 }
 
 .bio {
-  display: -webkit-box;
+  display: block;
   max-width: 100%;
-  margin: .85cqi 0 0;
-  overflow: hidden;
+  max-height: var(--identity-bio-max-height);
+  min-width: 0;
+  margin: 0;
+  overflow: visible;
   color: color-mix(in srgb, var(--craft-ink) 86%, transparent);
   font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
-  font-size: max(var(--master-micro-min, .84cqi), 2.2cqi);
+  font-size: max(var(--master-micro-min, .84cqi), var(--identity-bio-size));
   font-style: italic;
   font-weight: var(--master-secondary-display-weight, 500);
   letter-spacing: var(--master-secondary-display-tracking, .006em);
   line-height: var(--master-secondary-display-leading, 1.18);
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  overflow-wrap: anywhere;
+  text-wrap: pretty;
 }
 
 .jobPanel { display: grid; min-width: 0; align-items: center; }
@@ -520,6 +526,8 @@
   --identity-label-size: .96cqi;
   --identity-icon-size: 2.25cqi;
   --identity-column-gap: 3.6cqi;
+  --identity-bio-size: 1.9cqi;
+  --identity-bio-max-height: 8cqi;
 }
 
 .canvas[data-ratio='1:1'] .heroIdentity {
@@ -543,6 +551,7 @@
   --identity-paper-padding: 4.1cqi 6.1cqi 6.5cqi;
   --identity-value-size: 1.88cqi;
   --identity-column-gap: 4cqi;
+  --identity-bio-max-height: 9cqi;
 }
 
 .canvas[data-ratio='9:16'] {
@@ -557,6 +566,8 @@
   --identity-value-size: 1.83cqi;
   --identity-icon-size: 2.7cqi;
   --identity-column-gap: 3.5cqi;
+  --identity-bio-size: 2.15cqi;
+  --identity-bio-max-height: 10cqi;
 }
 
 .canvas[data-ratio='9:16'] .heroIdentity {
@@ -595,6 +606,8 @@
   --identity-value-size: 1.23cqi;
   --identity-icon-size: 1.7cqi;
   --identity-column-gap: 2.2cqi;
+  --identity-bio-size: 1.15cqi;
+  --identity-bio-max-height: 4.5cqi;
 }
 
 .canvas[data-ratio='16:9'] .masthead { padding-top: 1.2cqi; row-gap: .05cqi; }
@@ -615,7 +628,6 @@
 }
 
 .canvas[data-ratio='16:9'] .name { line-height: .95; }
-.canvas[data-ratio='16:9'] .bio { margin-top: .45cqi; font-size: 1.15cqi; -webkit-line-clamp: 1; }
 .canvas[data-ratio='16:9'] .jobBadge { grid-template-columns: 3.2cqi minmax(0, 1fr); gap: .6cqi; }
 .canvas[data-ratio='16:9'] .jobBadgeMark { width: 3.2cqi; height: 3.9cqi; }
 .canvas[data-ratio='16:9'] .jobName { font-size: 1.2cqi; }
@@ -626,3 +638,31 @@
 .canvas[data-ratio='16:9'] .recordEntry { grid-template-columns: var(--identity-icon-size) minmax(0, 1fr); gap: .6cqi; }
 .canvas[data-ratio='16:9'] .recordLabel { font-size: .66cqi; letter-spacing: .06em; }
 .canvas[data-ratio='16:9'] .recordCopy dd { font-size: 1cqi; line-height: 1.05; }
+
+/* Give long names and biographies enough paper for every identity record. */
+.canvas[data-content-density='dense'] .paper { gap: .7cqi; }
+.canvas[data-content-density='dense'] .records { padding-bottom: 1.2cqi; }
+.canvas[data-content-density='dense'] .recordColumn { gap: 1.1cqi; }
+
+.canvas[data-ratio='4:5'][data-content-density='dense'] {
+  --identity-photo-height: 55%;
+  --identity-paper-top: 55%;
+  --identity-paper-padding: 4.5cqi 6.1cqi 4cqi;
+}
+
+.canvas[data-ratio='3:4'][data-content-density='dense'] {
+  --identity-photo-height: 57%;
+  --identity-paper-top: 57%;
+  --identity-paper-padding: 4.1cqi 6.1cqi 4cqi;
+}
+
+.canvas[data-ratio='1:1'][data-content-density='dense'] .recordColumn,
+.canvas[data-ratio='4:5'][data-content-density='dense'] .recordColumn,
+.canvas[data-ratio='3:4'][data-content-density='dense'] .recordColumn {
+  height: auto;
+  grid-template-rows: repeat(3, min-content);
+  align-content: start;
+  gap: 2cqi;
+}
+
+.canvas[data-ratio='1:1'][data-content-density='dense'] .recordColumn { gap: 2.8cqi; }

@@ -7,18 +7,18 @@ export interface NameEnvelope {
  referenceSize:number;
  caps:Readonly<Record<TypographyScript,number>>;
 }
-const envelope=(width:number,height:number,referenceSize:number,korean:number,japanese:number):NameEnvelope=>({width,height,referenceSize,caps:{latin:referenceSize,korean,japanese}});
+const envelope=(width:number,height:number,referenceSize:number,korean:number,japanese:number,latin=referenceSize):NameEnvelope=>({width,height,referenceSize,caps:{latin,korean,japanese}});
 
 /** CQI measures describe visual ink, not a requirement to fill the box.
  * Script caps limit dense glyphs; the actual font's measured ink/width/height
  * decides the final size within them. Short names are never enlarged past cap. */
 export const CARD_NAME_ENVELOPES:Readonly<Record<AdventurerCardTemplate,Readonly<Record<CardRatio,NameEnvelope>>>>={
  cinematic:{
-  '4:5':envelope(72,28,32,22.4,24),
-  '1:1':envelope(70,25,28,20,21.6),
-  '3:4':envelope(72,28,32,22.4,24),
-  '9:16':envelope(72,30,28,20.2,21.8),
-  '16:9':envelope(56,15,10,7.2,7.8),
+  '4:5':envelope(72,28,32,22.4,24,25.6),
+  '1:1':envelope(70,25,28,20,21.6,22.4),
+  '3:4':envelope(72,28,32,22.4,24,25.6),
+  '9:16':envelope(72,30,28,20.2,21.8,22.4),
+  '16:9':envelope(56,15,10,7.2,7.8,8),
  },
  editorial:{
   '4:5':envelope(35,19,14.4,10.4,11.2),

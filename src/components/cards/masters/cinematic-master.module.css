@@ -6,6 +6,7 @@
   --cinema-bio-left: 7.5%;
   --cinema-bio-width: 25%;
   --cinema-bio-size: 2.2cqi;
+  --cinema-bio-max-height: 20%;
   --cinema-meta-label-size: 1.18cqi;
   --cinema-meta-value-size: 2.25cqi;
   --cinema-promise-top: 3.2%;
@@ -125,8 +126,10 @@
   top: var(--cinema-bio-top);
   left: var(--cinema-bio-left);
   width: var(--cinema-bio-width);
+  max-height: var(--cinema-bio-max-height);
   max-width: var(--cinema-bio-width);
   margin: 0;
+  overflow: visible;
   color: color-mix(in srgb, var(--craft-ivory, #f3ead7) 86%, transparent);
   font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
   font-size: max(var(--master-micro-min, .84cqi), var(--cinema-bio-size));
@@ -350,6 +353,7 @@
   --cinema-bio-left: 7%;
   --cinema-bio-width: 28%;
   --cinema-bio-size: 1.9cqi;
+  --cinema-bio-max-height: 20%;
   --cinema-meta-label-size: 1.05cqi;
   --cinema-meta-value-size: 1.75cqi;
   --cinema-promise-top: 3.8%;
@@ -372,13 +376,13 @@
   --cinema-bio-left: 7%;
   --cinema-bio-width: 33%;
   --cinema-bio-size: 1.9cqi;
+  --cinema-bio-max-height: 19%;
   --cinema-meta-label-size: 1.03cqi;
   --cinema-meta-value-size: 1.52cqi;
   --cinema-promise-top: 3%;
   --cinema-signature-top: 4.8%;
 }
 
-.canvas[data-ratio='9:16'] .bio { display: none; }
 .canvas[data-ratio='9:16'] .metadata { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: 1.2cqi; }
 .canvas[data-ratio='9:16'] .metaCell { min-height: 5cqi; }
 
@@ -386,17 +390,17 @@
   --cinema-identity-left: 6%;
   --cinema-identity-bottom: 7%;
   --cinema-identity-width: 88%;
-  --cinema-bio-top: 20%;
-  --cinema-bio-left: 7%;
-  --cinema-bio-width: 20%;
+  --cinema-bio-top: 42%;
+  --cinema-bio-left: 6%;
+  --cinema-bio-width: 32%;
   --cinema-bio-size: 1.55cqi;
+  --cinema-bio-max-height: 19%;
   --cinema-meta-label-size: .72cqi;
   --cinema-meta-value-size: 1.35cqi;
   --cinema-promise-top: 7%;
   --cinema-signature-top: 8%;
 }
 
-.canvas[data-ratio='16:9'] .bio { display: none; }
 .canvas[data-ratio='16:9'] .jobSeal { width: 3.4cqi; height: 3.4cqi; }
 .canvas[data-ratio='16:9'] .jobLockup { gap: .6cqi; }
 .canvas[data-ratio='16:9'] .jobAbbreviation { font-size: max(var(--master-micro-min, .7cqi), .72cqi); }

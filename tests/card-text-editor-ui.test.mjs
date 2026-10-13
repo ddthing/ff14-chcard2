@@ -1,17 +1,27 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { register } from 'node:module';
 import test from 'node:test';
+
+register('./ts-alias-loader.mjs', import.meta.url);
 
 const { getTextTargetBounds, placeTextTargets } = await import('../src/components/editor/text-editor/text-target-geometry.ts');
 const {
   getCardTextItemOrdinal,
   getEditorTextCategory,
+  getIndividualTypographyOrdinal,
+  getInformationTypographyItems,
+  getTypographyGroupPrimaryScript,
+  isIndividualTypographyItem,
   getTextItemsForCategory,
   resolveSelectedTextItem,
 } = await import('../src/components/editor/text-editor/card-text-model.ts');
+const { getTypographyFontOptions, getTypographyScriptsForText } = await import('../src/lib/typography-presets.ts');
 const { selectTextEditorControl } = await import('../src/components/editor/text-editor/text-editor-focus.ts');
 const pickerSource = await readFile(new URL('../src/components/editor/ffxiv-pickers.tsx', import.meta.url), 'utf8');
 const workspaceSource = await readFile(new URL('../src/components/editor/editor-workspace.tsx', import.meta.url), 'utf8');
+const navigationSource = await readFile(new URL('../src/components/editor/text-editor/card-text-editor.tsx', import.meta.url), 'utf8');
+const typographySource = await readFile(new URL('../src/components/editor/typography-role-editor.tsx', import.meta.url), 'utf8');
 
 const item = (id, category, fields = {}) => ({
   id,
@@ -80,15 +90,80 @@ test('the Name + Bio category includes canonical bio items and keeps hidden item
   assert.equal(resolveSelectedTextItem(items, 'identity', 'character.bio')?.id, 'character.bio');
 });
 
+test('individual typography targets are name, bio, and decorative copy; small information is one group', () => {
+  const items = [
+    item('character.name', 'identity', { field: 'name' }),
+    item('character.bio', 'information', { field: 'bio' }),
+    item('character.job', 'information', { field: 'job' }),
+    item('character.level', 'information', { field: 'level', visible: false, value: '' }),
+    item('cinematic.label.job', 'information', { kind: 'label', supportsTextOverride: true }),
+    item('cinematic.promise', 'copy', { supportsTextOverride: true }),
+    item('editorial.story', 'copy', { supportsTextOverride: true }),
+    item('identity.label.job', 'copy', { kind: 'label', supportsTextOverride: true }),
+  ];
+
+  assert.deepEqual(items.filter(isIndividualTypographyItem).map(({ id }) => id), [
+    'character.name', 'character.bio', 'cinematic.promise', 'editorial.story',
+  ]);
+  assert.deepEqual(getInformationTypographyItems(items).map(({ id }) => id), [
+    'character.job', 'character.level', 'cinematic.label.job',
+  ]);
+  assert.ok(getInformationTypographyItems(items).some(({ id, visible }) => id === 'character.level' && !visible));
+  assert.match(navigationSource, /function selectCategory[\s\S]*?onSelectItem\(nextItems\[0\]\)/u);
+  assert.match(typographySource, /const informationGroup = selectedItem\.category === 'information' && !isIndividualTypographyItem\(selectedItem\)/u);
+});
+
+test('creative target ordinals stay unique across Name + Bio and Card phrases', () => {
+  const items = [
+    item('character.name', 'identity', { field: 'name' }),
+    item('character.job', 'information', { field: 'job' }),
+    item('character.bio', 'information', { field: 'bio' }),
+    item('cinematic.promise', 'copy', { supportsTextOverride: true }),
+    item('cinematic.quote', 'copy', { supportsTextOverride: true }),
+    item('cinematic.signature', 'copy', { supportsTextOverride: true, visible: false, value: '' }),
+    item('cinematic.label.job', 'information', { kind: 'label', supportsTextOverride: true }),
+  ];
+
+  assert.deepEqual(items.map(({ id }) => getIndividualTypographyOrdinal(items, id)), [1, 0, 2, 3, 4, 5, 0]);
+  assert.match(navigationSource, /getIndividualTypographyOrdinal\(items, item\.id\)/u);
+  assert.match(navigationSource, /ordinal > 0 \? `\$\{ordinal\}\. ` : ''/u);
+});
+
+test('mixed Japanese and Latin detail values still have a Japanese-primary group font choice', () => {
+  const localeFallback = 'japanese';
+  const requiredScripts = Array.from(new Set([
+    ...getTypographyScriptsForText('Tonberry', localeFallback),
+    ...getTypographyScriptsForText('冒険者の紹介', localeFallback),
+  ]));
+  const primaryScript = getTypographyGroupPrimaryScript(requiredScripts, localeFallback);
+  const selectableFonts = getTypographyFontOptions().filter((font) => font.supportedScripts.includes(primaryScript));
+
+  assert.deepEqual(requiredScripts, ['latin', 'japanese']);
+  assert.equal(primaryScript, 'japanese');
+  assert.equal(getTypographyGroupPrimaryScript(requiredScripts, 'latin'), 'japanese');
+  assert.ok(selectableFonts.some((font) => font.id === 'noto-sans-jp'));
+  assert.match(typographySource, /getTypographyScriptsForText\(target\.value \|\| target\.defaultValue, localeScript\)/u);
+  assert.match(typographySource, /getTypographyGroupPrimaryScript\(requiredScripts, localeScript\)/u);
+  assert.match(typographySource, /requiredScripts\.some\(\(requiredScript\) => !selectedEntry\.supportedScripts\.includes\(requiredScript\)\)/u);
+});
+
 test('the overlay is rendered through a body portal outside the card/export subtree', async () => {
   const overlay = await readFile(new URL('../src/components/editor/text-editor/card-text-overlay.tsx', import.meta.url), 'utf8');
+  const overlayStyles = await readFile(new URL('../src/components/editor/text-editor/card-text-overlay.module.css', import.meta.url), 'utf8');
   const preview = await readFile(new URL('../src/components/editor/card-preview.tsx', import.meta.url), 'utf8');
 
   assert.match(overlay, /createPortal\([\s\S]*?document\.body/u);
   assert.match(overlay, /data-card-text-target=\{target\.id\}/u);
+  assert.match(overlay, /data-information-group=\{isInformationGroup \? 'true' : undefined\}/u);
+  assert.match(overlay, /informationTargetLabel\?: string/u);
+  assert.match(overlay, /currentItems\.filter\(\(item\) => item\.visible && isIndividualTypographyItem\(item\)\)/u);
+  assert.match(overlay, /getInformationTypographyItems\(currentItems\)\.filter\(\(item\) => item\.visible\)/u);
+  assert.match(overlay, /target\.textOutlines\.map/u);
   assert.match(overlay, /data-compact=\{target\.compact \? 'true' : 'false'\}/u);
   assert.doesNotMatch(overlay, /target\.expandedBounds/u);
-  assert.match(overlay, /!target\.compact \|\| isSelected/u);
+  assert.match(overlayStyles, /\.target\s*\{[^}]*border:\s*0/u);
+  assert.match(overlayStyles, /\.textOutline\s*\{[^}]*border:\s*1px solid transparent/u);
+  assert.match(overlayStyles, /\.badge,\s*\.groupMarker\s*\{[^}]*width:\s*16px[^}]*height:\s*16px/u);
   assert.doesNotMatch(preview, /CardTextOverlay/u);
 });
 

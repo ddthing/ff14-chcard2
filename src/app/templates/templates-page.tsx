@@ -38,7 +38,7 @@ const localizedSelection = {
     sampleStatus: '예시 카드',
     personalStatus: '내 카드',
     loading: '초안 확인 중',
-    noDraft: '저장된 카드 없음',
+    compareUnavailable: '내 카드 비교는 카드를 만든 뒤 사용할 수 있어요.',
     draftName: '현재 초안',
     unnamed: '이름 없음',
   },
@@ -57,7 +57,7 @@ const localizedSelection = {
     sampleStatus: 'Sample card',
     personalStatus: 'My card',
     loading: 'Checking draft',
-    noDraft: 'No saved card',
+    compareUnavailable: 'Create a card to use My card.',
     draftName: 'Current draft',
     unnamed: 'Unnamed',
   },
@@ -76,7 +76,7 @@ const localizedSelection = {
     sampleStatus: 'サンプルカード',
     personalStatus: '自分のカード',
     loading: '下書きを確認中',
-    noDraft: '保存したカードはありません',
+    compareUnavailable: '自分のカードを作成すると比較できます。',
     draftName: '現在の下書き',
     unnamed: '名前未設定',
   },
@@ -198,9 +198,10 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
   }, [personalData]);
   const status = !draftReady
     ? labels.loading
-    : draft
-      ? compareMode === 'personal' ? labels.personalStatus : labels.sampleStatus
-      : '';
+    : !draft
+      ? labels.compareUnavailable
+      : compareMode === 'personal' ? labels.personalStatus : labels.sampleStatus;
+  const comparisonUnavailable = draftReady && !draft;
 
   const chooseTemplate = (template: AdventurerCardTemplate) => {
     selectedRef.current = template;
@@ -230,27 +231,52 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
         </header>
 
         <section className={styles.compareTools} aria-label={labels.modeLabel}>
-          <span className={styles.compareLabel}>{labels.modeLabel}</span>
-          <div className={styles.compareModes} role="group" aria-label={labels.modeLabel} aria-describedby="comparison-status">
-            <button
-              type="button"
-              aria-pressed={compareMode === 'sample'}
-              onClick={() => setCompareMode('sample')}
-            >
-              {labels.sampleMode}
-            </button>
-            <button
-              type="button"
-              aria-pressed={compareMode === 'personal'}
-              aria-describedby="comparison-status"
-              disabled={!draftReady || !draft}
-              onClick={() => setCompareMode('personal')}
-            >
-              {labels.personalMode}
-            </button>
+          <div className={styles.compareControl}>
+            <span className={styles.compareLabel}>{labels.modeLabel}</span>
+            <div className={styles.compareModes} role="group" aria-label={labels.modeLabel}>
+              <button
+                type="button"
+                aria-pressed={compareMode === 'sample'}
+                onClick={() => setCompareMode('sample')}
+              >
+                {labels.sampleMode}
+              </button>
+              <button
+                type="button"
+                aria-pressed={compareMode === 'personal'}
+                aria-describedby={comparisonUnavailable ? 'comparison-status' : undefined}
+                disabled={!draftReady || !draft}
+                onClick={() => setCompareMode('personal')}
+              >
+                {labels.personalMode}
+              </button>
+            </div>
           </div>
-          <span className={styles.srOnly} id="comparison-status" role="status" aria-live="polite" aria-atomic="true">{status}</span>
+          <span
+            className={comparisonUnavailable ? styles.compareStatus : styles.srOnly}
+            id="comparison-status"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            {status}
+          </span>
         </section>
+
+        <div className={styles.mobileStyleSelectors} role="group" aria-label={labels.title}>
+          {MASTER_TEMPLATE_ORDER.map((template) => (
+            <button
+              className={styles.mobileStyleSelector}
+              type="button"
+              aria-pressed={selected === template}
+              aria-controls={template}
+              key={template}
+              onClick={() => chooseTemplate(template)}
+            >
+              {names[template]}
+            </button>
+          ))}
+        </div>
 
         <section
           className={styles.gallery}
@@ -309,7 +335,6 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
             <span>{labels.selected}</span>
             <strong key={selected} aria-live="polite" aria-atomic="true">{names[selected]}</strong>
             {draft && <small>{labels.draftName}: {draft.character.name.trim() || labels.unnamed}</small>}
-            {draftReady && !draft && <small className={styles.emptyState}>{labels.noDraft}</small>}
           </div>
           <div className={styles.actions}>
             {draft ? (

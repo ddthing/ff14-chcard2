@@ -55,6 +55,10 @@ export interface EditorCopy {
     contentPlaceholder: string;
     lineCountSuffix: string;
     cardTypography: string;
+    informationTypography: string;
+    informationScope: string;
+    existingSettings: string;
+    resetInformationTypography: string;
     additionalSettings: string;
     useDefaultCopy: string;
     defaultCopyActive: string;
@@ -398,6 +402,10 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
       content: '문구 편집', contentPlaceholder: '선택한 카드 문구를 입력하세요.',
       lineCountSuffix: '줄',
       cardTypography: '카드 기본 서체',
+      informationTypography: '정보 서체',
+      informationScope: '현재 카드의 직업·월드·레이블 등 정보를 함께 조절합니다.',
+      existingSettings: '기존 설정',
+      resetInformationTypography: '작은 정보 서체 초기화',
       additionalSettings: '카드 기본값',
       useDefaultCopy: '기본 샘플 문구 사용', defaultCopyActive: '기본 샘플 문구 사용 중', restoreDefaultCopy: '기본 문구로 복원', resetToDefault: '기본 문구로 초기화',
       globalTypographyOnly: '현재 스타일에서는 카드 전체 서체를 조절합니다.',
@@ -430,6 +438,10 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
       content: 'Edit phrase', contentPlaceholder: 'Enter the selected card phrase.',
       lineCountSuffix: 'lines',
       cardTypography: 'Card typography',
+      informationTypography: 'Detail typography',
+      informationScope: 'Adjusts the job, world, labels, and other details on this card together.',
+      existingSettings: 'Existing settings',
+      resetInformationTypography: 'Reset small information style',
       additionalSettings: 'Card defaults',
       useDefaultCopy: 'Use sample copy', defaultCopyActive: 'Sample copy active', restoreDefaultCopy: 'Restore default phrases', resetToDefault: 'Reset to default text',
       globalTypographyOnly: 'This style uses one font for the whole card.',
@@ -463,6 +475,10 @@ const editorCopy: Record<AppLocale, Omit<EditorCopy, 'cardPreviewSummary' | 'ima
       content: '文言を編集', contentPlaceholder: '選択したカードの文言を入力',
       lineCountSuffix: '行',
       cardTypography: 'カード全体の文字スタイル',
+      informationTypography: '情報の書体',
+      informationScope: 'このカードのジョブ・ワールド・ラベルなどをまとめて調整します。',
+      existingSettings: '既存の設定',
+      resetInformationTypography: '小さな情報の文字スタイルをリセット',
       additionalSettings: 'カードの基本設定',
       useDefaultCopy: 'サンプル文言を使う', defaultCopyActive: '標準の文言を使用中', restoreDefaultCopy: '標準の文言に戻す', resetToDefault: '標準の文言に戻す',
       globalTypographyOnly: '現在のスタイルではカード全体のフォントを調整します。',

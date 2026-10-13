@@ -28,6 +28,8 @@ type EditorialFactPart = {
   separator?: string;
 };
 
+type EditorialFactGroup = 'identity' | 'route' | 'lineage' | 'affiliation';
+
 const EDITORIAL_PAPER_SURFACE = resolveCardMaterial('editorial', 'editorial-paper-surface').src;
 const EDITORIAL_INK_DENSITY = resolveCardMaterial('editorial', 'editorial-ink-density').src;
 
@@ -73,8 +75,9 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
   const hasLevel = Number.isFinite(character.level) && character.level > 0;
   const bio = localizedBio.trim();
   const bioUnits = Array.from(bio).length;
-  const paperBio = bio.length > 0 && bioUnits <= (nameLayout.script === 'latin' ? 70 : 34) && nameLayout.category === 'short' && nameLines.length === 1;
+  const paperBio = bio.length > 0 && !bio.includes('\n') && bioUnits <= (nameLayout.script === 'latin' ? 70 : 34) && nameLayout.category === 'short' && nameLines.length === 1;
   const photoBio = bio.length > 0 && !paperBio;
+  const bioTypography = getCardTextTypographyOverride(data.design, 'character.bio', 'secondaryDisplay');
   const selectedJob = getJob(character.jobId ?? character.job);
   const jobCategory = JOB_CATEGORIES.find(({ id }) => id === selectedJob?.category);
   const jobRoleLabel = jobCategory?.id === 'magical-ranged-dps' && locale === 'en'
@@ -94,29 +97,32 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
     typography: freeCompanyTypography,
   });
 
-  const facts: Array<{ id: string; label: string; parts: EditorialFactPart[] }> = [
+  const facts: Array<{ id: string; group: EditorialFactGroup; label: string; parts: EditorialFactPart[] }> = [
     {
       id: 'job',
+      group: 'identity',
       label: copy.job,
       parts: [
         ...(labels.job ? [{ field: 'job' as const, value: labels.job, role: 'information' as const }] : []),
         ...(microcopy.jobAbbreviation ? [{ field: 'jobAbbreviation' as const, value: microcopy.jobAbbreviation, role: 'micro' as const, separator: ' / ' }] : []),
       ],
     },
-    { id: 'level', label: ui.level, parts: hasLevel ? [{ field: 'level', value: String(character.level), role: 'information' }] : [] },
-    { id: 'world', label: ui.world, parts: labels.world ? [{ field: 'world', value: labels.world, role: 'information' }] : [] },
-    { id: 'data-center', label: ui.dataCenter, parts: labels.dataCenter ? [{ field: 'dataCenter', value: labels.dataCenter, role: 'information' }] : [] },
+    { id: 'level', group: 'identity', label: ui.level, parts: hasLevel ? [{ field: 'level', value: String(character.level), role: 'information' }] : [] },
+    { id: 'world', group: 'route', label: ui.world, parts: labels.world ? [{ field: 'world', value: labels.world, role: 'information' }] : [] },
+    { id: 'data-center', group: 'route', label: ui.dataCenter, parts: labels.dataCenter ? [{ field: 'dataCenter', value: labels.dataCenter, role: 'information' }] : [] },
     {
       id: 'lineage',
+      group: 'lineage',
       label: lineageLabel,
       parts: [
         ...(labels.race ? [{ field: 'race' as const, value: labels.race, role: 'information' as const }] : []),
         ...(labels.clan ? [{ field: 'clan' as const, value: labels.clan, role: 'information' as const, separator: ' · ' }] : []),
       ],
     },
-    { id: 'free-company', label: ui.freeCompany, parts: character.freeCompany.trim() ? [{ field: 'freeCompany', value: character.freeCompany, role: 'information' }] : [] },
-    { id: 'service', label: copy.service, parts: microcopy.origin ? [{ field: 'origin', value: microcopy.origin, role: 'information' }] : [] },
+    { id: 'free-company', group: 'affiliation', label: ui.freeCompany, parts: character.freeCompany.trim() ? [{ field: 'freeCompany', value: character.freeCompany, role: 'information' }] : [] },
+    { id: 'service', group: 'affiliation', label: copy.service, parts: microcopy.origin ? [{ field: 'origin', value: microcopy.origin, role: 'information' }] : [] },
   ];
+  const visibleFacts = facts.filter((fact) => fact.parts.length > 0);
 
   return (
     <div
@@ -203,18 +209,32 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
           data-name-script={nameLayout.script}
           data-name-category={nameLayout.category}
         />
-        {paperBio && <p className={styles.quote} data-master-typography-role="secondaryDisplay" {...masterFieldProps('editorial', 'bio')}>{bio}</p>}
+        {paperBio && <FitCardCopy
+          family="editorial"
+          locale={locale}
+          ratio={resolvedRatio}
+          role="secondaryDisplay"
+          text={bio}
+          typography={bioTypography}
+          className={styles.quote}
+          data-master-typography-role="secondaryDisplay"
+          {...masterFieldProps('editorial', 'bio')}
+        />}
       </div>
 
       {photoBio ? (
-        <div
+        <FitCardCopy
+          family="editorial"
+          locale={locale}
+          ratio={resolvedRatio}
+          role="secondaryDisplay"
+          text={bio}
+          typography={bioTypography}
           className={styles.photoStory}
           data-photo-story="bio"
           data-master-typography-role="secondaryDisplay"
           {...masterFieldProps('editorial', 'bio')}
-        >
-          {bio}
-        </div>
+        />
       ) : copy.story && (
         <FitCardCopy
           family="editorial"
@@ -231,8 +251,14 @@ export function EditorialMaster({ data, locale, ratio }: MasterArtProps) {
       )}
 
       <dl className={styles.facts} aria-label={copy.details}>
-        {facts.filter((fact) => fact.parts.length > 0).map((fact) => (
-          <div className={styles.fact} data-editorial-row={fact.id} key={fact.id}>
+        {visibleFacts.map((fact, index) => (
+          <div
+            className={styles.fact}
+            data-editorial-row={fact.id}
+            data-editorial-group={fact.group}
+            data-editorial-group-start={index > 0 && fact.group !== visibleFacts[index - 1]?.group ? 'true' : undefined}
+            key={fact.id}
+          >
             <dt
               className={styles.factLabel}
               data-master-typography-role="label"

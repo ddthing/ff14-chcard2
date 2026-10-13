@@ -81,26 +81,32 @@ export default function HomePage() {
           ) : null}
 
           <figure className={styles.artwork}>
-            <div className={styles.cardFan}>
+            <div className={styles.cardFan} role="group" aria-label={copy.styleHeading}>
               {MASTER_TEMPLATE_ORDER.map((template) => {
                 const relativeIndex = (MASTER_TEMPLATE_ORDER.indexOf(template) - activeTemplateIndex + MASTER_TEMPLATE_ORDER.length) % MASTER_TEMPLATE_ORDER.length;
                 const position = relativeIndex === 0 ? 'center' : relativeIndex === 1 ? 'right' : 'left';
+                const isActive = template === activeTemplate;
 
                 return (
-                  <div
+                  <button
+                    type="button"
                     className={styles.cardSlot}
                     key={template}
                     data-position={position}
-                    aria-hidden={position !== 'center'}
+                    aria-pressed={isActive}
+                    aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
+                    onClick={() => setActiveTemplate(template)}
                   >
-                    <LazyMaster
-                      template={template}
-                      ratio="4:5"
-                      locale={locale}
-                      eager
-                      className={styles.cardArtwork}
-                    />
-                  </div>
+                    <div className={styles.cardVisual} aria-hidden="true">
+                      <LazyMaster
+                        template={template}
+                        ratio="4:5"
+                        locale={locale}
+                        eager
+                        className={styles.cardArtwork}
+                      />
+                    </div>
+                  </button>
                 );
               })}
             </div>

@@ -13,10 +13,17 @@ import {
 } from '../src/components/editor/editor-navigation.ts';
 
 register('./ts-alias-loader.mjs', import.meta.url);
-const [{ editorStore }, { isCardDecorativeCopy }, { applyDefaultCopySample, applyGlobalTypographyPreset, resetLegacyTypographyRole }] = await Promise.all([
+const [{ editorStore }, { isCardDecorativeCopy }, {
+  applyDefaultCopySample,
+  applyGlobalTypographyPreset,
+  applyTypographyGroupOverrides,
+  resetLegacyTypographyRole,
+  resetTypographyGroupOverrides,
+}, { loadEditorDraft, persistEditorDraft }] = await Promise.all([
   import('../src/store/editor-store.ts'),
   import('../src/components/cards/types.ts'),
   import('../src/components/editor/text-editor/card-text-actions.ts'),
+  import('../src/store/editor-persistence.ts'),
 ]);
 
 const workspaceSource = readFileSync(new URL('../src/components/editor/editor-workspace.tsx', import.meta.url), 'utf8');
@@ -171,6 +178,82 @@ test('a saved role style can be reset from the selected text editor with an undo
   }
 });
 
+test('small-information typography updates are atomic and preserve unrelated per-text styles', () => {
+  const beforeStore = editorStore.getState();
+  const priorTextOverrides = beforeStore.design.textOverrides;
+  const priorOverrides = {
+    'character.name': { fontFamily: 'dm-sans', sizePercent: 112 },
+    'character.bio': { fontFamily: 'cormorant-garamond', trackingEm: 0.015 },
+    'character.job': { fontFamily: 'noto-sans-kr', sizePercent: 110, trackingEm: 0.02 },
+    'cinematic.label.job': { sizePercent: 92, weight: 400 },
+    'cinematic.promise': { fontFamily: 'gmarket-sans', sizePercent: 104 },
+  };
+  const priorRoleTypography = {
+    information: { fontFamily: 'noto-sans-kr', sizePercent: 105, weight: 500 },
+    label: { fontFamily: 'dm-sans', sizePercent: 96, trackingEm: 0.01 },
+    job: { weight: 600 },
+  };
+
+  try {
+    editorStore.getState().setDesign({ typography: priorRoleTypography, textTypography: priorOverrides }, { recordHistory: false, persist: false });
+    const historyLength = editorStore.getState().history.past.length;
+
+    applyTypographyGroupOverrides([
+      { id: 'character.job', patch: { fontFamily: 'gmarket-sans', weight: 500, sizePercent: 108 } },
+      { id: 'character.dataCenter', patch: { fontFamily: 'gmarket-sans', weight: 500, sizePercent: 108 } },
+      { id: 'cinematic.label.job', patch: { fontFamily: 'gmarket-sans', weight: 500, sizePercent: 108 } },
+    ]);
+
+    const updated = editorStore.getState();
+    assert.equal(updated.history.past.length, historyLength + 1);
+    assert.deepEqual(updated.design.textOverrides, priorTextOverrides);
+    assert.deepEqual(updated.design.typography, priorRoleTypography);
+    assert.deepEqual(updated.design.textTypography['character.job'], {
+      fontFamily: 'gmarket-sans', sizePercent: 108, weight: 500, trackingEm: 0.02,
+    });
+    assert.deepEqual(updated.design.textTypography['character.dataCenter'], {
+      fontFamily: 'gmarket-sans', sizePercent: 108, weight: 500,
+    });
+    assert.deepEqual(updated.design.textTypography['cinematic.label.job'], {
+      fontFamily: 'gmarket-sans', sizePercent: 108, weight: 500,
+    });
+    assert.deepEqual(updated.design.textTypography['character.name'], priorOverrides['character.name']);
+    assert.deepEqual(updated.design.textTypography['character.bio'], priorOverrides['character.bio']);
+    assert.deepEqual(updated.design.textTypography['cinematic.promise'], priorOverrides['cinematic.promise']);
+
+    const values = new Map();
+    const storage = {
+      getItem: (key) => values.get(key) ?? null,
+      setItem: (key, value) => values.set(key, String(value)),
+      removeItem: (key) => values.delete(key),
+    };
+    assert.equal(persistEditorDraft(updated.toCardData(), storage), true);
+    assert.deepEqual(loadEditorDraft(storage).card.design.textTypography, updated.design.textTypography);
+
+    updated.undo();
+    assert.deepEqual(editorStore.getState().design.textTypography, priorOverrides);
+    assert.deepEqual(editorStore.getState().design.textOverrides, priorTextOverrides);
+    editorStore.getState().redo();
+    assert.deepEqual(editorStore.getState().design.textTypography, updated.design.textTypography);
+    editorStore.getState().undo();
+    assert.deepEqual(editorStore.getState().design.textTypography, priorOverrides);
+
+    resetTypographyGroupOverrides(['character.job', 'character.dataCenter', 'cinematic.label.job']);
+    const reset = editorStore.getState().design.textTypography;
+    assert.deepEqual(editorStore.getState().design.typography, priorRoleTypography);
+    assert.equal(reset['character.job'], undefined);
+    assert.equal(reset['character.dataCenter'], undefined);
+    assert.equal(reset['cinematic.label.job'], undefined);
+    assert.deepEqual(reset['character.name'], priorOverrides['character.name']);
+    assert.deepEqual(reset['character.bio'], priorOverrides['character.bio']);
+    assert.deepEqual(reset['cinematic.promise'], priorOverrides['cinematic.promise']);
+    editorStore.getState().undo();
+    assert.deepEqual(editorStore.getState().design.textTypography, priorOverrides);
+  } finally {
+    editorStore.setState(beforeStore, true);
+  }
+});
+
 test('experimental layouts keep saved overrides but expose only canonical fields and the global font preset', () => {
   const previousDesign = editorStore.getState().design;
   const textOverrides = { 'cinematic.promise': 'Saved phrase' };
@@ -195,11 +278,26 @@ test('experimental layouts keep saved overrides but expose only canonical fields
   assert.match(workspaceSource, /!supportsPerItemTextEditing && \([\s\S]*?copy\.textEditor\.globalTypographyOnly/u);
   assert.match(workspaceSource, /supportsPerItemTextEditing\s*\?\s*<TypographyRoleEditor/u);
   assert.match(workspaceSource, /enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.match(workspaceSource, /informationItems=\{informationTypographyItems\}/u);
+  assert.match(workspaceSource, /getInformationTypographyItems\(textEditorItems\)/u);
   assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.globalTypographyOnly), [
     '현재 스타일에서는 카드 전체 서체를 조절합니다.',
     'This style uses one font for the whole card.',
     '現在のスタイルではカード全体のフォントを調整します。',
   ]);
+  assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.informationTypography), [
+    '정보 서체', 'Detail typography', '情報の書体',
+  ]);
+  assert.deepEqual(['ko', 'en', 'ja'].map((locale) => getEditorCopy(locale).textEditor.informationScope), [
+    '현재 카드의 직업·월드·레이블 등 정보를 함께 조절합니다.',
+    'Adjusts the job, world, labels, and other details on this card together.',
+    'このカードのジョブ・ワールド・ラベルなどをまとめて調整します。',
+  ]);
+  assert.match(typographyEditorSource, /applyTypographyGroupOverrides\([\s\S]*?sizePercent: nextSizePercent/u);
+  assert.match(typographyEditorSource, /resetTypographyGroupOverrides\(targets\.map/u);
+  assert.match(typographyEditorSource, /data-text-typography-editor=\{informationGroup \? 'information-group' : item\.id\}/u);
+  assert.match(typographyEditorSource, /<select[\s\S]*?className=\{styles\.fontSelect\}[\s\S]*?selectableOptions\.map/u);
+  assert.doesNotMatch(typographyEditorSource, /styles\.fontOptions|styles\.fontChoice/u);
 });
 
 test('V3 tabs keep real editor controls connected to the existing store and preview', () => {
@@ -225,6 +323,7 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /<CardTextOverrideInput[\s\S]*?item=\{selectedTextItem\}/u);
   assert.match(workspaceSource, /<TypographyRoleEditor locale=\{locale\} item=\{selectedTextItem\}/u);
   assert.match(workspaceSource, /<CardTextOverlay[\s\S]*?enabled=\{contentTextEditing && !previewOpen && design\.layoutVariant === 'a'\}/u);
+  assert.match(workspaceSource, /informationTargetLabel=\{copy\.textEditor\.informationTypography\}/u);
   assert.match(textEditorSource, /data-text-editor="true" data-selected-text-id=/u);
   assert.match(textEditorSource, /categoryItems\.length > 2/u);
   assert.match(workspaceSource, /updateDesign\('colorMode'/u);

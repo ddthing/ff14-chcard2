@@ -9,44 +9,69 @@
 .target {
   position: fixed;
   display: block;
-  min-width: 44px;
-  min-height: 44px;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 0;
+  overflow: visible;
   padding: 0;
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  border: 0;
   background: transparent;
   color: var(--app-text);
   font: inherit;
+  pointer-events: none;
+}
+
+.target:hover,
+.target[data-selected='true'],
+.target:focus-visible {
+  z-index: 1;
+}
+
+.target:focus-visible {
+  outline: none;
+}
+
+.hitFragment {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  padding: 0;
+  border: 0;
+  background: transparent;
   pointer-events: auto;
   touch-action: manipulation;
   cursor: pointer;
 }
 
-.target[data-compact='true'] {
-  min-width: 0;
-  min-height: 0;
+.textOutline {
+  position: absolute;
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  pointer-events: none;
 }
 
-.target:hover,
-.target[data-selected='true'] {
-  z-index: 1;
+.target:hover .textOutline,
+.target[data-selected='true'] .textOutline {
   border-color: var(--app-focus);
 }
 
-.target:focus-visible {
-  z-index: 1;
+.target:focus-visible .textOutline {
+  border-color: var(--app-focus);
   outline: 2px solid var(--app-focus);
   outline-offset: 2px;
 }
 
-.badge {
+.badge,
+.groupMarker {
   position: absolute;
-  top: 2px;
-  right: 2px;
   display: grid;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   place-items: center;
+  box-sizing: border-box;
   border: 1px solid var(--app-border-strong);
   border-radius: 50%;
   background: var(--app-surface);
@@ -58,21 +83,30 @@
   pointer-events: none;
 }
 
-.target[data-selected='true'] .badge {
+.target[data-selected='true'] .badge,
+.groupTarget:hover .groupMarker,
+.groupTarget[data-selected='true'] .groupMarker {
   border-color: var(--app-focus);
   background: var(--app-accent);
   color: var(--app-on-accent);
 }
 
+.groupTarget:focus-visible .groupMarker {
+  border-color: var(--app-focus);
+  outline: 2px solid var(--app-focus);
+  outline-offset: 2px;
+}
+
 @media (forced-colors: active) {
-  .target:hover,
-  .target[data-selected='true'],
-  .target:focus-visible {
+  .textOutline,
+  .target:focus-visible .textOutline,
+  .groupTarget:focus-visible .groupMarker {
     border-color: Highlight;
     outline-color: Highlight;
   }
 
-  .badge {
+  .badge,
+  .groupMarker {
     border-color: ButtonText;
     background: Canvas;
     color: ButtonText;

@@ -1,6 +1,59 @@
-import type { CardTypographyPreset, CardTypographyRole } from '@/components/cards/types';
+import type { CardTypographyOverride, CardTypographyPreset, CardTypographyRole } from '@/components/cards/types';
 import type { CardTextSlotId } from '@/lib/card-text-editing';
 import { editorStore } from '@/store/editor-store';
+import { normalizeCardTypographyOverride } from '@/store/editor-persistence';
+
+export interface TypographyGroupUpdate {
+  id: CardTextSlotId;
+  patch: Partial<CardTypographyOverride>;
+}
+
+function sameTypographyOverride(left: CardTypographyOverride | undefined, right: CardTypographyOverride | undefined): boolean {
+  return left?.fontFamily === right?.fontFamily && left?.sizePercent === right?.sizePercent &&
+    left?.weight === right?.weight && left?.trackingEm === right?.trackingEm;
+}
+
+export function applyTypographyGroupOverrides(updates: readonly TypographyGroupUpdate[], groupId?: string) {
+  if (!updates.length) return;
+  const state = editorStore.getState();
+  const current = state.design.textTypography ?? {};
+  const next = { ...current };
+  let changed = false;
+
+  for (const { id, patch } of updates) {
+    const merged = { ...(current[id] ?? {}), ...patch };
+    for (const key of Object.keys(merged) as Array<keyof CardTypographyOverride>) {
+      if (merged[key] === undefined) delete merged[key];
+    }
+    const normalized = normalizeCardTypographyOverride(merged);
+    if (sameTypographyOverride(current[id], normalized)) continue;
+    changed = true;
+    if (normalized) next[id] = normalized;
+    else delete next[id];
+  }
+
+  if (changed) {
+    state.setDesign(
+      { textTypography: Object.keys(next).length > 0 ? next : undefined },
+      groupId ? { groupId } : undefined,
+    );
+  }
+}
+
+export function resetTypographyGroupOverrides(ids: readonly CardTextSlotId[]) {
+  if (!ids.length) return;
+  const state = editorStore.getState();
+  const current = state.design.textTypography;
+  if (!current) return;
+  const next = { ...current };
+  let changed = false;
+  for (const id of ids) {
+    if (!Object.hasOwn(next, id)) continue;
+    delete next[id];
+    changed = true;
+  }
+  if (changed) state.setDesign({ textTypography: Object.keys(next).length > 0 ? next : undefined });
+}
 
 export function applyGlobalTypographyPreset(preset: CardTypographyPreset) {
   editorStore.getState().updateDesign('typographyPreset', preset);

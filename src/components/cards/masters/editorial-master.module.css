@@ -13,6 +13,12 @@
   --editorial-name-top: 8.4%;
   --editorial-facts-top: 36.6%;
   --editorial-facts-bottom: 37.2%;
+  --editorial-fact-label-column: 32%;
+  --editorial-fact-rule-length: min(22cqi, 58%);
+  --editorial-fact-group-space: .65cqi;
+  --editorial-fact-group-padding: .9cqi;
+  --editorial-fact-padding: .45cqi;
+  --editorial-fact-gap: .8cqi;
   position: absolute;
   z-index: 0;
   isolation: isolate;
@@ -244,10 +250,11 @@
 }
 
 .photoStory[data-photo-story='bio'] {
-  display: -webkit-box;
+  display: block;
+  overflow: visible;
   font-family: var(--master-font-secondary-display, var(--card-font-story, var(--card-font-display, Georgia, serif)));
   font-size: max(var(--master-micro-min, .84cqi), 2cqi);
-  -webkit-box-orient: vertical;
+  -webkit-line-clamp: unset;
 }
 
 .photoStory[data-photo-story='copy'] {
@@ -275,15 +282,20 @@
   min-width: 0;
   min-height: 0;
   flex: 1 1 0;
-  grid-template-columns: 41% minmax(0, 1fr);
+  grid-template-columns: var(--editorial-fact-label-column) minmax(0, 1fr);
   align-items: center;
-  gap: .8cqi;
+  gap: var(--editorial-fact-gap);
+  padding: var(--editorial-fact-padding) 0;
+}
+
+.fact[data-editorial-group-start='true'] {
+  margin-block-start: var(--editorial-fact-group-space);
   border-top: 1px solid transparent;
   background-image: linear-gradient(color-mix(in srgb, var(--editorial-ink) 48%, transparent), color-mix(in srgb, var(--editorial-ink) 48%, transparent));
-  background-size: 100% var(--master-rule-weight, .13cqi);
-  background-position: top;
+  background-size: var(--editorial-fact-rule-length) var(--master-rule-weight, .13cqi);
+  background-position: left top;
   background-repeat: no-repeat;
-  padding: .8cqi 0;
+  padding-block-start: var(--editorial-fact-group-padding);
 }
 
 .factLabel {
@@ -296,6 +308,11 @@
   line-height: 1.06;
   text-transform: uppercase;
   overflow-wrap: anywhere;
+}
+
+.fact[data-editorial-row='job'] .factLabel {
+  color: var(--editorial-red);
+  font-weight: 700;
 }
 
 .factValue {
@@ -417,8 +434,15 @@
 .canvas[data-ratio='9:16'] .quote { max-width: 80%; text-align: center; font-size: 1.8cqi; }
 .canvas[data-ratio='9:16'] .photoStory { bottom: 61%; left: 6%; width: 33%; font-size: 3cqi; }
 .canvas[data-ratio='9:16'] .photoStory[data-photo-story='bio'] { font-size: 1.7cqi; }
+.canvas[data-ratio='9:16'] {
+  --editorial-fact-label-column: 36%;
+  --editorial-fact-rule-length: min(20cqi, 58%);
+  --editorial-fact-group-space: 0;
+  --editorial-fact-group-padding: .8cqi;
+  --editorial-fact-padding: .6cqi;
+  --editorial-fact-gap: .65cqi;
+}
 .canvas[data-ratio='9:16'] .facts { top: 63%; right: 6%; bottom: 17%; left: 6%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(0, 1fr)); column-gap: 3cqi; }
-.canvas[data-ratio='9:16'] .fact { grid-template-columns: 36% minmax(0, 1fr); gap: .65cqi; padding: .6cqi 0; }
 .canvas[data-ratio='9:16'] .factLabel { font-size: 1cqi; letter-spacing: .06em; }
 .canvas[data-ratio='9:16'] .factValue { font-size: 1.65cqi; }
 .canvas[data-ratio='9:16'] .jobInsignia { top: 83%; right: 6%; width: 30%; grid-template-columns: 10cqi minmax(0, 1fr); justify-items: start; gap: .6cqi 1.1cqi; text-align: left; }
@@ -435,6 +459,12 @@
   --editorial-name-top: 9%;
   --editorial-facts-top: 35%;
   --editorial-facts-bottom: 31%;
+  --editorial-fact-label-column: 36%;
+  --editorial-fact-rule-length: min(26cqi, 58%);
+  --editorial-fact-group-space: .4cqi;
+  --editorial-fact-group-padding: .72cqi;
+  --editorial-fact-padding: .45cqi;
+  --editorial-fact-gap: .55cqi;
 }
 
 .canvas[data-ratio='16:9'] .masthead { top: 4.4%; right: 4%; }
@@ -444,7 +474,6 @@
 .canvas[data-ratio='16:9'] .quote { font-size: 1.4cqi; }
 .canvas[data-ratio='16:9'] .photoStory { bottom: 12%; left: 4%; width: 28%; font-size: 3.1cqi; }
 .canvas[data-ratio='16:9'] .photoStory[data-photo-story='bio'] { font-size: 1.15cqi; }
-.canvas[data-ratio='16:9'] .fact { grid-template-columns: 36% minmax(0, 1fr); gap: .55cqi; padding: .5cqi 0; }
 .canvas[data-ratio='16:9'] .factLabel { font-size: .72cqi; letter-spacing: .07em; }
 .canvas[data-ratio='16:9'] .factValue { font-size: 1.12cqi; }
 .canvas[data-ratio='16:9'] .jobInsignia { top: 71%; right: 4%; width: 32%; gap: .35cqi; }
