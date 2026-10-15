@@ -61,7 +61,13 @@ export default function HomePage() {
       <div className={styles.content}>
         <section className={styles.studio} aria-labelledby="home-title">
           <header className={styles.intro}>
-            <h1 id="home-title">{copy.title}</h1>
+            <div className={styles.introTitle}>
+              <span className={styles.eyebrow}>{copy.eyebrow}</span>
+              <h1 id="home-title">{copy.title}</h1>
+            </div>
+            <Link className={styles.compareAction} href={compareHref}>
+              {draft ? copy.exploreDraft : copy.explore}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
+            </Link>
           </header>
 
           {draft ? (
@@ -81,71 +87,74 @@ export default function HomePage() {
             </section>
           ) : null}
 
-          <figure className={styles.artwork}>
-            <div className={styles.cardFan} role="group" aria-label={copy.styleHeading}>
-              {MASTER_TEMPLATE_ORDER.map((template) => {
-                const relativeIndex = (MASTER_TEMPLATE_ORDER.indexOf(template) - activeTemplateIndex + MASTER_TEMPLATE_ORDER.length) % MASTER_TEMPLATE_ORDER.length;
-                const position = relativeIndex === 0 ? 'center' : relativeIndex === 1 ? 'right' : 'left';
-                const isActive = template === activeTemplate;
+          <div className={styles.stage}>
+            <figure className={styles.artwork}>
+              <div className={styles.stageMeta} aria-hidden="true">
+                <span>{copy.sampleLabel}</span>
+                <span>4:5</span>
+              </div>
+              <div className={styles.cardFan} role="group" aria-label={copy.styleHeading}>
+                {MASTER_TEMPLATE_ORDER.map((template) => {
+                  const relativeIndex = (MASTER_TEMPLATE_ORDER.indexOf(template) - activeTemplateIndex + MASTER_TEMPLATE_ORDER.length) % MASTER_TEMPLATE_ORDER.length;
+                  const position = relativeIndex === 0 ? 'center' : relativeIndex === 1 ? 'right' : 'left';
+                  const isActive = template === activeTemplate;
 
-                return (
-                  <button
-                    type="button"
-                    className={styles.cardSlot}
-                    key={template}
-                    data-position={position}
-                    aria-pressed={isActive}
-                    aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
-                    onClick={() => setActiveTemplate(template)}
-                  >
-                    <div className={styles.cardVisual} aria-hidden="true">
-                      <LazyMaster
-                        template={template}
-                        ratio="4:5"
-                        locale={locale}
-                        eager
-                        className={styles.cardArtwork}
-                      />
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-            <figcaption className={styles.activeCaption} aria-live="polite" aria-atomic="true">
-              <span>{copy.sampleLabel}</span>
-              <span aria-hidden="true">·</span>
-              <strong>{styleNames[activeTemplate]}</strong>
-            </figcaption>
-          </figure>
+                  return (
+                    <button
+                      type="button"
+                      className={styles.cardSlot}
+                      key={template}
+                      data-position={position}
+                      aria-pressed={isActive}
+                      aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
+                      onClick={() => setActiveTemplate(template)}
+                    >
+                      <div className={styles.cardVisual} aria-hidden="true">
+                        <LazyMaster
+                          template={template}
+                          ratio="4:5"
+                          locale={locale}
+                          eager
+                          className={styles.cardArtwork}
+                        />
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              <figcaption className={styles.activeCaption} aria-live="polite" aria-atomic="true">
+                <span className={styles.captionIndex} aria-hidden="true">{String(activeTemplateIndex + 1).padStart(2, '0')} / 03</span>
+                <strong>{styleNames[activeTemplate]}</strong>
+              </figcaption>
+            </figure>
 
-          <div className={styles.stageDock}>
-            <div className={styles.styleChoices} role="group" aria-label={copy.styleSelector}>
-              {MASTER_TEMPLATE_ORDER.map((template) => {
-                const isActive = activeTemplate === template;
+            <div className={styles.stageDock}>
+              <div className={styles.styleChoices} role="group" aria-label={copy.styleSelector}>
+                {MASTER_TEMPLATE_ORDER.map((template, index) => {
+                  const isActive = activeTemplate === template;
 
-                return (
-                  <button
-                    type="button"
-                    key={template}
-                    className={styles.styleChoice}
-                    aria-pressed={isActive}
-                    aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
-                    onClick={() => setActiveTemplate(template)}
-                  >
-                    <span className={styles.styleLabel}>{styleNames[template]}</span>
-                    <span className={styles.styleCheck} aria-hidden="true">{isActive ? <AppIcon name="Check" /> : ''}</span>
-                  </button>
-                );
-              })}
-            </div>
+                  return (
+                    <button
+                      type="button"
+                      key={template}
+                      className={styles.styleChoice}
+                      aria-pressed={isActive}
+                      aria-label={`${styleNames[template]}${isActive ? ` · ${copy.selected}` : ''}`}
+                      onClick={() => setActiveTemplate(template)}
+                    >
+                      <span className={styles.styleIndex} aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                      <span className={styles.styleLabel}>{styleNames[template]}</span>
+                      <span className={styles.styleCheck} aria-hidden="true">{isActive ? <AppIcon name="Check" /> : ''}</span>
+                    </button>
+                  );
+                })}
+              </div>
 
-            <div className={styles.stageActions}>
-              <Link className={styles.primaryAction} href={getTemplatePhotoPath(activeTemplate)}>
-                {copy.create}<span aria-hidden="true"><AppIcon name="ArrowRight" /></span>
-              </Link>
-              <Link className={styles.compareAction} href={compareHref}>
-                {draft ? copy.exploreDraft : copy.explore}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
-              </Link>
+              <div className={styles.stageActions}>
+                <Link className={styles.primaryAction} href={getTemplatePhotoPath(activeTemplate)}>
+                  {copy.create}<span aria-hidden="true"><AppIcon name="ArrowRight" /></span>
+                </Link>
+              </div>
             </div>
           </div>
         </section>

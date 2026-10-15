@@ -315,98 +315,77 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
         </header>
 
         <div className={styles.layout}>
-          <section
-            className={styles.uploadPanel}
-            aria-labelledby="upload-title"
-            data-state={uploadState}
-            aria-busy={uploadState === 'processing'}
-            onDragEnter={handleDragEnter}
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-          >
-            <span className={styles.uploadSymbol} aria-hidden="true" data-state={uploadState}>
-              {uploadState === 'processing'
-                ? <span className={styles.uploadSpinner} />
-                : photoReady
-                  ? <span className={styles.uploadSuccessMark}><AppIcon name="Check" /></span>
-                  : <EditorIcon name="upload" size={26} />}
-            </span>
-            <h2 id="upload-title">{confirmUpload ? text.confirmUploadTitle : text.uploadTitle}</h2>
-            {(uploadState === 'idle' || uploadState === 'error') && !confirmUpload && (
-              <p className={styles.dropPrompt}>{text.dropIdle}</p>
-            )}
-            <span className={styles.fileTypes} id="upload-formats">{text.fileTypes}</span>
-            {!confirmUpload && (
-              <button
-                ref={chooseFileRef}
-                className={photoReady ? styles.changePhotoButton : styles.chooseButton}
-                type="button"
-                disabled={uploadState === 'processing'}
-                onClick={openFilePicker}
+          <div className={styles.sourcePanel}>
+            <section
+              className={styles.uploadPanel}
+              aria-labelledby="upload-title"
+              data-state={uploadState}
+              aria-busy={uploadState === 'processing'}
+              onDragEnter={handleDragEnter}
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+            >
+              <span className={styles.uploadSymbol} aria-hidden="true" data-state={uploadState}>
+                {uploadState === 'processing'
+                  ? <span className={styles.uploadSpinner} />
+                  : photoReady
+                    ? <span className={styles.uploadSuccessMark}><AppIcon name="Check" /></span>
+                    : <EditorIcon name="upload" size={26} />}
+              </span>
+              <h2 id="upload-title">{confirmUpload ? text.confirmUploadTitle : text.uploadTitle}</h2>
+              {(uploadState === 'idle' || uploadState === 'error') && !confirmUpload && (
+                <p className={styles.dropPrompt}>{text.dropIdle}</p>
+              )}
+              <span className={styles.fileTypes} id="upload-formats">{text.fileTypes}</span>
+              {!confirmUpload && (
+                <button
+                  ref={chooseFileRef}
+                  className={photoReady ? styles.changePhotoButton : styles.chooseButton}
+                  type="button"
+                  disabled={uploadState === 'processing'}
+                  onClick={openFilePicker}
+                  aria-describedby="upload-formats upload-guidance upload-status"
+                >{uploadState === 'processing' ? text.processing : photoReady ? text.chooseAnotherPhoto : text.chooseFile}</button>
+              )}
+              <input
+                ref={fileInputRef}
+                className={styles.fileInput}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                aria-label={text.uploadTitle}
                 aria-describedby="upload-formats upload-guidance upload-status"
-              >{uploadState === 'processing' ? text.processing : photoReady ? text.chooseAnotherPhoto : text.chooseFile}</button>
-            )}
-            <input
-              ref={fileInputRef}
-              className={styles.fileInput}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              aria-label={text.uploadTitle}
-              aria-describedby="upload-formats upload-guidance upload-status"
-              tabIndex={-1}
-              onChange={handleFileChange}
-            />
-            {uploadState === 'processing' && (
-              <button className={styles.cancelUpload} type="button" onClick={() => cancelUpload()}>{text.cancelUpload}</button>
-            )}
-            <p className={styles.uploadGuidance} id="upload-guidance">{text.privacy}</p>
-            <p className={styles.uploadStatus} id="upload-status" role="status" aria-live="polite" aria-atomic="true">{uploadStatus}</p>
-            {photoReady && selectedFileName && (
-              <p className={styles.selectedFile}><span>{text.fileSelected}</span><strong>{selectedFileName}</strong></p>
-            )}
-            {uploadError && (
-              <p className={styles.uploadError} role="alert" aria-atomic="true">
-                <strong>{failedFileName}</strong><span>{uploadError}</span>
-              </p>
-            )}
-            {confirmUpload && pendingUpload && (
-              <div className={styles.confirmPanel} role="group" aria-label={text.confirmUploadLabel}>
-                <div className={styles.pendingPhoto}>
-                  <span className={styles.pendingThumb} aria-hidden="true">
-                    <Image src={pendingUpload.imageUrl} alt="" fill sizes="72px" />
-                  </span>
-                  <p>{text.confirmUploadMessage}<strong>{pendingUpload.fileName}</strong></p>
-                </div>
-                <button ref={confirmUploadRef} className={styles.confirmAction} type="button" onClick={() => applyPreparedUpload(pendingUpload, { fromConfirmation: true })}>
-                  {text.confirmUploadAction}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
-                </button>
-                <button className={styles.cancelConfirm} type="button" onClick={cancelPendingUpload}>{text.cancelReplace}</button>
-              </div>
-            )}
-          </section>
-
-          <aside className={styles.previewPanel} aria-labelledby="preview-title" data-has-photo={showCardPreview} data-sample={activeSample}>
-            <header className={styles.previewHeading}>
-              <div>
-                <p className={styles.eyebrow}>{showCardPreview ? text.previewLabel : text.samplePreviewLabel}</p>
-                <h2 id="preview-title">{templateNames[selectedTemplate]}</h2>
-              </div>
-              {photoReady && <span className={styles.previewReady} aria-hidden="true"><AppIcon name="Check" /></span>}
-            </header>
-
-            <div className={styles.previewStage}>
-              {showCardPreview ? (
-                <div role="img" aria-label={previewSummary}>
-                  <CardPreview data={previewData} locale={locale} className={styles.previewCard} />
-                </div>
-              ) : (
-                <div className={styles.sampleArtwork} role="img" aria-label={text.samplePreviewLabel}>
-                  <Image src={conerSample.screenshots[activeSample].optimized} alt="" fill sizes="(max-width: 760px) 100vw, (max-width: 1100px) 45vw, 36vw" />
-                  <span>{text.samplePreviewLabel}</span>
+                tabIndex={-1}
+                onChange={handleFileChange}
+              />
+              {uploadState === 'processing' && (
+                <button className={styles.cancelUpload} type="button" onClick={() => cancelUpload()}>{text.cancelUpload}</button>
+              )}
+              <p className={styles.uploadGuidance} id="upload-guidance">{text.privacy}</p>
+              <p className={styles.uploadStatus} id="upload-status" role="status" aria-live="polite" aria-atomic="true">{uploadStatus}</p>
+              {photoReady && selectedFileName && (
+                <p className={styles.selectedFile}><span>{text.fileSelected}</span><strong>{selectedFileName}</strong></p>
+              )}
+              {uploadError && (
+                <p className={styles.uploadError} role="alert" aria-atomic="true">
+                  <strong>{failedFileName}</strong><span>{uploadError}</span>
+                </p>
+              )}
+              {confirmUpload && pendingUpload && (
+                <div className={styles.confirmPanel} role="group" aria-label={text.confirmUploadLabel}>
+                  <div className={styles.pendingPhoto}>
+                    <span className={styles.pendingThumb} aria-hidden="true">
+                      <Image src={pendingUpload.imageUrl} alt="" fill sizes="72px" />
+                    </span>
+                    <p>{text.confirmUploadMessage}<strong>{pendingUpload.fileName}</strong></p>
+                  </div>
+                  <button ref={confirmUploadRef} className={styles.confirmAction} type="button" onClick={() => applyPreparedUpload(pendingUpload, { fromConfirmation: true })}>
+                    {text.confirmUploadAction}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
+                  </button>
+                  <button className={styles.cancelConfirm} type="button" onClick={cancelPendingUpload}>{text.cancelReplace}</button>
                 </div>
               )}
-            </div>
+            </section>
 
             {photoReady && (
               <div className={styles.readyActions}>
@@ -422,7 +401,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
 
             <section className={styles.sampleSection} aria-labelledby="sample-option-title">
               <header className={styles.sampleHeading}>
-                <h3 id="sample-option-title">{text.sampleTitle}</h3>
+                <h2 id="sample-option-title">{text.sampleTitle}</h2>
               </header>
               <div className={styles.sampleChoices} role="group" aria-label={text.sampleTitle}>
                 {(['portrait', 'landscape'] as const).map((role) => {
@@ -441,7 +420,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                       ref={(node) => { sampleTriggerRefs.current[role] = node; }}
                     >
                       <span className={styles.sampleThumb} aria-hidden="true">
-                        <Image src={conerSample.screenshots[role].optimized} alt="" fill sizes="(max-width: 760px) 72px, 96px" />
+                        <Image src={conerSample.screenshots[role].optimized} alt="" fill sizes="(max-width: 760px) 45vw, (max-width: 1000px) 20vw, 220px" />
                       </span>
                       <span>{label}</span>
                       <span className={styles.sampleMark} aria-hidden="true">{active ? <AppIcon name="Check" /> : ''}</span>
@@ -469,6 +448,22 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                 {text.resumeDraft}<span aria-hidden="true"><AppIcon name="ArrowUpRight" /></span>
               </Link>
             )}
+          </div>
+
+          <aside className={styles.previewPanel} aria-labelledby="preview-title" data-has-photo={showCardPreview} data-sample={activeSample}>
+            <header className={styles.previewHeading}>
+              <div>
+                <p className={styles.eyebrow}>{showCardPreview ? text.previewLabel : text.samplePreviewLabel}</p>
+                <h2 id="preview-title">{templateNames[selectedTemplate]}</h2>
+              </div>
+              {photoReady && <span className={styles.previewReady} aria-hidden="true"><AppIcon name="Check" /></span>}
+            </header>
+
+            <div className={styles.previewStage} data-ratio={previewData.design.ratio}>
+              <div role="img" aria-label={showCardPreview ? previewSummary : `${text.samplePreviewLabel} · ${previewSummary}`}>
+                <CardPreview data={previewData} locale={locale} className={styles.previewCard} />
+              </div>
+            </div>
           </aside>
         </div>
 

@@ -155,6 +155,8 @@ function ResultBitmapPreview({
 const copy = {
   ko: {
     title: '카드 내보내기',
+    settings: '내보내기 설정',
+    resultFile: '결과 파일',
     resultTitle: '다운로드 요청 완료',
     resultPreviewLoading: '완성된 카드 이미지를 표시하고 있어요…',
     resultPreviewFailed: '이미지 미리보기를 표시하지 못했어요. 파일을 다시 다운로드할 수 있어요.',
@@ -224,6 +226,8 @@ const copy = {
   },
   en: {
     title: 'Export card',
+    settings: 'Export settings',
+    resultFile: 'Exported file',
     resultTitle: 'Download request complete',
     resultPreviewLoading: 'Preparing the exported image preview…',
     resultPreviewFailed: 'The image preview could not be displayed. You can still download the file again.',
@@ -293,6 +297,8 @@ const copy = {
   },
   ja: {
     title: 'カードを書き出す',
+    settings: '書き出し設定',
+    resultFile: '書き出したファイル',
     resultTitle: 'ダウンロードをリクエストしました。',
     resultPreviewLoading: '書き出したカード画像を表示しています…',
     resultPreviewFailed: '画像プレビューを表示できませんでした。ファイルは再ダウンロードできます。',
@@ -803,7 +809,6 @@ export default function ExportPage() {
               <span className={styles.successMark} aria-hidden="true"><AppIcon name="Check" /></span>
               <div>
                 <h1 className={styles.title}>{text.resultTitle}</h1>
-                <p className={styles.fileName}>{result.filename}</p>
               </div>
             </div>
             {!error && <p className={styles.visuallyHidden} role="status">{status || formatExportSuccess(result, text)}</p>}
@@ -817,10 +822,13 @@ export default function ExportPage() {
         <div className={styles.workspace}>
           <section className={styles.previewPanel} aria-label={text.preview}>
             <div className={styles.previewHeader}>
-              <span>{text.preview}</span>
-              <span>{viewData.design.ratio}</span>
+              <div className={styles.previewIdentity}>
+                <h2>{viewData.character.name || text.preview}</h2>
+                <p>{[jobLabel, worldLabel].filter(Boolean).join(' · ')}</p>
+              </div>
+              <span className={styles.ratioBadge}>{viewData.design.ratio}</span>
             </div>
-            <div className={`${styles.previewStage} ${result ? styles.resultStage : ''}`}>
+            <div className={styles.previewStage}>
               {result ? (
                 <ResultBitmapPreview
                   blob={result.blob}
@@ -842,28 +850,19 @@ export default function ExportPage() {
                 </div>
               )}
             </div>
-            {!result && (
-              <div className={styles.previewFooter}>
-                <div className={styles.previewIdentity}>
-                  <strong>{viewData.character.name}</strong>
-                  <span>{jobLabel} · {worldLabel}</span>
-                </div>
-                <div className={styles.previewDimensions}>
-                  <span>{sampleArtwork ? text.sample : text.local}</span>
-                  <strong>{dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)} {text.pixel}</strong>
-                  {dimensions.capped && <span>{text.capped}</span>}
-                </div>
-              </div>
-            )}
+            <div className={styles.previewFooter}>
+              <span>{activeTemplate}</span>
+              <span>{sampleArtwork ? text.sample : text.local}</span>
+            </div>
           </section>
 
           {result ? (
-            <aside className={`${styles.exportPanel} ${styles.resultPanel}`} aria-labelledby="export-result-title">
-              <h2 className={styles.resultName} id="export-result-title">{viewData.character.name}</h2>
+            <aside className={styles.exportPanel} aria-labelledby="export-result-title">
+              <h2 className={styles.panelTitle} id="export-result-title">{text.resultFile}</h2>
+              <p className={styles.fileName}>{result.filename}</p>
               <dl className={styles.resultDetails}>
+                <div className={styles.resultPixels}><dt>{text.resultDimensions}</dt><dd>{dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)} <span>{text.pixel}</span></dd></div>
                 <div><dt>{text.resultFormat}</dt><dd>{viewFormat.toUpperCase()}</dd></div>
-                <div><dt>{text.resultDimensions}</dt><dd>{dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)} {text.pixel}</dd></div>
-                <div><dt>{text.ratio}</dt><dd>{viewData.design.ratio}</dd></div>
                 <div><dt>{text.fileSize}</dt><dd>{formatBlobSize(result.blob.size, viewLocale)}</dd></div>
               </dl>
               {dimensions.capped && <p className={styles.cappedNote}>{text.capped}</p>}
@@ -888,11 +887,10 @@ export default function ExportPage() {
             </aside>
           ) : (
             <aside className={styles.exportPanel} aria-labelledby="export-settings-title" aria-busy={exporting}>
-              <h2 className={styles.characterName} id="export-settings-title">{viewData.character.name}</h2>
-              <p className={styles.identity}>{activeTemplate}<span>·</span>{viewData.design.ratio}</p>
+              <h2 className={styles.panelTitle} id="export-settings-title">{text.settings}</h2>
 
               <fieldset className={styles.optionGroup} disabled={exporting || printPreparing} aria-describedby={errorAction === 'format' ? 'export-feedback' : undefined}>
-                <legend className={styles.controlLabel}><span>{text.format}</span><span>{viewFormat.toUpperCase()}</span></legend>
+                <legend className={styles.controlLabel}>{text.format}</legend>
                 <div className={styles.segmented} data-count="2">
                   {(['png', 'webp'] as const).map((value) => (
                     <label key={value} className={viewFormat === value ? styles.selectedChoice : undefined}>
@@ -904,7 +902,7 @@ export default function ExportPage() {
               </fieldset>
 
               <fieldset className={styles.optionGroup} disabled={exporting || printPreparing} aria-describedby={errorAction === 'resolution' ? 'export-feedback' : 'export-dimensions'}>
-                <legend className={styles.controlLabel}><span>{text.resolution}</span><span>{viewScale}×</span></legend>
+                <legend className={styles.controlLabel}>{text.resolution}</legend>
                 <div className={styles.segmented} data-count={CARD_EXPORT_SCALES.length}>
                   {CARD_EXPORT_SCALES.map((value) => (
                     <label key={value} className={viewScale === value ? styles.selectedChoice : undefined}>
@@ -914,13 +912,13 @@ export default function ExportPage() {
                   ))}
                 </div>
                 <p className={styles.dimensions} id="export-dimensions">
-                  <span>{text.pixel} · {viewData.design.ratio}</span>
-                  <strong>{dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)}</strong>
+                  <span>{text.resultDimensions}</span>
+                  <strong>{dimensions.width.toLocaleString(viewLocale)} × {dimensions.height.toLocaleString(viewLocale)} {text.pixel}</strong>
                 </p>
                 {dimensions.capped && <p className={styles.cappedNote}>{text.capped}</p>}
               </fieldset>
 
-              <fieldset className={`${styles.optionGroup} ${styles.ratioGroup}`} disabled={exporting || printPreparing} aria-describedby="export-ratio-hint">
+              <fieldset className={styles.optionGroup} disabled={exporting || printPreparing} aria-describedby="export-ratio-hint">
                 <legend className={styles.controlLabel}>{text.ratioLabel}</legend>
                 <div className={styles.segmented} data-count="5">
                   {(['1:1', '4:5', '3:4', '9:16', '16:9'] as const).map((value) => (

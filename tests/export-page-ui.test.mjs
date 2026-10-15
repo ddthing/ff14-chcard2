@@ -14,12 +14,16 @@ test('the completed export state follows a successful browser download dispatch'
   const resultStart = page.indexOf('{result ? (');
   const resultEnd = page.indexOf('\n        ) : (', resultStart);
   const completedView = page.slice(resultStart, resultEnd);
+  const resultPanelStart = page.indexOf('aria-labelledby="export-result-title"');
+  const resultPanelEnd = page.indexOf('</aside>', resultPanelStart);
+  const completedPanel = page.slice(resultPanelStart, resultPanelEnd);
 
   assert.ok(dispatch >= 0, 'the rendered Blob is sent through the existing download helper');
   assert.ok(completion > dispatch, 'the result state is committed only after dispatch returns');
   assert.ok(resultStart >= 0 && resultEnd > resultStart, 'the page has a distinct completed view');
   assert.match(completedView, /<h1 className=\{styles\.title\}>\{text\.resultTitle\}<\/h1>/);
-  assert.match(completedView, /<p className=\{styles\.fileName\}>\{result\.filename\}<\/p>/);
+  assert.ok(resultPanelStart >= 0 && resultPanelEnd > resultPanelStart, 'the completed output has a named result panel');
+  assert.match(completedPanel, /<p className=\{styles\.fileName\}>\{result\.filename\}<\/p>/);
   assert.match(completedView, /!error && <p className=\{styles\.visuallyHidden\} role="status">\{status \|\| formatExportSuccess\(result, text\)\}<\/p>/);
 });
 
