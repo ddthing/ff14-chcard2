@@ -9,49 +9,54 @@
 .routeFallback { display: grid; min-height: calc(100dvh - var(--app-header-height, 72px)); place-items: center; background: var(--app-bg); }
 .routeFallback > span { width: 1.4rem; height: 1.4rem; border: 1px solid var(--app-border); border-top-color: var(--app-accent); border-radius: 50%; animation: route-wait 800ms linear infinite; }
 
-.stepNav { display: flex; min-height: 4.25rem; align-items: center; border-bottom: 1px solid var(--app-border); }
+.stepNav { display: flex; min-height: 3.5rem; align-items: center; }
 .backLink { display: inline-flex; min-height: 2.75rem; align-items: center; gap: 0.55rem; color: var(--app-text); font-size: 0.82rem; font-weight: 600; text-decoration: none; }
 .backLink span { font-size: 1.2rem; transition: transform var(--motion-fast, 160ms) var(--ease-editorial, ease); }
 .backLink:hover { color: var(--app-accent); }
 .backLink:hover span { transform: translateX(-2px); }
 
-.heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; margin: clamp(1rem, 2vw, 1.5rem) 0 0.75rem; animation: heading-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
+.heading { display: flex; align-items: center; justify-content: space-between; gap: 2rem; margin: 0; border-bottom: 1px solid var(--app-border); padding: 0.75rem 0 1.5rem; animation: heading-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
 .headingCopy { min-width: 0; }
 .heading h1 { margin: 0; font-family: var(--font-editorial, Georgia, serif); font-size: clamp(2rem, calc(2.15rem + 0.67vw), 2.75rem); font-weight: 450; letter-spacing: -0.06em; line-height: 1.02; text-wrap: balance; }
 .page:lang(ko) .heading h1 { letter-spacing: -0.07em; line-height: 1.15; word-break: keep-all; }
 .page:lang(ja) .heading h1 { letter-spacing: -0.05em; line-height: 1.15; line-break: strict; }
 
-.compareTools { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 3.5rem; border-block: 1px solid var(--app-border); padding: 0.6rem 0; animation: tools-arrive var(--motion-default, 420ms) 60ms var(--ease-editorial, ease) both; }
+.compareTools { display: grid; justify-items: end; gap: 0.5rem; min-width: 0; max-width: 28rem; animation: tools-arrive var(--motion-default, 420ms) 60ms var(--ease-editorial, ease) both; }
 .compareControl { display: flex; min-width: 0; align-items: center; gap: 0.8rem; }
 .compareLabel { color: var(--app-text-muted); font-size: 0.75rem; font-weight: 600; }
-.compareModes { display: inline-flex; min-height: 3.2rem; flex: 0 0 auto; align-items: stretch; gap: 0.15rem; border: 1px solid var(--app-border-strong); border-radius: var(--radius-lg); padding: 0.2rem; background: var(--app-surface); }
+.compareModes { display: inline-flex; min-height: 3.2rem; flex: 0 0 auto; align-items: stretch; gap: 0.15rem; border: 1px solid var(--app-border); border-radius: var(--radius-lg); padding: 0.2rem; background: var(--app-workspace); }
 .compareModes button { min-height: 2.75rem; border: 0; border-radius: var(--radius-md); padding: 0.45rem 0.95rem; background: transparent; color: var(--app-text-muted); font: inherit; font-size: 0.78rem; font-weight: 600; line-height: 1.2; cursor: pointer; transition: background-color var(--motion-ui, 240ms) var(--ease-editorial, ease), color var(--motion-ui, 240ms) var(--ease-editorial, ease); }
-.compareModes button[aria-pressed='true'] { background: var(--app-accent); color: var(--app-on-accent); }
+.compareModes button[aria-pressed='true'] { background: var(--app-surface); color: var(--app-text); box-shadow: 0 1px 3px rgb(0 0 0 / 8%); }
 .compareModes button:disabled { cursor: not-allowed; opacity: 0.62; }
-.compareStatus { min-width: 0; color: var(--app-text); font-size: 0.78rem; line-height: 1.4; text-align: right; }
+.compareStatus { min-width: 0; color: var(--app-text-muted); font-size: 0.75rem; line-height: 1.45; text-align: right; }
 .page :is(a, button):focus-visible { outline: 2px solid var(--app-focus); outline-offset: 3px; }
 .srOnly { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); clip-path: inset(50%); white-space: nowrap; }
 .mobileStyleSelectors { display: none; }
 
-.gallery { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: clamp(1.25rem, 2vw, 2rem); padding: 1.15rem 0 1.5rem; }
+.gallery { --gallery-art-height: clamp(14rem, calc(100dvh - 31rem), 30rem); --gallery-art-ratio: 0.8; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-items: start; gap: clamp(1rem, 2vw, 2rem); padding: 1.5rem 0; }
+.gallery[data-ratio='1:1'] { --gallery-art-ratio: 1; }
+.gallery[data-ratio='3:4'] { --gallery-art-ratio: 0.75; }
+.gallery[data-ratio='9:16'] { --gallery-art-ratio: 0.5625; }
+.gallery[data-ratio='16:9'] { --gallery-art-ratio: 1.777778; }
 .galleryCard { min-width: 0; opacity: 1; animation: gallery-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
 .galleryCard:nth-child(2) { animation-delay: 70ms; }
 .galleryCard:nth-child(3) { animation-delay: 140ms; }
-.cardChoice { display: flex; width: 100%; flex-direction: column; align-items: stretch; gap: 0.85rem; border: 0; padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
-.visualStage { display: grid; width: 100%; place-items: center; overflow: hidden; border: 1px solid var(--app-border); padding: clamp(0.45rem, 0.9vw, 0.75rem); background: var(--app-workspace); transition: transform var(--motion-ui, 240ms) var(--ease-editorial, ease); }
-.galleryCard[data-selected='true'] .visualStage { border-color: var(--app-accent); outline: 2px solid var(--app-accent); outline-offset: 3px; box-shadow: 0 10px 22px rgb(0 0 0 / 12%); transform: translateY(-2px); }
+.cardChoice { display: flex; width: 100%; flex-direction: column; align-items: stretch; gap: 0.5rem; border: 0; border-radius: var(--radius-lg); padding: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+.visualStage { display: grid; width: 100%; height: calc(var(--gallery-art-height) + 2.5rem); place-items: center; border: 1px solid var(--app-border); border-radius: var(--radius-lg); padding: 1.25rem; background: var(--app-workspace); transition: border-color var(--motion-fast, 160ms) ease, background-color var(--motion-fast, 160ms) ease; }
+.artworkFrame { display: block; width: min(100%, calc(var(--gallery-art-height) * var(--gallery-art-ratio))); box-shadow: 0 4px 8px rgb(0 0 0 / 5%), 0 12px 28px rgb(0 0 0 / 10%); transition: transform var(--motion-ui, 240ms) var(--ease-editorial, ease); }
+.galleryCard[data-selected='true'] .visualStage { border-color: var(--app-accent); background: var(--app-surface); }
 .masterCard { width: 100%; height: auto; }
 .masterCard article[data-template] { width: 100%; height: auto; }
 .liveMaster { width: 100%; height: auto; animation: artwork-arrive var(--motion-default, 420ms) var(--ease-editorial, ease) both; }
 .masterCopy { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 0.75rem; min-height: 3.5rem; padding: 0.2rem 0.1rem 0.25rem; }
-.masterCopy strong { grid-column: 1; grid-row: 1; overflow: hidden; font-family: var(--font-editorial, Georgia, serif); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.25; text-overflow: ellipsis; }
+.masterCopy strong { grid-column: 1; grid-row: 1; font-family: var(--font-editorial, Georgia, serif); font-size: 1.125rem; font-weight: 600; letter-spacing: -0.025em; line-height: 1.35; overflow-wrap: anywhere; }
 .choiceMark { display: grid; width: 1.75rem; height: 1.75rem; grid-column: 2; grid-row: 1; place-items: center; border: 1px solid transparent; border-radius: 50%; color: transparent; font-size: 0.9rem; font-weight: 650; }
 .galleryCard[data-selected='true'] .choiceMark { border-color: var(--app-accent); background: var(--app-accent); color: var(--app-on-accent); }
 
-.selectionBar { display: flex; min-height: 5.5rem; align-items: center; justify-content: space-between; gap: 1.5rem; border-top: 1px solid var(--app-border); border-bottom: 1px solid var(--app-border); padding: 0.85rem 0; }
+.selectionBar { display: flex; min-height: 5.5rem; align-items: center; justify-content: space-between; gap: 1.5rem; border: 1px solid var(--app-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; background: var(--app-workspace); }
 .selectionCopy { display: grid; min-width: 0; grid-template-columns: auto minmax(0, auto); align-items: baseline; column-gap: 0.7rem; row-gap: 0.15rem; }
 .selectionCopy > span { color: var(--app-text-muted); font-size: 0.75rem; font-weight: 600; }
-.selectionCopy strong { overflow: hidden; font-family: var(--font-editorial, Georgia, serif); font-size: 1.35rem; font-weight: 500; letter-spacing: -0.035em; line-height: 1.2; text-overflow: ellipsis; }
+.selectionCopy strong { font-family: var(--font-editorial, Georgia, serif); font-size: 1.25rem; font-weight: 550; letter-spacing: -0.025em; line-height: 1.35; overflow-wrap: anywhere; }
 .selectionCopy small { grid-column: 1 / -1; color: var(--app-text-muted); font-size: 0.75rem; line-height: 1.35; }
 .actions { display: flex; flex: 0 0 auto; align-items: center; gap: 0.8rem; }
 .primaryAction { display: inline-flex; min-width: 13rem; min-height: 3rem; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid var(--app-accent); border-radius: var(--radius-lg); padding: 0.65rem 1rem; background: var(--app-accent); color: var(--app-on-accent); font: inherit; font-size: 0.82rem; font-weight: 650; text-decoration: none; cursor: pointer; transition: transform var(--motion-fast, 160ms) var(--ease-editorial, ease), background-color var(--motion-fast, 160ms) ease; }
@@ -70,32 +75,37 @@
 @media (max-width: 980px) {
   .page { padding-inline: 1.5rem; }
   .gallery { gap: 0.9rem; }
-  .visualStage { padding: 0.45rem; }
+  .visualStage { padding: 0.8rem; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .cardChoice:hover .artworkFrame { transform: translateY(-3px); }
+  .cardChoice:hover .visualStage { border-color: var(--app-accent); }
 }
 
 @media (max-width: 760px) {
   .page { min-height: calc(100dvh - var(--app-header-height, 66px)); padding: 0 1.25rem 1rem; }
   .stepNav { min-height: 3.5rem; border-bottom: 0; }
   .backLink { gap: 0.4rem; }
-  .heading { display: block; margin: 0.2rem 0 0.8rem; }
+  .heading { align-items: stretch; flex-direction: column; gap: 1.15rem; padding: 0.4rem 0 1rem; }
   .heading h1 { line-height: 1.08; }
   .page:lang(ko) .heading h1 { line-height: 1.2; }
-  .compareTools { align-items: stretch; flex-direction: column; gap: 0.55rem; padding: 0.65rem 0; }
+  .compareTools { max-width: none; justify-items: stretch; gap: 0.5rem; }
   .compareControl { justify-content: space-between; gap: 0.5rem; }
   .compareLabel { font-size: 0.75rem; }
   .compareModes { min-height: 3.2rem; }
   .compareModes button { min-height: 2.75rem; padding-inline: 0.75rem; font-size: 0.75rem; }
   .compareStatus { text-align: left; }
   .mobileStyleSelectors { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.5rem; margin-top: 0.65rem; }
-  .mobileStyleSelector { min-width: 0; min-height: 48px; border: 1px solid var(--app-border-strong); border-radius: var(--radius-md); padding: 0.45rem 0.4rem; background: var(--app-surface); color: var(--app-text-muted); font: inherit; font-size: 0.75rem; font-weight: 600; line-height: 1.2; text-align: center; text-wrap: balance; cursor: pointer; transition: border-color var(--motion-ui, 240ms) var(--ease-editorial, ease), background-color var(--motion-ui, 240ms) var(--ease-editorial, ease), color var(--motion-ui, 240ms) var(--ease-editorial, ease); }
-  .mobileStyleSelector[aria-pressed='true'] { border-color: var(--app-accent); background: var(--app-accent-soft); color: var(--app-accent); box-shadow: inset 0 0 0 1px var(--app-accent); }
-  .gallery { display: flex; width: calc(100% + 2.5rem); gap: 0.8rem; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 1.25rem; scrollbar-width: none; margin-inline: -1.25rem; padding: 0.85rem 1.25rem 1.25rem; }
+  .mobileStyleSelector { min-width: 0; min-height: 48px; border: 1px solid transparent; border-radius: var(--radius-md); padding: 0.45rem 0.4rem; background: transparent; color: var(--app-text-muted); font: inherit; font-size: 0.75rem; font-weight: 600; line-height: 1.3; text-align: center; text-wrap: balance; cursor: pointer; transition: border-color var(--motion-ui, 240ms) var(--ease-editorial, ease), background-color var(--motion-ui, 240ms) var(--ease-editorial, ease), color var(--motion-ui, 240ms) var(--ease-editorial, ease); }
+  .mobileStyleSelector[aria-pressed='true'] { border-color: var(--app-border-strong); background: var(--app-workspace); color: var(--app-text); }
+  .gallery { --gallery-art-height: clamp(16rem, calc(100dvh - 25rem), 27rem); display: flex; width: calc(100% + 2.5rem); gap: 0.8rem; overflow-x: auto; overscroll-behavior-inline: contain; scroll-snap-type: x mandatory; scroll-padding-inline: 1.25rem; scrollbar-width: none; margin-inline: -1.25rem; padding: 1rem 1.25rem; }
   .gallery::-webkit-scrollbar { display: none; }
   .galleryCard { flex: 0 0 min(82vw, 25rem); scroll-snap-align: center; }
   .cardChoice { gap: 0.65rem; }
-  .visualStage { padding: 0.5rem; }
+  .visualStage { height: calc(var(--gallery-art-height) + 2rem); padding: 1rem; }
   .masterCopy { min-height: 3.15rem; }
-  .selectionBar { position: sticky; z-index: 5; bottom: 0; width: calc(100% + 2.5rem); min-height: 0; align-items: stretch; gap: 0.5rem; border: 0; border-top: 1px solid var(--app-border); margin: 0 -1.25rem; padding: 0.65rem 1.25rem max(0.75rem, env(safe-area-inset-bottom)); background: var(--app-surface); }
+  .selectionBar { position: sticky; z-index: 5; bottom: 0; width: calc(100% + 2.5rem); min-height: 0; align-items: center; gap: 0.75rem; border: 0; border-top: 1px solid var(--app-border); border-radius: 0; margin: 0 -1.25rem; padding: 0.75rem 1.25rem max(0.75rem, env(safe-area-inset-bottom)); background: var(--app-surface); }
   .selectionCopy { grid-template-columns: auto minmax(0, 1fr); align-content: center; align-items: center; column-gap: 0.45rem; }
   .selectionCopy > span { grid-column: 1 / -1; font-size: 0.75rem; }
   .selectionCopy strong { font-size: 1.08rem; }
@@ -127,9 +137,11 @@
   .compareModes button,
   .mobileStyleSelector,
   .visualStage,
+  .artworkFrame,
   .primaryAction,
   .primaryAction > span:last-child { transition: none; }
   .backLink:hover span,
+  .cardChoice:hover .artworkFrame,
   .primaryAction:hover,
   .primaryAction:hover > span:last-child { transform: none; }
   .gallery { scroll-behavior: auto; }

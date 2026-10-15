@@ -106,7 +106,8 @@ test('mobile style selectors expose every localized card and stay in sync with t
   assert.match(selectorMarkup, /aria-controls=\{template\}/u);
   assert.match(selectorMarkup, /onClick=\{\(\) => chooseTemplate\(template\)\}/u);
   assert.match(selectorMarkup, /\{names\[template\]\}/u);
-  assert.match(templateStyles, /\.galleryCard\[data-selected='true'\] \.visualStage \{[^}]*outline:\s*2px solid var\(--app-accent\)[^}]*box-shadow:\s*0 10px 22px rgb\(0 0 0 \/ 12%\)/u);
+  assert.match(templateStyles, /\.galleryCard\[data-selected='true'\] \.visualStage \{[^}]*border-color:\s*var\(--app-accent\)[^}]*background:\s*var\(--app-surface\)/u);
+  assert.match(templateStyles, /\.galleryCard\[data-selected='true'\] \.choiceMark \{[^}]*background:\s*var\(--app-accent\)[^}]*color:\s*var\(--app-on-accent\)/u);
   assert.match(templateStyles, /\.masterCopy strong \{[^}]*font-size:\s*1\.125rem/u);
   assert.match(templateStyles, /@media \(max-width: 760px\)[\s\S]*?\.mobileStyleSelectors \{ display: grid; grid-template-columns: repeat\(3, minmax\(0, 1fr\)\)/u);
   assert.match(templateStyles, /\.mobileStyleSelector \{[^}]*min-height: 48px/u);

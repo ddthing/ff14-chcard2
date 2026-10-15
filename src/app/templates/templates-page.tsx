@@ -229,40 +229,39 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
           <div className={styles.headingCopy}>
             <h1>{labels.title}</h1>
           </div>
-        </header>
-
-        <section className={styles.compareTools} aria-label={labels.modeLabel}>
-          <div className={styles.compareControl}>
-            <span className={styles.compareLabel}>{labels.modeLabel}</span>
-            <div className={styles.compareModes} role="group" aria-label={labels.modeLabel}>
-              <button
-                type="button"
-                aria-pressed={compareMode === 'sample'}
-                onClick={() => setCompareMode('sample')}
-              >
-                {labels.sampleMode}
-              </button>
-              <button
-                type="button"
-                aria-pressed={compareMode === 'personal'}
-                aria-describedby={comparisonUnavailable ? 'comparison-status' : undefined}
-                disabled={!draftReady || !draft}
-                onClick={() => setCompareMode('personal')}
-              >
-                {labels.personalMode}
-              </button>
+          <section className={styles.compareTools} aria-label={labels.modeLabel}>
+            <div className={styles.compareControl}>
+              <span className={styles.compareLabel}>{labels.modeLabel}</span>
+              <div className={styles.compareModes} role="group" aria-label={labels.modeLabel}>
+                <button
+                  type="button"
+                  aria-pressed={compareMode === 'sample'}
+                  onClick={() => setCompareMode('sample')}
+                >
+                  {labels.sampleMode}
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={compareMode === 'personal'}
+                  aria-describedby={comparisonUnavailable ? 'comparison-status' : undefined}
+                  disabled={!draftReady || !draft}
+                  onClick={() => setCompareMode('personal')}
+                >
+                  {labels.personalMode}
+                </button>
+              </div>
             </div>
-          </div>
-          <span
-            className={comparisonUnavailable ? styles.compareStatus : styles.srOnly}
-            id="comparison-status"
-            role="status"
-            aria-live="polite"
-            aria-atomic="true"
-          >
-            {status}
-          </span>
-        </section>
+            <span
+              className={comparisonUnavailable ? styles.compareStatus : styles.srOnly}
+              id="comparison-status"
+              role="status"
+              aria-live="polite"
+              aria-atomic="true"
+            >
+              {status}
+            </span>
+          </section>
+        </header>
 
         <div className={styles.mobileStyleSelectors} role="group" aria-label={labels.title}>
           {MASTER_TEMPLATE_ORDER.map((template) => (
@@ -284,6 +283,7 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
           ref={galleryRef}
           data-active={selected}
           data-mode={compareMode}
+          data-ratio={personalData?.design.ratio ?? '4:5'}
           role="group"
           aria-label={labels.title}
         >
@@ -309,17 +309,19 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
                   onClick={() => chooseTemplate(template)}
                 >
                   <span className={styles.visualStage} aria-hidden="true">
-                    {comparisonData ? (
-                      <CardPreview data={comparisonData} locale={locale} className={styles.liveMaster} />
-                    ) : (
-                      <LazyMaster
-                        template={template}
-                        ratio={ratio}
-                        locale={locale}
-                        eager={active}
-                        className={styles.masterCard}
-                      />
-                    )}
+                    <span className={styles.artworkFrame}>
+                      {comparisonData ? (
+                        <CardPreview data={comparisonData} locale={locale} className={styles.liveMaster} />
+                      ) : (
+                        <LazyMaster
+                          template={template}
+                          ratio={ratio}
+                          locale={locale}
+                          eager={active}
+                          className={styles.masterCard}
+                        />
+                      )}
+                    </span>
                   </span>
                   <span className={styles.masterCopy}>
                     <strong>{names[template]}</strong>
