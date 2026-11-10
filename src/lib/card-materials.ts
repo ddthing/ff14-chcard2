@@ -22,7 +22,7 @@ const SAFE_MATERIAL_FALLBACK: CardMaterialAsset = {
 
 const MATERIALS_BY_FAMILY: Readonly<Record<AdventurerCardTemplate, Partial<Record<CardMaterialRole, CardMaterialAsset>>>> = {
   cinematic: {
-    'cinematic-film-grain': { src: '/images/materials/cinematic-film-grain.webp', opacity: 0.45 },
+    'cinematic-film-grain': { src: '/images/materials/cinematic-film-grain-compact.webp', opacity: 0.45 },
   },
   editorial: {
     'editorial-paper-surface': { src: '/images/materials/editorial-paper-surface.webp', opacity: 0.3 },

@@ -36,6 +36,8 @@ export const conerSample = {
     landscape: {
       original: '/assets/samples/coner/original/landscape.png',
       optimized: '/assets/samples/coner/optimized/landscape.webp',
+      preview: '/assets/samples/coner/optimized/landscape-preview.webp',
+      thumbnail: '/assets/samples/coner/optimized/landscape-thumb.webp',
       width: 3840,
       height: 2160,
       // Existing browser Auto Color extractor, measured against this WebP.
@@ -44,6 +46,8 @@ export const conerSample = {
     portrait: {
       original: '/assets/samples/coner/original/portrait.png',
       optimized: '/assets/samples/coner/optimized/portrait.webp',
+      preview: '/assets/samples/coner/optimized/portrait-preview.webp',
+      thumbnail: '/assets/samples/coner/optimized/portrait-thumb.webp',
       width: 2160,
       height: 3840,
       palette: { primary: '#8f561e', accent: '#609915', light: '#f3f0ed', dark: '#291f15' },
@@ -93,9 +97,18 @@ export function getConerScreenshotPresentation(
 
   return {
     role,
-    imageUrl: source.optimized,
+    imageUrl: source.preview,
     palette: { ...source.palette },
     imageAdjustments: { ...framing, ...neutralAdjustments } satisfies AdventurerCardImageAdjustments,
   };
+}
+
+export function getFullSampleImage(imageUrl: string): string | undefined {
+  return Object.values(conerSample.screenshots).find(sample => sample.preview === imageUrl)?.optimized;
+}
+
+export function getPreviewSampleImage(imageUrl: string): string {
+  return Object.values(conerSample.screenshots)
+    .find(sample => sample.original === imageUrl || sample.optimized === imageUrl)?.preview ?? imageUrl;
 }
 

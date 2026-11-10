@@ -257,7 +257,7 @@ export function getCardCopyFamily(template: AdventurerCardTemplate): CardCopyFam
 export const CARD_LEGACY_COPY = CARD_STOCK_COPY.legacy;
 
 const BUILT_IN_SAMPLE_IMAGE_URLS: ReadonlySet<string> = new Set(
-  Object.values(conerSample.screenshots).flatMap(({ original, optimized }) => [original, optimized]),
+  Object.values(conerSample.screenshots).flatMap(({ original, optimized, preview }) => [original, optimized, preview]),
 );
 
 /** Localize only the untouched built-in sample quote for its known image files. */

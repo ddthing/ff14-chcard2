@@ -21,6 +21,7 @@ import { getTypographySupportedWeight, isRegisteredTypographyFontId } from '@/li
 import { CARD_TEXTURE_EFFECTS } from '@/lib/card-texture-effects';
 import { isCardTextOverrideId, isKnownCardTextId, normalizeCardTextOverride } from '@/lib/card-text-editing';
 import { createEmptyUserCharacter } from '@/lib/new-user-card';
+import { getPreviewSampleImage } from '@/data/samples/coner';
 import {
   DATA_CENTERS,
   SERVICES,
@@ -627,7 +628,7 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
       : [...base.design.effects],
   };
 
-  const imageUrl = safeImageUrl(input.imageUrl, base.imageUrl);
+  const imageUrl = getPreviewSampleImage(safeImageUrl(input.imageUrl, base.imageUrl));
   const originalPhotoId = imageUrl.startsWith('data:image/') && typeof input.originalPhotoId === 'string'
     && /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i.test(input.originalPhotoId)
     ? input.originalPhotoId : undefined;

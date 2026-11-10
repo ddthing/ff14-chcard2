@@ -14,10 +14,10 @@ test('Coner sample shares the exact canonical profile across all presentations',
  assert.equal(getJob(p.jobId).abbreviation,'RDM');assert.equal(getPlayStyle('questing').localizedName.ja,'クエスト');
  for(const f of ['cinematic','editorial','id-card'])for(const r of ['1:1','4:5','3:4','9:16','16:9']){
   const card=getConerSample(f,r);assert.deepEqual(card.character,p);assert.equal(card.design.ratio,r);
-  assert.equal(card.imageUrl,conerSample.screenshots[f==='cinematic'?'landscape':'portrait'].optimized);
+  assert.equal(card.imageUrl,conerSample.screenshots[f==='cinematic'?'landscape':'portrait'].preview);
   assert.ok(card.imageAdjustments.scale>=.75&&card.imageAdjustments.scale<=2.5);
  }
- assert.equal(demoAdventurerData.imageUrl,conerSample.screenshots.portrait.optimized);
+ assert.equal(demoAdventurerData.imageUrl,conerSample.screenshots.portrait.preview);
 });
 
 test('editorial portrait samples lift the 9:16 crop while other sample framing stays intact',()=>{
@@ -38,6 +38,8 @@ test('supplied source PNGs are byte-preserved and RDM uses the official source m
   assert.equal(createHash('sha256').update(png).digest('hex'),hashes[role]);
   assert.deepEqual([png.readUInt32BE(16),png.readUInt32BE(20)],[asset.width,asset.height]);
   await access(new URL(`../public${asset.optimized}`,import.meta.url));
+  await access(new URL(`../public${asset.preview}`,import.meta.url));
+  await access(new URL(`../public${asset.thumbnail}`,import.meta.url));
  }
  const rdm=resolveJobIcon({jobId:'red-mage',usage:'cardSmall',officialAssetsEnabled:true});assert.ok(rdm);assert.equal(rdm.source,'xivapi-svg');await access(new URL(`../public${rdm.src}`,import.meta.url));
 });

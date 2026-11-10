@@ -422,7 +422,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
                       ref={(node) => { sampleTriggerRefs.current[role] = node; }}
                     >
                       <span className={styles.sampleThumb} aria-hidden="true">
-                        <Image src={conerSample.screenshots[role].optimized} alt="" fill sizes="(max-width: 760px) 45vw, (max-width: 1000px) 20vw, 220px" />
+                        <Image src={conerSample.screenshots[role].thumbnail} alt="" fill sizes="(max-width: 760px) 45vw, (max-width: 1000px) 20vw, 220px" />
                       </span>
                       <span>{label}</span>
                       <span className={styles.sampleMark} aria-hidden="true">{active ? <AppIcon name="Check" /> : ''}</span>

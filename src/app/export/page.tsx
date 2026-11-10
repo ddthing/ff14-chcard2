@@ -12,7 +12,7 @@ import { getJob, localizeFfxivLabel } from '@/data/ffxiv';
 import { resolveJobIcon } from '@/lib/ffxiv-assets';
 import { prepareCardForPrint } from '@/lib/card-print';
 import { readOriginalPhoto } from '@/lib/original-photos';
-import { conerSample } from '@/data/samples/coner';
+import { conerSample, getFullSampleImage } from '@/data/samples/coner';
 import { useI18n, type Locale } from '@/lib/i18n';
 import {
   CARD_EXPORT_SCALES,
@@ -625,7 +625,8 @@ export default function ExportPage() {
         if (!isCurrent()) return;
         if (original) originalUrl = URL.createObjectURL(original);
       }
-      const captureData = originalUrl ? { ...snapshot.data, imageUrl: originalUrl } : snapshot.data;
+      const captureUrl = originalUrl ?? (exportScale > 1 ? getFullSampleImage(snapshot.data.imageUrl) : undefined);
+      const captureData = captureUrl ? { ...snapshot.data, imageUrl: captureUrl } : snapshot.data;
       // Commit the immutable job into the hidden export surface before reading
       // it. The app header may change locale while this render is in flight.
       const finishMountTiming = profileStart('export.page.hiddenSurfaceCommit');
@@ -633,7 +634,7 @@ export default function ExportPage() {
         setResult(null);
         setRetryExport(null);
         setExportSnapshot(snapshot);
-        setCapturePhotoUrl(originalUrl);
+        setCapturePhotoUrl(captureUrl ?? null);
         setError(null);
         setErrorAction(null);
         setExporting(true);
