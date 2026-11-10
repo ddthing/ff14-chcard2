@@ -65,6 +65,17 @@ export const FONT_UNICODE_RANGES = {
  * requests limited to glyphs used by the selected card text.
  */
 export const FONT_REGISTRY = {
+  reaticLocal: {
+    id: 'reatic-local',
+    family: 'Reatic Card Local',
+    displayNames: { ko: '리틱체', en: 'REATIC', ja: 'リティック体' },
+    license: 'REATIC Industry Font License',
+    licenseFile: 'licenses/fonts/REATIC-license.txt',
+    sourceUrl: 'https://www.reaticindustry.com/reaticfont',
+    axes: { weight: [400, 400] },
+    weights: [400],
+    supportedScripts: ['latin', 'korean'],
+  },
   pinyonScript: {
     id: 'pinyon-script', family: 'Pinyon Script', license: 'SIL Open Font License 1.1',
     licenseFile: 'licenses/fonts/Pinyon-Script-OFL.txt',

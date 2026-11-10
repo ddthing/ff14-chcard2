@@ -205,6 +205,31 @@ test('OpenType source bytes serialize with the OpenType MIME type', async () => 
   }
 });
 
+test('local OpenType blob fonts are embedded only from the card origin', async () => {
+  const localUrl = 'blob:https://app.test/local-font';
+  const local = createFontExportNode('Local OpenType', `url("${localUrl}") format("opentype")`);
+  const remote = createFontExportNode('Remote OpenType', 'url("blob:https://example.test/remote-font") format("opentype")');
+  const originalBytes = Uint8Array.of(0x4f, 0x54, 0x54, 0x4f, 1, 2, 3, 4);
+  const originalFetch = globalThis.fetch;
+  const fetched = [];
+  globalThis.fetch = async (url) => {
+    fetched.push(url);
+    return {
+      ok: true,
+      headers: { get: () => null },
+      arrayBuffer: async () => originalBytes.slice().buffer,
+    };
+  };
+  try {
+    const result = await prepareCardFontCss(local);
+    assert.ok(result?.cssText.includes(`data:font/otf;base64,${Buffer.from(originalBytes).toString('base64')}`));
+    assert.equal(await prepareCardFontCss(remote), null);
+    assert.deepEqual(fetched, [localUrl]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test('font CSS preparation includes whitespace and quoted pseudo families without reordering src candidates', async () => {
   class FakeStyleDeclaration {
     constructor(entries) {

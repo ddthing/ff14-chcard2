@@ -1,6 +1,7 @@
 'use client';
 
-import type { ReactNode } from 'react';
+import { lazy, Suspense, type ReactNode } from 'react';
+import { FONT_REGISTRY } from '@/data/fonts/registry';
 import type { CardTypographyOverride } from '@/components/cards/types';
 import type { CardTextItem } from '@/lib/card-text-editing';
 import {
@@ -23,6 +24,8 @@ import { getEditorCopy } from '@/components/editor/copy';
 import { EditorNumberControl } from './editor-number-control';
 import { getTypographyFontLabel, TypographyFontPicker, type TypographyFontPickerChoice } from './typography-font-picker';
 import styles from './typography-role-editor.module.css';
+
+const ReaticFontImport = lazy(() => import('./reatic-font-import'));
 
 const COPY = {
   ko: {
@@ -364,6 +367,12 @@ export function TypographyRoleEditor({
           onValueChange={changeSize}
         />
       </div>
+
+      {selectedFontId === FONT_REGISTRY.reaticLocal.id && (
+        <Suspense fallback={null}>
+          <ReaticFontImport locale={locale} />
+        </Suspense>
+      )}
 
       {!informationGroup && (
         <details className={styles.advanced}>
