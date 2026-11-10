@@ -11,6 +11,7 @@ export type CardExportErrorCode =
   | 'cancelled'
   | 'font-timeout'
   | 'font-load-failed'
+  | 'reatic-font-missing'
   | 'image-timeout'
   | 'image-failed'
   | 'photo-print-timeout'

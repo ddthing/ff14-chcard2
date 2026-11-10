@@ -1,0 +1,50 @@
+.root {
+  display: grid;
+  gap: var(--editor-density-label-gap);
+  min-width: 0;
+  color: var(--app-text-muted);
+  font-size: var(--editor-density-meta-font-size);
+  line-height: 1.4;
+}
+
+.root p { margin: 0; }
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+}
+
+.actions button,
+.actions a {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--editor-density-control-height);
+  border-radius: var(--radius-md);
+  color: var(--app-text);
+}
+
+.actions button {
+  padding-inline: 10px;
+  border: 1px solid var(--app-border-strong);
+  background: var(--app-control);
+  font: inherit;
+  cursor: pointer;
+}
+
+.actions button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.actions a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.actions button:focus-visible,
+.actions a:focus-visible {
+  outline: 2px solid var(--editor-selection);
+  outline-offset: 2px;
+}

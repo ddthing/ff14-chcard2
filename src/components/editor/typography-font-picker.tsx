@@ -2,6 +2,7 @@
 
 import { createPortal } from 'react-dom';
 import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
+import { FONT_REGISTRY } from '@/data/fonts/registry';
 import { AppIcon } from '@/components/app-icon';
 import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, RefObject } from 'react';
 import { getTypographySupportedWeight, type TypographyScript } from '@/lib/typography-presets';
@@ -147,6 +148,7 @@ function FontSample({
   locale: Locale;
   listRootRef: RefObject<HTMLDivElement | null>;
 }) {
+  const localFont = choice.fontId === FONT_REGISTRY.reaticLocal.id;
   const sampleRef = useRef<HTMLSpanElement>(null);
   const [shouldLoad, setShouldLoad] = useState(false);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>(choice.fontId ? 'loading' : 'ready');
@@ -162,7 +164,7 @@ function FontSample({
 
   useEffect(() => {
     const sample = sampleRef.current;
-    if (!sample || !choice.fontId) return;
+    if (!sample || !choice.fontId || localFont) return;
 
     if (typeof IntersectionObserver === 'undefined') {
       const frame = requestAnimationFrame(() => setShouldLoad(index < 8));
@@ -178,17 +180,17 @@ function FontSample({
 
     observer.observe(sample);
     return () => observer.disconnect();
-  }, [choice.fontId, index, listRootRef]);
+  }, [choice.fontId, index, listRootRef, localFont]);
 
   useEffect(() => {
-    if (!active || typeof IntersectionObserver !== 'undefined') return;
+    if (localFont || !active || typeof IntersectionObserver !== 'undefined') return;
     const frame = requestAnimationFrame(() => setShouldLoad(true));
     return () => cancelAnimationFrame(frame);
-  }, [active]);
+  }, [active, localFont]);
 
   useEffect(() => {
     const fontId = choice.fontId;
-    if (!shouldLoad || !fontId) return;
+    if (localFont || !shouldLoad || !fontId) return;
     let cancelled = false;
     const controller = new AbortController();
 
@@ -219,10 +221,10 @@ function FontSample({
       cancelled = true;
       controller.abort();
     };
-  }, [choice.fontId, choice.family, choice.weight, choice.sample, choice.fallbackStack, scripts, requestKey, shouldLoad]);
+  }, [choice.fontId, choice.family, choice.weight, choice.sample, choice.fallbackStack, scripts, requestKey, shouldLoad, localFont]);
 
   const resolvedPreviewState = resolvedRequestKey === requestKey ? loadState : 'loading';
-  const previewState = choice.fontId ? shouldLoad ? resolvedPreviewState : 'idle' : 'ready';
+  const previewState = choice.fontId && !localFont ? shouldLoad ? resolvedPreviewState : 'idle' : 'ready';
   const fontFamily = choice.fontId
     ? `${JSON.stringify(resolvedRequestKey === requestKey ? loadedFamily ?? choice.family : choice.family)}, ${choice.fallbackStack}`
     : choice.fontStack ?? choice.fallbackStack;

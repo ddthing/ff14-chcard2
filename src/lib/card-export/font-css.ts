@@ -490,7 +490,7 @@ function resolveSameOriginFontUrl(url: string, baseHref: string | null, document
   try {
     const page = new URL(document.location.href);
     const resolved = new URL(url, baseHref || document.baseURI);
-    if (resolved.origin !== page.origin || !/^https?:$/u.test(resolved.protocol)) return null;
+    if (resolved.origin !== page.origin || !/^(https?:|blob:)$/u.test(resolved.protocol)) return null;
     resolved.hash = '';
     return resolved.href;
   } catch {

@@ -1,0 +1,9 @@
+REATIC 1.0.0
+Copyright © 2026 리틱인더스트리
+Design: 유준상. Distribution files: 박유찬.
+Source: https://www.reaticindustry.com/reaticfont
+
+The publisher permits commercial and non-commercial use in images, videos, and print.
+The publisher prohibits selling, modifying, processing, or redistributing the font
+files without authorization. This project distributes no REATIC font files.
+See LICENSE.txt inside the official ZIP for the full license in Korean.

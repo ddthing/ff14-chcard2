@@ -208,6 +208,14 @@ export async function loadTypographyFonts(
       finishStylesheetTiming();
     }
 
+    if (options.fontRequests?.some(({ fontId }) => fontId === FONT_REGISTRY.reaticLocal.id)) {
+      const ready = await withCardExportTimeout(async () => {
+        const { ensureReaticFont } = await import('./reatic-font');
+        return ensureReaticFont();
+      }, timeoutMs, 'font-timeout', options.signal);
+      if (!ready && profileSource === 'export') throw new CardExportError('reatic-font-missing');
+    }
+
     const fontLoads = scriptList.flatMap((script) => {
       if (script === 'latin') return [];
       const text = textByScript[script] || TYPOGRAPHY_SPECIMENS[script];
@@ -241,7 +249,7 @@ export async function loadTypographyFonts(
 
     const overrideFontLoads = (options.fontRequests ?? []).flatMap(({ fontId, weight }) => {
       const entry = getTypographyFontEntry(fontId);
-      if (!entry || !entry.supportedScripts.some((script) => scriptList.includes(script))) return [];
+      if (!entry || fontId === FONT_REGISTRY.reaticLocal.id || !entry.supportedScripts.some((script) => scriptList.includes(script))) return [];
       const boundedWeight = getTypographySupportedWeight(fontId, Number.isFinite(weight) ? weight : 400);
       return scriptList.flatMap((script) => {
         if (!entry.supportedScripts.includes(script)) return [];
