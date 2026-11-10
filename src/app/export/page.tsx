@@ -11,7 +11,8 @@ import type { CardRatio } from '@/components/cards/types';
 import { getJob, localizeFfxivLabel } from '@/data/ffxiv';
 import { resolveJobIcon } from '@/lib/ffxiv-assets';
 import { prepareCardForPrint } from '@/lib/card-print';
-import { conerSample } from '@/data/samples/coner';
+import { readOriginalPhoto } from '@/lib/original-photos';
+import { conerSample, getFullSampleImage } from '@/data/samples/coner';
 import { useI18n, type Locale } from '@/lib/i18n';
 import {
   CARD_EXPORT_SCALES,
@@ -460,6 +461,7 @@ export default function ExportPage() {
   const [errorAction, setErrorAction] = useState<'format' | 'resolution' | 'download' | 'retry' | null>(null);
   const [status, setStatus] = useState('');
   const [exportSnapshot, setExportSnapshot] = useState<CardExportSnapshot | null>(null);
+  const [capturePhotoUrl, setCapturePhotoUrl] = useState<string | null>(null);
   const [result, setResult] = useState<ExportDownload | null>(null);
   const [retryExport, setRetryExport] = useState<ExportDownload | null>(null);
   const [printSnapshot, setPrintSnapshot] = useState<CardExportSnapshot | null>(null);
@@ -610,11 +612,21 @@ export default function ExportPage() {
     activeExportRef.current = operation;
     const { signal } = operation.controller;
     const isCurrent = () => mountedRef.current && activeExportRef.current === operation && !signal.aborted;
+    let originalUrl: string | null = null;
 
     try {
       const finishSnapshotTiming = profileStart('export.page.snapshot');
       const snapshot = createCardExportSnapshot(renderData, locale, exportFormat, exportScale);
       finishSnapshotTiming();
+      if (image.originalPhotoId && exportScale > 1) {
+        setExporting(true);
+        setStatus(text.preparing);
+        const original = await readOriginalPhoto(image.originalPhotoId).catch(() => undefined);
+        if (!isCurrent()) return;
+        if (original) originalUrl = URL.createObjectURL(original);
+      }
+      const captureUrl = originalUrl ?? (exportScale > 1 ? getFullSampleImage(snapshot.data.imageUrl) : undefined);
+      const captureData = captureUrl ? { ...snapshot.data, imageUrl: captureUrl } : snapshot.data;
       // Commit the immutable job into the hidden export surface before reading
       // it. The app header may change locale while this render is in flight.
       const finishMountTiming = profileStart('export.page.hiddenSurfaceCommit');
@@ -622,6 +634,7 @@ export default function ExportPage() {
         setResult(null);
         setRetryExport(null);
         setExportSnapshot(snapshot);
+        setCapturePhotoUrl(captureUrl ?? null);
         setError(null);
         setErrorAction(null);
         setExporting(true);
@@ -643,7 +656,7 @@ export default function ExportPage() {
       const finishRenderTiming = profileStart('export.page.render');
       let rendered: Awaited<ReturnType<typeof renderCardBlob>>;
       try {
-        rendered = await renderCardBlob(node, snapshot.data, snapshot.format, snapshot.scale, (nextProgress) => {
+        rendered = await renderCardBlob(node, captureData, snapshot.format, snapshot.scale, (nextProgress) => {
           if (!isCurrent()) return;
           setProgress(nextProgress);
           setStatus(getStageLabel(nextProgress.stage, copy[snapshot.locale]));
@@ -686,16 +699,30 @@ export default function ExportPage() {
         setStatus('');
       }
     } finally {
+      if (originalUrl) URL.revokeObjectURL(originalUrl);
       if (activeExportRef.current === operation) {
         activeExportRef.current = null;
         if (mountedRef.current) {
           setExportSnapshot(null);
+          setCapturePhotoUrl(null);
           setExporting(false);
         }
       }
       finishExportTiming();
     }
-  }, [format, locale, renderData, scale, text]);
+  }, [format, image.originalPhotoId, locale, renderData, scale, text]);
+
+  useEffect(() => {
+    if (!isHydrated || !useEditorStore.getState().ui.quickDownloadRequestedAt) return;
+    const timer = window.setTimeout(() => {
+      const { ui, setUi } = useEditorStore.getState();
+      setUi({ quickDownloadRequestedAt: undefined });
+      if (!ui.quickDownloadRequestedAt || Date.now() - ui.quickDownloadRequestedAt > 30_000) return;
+      setScale(1);
+      void handleDownload({ format: 'png', scale: 1 });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [handleDownload, isHydrated]);
 
   const clearExportFeedback = useCallback(() => {
     setError(null);
@@ -972,7 +999,11 @@ export default function ExportPage() {
       {exportSnapshot && (
         <div ref={exportSurfaceRef} className={styles.exportSurface} aria-hidden="true" style={renderBaseStyle}>
           <div className={styles.renderFrame}>
-            <MemoizedCardPreview data={exportSnapshot.data} className={styles.renderCard} locale={exportSnapshot.locale} />
+            <MemoizedCardPreview
+              data={capturePhotoUrl ? { ...exportSnapshot.data, imageUrl: capturePhotoUrl } : exportSnapshot.data}
+              className={styles.renderCard}
+              locale={exportSnapshot.locale}
+            />
           </div>
         </div>
       )}

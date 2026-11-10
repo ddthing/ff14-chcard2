@@ -29,4 +29,21 @@ test('uploaded images, custom names and their edits survive preset refresh', () 
   assert.equal(restored.imageAdjustments.scale,1.4);
 });
 
+test('persisted drafts reject remote and protocol-relative photo references', () => {
+  const base = demoAdventurerCards.cinematic;
+  for (const imageUrl of ['https://probe.invalid/photo.webp', '//probe.invalid/photo.webp', '/\\probe.invalid/photo.webp', 'data:text/html;base64,QQ==']) {
+    const restored = normalizeCardData({ ...base, imageUrl });
+    assert.equal(restored.imageUrl, base.imageUrl);
+  }
+});
+
+test('original photo references are retained for uploaded photos and discarded on sample restore', () => {
+  const base = demoAdventurerCards.cinematic;
+  const originalPhotoId = '660df2f5-3047-4a68-962c-bca4911db3d5';
+  const imageUrl = 'data:image/png;base64,QQ==';
+  assert.equal(normalizeCardData({ ...base, imageUrl, originalPhotoId }).originalPhotoId, originalPhotoId);
+  assert.equal(normalizeCardData({ ...base, originalPhotoId }).originalPhotoId, undefined);
+  assert.equal(normalizeCardData({ ...base, imageUrl, originalPhotoId: '//probe.invalid/' }).originalPhotoId, undefined);
+});
+
 

@@ -3,22 +3,22 @@ import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { CardPreview } from "@/components/editor/card-preview";
 import { getConerSample, type AdventurerCardTemplate, type CardRatio } from "@/components/cards/types";
 import type { Locale } from "@/lib/types";
-import { conerSample } from "@/data/samples/coner";
+import { conerSample, type ConerScreenshotRole } from "@/data/samples/coner";
 import { localizeFfxivLabel } from "@/data/ffxiv";
 import { localizeCardWorld } from "@/lib/card-microcopy";
 import { getLatestVisibility } from "./visibility";
 
-export interface LazyMasterProps { template: AdventurerCardTemplate; ratio: CardRatio; locale: Locale; eager?: boolean; className?: string }
+export interface LazyMasterProps { template: AdventurerCardTemplate; ratio: CardRatio; locale: Locale; sampleRole?: ConerScreenshotRole; eager?: boolean; className?: string }
 const artworkLabels = {
   ko: { cinematic: '시네마틱 카드', editorial: '에디토리얼 카드', 'id-card': '아이덴티티 카드', level: '레벨', sample: '예시 카드' },
   en: { cinematic: 'Cinematic card', editorial: 'Editorial card', 'id-card': 'Identity card', level: 'level', sample: 'Sample card' },
   ja: { cinematic: 'シネマティックカード', editorial: 'エディトリアルカード', 'id-card': 'アイデンティティカード', level: 'レベル', sample: 'サンプルカード' },
 };
 /** Admit below-fold art once, then preserve its fitted type and font readiness. */
-export const LazyMaster = memo(function LazyMaster({ template, ratio, locale, eager = false, className }: LazyMasterProps) {
+export const LazyMaster = memo(function LazyMaster({ template, ratio, locale, sampleRole, eager = false, className }: LazyMasterProps) {
   const host = useRef<HTMLDivElement>(null);
   const [admitted, setAdmitted] = useState(eager);
-  const data = useMemo(() => getConerSample(template, ratio), [template, ratio]);
+  const data = useMemo(() => getConerSample(template, ratio, sampleRole), [template, ratio, sampleRole]);
   useEffect(() => {
     if (eager || admitted || !host.current) return;
     if (typeof IntersectionObserver === "undefined") {

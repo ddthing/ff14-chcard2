@@ -14,7 +14,7 @@ const { getMasterArtProperties } = await import('../src/lib/card-art-tokens.ts')
 const { getEditorialBrushShape } = await import('../src/lib/card-graphics/editorial-shape.ts');
 
 const EXPECTED_MATERIALS = {
-  cinematic: [['cinematic-film-grain', '/images/materials/cinematic-film-grain.webp', 0.45]],
+  cinematic: [['cinematic-film-grain', '/images/materials/cinematic-film-grain-compact.webp', 0.45]],
   editorial: [
     ['editorial-paper-surface', '/images/materials/editorial-paper-surface.webp', 0.3],
     ['editorial-ink-density', '/images/materials/editorial-ink-density.webp', 0.5],
@@ -141,7 +141,7 @@ test('unknown families and missing roles resolve to an inert transparent image',
 
 test('CSS variables use the registry source and zero-opacity fallback for unused roles', () => {
   const props = getCardMaterialStyleProperties('cinematic');
-  assert.equal(props['--material-cinematic-film-grain-image'], 'url("/images/materials/cinematic-film-grain.webp")');
+  assert.equal(props['--material-cinematic-film-grain-image'], 'url("/images/materials/cinematic-film-grain-compact.webp")');
   assert.equal(props['--material-cinematic-film-grain-opacity'], '0.45');
   assert.equal(props['--material-editorial-paper-surface-image'], `url("${SAFE_MATERIAL_FALLBACK.src}")`);
   assert.equal(props['--material-editorial-paper-surface-opacity'], '0');

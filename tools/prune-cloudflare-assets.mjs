@@ -1,4 +1,4 @@
-import { cp, lstat, mkdir, readFile, readdir, rm, stat } from 'node:fs/promises';
+import { cp, lstat, mkdir, readFile, readdir, rm, stat, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -27,6 +27,13 @@ if (optIn === undefined) {
 
 const staticIndex = path.join(output, 'index.html');
 await stat(staticIndex);
+for (const name of ['portrait.png', 'landscape.png']) {
+  const original = path.join(output, 'assets', 'samples', 'coner', 'original', name);
+  if (!withinOutput(original)) throw new Error('Refusing to remove a file outside the static export.');
+  await unlink(original).catch(error => {
+    if (error.code !== 'ENOENT') throw error;
+  });
+}
 if (optIn === 'true') {
   console.log('Cloudflare Pages export retains the explicitly enabled Job icon assets.');
 } else {

@@ -1,6 +1,7 @@
 import HomePage from "@/components/home/home-page";
 import type { Metadata } from "next";
 import { preload } from "react-dom";
+import { conerSample } from "@/data/samples/coner";
 
 export const metadata: Metadata = {
   title: "XIV Adventurer Card",
@@ -9,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  preload("/assets/samples/coner/optimized/portrait.webp", { as: "image", fetchPriority: "high" });
+  preload(conerSample.screenshots.portrait.preview, { as: "image", fetchPriority: "high" });
   return <HomePage />;
 }
 

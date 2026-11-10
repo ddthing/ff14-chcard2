@@ -118,6 +118,7 @@ export interface AdventurerCardData {
   character: AdventurerCardCharacter;
   design: AdventurerCardDesign;
   imageUrl: string;
+  originalPhotoId?: string;
   imageAdjustments: AdventurerCardImageAdjustments;
 }
 

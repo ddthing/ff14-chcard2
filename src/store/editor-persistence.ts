@@ -21,6 +21,7 @@ import { getTypographySupportedWeight, isRegisteredTypographyFontId } from '@/li
 import { CARD_TEXTURE_EFFECTS } from '@/lib/card-texture-effects';
 import { isCardTextOverrideId, isKnownCardTextId, normalizeCardTextOverride } from '@/lib/card-text-editing';
 import { createEmptyUserCharacter } from '@/lib/new-user-card';
+import { getPreviewSampleImage } from '@/data/samples/coner';
 import {
   DATA_CENTERS,
   SERVICES,
@@ -228,7 +229,8 @@ function safeImageUrl(value: unknown, fallback: string): string {
   if (typeof value !== 'string' || !value.trim()) return fallback;
   const candidate = value.trim();
   // Object URLs belong to one page lifetime and are dead after a reload.
-  if (/^(data:image\/(png|jpe?g|webp);base64,|https?:\/\/|\/)/i.test(candidate)) return candidate;
+  if (/^data:image\/(png|jpe?g|webp);base64,[a-z\d+/]/i.test(candidate)) return candidate;
+  if (/^\/(?!\/)[a-z\d/_-]+\.(png|jpe?g|webp)$/i.test(candidate)) return candidate;
   return fallback;
 }
 
@@ -626,10 +628,15 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
       : [...base.design.effects],
   };
 
+  const imageUrl = getPreviewSampleImage(safeImageUrl(input.imageUrl, base.imageUrl));
+  const originalPhotoId = imageUrl.startsWith('data:image/') && typeof input.originalPhotoId === 'string'
+    && /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i.test(input.originalPhotoId)
+    ? input.originalPhotoId : undefined;
   return {
     character: normalizeCharacter(characterInput, characterFallback),
     design,
-    imageUrl: safeImageUrl(input.imageUrl, base.imageUrl),
+    imageUrl,
+    ...(originalPhotoId ? { originalPhotoId } : {}),
     imageAdjustments: adjustments,
   };
   } finally {

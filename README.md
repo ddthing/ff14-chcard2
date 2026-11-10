@@ -49,9 +49,9 @@ that command fails if a required archive is missing. Archive checks do not repla
 - `src/data/fonts/`: font license registry and lazy script-specific card font loading
 - `src/lib/ffxiv-assets/`, `src/components/ffxiv/`: optional official-asset adapter and role-symbol fallback
 - `src/data/samples/coner.ts`: canonical Coner profile, image roles, sample crops, and measured Auto Color palettes
-- `public/assets/samples/coner/`: unchanged original player screenshots and optimized WebPs
+- `public/assets/samples/coner/`: source PNGs and WebP preview, thumbnail, and full export images. The deploy build excludes source PNGs.
 
-The card data model keeps character details separate from template, variation, ratio, palette, and image adjustments. Three template families each have A/B/C compositions; all five ratios recompose their content. Drafts and compressed uploaded images remain in this browser's local storage. Undo history and canvas UI state last for the current session. No account or remote storage is used.
+The card data model keeps character details separate from template, variation, ratio, palette, and image adjustments. Three template families each have A/B/C compositions; all five ratios recompose their content. Drafts and compressed previews remain in local storage. Original upload bytes are stored in IndexedDB and used for 2× and 4× downloads. Undo history and canvas UI state last for the current session. No account or remote storage is used.
 
 The export screen offers PNG and WebP at 1×, 2×, or 4×. A 4:5 card at 2× is 2160 × 2700 pixels. Large 4× requests are capped at 22 megapixels and an 8192-pixel edge to limit browser memory use. Export waits for fonts and images, then renders only the card.
 

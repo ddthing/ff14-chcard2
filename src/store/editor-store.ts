@@ -29,6 +29,7 @@ export type EditorSaveStatus = 'saving' | 'saved' | 'error';
 export interface EditorImageState extends AdventurerCardImageAdjustments {
   /** Current screenshot source. Uploaded images should be data URLs for persistence. */
   src: string;
+  originalPhotoId?: string;
   fileName: string | null;
   mimeType: string | null;
 }
@@ -54,6 +55,7 @@ export interface EditorUiState {
   safeAreaVisible: boolean;
   previewOpen: boolean;
   inspectorOpen: boolean;
+  quickDownloadRequestedAt?: number;
 }
 
 export interface EditorStoreState extends EditorSnapshot {
@@ -70,7 +72,7 @@ export interface EditorStoreState extends EditorSnapshot {
   setTextTypographyOverride: (id: string, override: CardTypographyOverride, options?: EditorHistoryOptions) => void;
   resetTextTypographyOverride: (id: string, options?: EditorHistoryOptions) => void;
   setImage: (partial: Partial<EditorImageState>, options?: { groupId?: string }) => void;
-  replaceUploadedImage: (source: Pick<EditorImageState, 'src' | 'fileName' | 'mimeType'>, palette: CardPalette) => void;
+  replaceUploadedImage: (source: Pick<EditorImageState, 'src' | 'fileName' | 'mimeType' | 'originalPhotoId'>, palette: CardPalette) => void;
   beginHistoryGroup: (groupId: string, scope?: EditorHistoryScope) => void;
   endHistoryGroup: () => void;
   beginImageAdjustmentGroup: (groupId: string) => void;
@@ -106,6 +108,7 @@ function imageFromCardData(
 ): EditorImageState {
   return {
     src: data.imageUrl,
+    ...(data.originalPhotoId ? { originalPhotoId: data.originalPhotoId } : {}),
     ...metadata,
     ...data.imageAdjustments,
   };
@@ -198,6 +201,7 @@ function cloneTextTypography(overrides: AdventurerCardDesign['textTypography']):
 function normalizeImagePatch(current: EditorImageState, partial: Partial<EditorImageState>): EditorImageState {
   return {
     ...current,
+    ...(partial.src !== undefined && partial.src !== current.src ? { originalPhotoId: undefined } : {}),
     ...partial,
     x: clamp(partial.x ?? current.x, current.x, 0, 100),
     y: clamp(partial.y ?? current.y, current.y, 0, 100),
@@ -211,7 +215,7 @@ function normalizeImagePatch(current: EditorImageState, partial: Partial<EditorI
 }
 
 function sameImage(a: EditorImageState, b: EditorImageState): boolean {
-  return a.src === b.src && a.fileName === b.fileName && a.mimeType === b.mimeType &&
+  return a.src === b.src && a.originalPhotoId === b.originalPhotoId && a.fileName === b.fileName && a.mimeType === b.mimeType &&
     a.x === b.x && a.y === b.y && a.scale === b.scale && a.rotation === b.rotation &&
     a.brightness === b.brightness && a.contrast === b.contrast && a.saturation === b.saturation &&
     a.exposure === b.exposure;
@@ -633,6 +637,7 @@ export const useEditorStore = create<EditorStoreState>((set, get) => {
           imageScale: state.image.scale,
         },
         imageUrl: state.image.src,
+        ...(state.image.originalPhotoId ? { originalPhotoId: state.image.originalPhotoId } : {}),
         imageAdjustments,
       };
       finishToCardData();

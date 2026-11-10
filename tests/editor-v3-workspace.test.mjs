@@ -325,7 +325,7 @@ test('V3 tabs keep real editor controls connected to the existing store and prev
   assert.match(workspaceSource, /pendingMobileFocusTask\.current = task/u);
   assert.match(workspaceSource, /\{isSampleArtwork && \([\s\S]*?copy\.sampleBadge/u);
   assert.match(workspaceSource, /<MemoCardPreview data=\{cardData\}/u);
-  assert.match(workspaceSource, /prepareImageFile\(file/u);
+  assert.match(workspaceSource, /prepareEditorPhoto\(file/u);
   assert.match(workspaceSource, /BASIC_IMAGE_CONTROL_KEYS\.map\(renderImageControl\)/u);
   assert.match(workspaceSource, /ADVANCED_IMAGE_CONTROL_KEYS\.map\(renderImageControl\)/u);
   for (const picker of ['MemoJobPicker', 'MemoWorldPicker', 'MemoRaceClanPicker', 'MemoGrandCompanyPicker']) {
