@@ -37,4 +37,13 @@ test('persisted drafts reject remote and protocol-relative photo references', ()
   }
 });
 
+test('original photo references are retained for uploaded photos and discarded on sample restore', () => {
+  const base = demoAdventurerCards.cinematic;
+  const originalPhotoId = '660df2f5-3047-4a68-962c-bca4911db3d5';
+  const imageUrl = 'data:image/png;base64,QQ==';
+  assert.equal(normalizeCardData({ ...base, imageUrl, originalPhotoId }).originalPhotoId, originalPhotoId);
+  assert.equal(normalizeCardData({ ...base, originalPhotoId }).originalPhotoId, undefined);
+  assert.equal(normalizeCardData({ ...base, imageUrl, originalPhotoId: '//probe.invalid/' }).originalPhotoId, undefined);
+});
+
 

@@ -24,7 +24,8 @@ import { MASTER_CARD_CONFIG, MASTER_TEMPLATE_ORDER } from '@/lib/master-card-con
 import { getJobTheme } from '@/lib/job-themes';
 import { localizeCardWorld } from '@/lib/card-microcopy';
 import { getJob, LANGUAGES, PLAY_STYLES } from '@/data/ffxiv';
-import { prepareImageFile, ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
+import { ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
+import { prepareEditorPhoto } from '@/lib/original-photos';
 import { EditorBoundary } from './editor-boundary';
 import { EditorLayerPanel } from './editor-layer-panel';
 import { useEditorChrome } from './editor-chrome-context';
@@ -671,7 +672,7 @@ function EditorInspector({
     setUploadError('');
     setUploadState((state) => transitionUploadInteractionState(state, 'processing'));
     try {
-      const prepared = await prepareImageFile(file, {
+      const prepared = await prepareEditorPhoto(file, {
         signal: controller.signal,
         ...(PERFORMANCE_PROFILING_ENABLED ? {
           onTiming: (stage, durationMs) => profileTiming('image-processing.' + stage, durationMs, { inputBytes: file.size }),
@@ -684,6 +685,7 @@ function EditorInspector({
         src: prepared.imageUrl,
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
+        originalPhotoId: prepared.originalPhotoId,
       }, prepared.palette);
       onSuccessfulUpload();
       setUploadState((state) => transitionUploadInteractionState(state, 'success'));

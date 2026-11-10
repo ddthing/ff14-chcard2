@@ -627,10 +627,15 @@ export function normalizeCardData(value: unknown): AdventurerCardData {
       : [...base.design.effects],
   };
 
+  const imageUrl = safeImageUrl(input.imageUrl, base.imageUrl);
+  const originalPhotoId = imageUrl.startsWith('data:image/') && typeof input.originalPhotoId === 'string'
+    && /^[\da-f]{8}-(?:[\da-f]{4}-){3}[\da-f]{12}$/i.test(input.originalPhotoId)
+    ? input.originalPhotoId : undefined;
   return {
     character: normalizeCharacter(characterInput, characterFallback),
     design,
-    imageUrl: safeImageUrl(input.imageUrl, base.imageUrl),
+    imageUrl,
+    ...(originalPhotoId ? { originalPhotoId } : {}),
     imageAdjustments: adjustments,
   };
   } finally {

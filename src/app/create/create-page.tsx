@@ -20,7 +20,8 @@ import { registerUploadCancellation } from '@/components/editor/upload-session';
 import { FFXIVAttribution } from '@/components/ffxiv';
 import { conerSample } from '@/data/samples/coner';
 import { useI18n } from '@/lib/i18n';
-import { ImageProcessingError, isImageProcessingCancelled, prepareImageFile, type PreparedImage } from '@/lib/image-processing';
+import { ImageProcessingError, isImageProcessingCancelled } from '@/lib/image-processing';
+import { prepareEditorPhoto, type PreparedEditorPhoto } from '@/lib/original-photos';
 import { createNewUserCardFromUpload } from '@/lib/new-user-card';
 import { normalizeCardData } from '@/store/editor-persistence';
 import { editorStore } from '@/store/editor-store';
@@ -42,7 +43,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
   const [confirmSample, setConfirmSample] = useState(false);
   const [pendingSample, setPendingSample] = useState<SampleRole | null>(null);
   const [confirmUpload, setConfirmUpload] = useState(false);
-  const [pendingUpload, setPendingUpload] = useState<PreparedImage | null>(null);
+  const [pendingUpload, setPendingUpload] = useState<PreparedEditorPhoto | null>(null);
   const [uploadState, setUploadState] = useState<UploadInteractionState>('idle');
   const [uploadError, setUploadError] = useState('');
   const [failedFileName, setFailedFileName] = useState('');
@@ -137,14 +138,14 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
   }, [cancelUpload, initialTemplate]);
 
   const applyPreparedUpload = useCallback((
-    prepared: PreparedImage,
+    prepared: PreparedEditorPhoto,
     options: { fromConfirmation?: boolean; initializeUserProfile?: boolean } = {},
   ) => {
     const store = editorStore.getState();
     if (!store.isHydrated) store.hydrate();
     if (options.initializeUserProfile) {
       store.replaceCardData(
-        createNewUserCardFromUpload(selectedTemplate, prepared.imageUrl, prepared.palette),
+        { ...createNewUserCardFromUpload(selectedTemplate, prepared.imageUrl, prepared.palette), originalPhotoId: prepared.originalPhotoId },
         { imageMetadata: { fileName: prepared.fileName, mimeType: prepared.mimeType } },
       );
       store.setUi({ activePanel: 'information' });
@@ -154,6 +155,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
         src: prepared.imageUrl,
         fileName: prepared.fileName,
         mimeType: prepared.mimeType,
+        originalPhotoId: prepared.originalPhotoId,
       }, prepared.palette);
     }
     store.persistNow();
@@ -184,7 +186,7 @@ export default function CreatePage({ initialTemplate }: { initialTemplate?: Adve
     setUploadState((state) => transitionUploadInteractionState(state, 'processing'));
 
     try {
-      const prepared = await prepareImageFile(file, { signal: controller.signal });
+      const prepared = await prepareEditorPhoto(file, { signal: controller.signal });
       if (!canApplyPreparedUpload(token, uploadToken.current, mounted.current)) return;
 
       uploadController.current = null;
