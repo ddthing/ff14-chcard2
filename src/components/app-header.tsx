@@ -120,7 +120,10 @@ export function AppHeader() {
           </select>
         </label>
         {isEditor && (
-          <Link className={styles.headerExport} href={ROUTES.export} onClick={() => persistNow()}>
+          <Link className={styles.headerExport} href={ROUTES.export} onNavigate={() => {
+            persistNow();
+            useEditorStore.getState().setUi({ quickDownloadRequestedAt: Date.now() });
+          }}>
             <span>{copy.saveImage}</span><EditorIcon name="export" size={16} />
           </Link>
         )}

@@ -712,6 +712,18 @@ export default function ExportPage() {
     }
   }, [format, image.originalPhotoId, locale, renderData, scale, text]);
 
+  useEffect(() => {
+    if (!isHydrated || !useEditorStore.getState().ui.quickDownloadRequestedAt) return;
+    const timer = window.setTimeout(() => {
+      const { ui, setUi } = useEditorStore.getState();
+      setUi({ quickDownloadRequestedAt: undefined });
+      if (!ui.quickDownloadRequestedAt || Date.now() - ui.quickDownloadRequestedAt > 30_000) return;
+      setScale(1);
+      void handleDownload({ format: 'png', scale: 1 });
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [handleDownload, isHydrated]);
+
   const clearExportFeedback = useCallback(() => {
     setError(null);
     setErrorAction(null);

@@ -55,7 +55,7 @@
 
 .selectionBar { display: flex; min-height: 5.5rem; align-items: center; justify-content: space-between; gap: 1.5rem; border: 1px solid var(--app-border); border-radius: var(--radius-lg); padding: 1rem 1.25rem; background: var(--app-workspace); }
 .selectionCopy { display: grid; min-width: 0; grid-template-columns: auto minmax(0, auto); align-items: baseline; column-gap: 0.7rem; row-gap: 0.15rem; }
-.selectionCopy > span { color: var(--app-text-muted); font-size: 0.75rem; font-weight: 600; }
+.selectionCopy > span { color: var(--app-text); font-size: 0.75rem; font-weight: 600; }
 .selectionCopy strong { font-family: var(--font-editorial, Georgia, serif); font-size: 1.25rem; font-weight: 550; letter-spacing: -0.025em; line-height: 1.35; overflow-wrap: anywhere; }
 .selectionCopy small { grid-column: 1 / -1; color: var(--app-text-muted); font-size: 0.75rem; line-height: 1.35; }
 .actions { display: flex; flex: 0 0 auto; align-items: center; gap: 0.8rem; }

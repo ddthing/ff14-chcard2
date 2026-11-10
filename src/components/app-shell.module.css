@@ -106,9 +106,9 @@
 .appHeader[data-editor-header='true'] .mobileMenuLanguageSelect { min-height: var(--editor-density-control-height); font-size: var(--editor-density-input-font-size); }
 
 .editorGuideButton {
-  width: var(--editor-density-icon-target);
-  min-width: var(--editor-density-icon-target);
-  height: var(--editor-density-icon-target);
+  width: var(--editor-density-control-height);
+  min-width: var(--editor-density-control-height);
+  height: var(--editor-density-control-height);
   border: 1px solid var(--app-border);
   border-radius: var(--radius-md);
   background: var(--app-control);

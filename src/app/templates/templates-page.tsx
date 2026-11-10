@@ -28,7 +28,6 @@ const localizedSelection = {
     navigation: '스타일 선택',
     title: '카드 스타일',
     selected: '선택한 스타일',
-    choose: '스타일 미리보기',
     home: '홈',
     photo: '이 스타일로 시작',
     apply: '내 카드에 적용',
@@ -47,7 +46,6 @@ const localizedSelection = {
     navigation: 'Style selection',
     title: 'Card styles',
     selected: 'Selected style',
-    choose: 'Preview style',
     home: 'Home',
     photo: 'Start with this style',
     apply: 'Apply to my card',
@@ -66,7 +64,6 @@ const localizedSelection = {
     navigation: 'スタイル選択',
     title: 'カードスタイル',
     selected: '選択中のスタイル',
-    choose: 'スタイルをプレビュー',
     home: 'ホーム',
     photo: 'このスタイルで始める',
     apply: '自分のカードに適用',
@@ -305,7 +302,6 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
                   className={styles.cardChoice}
                   type="button"
                   aria-pressed={active}
-                  aria-label={`${names[template]}${active ? ` · ${labels.selected}` : ` · ${labels.choose}`}`}
                   onClick={() => chooseTemplate(template)}
                 >
                   <span className={styles.visualStage} aria-hidden="true">
@@ -317,6 +313,7 @@ export default function TemplatesPage({ initialTemplate }: { initialTemplate: Ad
                           template={template}
                           ratio={ratio}
                           locale={locale}
+                          sampleRole="portrait"
                           eager={active}
                           className={styles.masterCard}
                         />

@@ -7,8 +7,8 @@
   --cinema-bio-width: 25%;
   --cinema-bio-size: 2.2cqi;
   --cinema-bio-max-height: 20%;
-  --cinema-meta-label-size: 1.18cqi;
-  --cinema-meta-value-size: 2.25cqi;
+  --cinema-meta-label-size: 1.35cqi;
+  --cinema-meta-value-size: 2.45cqi;
   --cinema-promise-top: 3.2%;
   --cinema-signature-top: 5.7%;
   --cinema-frame-inset: 1.65%;
@@ -45,9 +45,9 @@
   z-index: 1;
   inset: 0;
   background:
-    radial-gradient(ellipse 42% 24% at 0% 0%, color-mix(in srgb, var(--craft-ink, #101519) 46%, transparent), transparent 100%),
-    radial-gradient(ellipse 40% 25% at 100% 0%, color-mix(in srgb, var(--craft-ink, #101519) 34%, transparent), transparent 100%),
-    linear-gradient(180deg, transparent 32%, color-mix(in srgb, var(--craft-ink, #101519) 8%, transparent) 48%, color-mix(in srgb, var(--craft-ink, #101519) 40%, transparent) 70%, color-mix(in srgb, var(--craft-ink, #101519) 78%, transparent) 100%);
+    radial-gradient(ellipse 45% 30% at 0% 0%, color-mix(in srgb, var(--craft-ink, #101519) 64%, transparent), transparent 100%),
+    radial-gradient(ellipse 43% 29% at 100% 0%, color-mix(in srgb, var(--craft-ink, #101519) 56%, transparent), transparent 100%),
+    linear-gradient(180deg, transparent 36%, color-mix(in srgb, var(--craft-ink, #101519) 8%, transparent) 49%, color-mix(in srgb, var(--craft-ink, #101519) 46%, transparent) 73%, color-mix(in srgb, var(--craft-ink, #101519) 88%, transparent) 100%);
   pointer-events: none;
 }
 
@@ -260,7 +260,7 @@
 .metaLabel {
   display: block;
   margin: 0 0 .58cqi;
-  color: color-mix(in srgb, var(--craft-gold-light, var(--craft-brass, #b99b72)) 88%, var(--craft-ivory, #f3ead7) 12%);
+  color: color-mix(in srgb, var(--craft-gold-light, var(--craft-brass, #b99b72)) 58%, var(--craft-ivory, #f3ead7) 42%);
   font-family: var(--master-font-label, var(--card-font-metadata, sans-serif));
   font-size: max(var(--master-micro-min, .84cqi), var(--cinema-meta-label-size));
   font-weight: var(--master-label-weight, 650);

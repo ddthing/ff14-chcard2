@@ -55,6 +55,7 @@ export interface EditorUiState {
   safeAreaVisible: boolean;
   previewOpen: boolean;
   inspectorOpen: boolean;
+  quickDownloadRequestedAt?: number;
 }
 
 export interface EditorStoreState extends EditorSnapshot {
