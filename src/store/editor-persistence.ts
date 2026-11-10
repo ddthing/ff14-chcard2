@@ -228,7 +228,8 @@ function safeImageUrl(value: unknown, fallback: string): string {
   if (typeof value !== 'string' || !value.trim()) return fallback;
   const candidate = value.trim();
   // Object URLs belong to one page lifetime and are dead after a reload.
-  if (/^(data:image\/(png|jpe?g|webp);base64,|https?:\/\/|\/)/i.test(candidate)) return candidate;
+  if (/^data:image\/(png|jpe?g|webp);base64,[a-z\d+/]/i.test(candidate)) return candidate;
+  if (/^\/(?!\/)[a-z\d/_-]+\.(png|jpe?g|webp)$/i.test(candidate)) return candidate;
   return fallback;
 }
 

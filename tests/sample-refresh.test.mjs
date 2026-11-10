@@ -29,4 +29,12 @@ test('uploaded images, custom names and their edits survive preset refresh', () 
   assert.equal(restored.imageAdjustments.scale,1.4);
 });
 
+test('persisted drafts reject remote and protocol-relative photo references', () => {
+  const base = demoAdventurerCards.cinematic;
+  for (const imageUrl of ['https://probe.invalid/photo.webp', '//probe.invalid/photo.webp', '/\\probe.invalid/photo.webp', 'data:text/html;base64,QQ==']) {
+    const restored = normalizeCardData({ ...base, imageUrl });
+    assert.equal(restored.imageUrl, base.imageUrl);
+  }
+});
+
 

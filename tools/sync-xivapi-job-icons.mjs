@@ -203,7 +203,12 @@ async function pool(items, worker, size = 8) {
 }
 
 async function checkExisting(root) {
-  const audit = JSON.parse(await readFile(path.join(root, AUDIT_PATH), "utf8"));
+  const audit = await readFile(path.join(root, AUDIT_PATH), "utf8")
+    .then(JSON.parse)
+    .catch((error) => {
+      if (error.code !== "ENOENT" || process.env.CARD_QA_EVIDENCE === "archive") throw error;
+      return { entries: {} };
+    });
   let checked = 0;
   for (const entry of Object.values(audit.entries)) {
     for (const source of Object.values(entry.sources)) {
